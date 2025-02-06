@@ -2,6 +2,7 @@
 import './globals.css';
 import { Space_Grotesk } from 'next/font/google';
 import Navbar from '@/components/Navbar';
+import { ThemeProvider } from '@/providers/theme-provider';
 
 const spaceGrotesk = Space_Grotesk({ 
   subsets: ['latin'],
@@ -21,10 +22,12 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={spaceGrotesk.className}>
-        <Navbar />
-        <main className="pt-20">
-          {children}
-        </main>
+        <ThemeProvider>
+          <Navbar />
+          <main className="pt-20">
+            {children}
+          </main>
+        </ThemeProvider>
       </body>
     </html>
   );
