@@ -59,8 +59,18 @@
   * {
     @apply border-border;
   }
+  
+  html {
+    @apply antialiased;
+  }
+
   body {
-    @apply bg-background text-foreground antialiased;
+    @apply bg-background text-foreground;
+  }
+
+  /* Smooth transitions for theme changes */
+  body * {
+    @apply transition-colors duration-200;
   }
 }
 
