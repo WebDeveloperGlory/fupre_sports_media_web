@@ -1,7 +1,7 @@
 'use client';
 
 import { BlurFade } from "@/components/ui/blur-fade";
-import { Play, Clock, Calendar, Filter } from "lucide-react";
+import { Play, Clock, Calendar } from "lucide-react";
 import Image from "next/image";
 
 // Temporary mock data
@@ -62,32 +62,12 @@ const highlights = [
   },
 ];
 
-const categories = ["All", "Football", "Basketball", "Athletics", "Volleyball"];
-
 export default function HighlightsPage() {
   return (
     <div className="container mx-auto px-4 py-6">
       <BlurFade>
-        <div className="flex items-center justify-between mb-6">
+        <div className="mb-6 pb-6 border-b border-black/20">
           <h1 className="text-2xl font-semibold">Match Highlights</h1>
-          <button className="flex items-center gap-2 px-4 py-2 text-sm rounded-full bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors">
-            <Filter className="w-4 h-4" />
-            <span>Filter</span>
-          </button>
-        </div>
-      </BlurFade>
-
-      {/* Categories */}
-      <BlurFade delay={0.1}>
-        <div className="flex gap-2 overflow-x-auto pb-4 mb-6 scrollbar-hide">
-          {categories.map((category) => (
-            <button
-              key={category}
-              className="px-4 py-2 text-sm rounded-full bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors whitespace-nowrap"
-            >
-              {category}
-            </button>
-          ))}
         </div>
       </BlurFade>
 
@@ -95,7 +75,7 @@ export default function HighlightsPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {highlights.map((highlight) => (
           <BlurFade key={highlight.id} delay={0.1 * highlight.id}>
-            <div className="group relative bg-card rounded-lg overflow-hidden hover:shadow-lg transition-all">
+            <div className="group relative bg-card rounded-lg overflow-hidden hover:shadow-lg transition-all border border-black/20">
               {/* Thumbnail */}
               <div className="relative aspect-video bg-muted overflow-hidden">
                 <Image
