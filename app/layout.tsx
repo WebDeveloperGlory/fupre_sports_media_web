@@ -1,5 +1,5 @@
 // app/layout.tsx
-import './globals.css';
+import '@/assets/styles/globals.css';
 import { Space_Grotesk } from 'next/font/google';
 import Navbar from '@/components/Navbar';
 import { ThemeProvider } from '@/providers/theme-provider';
