@@ -24,7 +24,7 @@ export default function RootLayout({
       <body className={spaceGrotesk.className}>
         <ThemeProvider>
           <Navbar />
-          <main className="pt-20 md:pb-0 pb-20">
+          <main className="py-4 pb-12 md:py-16 md:pb-0">
             {children}
           </main>
         </ThemeProvider>
