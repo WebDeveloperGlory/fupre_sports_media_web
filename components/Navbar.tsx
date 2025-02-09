@@ -33,7 +33,7 @@ const Navbar = () => {
       <div className="fixed top-0 left-0 right-0 z-50 p-4 md:block hidden">
         <nav className="mx-auto max-w-2xl rounded-full bg-navbar">
           <div className="relative h-12 flex items-center justify-between px-4">
-            {/* Logo */}
+          {/* Logo */}
             <Link 
               href="/" 
               className={cn(
@@ -46,23 +46,23 @@ const Navbar = () => {
               FSM
             </Link>
 
-            {/* Desktop Navigation */}
+          {/* Desktop Navigation */}
             <div className="flex items-center justify-center space-x-8">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.label}
-                  href={link.href}
+            {navLinks.map((link) => (
+              <Link
+                key={link.label}
+                href={link.href}
                   className={cn(
                     "text-[15px] font-medium transition-colors",
                     pathname === link.href 
                       ? "text-emerald-500" 
                       : "text-navbar-muted hover:text-navbar-foreground"
                   )}
-                >
-                  {link.label}
-                </Link>
-              ))}
-            </div>
+              >
+                {link.label}
+              </Link>
+            ))}
+          </div>
 
             {/* Theme Toggle */}
             <button
@@ -79,7 +79,7 @@ const Navbar = () => {
                     d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
                   />
                 </svg>
-              ) : (
+                ) : (
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path
                     strokeLinecap="round"
@@ -88,7 +88,7 @@ const Navbar = () => {
                     d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
                   />
                 </svg>
-              )}
+                )}
             </button>
           </div>
         </nav>
@@ -101,9 +101,9 @@ const Navbar = () => {
             {navLinks.map((link) => {
               const Icon = link.icon;
               return (
-                <Link
-                  key={link.label}
-                  href={link.href}
+              <Link
+                key={link.label}
+                href={link.href}
                   className={cn(
                     "flex flex-col items-center justify-center space-y-1 transition-colors",
                     pathname === link.href 
