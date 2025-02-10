@@ -1,12 +1,29 @@
 'use client'
 
 import React, { useState } from 'react'
+import { useParams } from 'next/navigation';
 import { liveFixtureInitialStateData } from '@/constants'
-import { LiveStatState } from '@/utils/stateTypes';
+import { LiveStatState, Players } from '@/utils/stateTypes';
 import Timer from '@/components/liveAdmin/Timer';
+import Events from '@/components/liveAdmin/Events';
+import Stats from '@/components/liveAdmin/Stats';
+import Log from '@/components/liveAdmin/Log';
+import LineUps from '@/components/liveAdmin/LineUps';
+
+const homeLineup: Players[] | [] = [
+    { name: 'John Bull', position: 'LB', _id: '123456' },
+    { name: 'John Doe', position: 'CB', _id: '123457' },
+    { name: 'John Wick', position: 'CB', _id: '123458' },
+];
+const awayLineup: Players[] | [] = [
+
+];
 
 const IndividualLivePage = () => {
+    const params = useParams();
+
     const [ statValues, setStatValues ] = useState<LiveStatState>( liveFixtureInitialStateData );
+    const [ hasPenalties, setHasPenalties ] = useState<boolean>( false );
     const [ activeTab, setActiveTab ] = useState<string>( 'timer' );
 
   return (
@@ -18,12 +35,24 @@ const IndividualLivePage = () => {
             <div className='flex items-center justify-center gap-6'>
                 <div className='text-right'>
                     <h2 className='text-lg'>{ statValues.homeTeam.name || 'Unknown Team' }</h2>
-                    <h2 className='text-2xl text-orange-500 font-bold'>{ statValues.homeScore }</h2>
+                    <div className='flex gap-2 justify-end items-center w-full text-right'>
+                        { statValues.competition?.type === 'knockout' && hasPenalties && statValues.homePenalty !== null && (
+                            <p className="text-xl">({ statValues.homePenalty })</p>
+                        )}
+                        <h2 className='text-2xl text-orange-500 font-bold'>{ statValues.homeScore }</h2>
+                    </div>
                 </div>
                 <h2 className='text-lg md:text-xl'>vs</h2>
                 <div className='text-left'>
                     <h2 className='text-lg'>{ statValues.awayTeam.name || 'Unknown Team' }</h2>
-                    <h2 className='text-2xl text-orange-500 font-bold'>{ statValues.awayScore }</h2>
+                    <div className='flex gap-2 justify-start items-center w-full text-left'>
+                        <h2 className='text-2xl text-orange-500 font-bold'>{ statValues.awayScore }</h2>
+                        { 
+                            statValues.competition?.type === 'knockout' && hasPenalties && statValues.awayPenalty !== null && (
+                                <p className="text-xl">({ statValues.awayPenalty })</p>
+                            )
+                        }
+                    </div>
                 </div>
             </div>
         </div>
@@ -32,7 +61,7 @@ const IndividualLivePage = () => {
         <div className='sticky top-0 border-b z-10'>
             <div className='flex overflow-x-scroll scrollbar-hide'>
                 {
-                    [ 'timer', 'events', 'stats', 'log' ].map( tab => (
+                    [ 'timer', 'events', 'stats', 'log', 'lineups' ].map( tab => (
                         <div
                             key={ tab }
                             onClick={ () => setActiveTab( tab ) }
@@ -54,6 +83,22 @@ const IndividualLivePage = () => {
         {/* Body */}
         <div>
             { activeTab === 'timer' && <Timer /> }
+            { activeTab === 'events' && <Events 
+                statValues={ statValues } 
+                hasPenalties={ hasPenalties }
+                setStatValues={ setStatValues } 
+                setHasPenalties={ setHasPenalties }    
+            /> }
+            { activeTab === 'stats' && <Stats 
+                homeStats={ statValues.home } 
+                awayStats={ statValues.away }
+            /> }
+            { activeTab === 'log' && <Log 
+                statValues={ statValues }
+                homeLineup={ homeLineup }
+                awayLineup={ awayLineup }
+            /> }
+            { activeTab === 'lineups' && <LineUps /> }
         </div>
     </div>
   )

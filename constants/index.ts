@@ -1,3 +1,5 @@
+import { EventTypes } from "@/utils/stateTypes";
+
 export const getCurrentDate = (): string => {
 	const today = new Date();
 	const year = today.getFullYear();
@@ -7,20 +9,20 @@ export const getCurrentDate = (): string => {
 	return `${ year }-${ month }-${ day }`;
 }
 
-const EVENT_TYPES = {
-    GOAL: 'goal',
-    ASSIST: 'assist',
-    YELLOWCARDS: 'yellowCard',
-    REDCARDS: 'redCard',
-    SUBSTITUTION: 'substitution',
-    SHOTSONTARGET: 'shotOnTarget',
-    SHOTSOFFTARGET: 'shotOffTarget',
-    CORNERS: 'corner',
-    OFFSIDES: 'offside',
-    FOULS: 'foul',
-    KICKOFF: 'kickoff',
-    HALFTIME: 'halftime',
-    FULLTIME: 'fulltime'
+export const EVENT_TYPES: EventTypes = {
+    goal: 'goal',
+    assist: 'assist',
+    yellowCards: 'yellowCard',
+    redCards: 'redCard',
+    substitution: 'substitution',
+    shotsOnTarget: 'shotOnTarget',
+    shotsOffTarget: 'shotOffTarget',
+    corners: 'corner',
+    offsides: 'offside',
+    fouls: 'foul',
+    kickoff: 'kickoff',
+    halftime: 'halftime',
+    fulltime: 'fulltime'
 };
 
 
@@ -39,12 +41,12 @@ const awayLineup = [
 
 export const liveFixtureInitialStateData = {
 	homeTeam: {
-        name: '',
-        _id: ''
+        name: 'Man U',
+        _id: '12'
     },
     awayTeam: {
-        name: '',
-        _id: ''
+        name: 'Chelsea',
+        _id: '23'
     },
     homeLineup: {
         formation: '',
@@ -57,9 +59,9 @@ export const liveFixtureInitialStateData = {
         subs: []
     },
     competition: {
-        name: '',
+        name: 'Super League',
         _id: '',
-        type: ''
+        type: 'knockout'
     },
 	home: {
         shotsOnTarget: 0,

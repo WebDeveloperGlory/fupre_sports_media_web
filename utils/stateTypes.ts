@@ -4,9 +4,15 @@ interface Competition {
     type: string
 }
 
-interface Players {
+export interface Team {
     name: string,
-    position: string
+    _id: string
+}
+
+export interface Players {
+    name: string,
+    position: string,
+    _id?: string
 }
 
 interface LineUp {
@@ -15,7 +21,23 @@ interface LineUp {
     subs: Players[]
 }
 
-interface FixtureStats {
+export type EventTypes = {
+    goal: string,
+    assist: string,
+    yellowCards: string,
+    redCards: string,
+    substitution: string,
+    shotsOnTarget: string,
+    shotsOffTarget: string,
+    corners: string,
+    offsides: string,
+    fouls: string,
+    kickoff: string,
+    halftime: string,
+    fulltime: string
+}
+
+export interface FixtureStats {
     shotsOnTarget: number,
     shotsOffTarget: number,
     fouls: number,
@@ -26,14 +48,8 @@ interface FixtureStats {
 }
 
 export interface LiveStatState {
-    homeTeam: {
-        name: string,
-        _id: string
-    },
-    awayTeam: {
-        name: string,
-        _id: string
-    },
+    homeTeam: Team,
+    awayTeam: Team,
 
     homeLineup: LineUp | null,
     awayLineup: LineUp | null,
