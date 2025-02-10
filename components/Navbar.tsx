@@ -20,6 +20,17 @@ const Navbar = () => {
   const pathname = usePathname();
   const [openMobileMenu, setOpenMobileMenu] = useState<boolean>(false);
 
+  const isActiveRoute = (path: string) => {
+    if (path === '/') return pathname === '/home';
+    if (path === '/football') {
+      return pathname === '/football' || 
+        pathname.startsWith('/competitions') || 
+        pathname.startsWith('/fixtures') || 
+        pathname.startsWith('/live');
+    }
+    return pathname === path;
+  };
+
   const navLinks = [
     { href: '/', label: 'Home', icon: Home },
     { href: '/football', label: 'Football', icon: Trophy },
@@ -38,7 +49,7 @@ const Navbar = () => {
               href="/" 
               className={cn(
                 "text-lg font-semibold transition-colors",
-                pathname === '/' 
+                isActiveRoute('/') 
                   ? "text-emerald-500" 
                   : "text-navbar-foreground hover:text-navbar-foreground/80"
               )}
@@ -54,7 +65,7 @@ const Navbar = () => {
                 href={link.href}
                   className={cn(
                     "text-[15px] font-medium transition-colors",
-                    pathname === link.href 
+                    isActiveRoute(link.href)
                       ? "text-emerald-500" 
                       : "text-navbar-muted hover:text-navbar-foreground"
                   )}
@@ -106,7 +117,7 @@ const Navbar = () => {
                 href={link.href}
                   className={cn(
                     "flex flex-col items-center justify-center space-y-1 transition-colors",
-                    pathname === link.href 
+                    isActiveRoute(link.href)
                       ? "text-emerald-500" 
                       : "text-navbar-muted hover:text-navbar-foreground"
                   )}
@@ -144,7 +155,7 @@ const Navbar = () => {
                 href="/" 
                 className={cn(
                   "text-lg font-semibold transition-colors",
-                  pathname === '/' 
+                  isActiveRoute('/') 
                     ? "text-emerald-500" 
                     : "text-navbar-foreground hover:text-navbar-foreground/80"
                 )}
@@ -206,14 +217,14 @@ const Navbar = () => {
                         onClick={() => setOpenMobileMenu(false)}
                         className={cn(
                           "flex items-center gap-4 px-4 py-3 rounded-lg transition-all",
-                          pathname === link.href
+                          isActiveRoute(link.href)
                             ? "bg-emerald-500/10 text-emerald-500"
                             : "bg-secondary text-secondary-foreground hover:bg-accent hover:text-accent-foreground"
                         )}
                       >
                         <Icon className={cn(
                           "w-5 h-5",
-                          pathname === link.href
+                          isActiveRoute(link.href)
                             ? "text-emerald-500"
                             : "text-muted-foreground"
                         )} />

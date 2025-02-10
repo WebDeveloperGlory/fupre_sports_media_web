@@ -6,6 +6,9 @@ import { FC, useState } from "react";
 import { ChevronDown, ChevronUp, Trophy, Calendar } from "lucide-react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
+import useTimerStore from "@/stores/timerStore";
+import useLiveStore from "@/stores/liveStore";
+import { liveFixtureInitialStateData } from "@/constants";
 
 const competitions = [
   {
@@ -20,6 +23,17 @@ const competitions = [
 
 const FootballPage: FC = () => {
   const [isCompetitionsOpen, setIsCompetitionsOpen] = useState(false);
+  const { time, half, injuryTime } = useTimerStore();
+  const { matchEvents } = useLiveStore();
+  const [statValues, setStatValues] = useState(liveFixtureInitialStateData);
+
+  const formatTime = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+  };
+
+  const totalTime = time + injuryTime;
 
   return (
     <main className="min-h-screen py-24 container">
@@ -36,7 +50,7 @@ const FootballPage: FC = () => {
                     <h2 className="text-lg font-semibold text-emerald-500">LIVE NOW</h2>
                   </div>
                   <Link
-                    href="/live/1/stats"
+                    href="/fixtures/1/stats"
                     className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full text-sm font-medium transition-colors"
                   >
                     View Stats
@@ -49,33 +63,43 @@ const FootballPage: FC = () => {
                       <div className="relative w-16 h-16 md:w-24 md:h-24">
                         <Image
                           src="/team-logos/team-a.png"
-                          alt="Home team"
+                          alt={statValues.homeTeam.name}
                           fill
                           className="object-contain"
                         />
                       </div>
-                      <span className="text-base md:text-lg font-medium text-center">Mechanical Stars</span>
+                      <span className="text-base md:text-lg font-medium text-center">{statValues.homeTeam.name}</span>
                     </div>
 
                     <div className="flex flex-col items-center gap-2 md:w-1/6">
                       <div className="text-4xl md:text-6xl font-bold tracking-tighter">
-                        <span>2</span>
+                        <span>{statValues.homeScore}</span>
                         <span className="text-muted-foreground mx-3">-</span>
-                        <span>1</span>
+                        <span>{statValues.awayScore}</span>
+                        {statValues.homePenalty !== null && statValues.awayPenalty !== null && (
+                          <div className="text-sm text-muted-foreground text-center mt-1">
+                            ({statValues.homePenalty} - {statValues.awayPenalty})
+                          </div>
+                        )}
                       </div>
-                      <span className="text-sm text-muted-foreground">75'</span>
+                      <div className="flex flex-col items-center">
+                        <span className="text-sm text-muted-foreground">{formatTime(totalTime)}</span>
+                        {injuryTime > 0 && (
+                          <span className="text-xs text-red-500">+{Math.floor(injuryTime / 60)}'</span>
+                        )}
+                      </div>
                     </div>
 
                     <div className="flex flex-col items-center gap-4 md:w-1/3">
                       <div className="relative w-16 h-16 md:w-24 md:h-24">
                         <Image
                           src="/team-logos/team-b.png"
-                          alt="Away team"
+                          alt={statValues.awayTeam.name}
                           fill
                           className="object-contain"
                         />
                       </div>
-                      <span className="text-base md:text-lg font-medium text-center">Chemical Warriors</span>
+                      <span className="text-base md:text-lg font-medium text-center">{statValues.awayTeam.name}</span>
                     </div>
                   </div>
 

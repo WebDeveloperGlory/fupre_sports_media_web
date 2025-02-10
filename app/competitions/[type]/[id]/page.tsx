@@ -232,13 +232,12 @@ export default function CompetitionPage({
                                   <span>{fixture.time}</span>
                                 </div>
                               </div>
-                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                fixture.status === 'completed'
-                                  ? 'bg-emerald-500/10 text-emerald-500'
-                                  : 'bg-orange-500/10 text-orange-500'
-                              }`}>
-                                {fixture.status === 'completed' ? 'FT' : 'Upcoming'}
-                              </span>
+                              <Link
+                                href={`/fixtures/${fixture.id}/stats`}
+                                className="px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20 transition-colors"
+                              >
+                                View Stats
+                              </Link>
                             </div>
                             <div className="flex items-center justify-between">
                               <span className="font-medium">{fixture.homeTeam}</span>
