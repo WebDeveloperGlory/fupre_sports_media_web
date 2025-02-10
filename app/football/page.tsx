@@ -3,88 +3,96 @@
 import { BlurFade } from "@/components/ui/blur-fade";
 import Image from "next/image";
 import { FC, useState } from "react";
-import { ChevronDown, ChevronUp, Trophy } from "lucide-react";
+import { ChevronDown, ChevronUp, Trophy, Calendar } from "lucide-react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 
 const competitions = [
   {
     id: 1,
-    name: "Unity Cup 2025",
-    type: "knockout",
-    status: "ongoing",
-    startDate: "January 30th",
-    endDate: "February 2nd",
-  },
-  {
-    id: 2,
-    name: "Inter-Faculty League",
+    name: "FUPRE Super League",
     type: "league",
     status: "ongoing",
-    startDate: "January 15th",
-    endDate: "March 30th",
-  },
-  {
-    id: 3,
-    name: "Chancellor's Cup",
-    type: "hybrid",
-    status: "upcoming",
-    startDate: "April 1st",
-    endDate: "April 15th",
-  },
+    startDate: "March 19th",
+    endDate: "April 30th",
+  }
 ];
 
 const FootballPage: FC = () => {
   const [isCompetitionsOpen, setIsCompetitionsOpen] = useState(false);
-  const teams = [
-    {
-      name: "Team A",
-      logo: "/team-logos/team-a.png",
-      played: 5,
-      won: 3,
-      drawn: 1,
-      lost: 1,
-      points: 10
-    },
-    {
-      name: "Team B",
-      logo: "/team-logos/team-b.png",
-      played: 5,
-      won: 2,
-      drawn: 2,
-      lost: 1,
-      points: 8
-    },
-    {
-      name: "Team C",
-      logo: "/team-logos/team-c.png",
-      played: 5,
-      won: 2,
-      drawn: 1,
-      lost: 2,
-      points: 7
-    },
-    {
-      name: "Team D",
-      logo: "/team-logos/team-d.png",
-      played: 5,
-      won: 1,
-      drawn: 2,
-      lost: 2,
-      points: 5
-    }
-  ];
 
   return (
     <main className="min-h-screen py-24 container">
       <BlurFade>
         <div className="space-y-8">
-          {/* Header */}
-          <div className="space-y-2">
-            <h1 className="text-4xl font-bold tracking-tight">Football</h1>
-            <p className="text-muted-foreground">
-              Stay updated with the latest football matches and standings
-            </p>
+          {/* Hero - Live Matches */}
+          <div className="relative bg-gradient-to-br from-emerald-500/20 via-background to-background rounded-xl border border-border overflow-hidden">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,_var(--tw-gradient-stops))] from-emerald-500/10 via-background to-background" />
+            <div className="relative p-8 md:p-12">
+              <div className="flex flex-col gap-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                    <h2 className="text-lg font-semibold text-emerald-500">LIVE NOW</h2>
+                  </div>
+                  <Link
+                    href="/live/1/stats"
+                    className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full text-sm font-medium transition-colors"
+                  >
+                    View Stats
+                  </Link>
+                </div>
+                
+                <div className="bg-card/40 backdrop-blur-sm rounded-xl p-6 border border-border">
+                  <div className="flex flex-col md:flex-row items-center justify-between gap-8 md:gap-16">
+                    <div className="flex flex-col items-center gap-4 md:w-1/3">
+                      <div className="relative w-16 h-16 md:w-24 md:h-24">
+                        <Image
+                          src="/team-logos/team-a.png"
+                          alt="Home team"
+                          fill
+                          className="object-contain"
+                        />
+                      </div>
+                      <span className="text-base md:text-lg font-medium text-center">Mechanical Stars</span>
+                    </div>
+
+                    <div className="flex flex-col items-center gap-2 md:w-1/6">
+                      <div className="text-4xl md:text-6xl font-bold tracking-tighter">
+                        <span>2</span>
+                        <span className="text-muted-foreground mx-3">-</span>
+                        <span>1</span>
+                      </div>
+                      <span className="text-sm text-muted-foreground">75'</span>
+                    </div>
+
+                    <div className="flex flex-col items-center gap-4 md:w-1/3">
+                      <div className="relative w-16 h-16 md:w-24 md:h-24">
+                        <Image
+                          src="/team-logos/team-b.png"
+                          alt="Away team"
+                          fill
+                          className="object-contain"
+                        />
+                      </div>
+                      <span className="text-base md:text-lg font-medium text-center">Chemical Warriors</span>
+                    </div>
+                  </div>
+
+                  <div className="mt-6 flex items-center justify-center gap-4 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-1">
+                      <Trophy className="w-4 h-4" />
+                      <span>FUPRE Super League</span>
+                    </div>
+                    <span>•</span>
+                    <div className="flex items-center gap-1">
+                      <Calendar className="w-4 h-4" />
+                      <span>Today</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Competitions Section */}
@@ -146,91 +154,6 @@ const FootballPage: FC = () => {
                 </motion.div>
               )}
             </AnimatePresence>
-          </div>
-
-          {/* League Table */}
-          <div className="bg-card rounded-xl p-6 border border-border">
-            <h2 className="text-2xl font-semibold mb-6">League Table</h2>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-border">
-                    <th className="text-left py-4 font-medium text-muted-foreground">Position</th>
-                    <th className="text-left py-4 font-medium text-muted-foreground">Team</th>
-                    <th className="text-center py-4 font-medium text-muted-foreground">Played</th>
-                    <th className="text-center py-4 font-medium text-muted-foreground">Won</th>
-                    <th className="text-center py-4 font-medium text-muted-foreground">Drawn</th>
-                    <th className="text-center py-4 font-medium text-muted-foreground">Lost</th>
-                    <th className="text-center py-4 font-medium text-muted-foreground">Points</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {teams.map((team, index) => (
-                    <tr key={team.name} className="border-b border-border">
-                      <td className="py-4">{index + 1}</td>
-                      <td className="py-4">
-                        <div className="flex items-center gap-3">
-                          <div className="relative w-8 h-8">
-                            <Image
-                              src={team.logo}
-                              alt={`${team.name} logo`}
-                              fill
-                              className="object-contain"
-                            />
-                          </div>
-                          <span>{team.name}</span>
-                        </div>
-                      </td>
-                      <td className="text-center py-4">{team.played}</td>
-                      <td className="text-center py-4">{team.won}</td>
-                      <td className="text-center py-4">{team.drawn}</td>
-                      <td className="text-center py-4">{team.lost}</td>
-                      <td className="text-center py-4 font-semibold">{team.points}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          {/* Recent Matches */}
-          <div className="bg-card rounded-xl p-6 border border-border">
-            <h2 className="text-2xl font-semibold mb-6">Recent Matches</h2>
-            <div className="space-y-4">
-              {/* Add match cards here */}
-              <div className="p-4 border border-border rounded-lg">
-                <p className="text-sm text-muted-foreground mb-2">January 25, 2024</p>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="relative w-8 h-8">
-                      <Image
-                        src="/team-logos/team-a.png"
-                        alt="Team A logo"
-                        fill
-                        className="object-contain"
-                      />
-                    </div>
-                    <span>Team A</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold">2</span>
-                    <span className="text-muted-foreground">-</span>
-                    <span className="font-semibold">1</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span>Team B</span>
-                    <div className="relative w-8 h-8">
-                      <Image
-                        src="/team-logos/team-b.png"
-                        alt="Team B logo"
-                        fill
-                        className="object-contain"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </BlurFade>

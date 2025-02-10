@@ -21,16 +21,16 @@ export default function HomePage() {
               <div className="mt-8 md:mt-12 space-y-8">
                 <div className="bg-card/40 backdrop-blur-sm rounded-xl p-8 max-w-2xl mx-auto border border-border">
                   <span className="inline-block px-4 py-1 rounded-full bg-emerald-500 text-emerald-50 text-sm font-medium mb-4">
-                    ONGOING
+                    STARTING TODAY
                   </span>
                   <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-                    Unity Cup 2025
+                    FUPRE Super League
                   </h2>
                   <p className="text-emerald-500 text-xl mb-6">
-                    January 30th - February 2nd
+                    March 19th - April 30th
                   </p>
                   <Link 
-                    href="/competitions/unity-cup-2025"
+                    href="/competitions/league/1"
                     className="inline-block px-8 py-3 rounded-full bg-emerald-500 text-emerald-50 font-medium hover:bg-emerald-600 transition-colors"
                   >
                     VIEW FIXTURES
