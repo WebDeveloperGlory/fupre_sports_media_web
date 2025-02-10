@@ -90,8 +90,8 @@ export default function LiveStatsPage({
                   <span className="text-sm text-muted-foreground">{matchStats.currentTime}</span>
                 </div>
 
-                <div className="flex flex-col md:flex-row items-center justify-between gap-8 w-full">
-                  <div className="flex flex-col items-center gap-4">
+                <div className="flex flex-col md:flex-row items-center justify-between gap-8 md:gap-16 w-full">
+                  <div className="flex flex-col items-center gap-4 md:w-1/3">
                     <div className="relative w-16 h-16 md:w-20 md:h-20">
                       <Image
                         src={matchStats.homeTeam.logo}
@@ -100,10 +100,10 @@ export default function LiveStatsPage({
                         className="object-contain"
                       />
                     </div>
-                    <span className="text-lg font-semibold">{matchStats.homeTeam.name}</span>
+                    <span className="text-base md:text-lg font-medium text-center">{matchStats.homeTeam.name}</span>
                   </div>
 
-                  <div className="flex flex-col items-center gap-2">
+                  <div className="flex flex-col items-center gap-2 md:w-1/6">
                     <div className="text-3xl md:text-4xl font-bold tracking-tighter">
                       <span>{matchStats.homeTeam.score}</span>
                       <span className="text-muted-foreground mx-3">-</span>
@@ -111,7 +111,7 @@ export default function LiveStatsPage({
                     </div>
                   </div>
 
-                  <div className="flex flex-col items-center gap-4">
+                  <div className="flex flex-col items-center gap-4 md:w-1/3">
                     <div className="relative w-16 h-16 md:w-20 md:h-20">
                       <Image
                         src={matchStats.awayTeam.logo}
@@ -120,7 +120,7 @@ export default function LiveStatsPage({
                         className="object-contain"
                       />
                     </div>
-                    <span className="text-lg font-semibold">{matchStats.awayTeam.name}</span>
+                    <span className="text-base md:text-lg font-medium text-center">{matchStats.awayTeam.name}</span>
                   </div>
                 </div>
 

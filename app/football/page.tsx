@@ -44,8 +44,8 @@ const FootballPage: FC = () => {
                 </div>
                 
                 <div className="bg-card/40 backdrop-blur-sm rounded-xl p-6 border border-border">
-                  <div className="flex flex-col md:flex-row items-center justify-between gap-8">
-                    <div className="flex flex-col items-center gap-4">
+                  <div className="flex flex-col md:flex-row items-center justify-between gap-8 md:gap-16">
+                    <div className="flex flex-col items-center gap-4 md:w-1/3">
                       <div className="relative w-16 h-16 md:w-24 md:h-24">
                         <Image
                           src="/team-logos/team-a.png"
@@ -54,10 +54,10 @@ const FootballPage: FC = () => {
                           className="object-contain"
                         />
                       </div>
-                      <span className="text-xl md:text-2xl font-bold">Mechanical Stars</span>
+                      <span className="text-base md:text-lg font-medium text-center">Mechanical Stars</span>
                     </div>
 
-                    <div className="flex flex-col items-center gap-2">
+                    <div className="flex flex-col items-center gap-2 md:w-1/6">
                       <div className="text-4xl md:text-6xl font-bold tracking-tighter">
                         <span>2</span>
                         <span className="text-muted-foreground mx-3">-</span>
@@ -66,7 +66,7 @@ const FootballPage: FC = () => {
                       <span className="text-sm text-muted-foreground">75'</span>
                     </div>
 
-                    <div className="flex flex-col items-center gap-4">
+                    <div className="flex flex-col items-center gap-4 md:w-1/3">
                       <div className="relative w-16 h-16 md:w-24 md:h-24">
                         <Image
                           src="/team-logos/team-b.png"
@@ -75,7 +75,7 @@ const FootballPage: FC = () => {
                           className="object-contain"
                         />
                       </div>
-                      <span className="text-xl md:text-2xl font-bold">Chemical Warriors</span>
+                      <span className="text-base md:text-lg font-medium text-center">Chemical Warriors</span>
                     </div>
                   </div>
 
