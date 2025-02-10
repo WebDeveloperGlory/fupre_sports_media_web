@@ -10,68 +10,52 @@ import { motion, AnimatePresence } from "framer-motion";
 const competitions = [
   {
     id: 1,
-    name: "Unity Cup 2025",
-    type: "knockout",
-    status: "ongoing",
-    startDate: "January 30th",
-    endDate: "February 2nd",
-  },
-  {
-    id: 2,
-    name: "Inter-Faculty League",
+    name: "FUPRE Super League",
     type: "league",
     status: "ongoing",
-    startDate: "January 15th",
-    endDate: "March 30th",
-  },
-  {
-    id: 3,
-    name: "Chancellor's Cup",
-    type: "hybrid",
-    status: "upcoming",
-    startDate: "April 1st",
-    endDate: "April 15th",
-  },
+    startDate: "March 19th",
+    endDate: "April 30th",
+  }
 ];
 
 const FootballPage: FC = () => {
   const [isCompetitionsOpen, setIsCompetitionsOpen] = useState(false);
   const teams = [
     {
-      name: "Team A",
+      name: "Mechanical Stars",
       logo: "/team-logos/team-a.png",
-      played: 5,
-      won: 3,
-      drawn: 1,
-      lost: 1,
-      points: 10
-    },
-    {
-      name: "Team B",
-      logo: "/team-logos/team-b.png",
-      played: 5,
-      won: 2,
-      drawn: 2,
-      lost: 1,
-      points: 8
-    },
-    {
-      name: "Team C",
-      logo: "/team-logos/team-c.png",
-      played: 5,
-      won: 2,
-      drawn: 1,
-      lost: 2,
-      points: 7
-    },
-    {
-      name: "Team D",
-      logo: "/team-logos/team-d.png",
-      played: 5,
+      played: 1,
       won: 1,
-      drawn: 2,
-      lost: 2,
-      points: 5
+      drawn: 0,
+      lost: 0,
+      points: 3
+    },
+    {
+      name: "Chemical Warriors",
+      logo: "/team-logos/team-b.png",
+      played: 1,
+      won: 0,
+      drawn: 1,
+      lost: 0,
+      points: 1
+    },
+    {
+      name: "Petroleum Dragons",
+      logo: "/team-logos/team-c.png",
+      played: 1,
+      won: 0,
+      drawn: 1,
+      lost: 0,
+      points: 1
+    },
+    {
+      name: "Marine Eagles",
+      logo: "/team-logos/team-d.png",
+      played: 1,
+      won: 0,
+      drawn: 0,
+      lost: 1,
+      points: 0
     }
   ];
 
@@ -155,22 +139,22 @@ const FootballPage: FC = () => {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-border">
-                    <th className="text-left py-4 font-medium text-muted-foreground">Position</th>
-                    <th className="text-left py-4 font-medium text-muted-foreground">Team</th>
-                    <th className="text-center py-4 font-medium text-muted-foreground">Played</th>
-                    <th className="text-center py-4 font-medium text-muted-foreground">Won</th>
-                    <th className="text-center py-4 font-medium text-muted-foreground">Drawn</th>
-                    <th className="text-center py-4 font-medium text-muted-foreground">Lost</th>
-                    <th className="text-center py-4 font-medium text-muted-foreground">Points</th>
+                    <th className="text-left py-6 px-4 font-medium text-muted-foreground">Position</th>
+                    <th className="text-left py-6 px-4 font-medium text-muted-foreground">Team</th>
+                    <th className="text-center py-6 px-4 font-medium text-muted-foreground">P</th>
+                    <th className="text-center py-6 px-4 font-medium text-muted-foreground">W</th>
+                    <th className="text-center py-6 px-4 font-medium text-muted-foreground">D</th>
+                    <th className="text-center py-6 px-4 font-medium text-muted-foreground">L</th>
+                    <th className="text-center py-6 px-4 font-medium text-muted-foreground">Pts</th>
                   </tr>
                 </thead>
                 <tbody>
                   {teams.map((team, index) => (
-                    <tr key={team.name} className="border-b border-border">
-                      <td className="py-4">{index + 1}</td>
-                      <td className="py-4">
-                        <div className="flex items-center gap-3">
-                          <div className="relative w-8 h-8">
+                    <tr key={team.name} className="border-b border-border hover:bg-accent/50 transition-colors">
+                      <td className="py-6 px-4">{index + 1}</td>
+                      <td className="py-6 px-4">
+                        <div className="flex items-center gap-4">
+                          <div className="relative w-10 h-10">
                             <Image
                               src={team.logo}
                               alt={`${team.name} logo`}
@@ -178,14 +162,14 @@ const FootballPage: FC = () => {
                               className="object-contain"
                             />
                           </div>
-                          <span>{team.name}</span>
+                          <span className="font-medium">{team.name}</span>
                         </div>
                       </td>
-                      <td className="text-center py-4">{team.played}</td>
-                      <td className="text-center py-4">{team.won}</td>
-                      <td className="text-center py-4">{team.drawn}</td>
-                      <td className="text-center py-4">{team.lost}</td>
-                      <td className="text-center py-4 font-semibold">{team.points}</td>
+                      <td className="text-center py-6 px-4">{team.played}</td>
+                      <td className="text-center py-6 px-4">{team.won}</td>
+                      <td className="text-center py-6 px-4">{team.drawn}</td>
+                      <td className="text-center py-6 px-4">{team.lost}</td>
+                      <td className="text-center py-6 px-4 font-semibold">{team.points}</td>
                     </tr>
                   ))}
                 </tbody>
