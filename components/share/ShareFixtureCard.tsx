@@ -117,7 +117,8 @@ const ShareFixtureCard = forwardRef<HTMLDivElement>((_, ref) => {
             </div>
             <div className="space-y-4">
             {Object.entries(matchData.stats.home).map(([key, homeValue]) => {
-                const awayValue = matchData.stats.away[key];
+                const statKey = key as keyof typeof matchData.stats.home; // ✅ Tell TS it's a valid key
+                const awayValue = matchData.stats.away[statKey]; // ✅ No error
                 const total = homeValue + awayValue;
                 
                 return (
