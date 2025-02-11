@@ -1,33 +1,40 @@
-import { Team } from '@/utils/stateTypes';
+import useLiveStore from '@/stores/liveStore';
+import useTimerStore from '@/stores/timerStore';
+import { LiveStatState, Team } from '@/utils/stateTypes';
 import { Activity, Clock, MapPin, Users } from 'lucide-react';
 import React, { forwardRef } from 'react'
 
-const matchData = {
-    competition: "Premier League",
-    matchday: "Matchday 24",
-    status: "Full Time",
-    homeTeam: { name: "Manchester United", _id: '1' },
-    awayTeam: { name: "Liverpool", _id: '2' },
-    homeLogo: "/manutd.png",
-    awayLogo: "/liverpool.png",
-    homeScore: 2,
-    awayScore: 1,
-    stats: {
-      home: { shots: 14, shotsOnTarget: 6, possession: 48, corners: 7, freeKicks: 15 },
-      away: { shots: 16, shotsOnTarget: 4, possession: 52, corners: 5, freeKicks: 12 },
-    },
-    scorers: [
-      { team: "home", player: "Marcus Rashford", minute: 24 },
-      { team: "away", player: "Mohamed Salah", minute: 39 },
-      { team: "home", player: "Bruno Fernandes", minute: 78 },
-    ],
-    venue: "Old Trafford",
-    attendance: "74,140",
-    date: "10 Feb 2025",
-};
+// const matchData = {
+//     competition: "Premier League",
+//     matchday: "Matchday 24",
+//     status: "Full Time",
+//     homeTeam: { name: "Manchester United", _id: '1' },
+//     awayTeam: { name: "Liverpool", _id: '2' },
+//     homeLogo: "/manutd.png",
+//     awayLogo: "/liverpool.png",
+//     homeScore: 2,
+//     awayScore: 1,
+//     stats: {
+//       home: { shots: 14, shotsOnTarget: 6, possession: 48, corners: 7, freeKicks: 15 },
+//       away: { shots: 16, shotsOnTarget: 4, possession: 52, corners: 5, freeKicks: 12 },
+//     },
+//     scorers: [
+//       { team: "home", player: "Marcus Rashford", minute: 24 },
+//       { team: "away", player: "Mohamed Salah", minute: 39 },
+//       { team: "home", player: "Bruno Fernandes", minute: 78 },
+//     ],
+//     venue: "Old Trafford",
+//     attendance: "74,140",
+//     date: "10 Feb 2025",
+// };
+interface ShareFixtureCardProps {
+    matchData: LiveStatState;
+}
 
-const ShareFixtureCard = forwardRef<HTMLDivElement>((_, ref) => {
-    console.log( ref )
+const ShareFixtureCard = forwardRef<HTMLDivElement, ShareFixtureCardProps>((props, ref) => {
+    const { matchData } = props;
+    const { time, half } = useTimerStore();
+    const { matchEvents } = useLiveStore();
   return (
     <div
         ref={ ref } 
@@ -36,30 +43,31 @@ const ShareFixtureCard = forwardRef<HTMLDivElement>((_, ref) => {
         {/* Competition Header */}
         <div className="text-center mb-8">
             <div className="inline-block bg-blue-600 text-white px-4 py-1 rounded-full text-sm font-semibold mb-2">
-                {matchData.competition}
+                { matchData.competition?.name || 'Friendly' }
             </div>
             <div className="flex items-center justify-center gap-2 text-muted-foreground">
                 <Clock size={16} />
-                <span>{matchData.matchday} • {matchData.date}</span>
+                <span>{ 'Matchday 1' } • { '11 Feb 2025' }</span>
             </div>
+            <h2 className='font-bold text-2xl'>'{ Math.floor( time / 60 ) }</h2>
         </div>
 
         {/* Score Section */}
         <div className="mb-8">
             <div className="flex items-center justify-between">
             <TeamScore 
-                team={matchData.homeTeam} 
-                score={matchData.homeScore} 
-                isHome={true}
+                team={ matchData.homeTeam } 
+                score={ matchData.homeScore } 
+                isHome={ true }
             />
             
             <div className="flex flex-col items-center">
                 <div className="bg-gray-900 text-white px-6 py-3 rounded-xl shadow-lg">
                 <div className="text-4xl font-bold tracking-wider">
-                    {matchData.homeScore} - {matchData.awayScore}
+                    { matchData.homeScore } - { matchData.awayScore }
                 </div>
                 <div className="text-xs text-gray-400 text-center mt-1">
-                    {matchData.status}
+                    { half }
                 </div>
                 </div>
             </div>
@@ -79,33 +87,42 @@ const ShareFixtureCard = forwardRef<HTMLDivElement>((_, ref) => {
           <h3 className="font-semibold text-gray-700">Goal Scorers</h3>
         </div>
         <div className="space-y-2">
-          {matchData.scorers.map((goal, index) => (
-            <div 
-              key={index} 
-              className={`
-                flex items-center
-                ${goal.team === "home" ? "justify-start" : "justify-end"}
-                hover:bg-gray-100 rounded-lg p-2 transition-colors duration-200
-              `}
-            >
-              {goal.team === "home" && (
-                <>
-                  <span className="font-semibold text-gray-800">{goal.player}</span>
-                  <span className="ml-2 text-sm bg-gray-200 px-2 py-1 rounded-full">
-                    {goal.minute}'
-                  </span>
-                </>
-              )}
-              {goal.team === "away" && (
-                <>
-                  <span className="mr-2 text-sm bg-gray-200 px-2 py-1 rounded-full">
-                    {goal.minute}'
-                  </span>
-                  <span className="font-semibold text-gray-800">{goal.player}</span>
-                </>
-              )}
-            </div>
-          ))}
+            {
+                matchEvents.map((event, index) => {
+                    if( event.eventType === 'goal' ) {
+                        return (
+                            <div 
+                                key={ index } 
+                                className={`
+                                    flex items-center
+                                    ${ event.team === matchData.homeTeam ? "justify-start" : "justify-end" }
+                                    hover:bg-gray-100 rounded-lg p-2 transition-colors duration-200
+                                `}
+                            >
+                                { 
+                                    event.team === matchData.homeTeam && (
+                                        <>
+                                            <span className="font-semibold text-gray-800">{ event.player?.name || 'Unknown' }</span>
+                                            <span className="ml-2 text-sm bg-gray-200 px-2 py-1 rounded-full">
+                                                { event.time }'
+                                            </span>
+                                        </>
+                                    )
+                                }
+                                {
+                                    event.team === matchData.awayTeam && (
+                                        <>
+                                            <span className="mr-2 text-sm bg-gray-200 px-2 py-1 rounded-full">
+                                                { event.time }'
+                                            </span>
+                                            <span className="font-semibold text-gray-800">{ event.player?.name || 'Unknown' }</span>
+                                        </>
+                                )}
+                            </div>
+                        )
+                    }
+                })
+            }
         </div>
       </div>
 
@@ -116,9 +133,9 @@ const ShareFixtureCard = forwardRef<HTMLDivElement>((_, ref) => {
             <h3 className="font-semibold text-gray-700">Match Stats</h3>
             </div>
             <div className="space-y-4">
-            {Object.entries(matchData.stats.home).map(([key, homeValue]) => {
-                const statKey = key as keyof typeof matchData.stats.home; // ✅ Tell TS it's a valid key
-                const awayValue = matchData.stats.away[statKey]; // ✅ No error
+            {Object.entries(matchData.home).map(([key, homeValue]) => {
+                const statKey = key as keyof typeof matchData.home; // ✅ Tell TS it's a valid key
+                const awayValue = matchData.away[statKey]; // ✅ No error
                 const total = homeValue + awayValue;
                 
                 return (
@@ -144,12 +161,12 @@ const ShareFixtureCard = forwardRef<HTMLDivElement>((_, ref) => {
         {/* Footer */}
         <div className="mt-6 flex justify-center items-center gap-6 text-gray-600">
             <div className="flex items-center gap-2">
-            <MapPin size={16} />
-            <span>{matchData.venue}</span>
+                <MapPin size={16} />
+                <span>{ 'Stade et Fupre' }</span>
             </div>
             <div className="flex items-center gap-2">
-            <Users size={16} />
-            <span>{matchData.attendance}</span>
+                <Users size={16} />
+                <span>{ 'Unknown' }</span>
             </div>
         </div>
     </div>

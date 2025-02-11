@@ -17,8 +17,8 @@ export interface Players {
 
 interface LineUp {
     formation: string,
-    startingXI: Players[],
-    subs: Players[]
+    startingXI: Players[] | [],
+    subs: Players[] | []
 }
 
 export type EventTypes = {

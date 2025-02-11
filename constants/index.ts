@@ -1,4 +1,5 @@
 import { EventTypes } from "@/utils/stateTypes";
+import { position } from "html2canvas/dist/types/css/property-descriptors/position";
 
 export const getCurrentDate = (): string => {
 	const today = new Date();
@@ -41,16 +42,32 @@ const awayLineup = [
 
 export const liveFixtureInitialStateData = {
 	homeTeam: {
-        name: 'Man U',
+        name: 'Propellers',
         _id: '12'
     },
     awayTeam: {
-        name: 'Chelsea',
+        name: 'Rayos FC',
         _id: '23'
     },
     homeLineup: {
         formation: '',
-        startingXI: [],
+        startingXI: [
+            { name: 'B Lionz', position: 'GK', _id: '111' },
+            { name: 'Clipha', position: 'GK', _id: '222' },
+            { name: 'Emmanuel', position: 'GK', _id: '333' },
+            { name: 'Gamer X', position: 'GK', _id: '444' },
+            { name: 'Godsent', position: 'GK', _id: '555' },
+            { name: 'Golden Jet', position: 'GK', _id: '66' },
+            { name: 'Isaac', position: 'GK', _id: '777' },
+            { name: 'Jeffrey', position: 'GK', _id: '888' },
+            { name: 'Joseph', position: 'GK', _id: '999' },
+            { name: 'Noble', position: 'GK', _id: '989' },
+            { name: 'Pius', position: 'GK', _id: '878' },
+            { name: 'Sammy', position: 'GK', _id: '767' },
+            { name: 'TAO', position: 'GK', _id: '656' },
+            { name: 'Uche', position: 'GK', _id: '545' },
+            { name: 'Verified', position: 'GK', _id: '434' },
+        ],
         subs: []
     },
     awayLineup: {
@@ -59,8 +76,8 @@ export const liveFixtureInitialStateData = {
         subs: []
     },
     competition: {
-        name: 'Super League',
-        _id: '',
+        name: 'Fupre Super League',
+        _id: '123',
         type: 'knockout'
     },
 	home: {

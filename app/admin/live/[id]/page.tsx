@@ -12,15 +12,6 @@ import LineUps from '@/components/liveAdmin/LineUps';
 import Time from '@/components/liveAdmin/Time';
 import ShareButton from '@/components/share/ShareButton';
 
-const homeLineup: Players[] | [] = [
-    { name: 'John Bull', position: 'LB', _id: '123456' },
-    { name: 'John Doe', position: 'CB', _id: '123457' },
-    { name: 'John Wick', position: 'CB', _id: '123458' },
-];
-const awayLineup: Players[] | [] = [
-
-];
-
 const IndividualLivePage = () => {
     const params = useParams();
 
@@ -32,7 +23,7 @@ const IndividualLivePage = () => {
     <div>
         {/* Header */}
         <div className='py-6 pb-2 px-4 flex items-center justify-center text-primary flex-col'>
-            <ShareButton />
+            <ShareButton statValues={ statValues } />
 
             <Time />
 
@@ -101,8 +92,8 @@ const IndividualLivePage = () => {
             /> }
             { activeTab === 'log' && <Log 
                 statValues={ statValues }
-                homeLineup={ homeLineup }
-                awayLineup={ awayLineup }
+                homeLineup={ statValues.homeLineup ? statValues.homeLineup.startingXI : [] }
+                awayLineup={ statValues.awayLineup ? statValues.awayLineup.startingXI : [] }
             /> }
             { activeTab === 'lineups' && <LineUps /> }
         </div>

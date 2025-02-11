@@ -1,8 +1,9 @@
 import html2canvas from 'html2canvas';
 import { useRef, useState } from 'react';
 import ShareFixtureCard from './ShareFixtureCard'; // Ensure this is correctly imported
+import { LiveStatState } from '@/utils/stateTypes';
 
-const ShareButton = () => {
+const ShareButton = ({ statValues }: { statValues: LiveStatState }) => {
   const hiddenCardRef = useRef<HTMLDivElement>(null);
   const [isRendering, setIsRendering] = useState(false);
 
@@ -54,12 +55,12 @@ const ShareButton = () => {
       {/* Hidden component for rendering */}
       {isRendering && (
         <div ref={hiddenCardRef} className="absolute -left-[9999px] -top-[9999px]">
-          <ShareFixtureCard />
+          <ShareFixtureCard matchData={ statValues } />
         </div>
       )}
 
       {/* Share button */}
-      <button onClick={handleShare} className="mt-4 bg-blue-500 text-white px-4 py-2 rounded">
+      <button onClick={handleShare} className="bg-blue-500 text-white px-4 py-2 rounded mb-4">
         Share Match Summary
       </button>
     </div>
