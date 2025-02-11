@@ -1,24 +1,23 @@
 import { BlurFade } from "@/components/ui/blur-fade";
+import { getTodaysFixtures } from "@/lib/requests/homePage/requests";
+import { Fixture } from "@/utils/requestDataTypes";
+import { format } from 'date-fns';
 import Link from "next/link";
 
-const todaysFixture = {
-  homeTeam: {
-    name: 'Propellers',
-    _id: '12'
-  },
-  awayTeam: {
-    name: 'Vamos',
-    _id: '123'
-  },
-  competition: {
-    name: '',
-    _id: '1234'
-  },
-  date: '2025-12-12T23:00',
-  venue: 'Stade et Fupre',
-  time: '13:00'
-}
-export default function HomePage() {
+export default async function HomePage() {
+    const data = await getTodaysFixtures();
+    let todayFixtureList: Fixture[] | null = null;
+
+    if( data && data.code === '00' ) {
+      todayFixtureList = data.data;
+    }
+    let todaysFixture: Fixture | null = todayFixtureList ? todayFixtureList[ 0 ] : null;
+
+    const formattedDate = todaysFixture ? format( todaysFixture.date, "yyyy-MM-dd HH:mm" ) : null;
+    const date = formattedDate ? formattedDate.split(' ')[ 0 ] : null;
+    const time = formattedDate ? formattedDate.split(' ')[ 1 ] : null;
+
+    console.log({ todayFixtureList, data });
   return (
     <main className="min-h-screen">
       {/* Hero Section */}
@@ -79,19 +78,19 @@ export default function HomePage() {
                       <span className="mr-2">
                         📅
                       </span>
-                      {new Date(todaysFixture.date).toLocaleDateString()}
+                      { date }
                     </div>
                     <div className="flex items-center">
                       <span className="mr-2">
                         ⏰
                       </span>
-                      {todaysFixture.time}
+                      { time }
                     </div>
                     <div className="flex items-center">
                       <span className="mr-2">
                         📍
                       </span>
-                      {todaysFixture.venue}
+                      { todaysFixture.stadium }
                     </div>
                   </div>
 

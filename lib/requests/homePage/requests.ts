@@ -15,7 +15,7 @@ const API_URL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_
 
 export const getTodaysFixtures = async ( ) => {
     try {
-        const response = await axiosInstance.get( `${ API_URL }/fixture?filterBy=${ getCurrentDate() }&limit=5` );
+        const response = await axiosInstance.get( `${ API_URL }/fixture?filterBy=${ getCurrentDate() }&limit=1` );
         const { data } = response;
 
         if( data.code === '99' ) {

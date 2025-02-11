@@ -15,8 +15,8 @@ export interface Players {
     _id?: string
 }
 
-interface LineUp {
-    formation: string,
+export interface LineUp {
+    formation: string | null,
     startingXI: Players[] | [],
     subs: Players[] | []
 }
