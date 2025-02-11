@@ -6,9 +6,16 @@ interface CustomError {
     message?: string;
     response?: {
         data: {
-            message: string;
+            message: string,
+            code: string,
+            data?: any
         };
     };
+}
+interface SuccessRequest {
+    code: string,
+    message: string,
+    data?: any
 }
 
 const API_URL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_PROD_API_URL : process.env.NEXT_PUBLIC_DEV_API_URL;
@@ -16,7 +23,7 @@ const API_URL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_
 export const getTodaysFixtures = async ( ) => {
     try {
         const response = await axiosInstance.get( `${ API_URL }/fixture?filterBy=${ getCurrentDate() }&limit=1` );
-        const { data } = response;
+        const { data }: { data: SuccessRequest } = response;
 
         if( data.code === '99' ) {
             throw data
@@ -27,7 +34,7 @@ export const getTodaysFixtures = async ( ) => {
 
         if( err?.status && err?.message ) {
             console.error( `Error ${ err.status }: `, response?.data.message )
-            return null;
+            return response?.data || null;
         } else {
             console.error('Error fetching fixtures: ', err );
             return null;

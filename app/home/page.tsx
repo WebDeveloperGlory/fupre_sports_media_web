@@ -17,7 +17,6 @@ export default async function HomePage() {
     const date = formattedDate ? formattedDate.split(' ')[ 0 ] : null;
     const time = formattedDate ? formattedDate.split(' ')[ 1 ] : null;
 
-    console.log({ todayFixtureList, data });
   return (
     <main className="min-h-screen">
       {/* Hero Section */}
