@@ -10,13 +10,16 @@ export function NavigationEvents() {
   const { setIsLoading } = useLoading();
 
   useEffect(() => {
-    // Show loading state
-    setIsLoading(true);
-    
-    // Hide loading state after a short delay
-    const timeout = setTimeout(() => {
+    const handleStart = () => {
+      setIsLoading(true);
+    };
+
+    const handleStop = () => {
       setIsLoading(false);
-    }, 500);
+    };
+
+    handleStart();
+    const timeout = setTimeout(handleStop, 500);
 
     return () => clearTimeout(timeout);
   }, [pathname, searchParams, setIsLoading]);

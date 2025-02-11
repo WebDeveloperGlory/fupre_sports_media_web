@@ -162,21 +162,21 @@ export default function CompetitionPage({
   return (
     <main className="min-h-screen">
       {/* Back Button */}
-      <div className="fixed top-8 left-8 z-10">
+      <div className="fixed top-16 right-4 md:right-8 z-10">
         <BackButton />
       </div>
 
-      <div className="py-16 container">
+      <div className="space-y-6">
         <BlurFade>
-          <div className="space-y-8">
+          <div className="space-y-6">
             {/* Header */}
-            <div className="bg-card rounded-xl p-6 border border-border">
-              <div className="flex items-center justify-between">
+            <div className="bg-card rounded-xl p-4 md:p-6 border border-border">
+              <div className="flex items-center justify-between flex-wrap gap-4">
                 <div className="flex items-center gap-3">
-                  <Trophy className="w-6 h-6 text-emerald-500" />
-                  <h1 className="text-2xl font-bold">{competition.name}</h1>
+                  <Trophy className="w-5 h-5 text-emerald-500" />
+                  <h1 className="text-xl md:text-2xl font-bold">{competition.name}</h1>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <span className={`px-3 py-1.5 rounded-full text-sm font-medium ${
                     competition.status === 'ongoing' 
                       ? 'bg-emerald-500/10 text-emerald-500' 
@@ -268,9 +268,9 @@ export default function CompetitionPage({
             <div className="bg-card rounded-xl border border-border overflow-hidden">
               <button
                 onClick={() => setIsTableOpen(!isTableOpen)}
-                className="w-full px-6 py-4 flex items-center justify-between hover:bg-accent/50 transition-colors"
+                className="w-full px-4 md:px-6 py-4 flex items-center justify-between hover:bg-accent/50 transition-colors"
               >
-                <h2 className="text-xl font-semibold">League Table</h2>
+                <h2 className="text-lg md:text-xl font-semibold">League Table</h2>
                 {isTableOpen ? (
                   <ChevronUp className="w-5 h-5 text-muted-foreground" />
                 ) : (
@@ -287,30 +287,30 @@ export default function CompetitionPage({
                     transition={{ duration: 0.2 }}
                     className="overflow-hidden"
                   >
-                    <div className="p-6 border-t border-border overflow-x-auto">
+                    <div className="p-4 md:p-6 border-t border-border overflow-x-auto">
                       <table className="w-full">
                         <thead>
                           <tr className="border-b border-border">
-                            <th className="text-left py-6 px-4 font-medium text-muted-foreground">Pos</th>
-                            <th className="text-left py-6 px-4 font-medium text-muted-foreground">Team</th>
-                            <th className="text-center py-6 px-4 font-medium text-muted-foreground">P</th>
-                            <th className="text-center py-6 px-4 font-medium text-muted-foreground">W</th>
-                            <th className="text-center py-6 px-4 font-medium text-muted-foreground">D</th>
-                            <th className="text-center py-6 px-4 font-medium text-muted-foreground">L</th>
-                            <th className="text-center py-6 px-4 font-medium text-muted-foreground">GF</th>
-                            <th className="text-center py-6 px-4 font-medium text-muted-foreground">GA</th>
-                            <th className="text-center py-6 px-4 font-medium text-muted-foreground">GD</th>
-                            <th className="text-center py-6 px-4 font-medium text-muted-foreground">Pts</th>
-                            <th className="text-center py-6 px-4 font-medium text-muted-foreground">Form</th>
+                            <th className="text-left py-4 px-3 text-sm font-medium text-muted-foreground">Pos</th>
+                            <th className="text-left py-4 px-3 text-sm font-medium text-muted-foreground">Team</th>
+                            <th className="text-center py-4 px-3 text-sm font-medium text-muted-foreground">P</th>
+                            <th className="text-center py-4 px-3 text-sm font-medium text-muted-foreground">W</th>
+                            <th className="text-center py-4 px-3 text-sm font-medium text-muted-foreground">D</th>
+                            <th className="text-center py-4 px-3 text-sm font-medium text-muted-foreground">L</th>
+                            <th className="text-center py-4 px-3 text-sm font-medium text-muted-foreground">GF</th>
+                            <th className="text-center py-4 px-3 text-sm font-medium text-muted-foreground">GA</th>
+                            <th className="text-center py-4 px-3 text-sm font-medium text-muted-foreground">GD</th>
+                            <th className="text-center py-4 px-3 text-sm font-medium text-muted-foreground">Pts</th>
+                            <th className="text-center py-4 px-3 text-sm font-medium text-muted-foreground">Form</th>
                           </tr>
                         </thead>
                         <tbody>
                           {sortedTeams.map((team, index) => (
                             <tr key={team.name} className="border-b border-border hover:bg-accent/50 transition-colors">
-                              <td className="py-6 px-4">{index + 1}</td>
-                              <td className="py-6 px-4">
-                                <div className="flex items-center gap-4">
-                                  <div className="relative w-10 h-10">
+                              <td className="py-4 px-3 text-sm">{index + 1}</td>
+                              <td className="py-4 px-3">
+                                <div className="flex items-center gap-3">
+                                  <div className="relative w-8 h-8">
                                     <Image
                                       src={team.logo}
                                       alt={`${team.name} logo`}
@@ -318,23 +318,23 @@ export default function CompetitionPage({
                                       className="object-contain"
                                     />
                                   </div>
-                                  <span className="font-medium">{team.name}</span>
+                                  <span className="font-medium text-sm md:text-base">{team.name}</span>
                                 </div>
                               </td>
-                              <td className="text-center py-6 px-4">{team.played}</td>
-                              <td className="text-center py-6 px-4">{team.won}</td>
-                              <td className="text-center py-6 px-4">{team.drawn}</td>
-                              <td className="text-center py-6 px-4">{team.lost}</td>
-                              <td className="text-center py-6 px-4">{team.gf}</td>
-                              <td className="text-center py-6 px-4">{team.ga}</td>
-                              <td className="text-center py-6 px-4">{team.gf - team.ga}</td>
-                              <td className="text-center py-6 px-4 font-semibold">{team.points}</td>
-                              <td className="text-center py-6 px-4">
-                                <div className="flex items-center justify-center gap-2">
+                              <td className="text-center py-4 px-3 text-sm">{team.played}</td>
+                              <td className="text-center py-4 px-3 text-sm">{team.won}</td>
+                              <td className="text-center py-4 px-3 text-sm">{team.drawn}</td>
+                              <td className="text-center py-4 px-3 text-sm">{team.lost}</td>
+                              <td className="text-center py-4 px-3 text-sm">{team.gf}</td>
+                              <td className="text-center py-4 px-3 text-sm">{team.ga}</td>
+                              <td className="text-center py-4 px-3 text-sm">{team.gf - team.ga}</td>
+                              <td className="text-center py-4 px-3 text-sm font-semibold">{team.points}</td>
+                              <td className="text-center py-4 px-3">
+                                <div className="flex items-center justify-center gap-1">
                                   {team.form.map((result, i) => (
                                     <span
                                       key={i}
-                                      className={`w-7 h-7 flex items-center justify-center rounded-full text-xs font-medium ${
+                                      className={`w-6 h-6 flex items-center justify-center rounded-full text-xs font-medium ${
                                         result === 'W' 
                                           ? 'bg-emerald-500/10 text-emerald-500' 
                                           : result === 'D'

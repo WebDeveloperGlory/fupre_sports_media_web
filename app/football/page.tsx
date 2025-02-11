@@ -36,13 +36,13 @@ const FootballPage: FC = () => {
   const totalTime = time + injuryTime;
 
   return (
-    <main className="min-h-screen py-24 container">
+    <main className="min-h-screen">
       <BlurFade>
-        <div className="space-y-8">
+        <div className="space-y-6">
           {/* Hero - Live Matches */}
           <div className="relative bg-gradient-to-br from-emerald-500/20 via-background to-background rounded-xl border border-border overflow-hidden">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,_var(--tw-gradient-stops))] from-emerald-500/10 via-background to-background" />
-            <div className="relative p-8 md:p-12">
+            <div className="relative p-4 md:p-8">
               <div className="flex flex-col gap-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">

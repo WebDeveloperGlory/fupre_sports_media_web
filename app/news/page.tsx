@@ -53,13 +53,13 @@ export default function NewsPage() {
       {/* Featured Article */}
       <BlurFade>
         <div className="relative bg-card border-b border-black/20">
-          <div className="container mx-auto px-4 py-12">
-            <div className="flex flex-col lg:flex-row gap-8 items-center">
+          <div className="p-4 md:p-8">
+            <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 items-center">
               <div className="flex-1 space-y-4">
-                <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
+                <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight">
                   {featuredArticle.title}
                 </h1>
-                <p className="text-lg text-muted-foreground">
+                <p className="text-base lg:text-lg text-muted-foreground">
                   {featuredArticle.excerpt}
                 </p>
                 <div className="flex items-center gap-4 text-sm text-muted-foreground">
@@ -98,11 +98,11 @@ export default function NewsPage() {
         </div>
       </BlurFade>
 
-      <div className="container mx-auto px-4 py-12">
+      <div className="p-4 md:p-8">
         {/* Latest Articles */}
         <BlurFade delay={0.1}>
-          <h2 className="text-2xl font-bold mb-8">Latest Stories</h2>
-          <div className="grid gap-12 max-w-4xl">
+          <h2 className="text-2xl font-bold mb-6">Latest Stories</h2>
+          <div className="grid gap-8 max-w-4xl">
             {latestArticles.map((article) => (
               <article key={article.id} className="group">
                 <Link href={`/news/${article.id}`} className="grid md:grid-cols-5 gap-6 items-start">
