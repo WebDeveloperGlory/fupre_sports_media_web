@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import useTimerStore from '@/stores/timerStore'
+import useLiveStore from '@/stores/liveStore';
+import { EVENT_TYPES } from '@/constants';
 
 const Timer = () => {
     const {
@@ -19,39 +21,37 @@ const Timer = () => {
       setInjuryTime,
       startPenaltyShootout,
     } = useTimerStore();
+    const { currentEventId, kickOffClicked, setMatchEvents, setKickOffClicked } = useLiveStore();
 
-    const [ localTime, setLocalTime ] = useState<number>( time );
-  
-    useEffect(() => {
-      let interval: any;
-
-      if ( isRunning ) {
-        interval = setInterval(() => {
-            setLocalTime(( prev ) => prev + 1 );
-        }, 1000);
-      }
-
-      return () => clearInterval( interval );
-    }, [ isRunning ] );
-  
-    useEffect(() => {
-        setTime( localTime );
-    }, [ localTime, setTime ] );
-  
-    const formatTime = ( seconds: number ) => {
-        const minutes = Math.floor(seconds / 60);
-        const secs = seconds % 60;
-        return `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-    };
-  
     const handleMatchOver = () => {
         stopTimer(); // This will clear the timer from localStorage
+        if( half === 'Second Half' ) {
+            setMatchEvents({
+                time: Math.floor( time / 60 ),
+                eventType: EVENT_TYPES.fulltime,
+                player: null,
+                team: null,
+                substitutedFor: null,
+                commentary: null,
+                id: currentEventId
+            })
+        }
     };
   
     const handleNextHalf = () => {
         stopTimer(); // Reset the timer
-        setLocalTime(0); // Reset local time to 0
-        setHalf(half === 'First Half' ? 'Second Half' : 'First Half'); // Update the half
+        if( half === 'First Half' ) {
+            setHalf( 'Second Half' ); // Update the half
+            setMatchEvents({
+                time: Math.floor( time / 60 ),
+                eventType: EVENT_TYPES.halftime,
+                player: null,
+                team: null,
+                substitutedFor: null,
+                commentary: null,
+                id: currentEventId
+            })
+        }
         setInjuryTime( 0 ); // Reset injury time for the new half
         startTimer(); // Start the timer for the next half
     };
@@ -66,27 +66,34 @@ const Timer = () => {
     const handleStartPenalties = () => {
         startPenaltyShootout(); // Transition to penalty shootout
     };
+
+    const handleKickoff = () => {
+        setMatchEvents({
+            time: 0,
+            eventType: EVENT_TYPES.kickoff,
+            player: null,
+            team: null,
+            substitutedFor: null,
+            commentary: null,
+            id: currentEventId
+        });
+        startTimer();
+        setKickOffClicked();
+    }
   
     const totalTime = time + injuryTime; // Total time including injury time
   
     return (
         <div className="max-w-lg mx-auto p-6 text-card-foreground">
-            {/* Timer Section */}
-            <div className="bg-muted p-4 rounded-lg flex flex-col items-center mb-4">
-                <p className="text-lg font-semibold">Current Half: { half }</p>
-                <p className="text-3xl font-bold mt-2">{ formatTime( totalTime ) }</p>
-                {
-                    injuryTime > 0 && (
-                        <p className="text-sm text-red-500 mt-1">+{formatTime(injuryTime)} Injury Time</p>
-                    )
-                }
-                {
-                    isPenaltyShootout && <p className="text-yellow-500 mt-2">Penalty Shootout in Progress</p>
-                }
-            </div>
-
             {/* Button Section */}
             <div className="grid grid-cols-2 gap-3">
+                <button 
+                    onClick={ handleKickoff }
+                    className="col-span-2 bg-gray-800 text-white py-2 rounded-lg disabled:opacity-50"
+                    disabled={ kickOffClicked }
+                >
+                    KickOff
+                </button>
                 <button 
                     onClick={ startTimer } 
                     disabled={ isRunning || isPenaltyShootout }

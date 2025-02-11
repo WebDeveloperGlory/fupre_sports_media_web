@@ -5,7 +5,7 @@ export type Event = {
     time: number,
     eventType: string,
     player: Players | null,
-    team: Team,
+    team: Team | null,
     substitutedFor: Players | null,
     commentary: string | null,
     id: number
@@ -15,16 +15,19 @@ export interface LiveStore {
     matchEvents: Event[] | [],
     currentEventId: number,
     hasMatchEvents: boolean,
+    kickOffClicked: boolean,
     setMatchEvents: ( event: Event ) => void,
     deleteMatchEvents: ( eventId: number ) => void,
     updateMatchEvents: ( eventId: number, updatedEvent: Event ) => void,
     setHasMatchEvents: ( checked: boolean ) => void,
+    setKickOffClicked: () => void,
 }
 
 const useLiveStore = create<LiveStore>( ( set ) => ({
     matchEvents: [],
     currentEventId: 0,
     hasMatchEvents: false,
+    kickOffClicked: false,
     setMatchEvents: ( event: Event ) => set( ( state: LiveStore ) => ({ 
         matchEvents: [ ...state.matchEvents, event ],
         currentEventId: state.currentEventId + 1
@@ -45,7 +48,8 @@ const useLiveStore = create<LiveStore>( ( set ) => ({
             matchEvents: updatedEvents
         })
     }),
-    setHasMatchEvents: ( checked: boolean ) => set({ hasMatchEvents: checked })
+    setHasMatchEvents: ( checked: boolean ) => set({ hasMatchEvents: checked }),
+    setKickOffClicked: () => set({ kickOffClicked: true }),
 }));
 
 export default useLiveStore;

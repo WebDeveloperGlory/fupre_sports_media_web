@@ -19,12 +19,7 @@ const LiveEvents = (
             ? statValues.awayTeam
             : { name: '', _id: '' };
       
-      let currentTime = half === 'First Half'
-        ? Math.floor( time / 60 )
-        : half === 'Second Half'
-          ? Math.floor( ( time + 2700 ) / 60 )
-          : time;
-      
+      let currentTime = Math.floor( time / 60 )
 
       if( hasMatchEvents ) {
         setMatchEvents(
@@ -56,11 +51,7 @@ const LiveEvents = (
             ? statValues.awayTeam
             : { name: '', _id: '' };
 
-      let currentTime = half === 'First Half'
-        ? Math.floor( time / 60 )
-        : half === 'Second Half'
-          ? Math.floor( ( time + 2700 ) / 60 )
-          : time;
+      let currentTime = Math.floor( time / 60 )
 
       setStatValues( ( prev: LiveStatState ) => {
         const homeScore = team === 'home' ? value : prev.homeScore;
@@ -72,7 +63,9 @@ const LiveEvents = (
           awayScore
         })
       })
-      if( hasMatchEvents ) {
+
+      const score = team === 'home' ? statValues.homeScore : statValues.awayScore
+      if( hasMatchEvents && value > score ) {
         setMatchEvents(
           {
             time: currentTime,

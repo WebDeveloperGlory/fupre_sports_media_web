@@ -9,6 +9,7 @@ import Events from '@/components/liveAdmin/Events';
 import Stats from '@/components/liveAdmin/Stats';
 import Log from '@/components/liveAdmin/Log';
 import LineUps from '@/components/liveAdmin/LineUps';
+import Time from '@/components/liveAdmin/Time';
 
 const homeLineup: Players[] | [] = [
     { name: 'John Bull', position: 'LB', _id: '123456' },
@@ -30,6 +31,8 @@ const IndividualLivePage = () => {
     <div>
         {/* Header */}
         <div className='py-6 pb-2 px-4 flex items-center justify-center text-primary flex-col'>
+            <Time />
+
             <p>{ statValues.competition?.name || 'Friendly' }</p>
 
             <div className='flex items-center justify-center gap-6'>
@@ -58,7 +61,7 @@ const IndividualLivePage = () => {
         </div>
 
         {/* Tabs Navigation */}
-        <div className='sticky top-0 border-b z-10'>
+        <div className='sticky top-0 border-b z-10 bg-primary-foreground'>
             <div className='flex overflow-x-scroll scrollbar-hide'>
                 {
                     [ 'timer', 'events', 'stats', 'log', 'lineups' ].map( tab => (

@@ -38,26 +38,26 @@ const getEventText = ( event: Event, players: Players[] ) => {
     const player = players.find( p => p._id === event.player?._id )?.name || '';
     switch ( event.eventType ) {
         case 'goal':
-            return `Goal scored by ${ event.team.name }( ${ player } )`;
+            return `Goal scored by ${ event.team!.name }( ${ player } )`;
         case 'assist':
-            return `Assisted by ${ event.team.name }( ${ player } )`;
+            return `Assisted by ${ event.team!.name }( ${ player } )`;
         case 'yellowCard':
-            return `Yellow card shown to ${ event.team.name }( ${ player } )`;
+            return `Yellow card shown to ${ event.team!.name }( ${ player } )`;
         case 'redCard':
-            return `Red card shown to ${ event.team.name }( ${ player } )`;
+            return `Red card shown to ${ event.team!.name }( ${ player } )`;
         case 'substitution':
             const subbed = players.find( p => p._id === event.substitutedFor?._id )?.name || '';
-            return `${ event.team.name }( ${ player } replaces ${ subbed } )`;
+            return `${ event.team!.name }( ${ player } replaces ${ subbed } )`;
         case 'foul': 
-            return `Foul by ${ event.team.name }`
+            return `Foul by ${ event.team!.name }`
         case 'corner': 
-            return `Corner awarded to ${ event.team.name }`
+            return `Corner awarded to ${ event.team!.name }`
         case 'offside': 
-            return `Offside by ${ event.team.name }`
+            return `Offside by ${ event.team!.name }`
         case 'shotOffTarget': 
-            return `Shot missed ${ event.team.name }`
+            return `Shot missed ${ event.team!.name }`
         case 'shotOnTarget': 
-            return `Shot on target ${ event.team.name }`
+            return `Shot on target ${ event.team!.name }`
         case 'kickoff':
             return 'Kick Off';
         case 'halftime':
@@ -80,11 +80,13 @@ const LogCard = (
         player: event.player,
         commentary: event.commentary || ''
     });
-    const playerList = event.team._id === homeTeam._id
-        ? homePlayers
-        : event.team._id === awayTeam._id
-            ? awayPlayers
-            : []
+    const playerList = event.team !== null
+        ? event.team._id === homeTeam._id
+            ? homePlayers
+            : event.team._id === awayTeam._id
+                ? awayPlayers
+                : []
+        : []
 
     const handleSave = () => {
         onEdit( event.id, {
@@ -164,7 +166,7 @@ const LogCard = (
                                         time: Number( e.target.value )
                                     })
                                 }
-                                className="border rounded px-2 py-1 w-20"
+                                className="border rounded px-2 py-1 w-20 text-black"
                                 min="0"
                                 max="120"
                             />
@@ -178,7 +180,7 @@ const LogCard = (
                                     <select
                                         value={ editedEvent.player?._id }
                                         onChange= { handlePlayerSelect }
-                                        className="border rounded px-2 py-1"
+                                        className="border rounded px-2 py-1 text-black cursor-pointer"
                                     >
                                         {
                                             playerList?.map( player => (
@@ -204,7 +206,7 @@ const LogCard = (
                                     })
                                 }
                                 placeholder="Add commentary..."
-                                className="border rounded px-2 py-1 w-full"
+                                className="border rounded px-2 py-1 w-full text-black"
                             />
                         </div>
             
