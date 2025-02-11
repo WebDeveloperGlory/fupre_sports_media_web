@@ -2,7 +2,7 @@
 
 import { BlurFade } from "@/components/ui/blur-fade";
 import { BackButton } from "@/components/ui/back-button";
-import { Trophy, Calendar, Clock, ChevronDown, ChevronUp } from "lucide-react";
+import { Trophy, Calendar, Clock, ChevronDown, ChevronUp, Users } from "lucide-react";
 import { notFound } from "next/navigation";
 import { use, useState } from "react";
 import Image from "next/image";
@@ -145,6 +145,7 @@ export default function CompetitionPage({
   const [isTableOpen, setIsTableOpen] = useState(true);
   const [isFixturesOpen, setIsFixturesOpen] = useState(true);
   const [isScorersOpen, setIsScorersOpen] = useState(true);
+  const [isTeamsOpen, setIsTeamsOpen] = useState(true);
   
   if (!competition || competition.type !== resolvedParams.type) {
     notFound();
@@ -160,48 +161,105 @@ export default function CompetitionPage({
   });
 
   return (
-    <main className="min-h-screen">
+    <main className="min-h-screen px-4 md:px-6">
       {/* Back Button */}
-      <div className="fixed top-16 right-4 md:right-8 z-10">
+      <div className="fixed top-[72px] left-4 md:left-8 z-10">
         <BackButton />
       </div>
 
-      <div className="space-y-6">
+      <div className="pt-24 pb-6 space-y-4 md:space-y-6 max-w-6xl mx-auto">
         <BlurFade>
-          <div className="space-y-6">
+          <div className="space-y-4 md:space-y-6">
             {/* Header */}
-            <div className="bg-card rounded-xl p-4 md:p-6 border border-border">
-              <div className="flex items-center justify-between flex-wrap gap-4">
-                <div className="flex items-center gap-3">
-                  <Trophy className="w-5 h-5 text-emerald-500" />
-                  <h1 className="text-xl md:text-2xl font-bold">{competition.name}</h1>
+            <div className="bg-card rounded-lg p-3 md:p-4 border border-border">
+              <div className="flex items-center justify-between flex-wrap gap-3">
+                <div className="flex items-center gap-2">
+                  <Trophy className="w-4 h-4 text-emerald-500" />
+                  <h1 className="text-lg md:text-xl font-bold">{competition.name}</h1>
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className={`px-3 py-1.5 rounded-full text-sm font-medium ${
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                     competition.status === 'ongoing' 
                       ? 'bg-emerald-500/10 text-emerald-500' 
                       : 'bg-orange-500/10 text-orange-500'
                   }`}>
                     {competition.status}
                   </span>
-                  <span className="text-sm text-muted-foreground">
+                  <span className="text-xs text-muted-foreground">
                     {competition.startDate} - {competition.endDate}
                   </span>
                 </div>
               </div>
             </div>
 
+            {/* Teams Section */}
+            <div className="bg-card rounded-lg border border-border overflow-hidden">
+              <button
+                onClick={() => setIsTeamsOpen(!isTeamsOpen)}
+                className="w-full px-4 py-3 flex items-center justify-between hover:bg-accent/50 transition-colors"
+              >
+                <div className="flex items-center gap-2">
+                  <Users className="w-4 h-4 text-emerald-500" />
+                  <h2 className="text-base md:text-lg font-semibold">Participating Teams</h2>
+                </div>
+                {isTeamsOpen ? (
+                  <ChevronUp className="w-4 h-4 text-muted-foreground" />
+                ) : (
+                  <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                )}
+              </button>
+
+              <AnimatePresence>
+                {isTeamsOpen && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="p-4 border-t border-border">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                        {competition.teams.map((team) => (
+                          <Link
+                            key={team.name}
+                            href={`/teams/${team.name.toLowerCase().replace(/\s+/g, '-')}`}
+                            className="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-accent/50 transition-colors"
+                          >
+                            <div className="relative w-10 h-10">
+                              <Image
+                                src={team.logo}
+                                alt={team.name}
+                                fill
+                                className="object-contain"
+                              />
+                            </div>
+                            <div>
+                              <h3 className="font-medium">{team.name}</h3>
+                              <p className="text-sm text-muted-foreground">
+                                {team.played} matches played
+                              </p>
+                            </div>
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
             {/* Fixtures Section */}
-            <div className="bg-card rounded-xl border border-border overflow-hidden">
+            <div className="bg-card rounded-lg border border-border overflow-hidden">
               <button
                 onClick={() => setIsFixturesOpen(!isFixturesOpen)}
-                className="w-full px-6 py-4 flex items-center justify-between hover:bg-accent/50 transition-colors"
+                className="w-full px-4 py-3 flex items-center justify-between hover:bg-accent/50 transition-colors"
               >
-                <h2 className="text-xl font-semibold">Fixtures</h2>
+                <h2 className="text-base md:text-lg font-semibold">Fixtures</h2>
                 {isFixturesOpen ? (
-                  <ChevronUp className="w-5 h-5 text-muted-foreground" />
+                  <ChevronUp className="w-4 h-4 text-muted-foreground" />
                 ) : (
-                  <ChevronDown className="w-5 h-5 text-muted-foreground" />
+                  <ChevronDown className="w-4 h-4 text-muted-foreground" />
                 )}
               </button>
 
@@ -214,45 +272,45 @@ export default function CompetitionPage({
                     transition={{ duration: 0.2 }}
                     className="overflow-hidden"
                   >
-                    <div className="p-6 border-t border-border">
-                      <div className="grid gap-4">
+                    <div className="p-4 border-t border-border">
+                      <div className="grid gap-3">
                         {competition.fixtures.map((fixture) => (
                           <div 
                             key={fixture.id}
-                            className="p-4 border border-border rounded-lg hover:bg-accent/50 transition-colors"
+                            className="p-3 border border-border rounded-lg hover:bg-accent/50 transition-colors"
                           >
-                            <div className="flex items-center justify-between mb-4">
-                              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                            <div className="flex items-center justify-between mb-3">
+                              <div className="flex items-center gap-3 text-xs text-muted-foreground">
                                 <div className="flex items-center gap-1">
-                                  <Calendar className="w-4 h-4" />
+                                  <Calendar className="w-3 h-3" />
                                   <span>{new Date(fixture.date).toLocaleDateString()}</span>
                                 </div>
                                 <div className="flex items-center gap-1">
-                                  <Clock className="w-4 h-4" />
+                                  <Clock className="w-3 h-3" />
                                   <span>{fixture.time}</span>
                                 </div>
                               </div>
                               <Link
                                 href={`/fixtures/${fixture.id}/stats`}
-                                className="px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20 transition-colors"
+                                className="px-2 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20 transition-colors"
                               >
                                 View Stats
                               </Link>
                             </div>
-                            <div className="flex items-center justify-between">
+                            <div className="flex items-center justify-between text-sm">
                               <span className="font-medium">{fixture.homeTeam}</span>
                               {fixture.status === 'completed' && fixture.score ? (
-                                <div className="flex items-center gap-3">
-                                  <span className="font-bold text-lg">{fixture.score.home}</span>
+                                <div className="flex items-center gap-2">
+                                  <span className="font-bold">{fixture.score.home}</span>
                                   <span className="text-muted-foreground">-</span>
-                                  <span className="font-bold text-lg">{fixture.score.away}</span>
+                                  <span className="font-bold">{fixture.score.away}</span>
                                 </div>
                               ) : (
                                 <span className="text-muted-foreground">vs</span>
                               )}
                               <span className="font-medium">{fixture.awayTeam}</span>
                             </div>
-                            <div className="mt-2 text-sm text-center text-muted-foreground">
+                            <div className="mt-2 text-xs text-center text-muted-foreground">
                               {fixture.venue}
                             </div>
                           </div>
