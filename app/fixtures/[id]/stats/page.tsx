@@ -171,11 +171,7 @@ const LineupSection = ({ team, side }: { team: typeof matchData.homeTeam, side: 
   );
 };
 
-export default function MatchStatsPage({ 
-  params 
-}: { 
-  params: { id: string } 
-}) {
+export default function MatchStatsPage() {
   const [isStatsOpen, setIsStatsOpen] = useState(true);
   const [isLineupsOpen, setIsLineupsOpen] = useState(true);
 
