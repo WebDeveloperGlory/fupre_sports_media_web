@@ -84,6 +84,7 @@ export default {
         slideUp: 'slideUp 300ms cubic-bezier(0.87, 0, 0.13, 1)',
         fadeIn: 'fadeIn 200ms ease',
         fadeOut: 'fadeOut 200ms ease',
+        'spin-reverse': 'spin 1s linear infinite reverse',
       },
     },
   },
