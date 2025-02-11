@@ -1,8 +1,11 @@
 import React from 'react'
+import ShareFixtureCard from '../share/ShareFixtureCard'
 
 const LineUps = () => {
   return (
-    <div>LineUps</div>
+    <div>
+      <ShareFixtureCard />
+    </div>
   )
 }
 

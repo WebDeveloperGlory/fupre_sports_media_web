@@ -10,6 +10,7 @@ import Stats from '@/components/liveAdmin/Stats';
 import Log from '@/components/liveAdmin/Log';
 import LineUps from '@/components/liveAdmin/LineUps';
 import Time from '@/components/liveAdmin/Time';
+import ShareButton from '@/components/share/ShareButton';
 
 const homeLineup: Players[] | [] = [
     { name: 'John Bull', position: 'LB', _id: '123456' },
@@ -31,6 +32,8 @@ const IndividualLivePage = () => {
     <div>
         {/* Header */}
         <div className='py-6 pb-2 px-4 flex items-center justify-center text-primary flex-col'>
+            <ShareButton />
+
             <Time />
 
             <p>{ statValues.competition?.name || 'Friendly' }</p>
