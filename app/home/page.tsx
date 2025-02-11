@@ -1,14 +1,31 @@
 import { BlurFade } from "@/components/ui/blur-fade";
 import Link from "next/link";
 
+const todaysFixture = {
+  homeTeam: {
+    name: 'Propellers',
+    _id: '12'
+  },
+  awayTeam: {
+    name: 'Vamos',
+    _id: '123'
+  },
+  competition: {
+    name: '',
+    _id: '1234'
+  },
+  date: '2025-12-12T23:00',
+  venue: 'Stade et Fupre',
+  time: '13:00'
+}
 export default function HomePage() {
   return (
     <main className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative bg-background min-h-screen flex items-center justify-center">
+      <section className="relative bg-background min-h-screen pb-20">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,_var(--tw-gradient-stops))] from-emerald-500/10 via-background to-background" />
         
-        <div className="container mx-auto px-4 py-8 md:py-24 relative">
+        <div className="container mx-auto px-4 relative">
           <BlurFade>
             <div className="flex flex-col items-center text-center space-y-6">
               <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-emerald-500">
@@ -39,6 +56,56 @@ export default function HomePage() {
               </div>
             </div>
           </BlurFade>
+        </div>
+
+        {/* Today's Fixture Section */}
+        <div className="max-w-2xl mx-auto bg-card/70 backdrop-blur-sm text-center p-8 rounded-xl mt-8 border border-black">
+          <h2 className="text-2xl font-bold">Today's Highlighted Fixture</h2>
+          <div className="mt-4">
+            {
+              todaysFixture ? (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between p-4">
+                    <div className="text-xl font-medium text-right flex-1">
+                      { todaysFixture.homeTeam.name }
+                    </div>
+                    <div className="px-6 text-emerald-500 font-bold">VS</div>
+                    <div className="text-xl font-medium text-left flex-1">
+                      {todaysFixture.awayTeam.name }
+                    </div>
+                  </div>
+                  <div className="flex justify-center items-center space-x-4 text-sm text-muted-foreground">
+                    <div className="flex items-center">
+                      <span className="mr-2">
+                        📅
+                      </span>
+                      {new Date(todaysFixture.date).toLocaleDateString()}
+                    </div>
+                    <div className="flex items-center">
+                      <span className="mr-2">
+                        ⏰
+                      </span>
+                      {todaysFixture.time}
+                    </div>
+                    <div className="flex items-center">
+                      <span className="mr-2">
+                        📍
+                      </span>
+                      {todaysFixture.venue}
+                    </div>
+                  </div>
+
+                  <div className="text-sm text-emerald-500 font-medium">
+                    { todaysFixture.competition?.name || 'Friendly' }
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center text-muted-foreground p-4">
+                  No fixtures scheduled for today
+                </div>
+              )
+            }
+          </div>
         </div>
 
         {/* Decorative glow effect */}
