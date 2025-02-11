@@ -182,7 +182,7 @@ export default function MatchStatsPage() {
         <BackButton />
       </div>
 
-      <div className="py-16 container">
+      <div className="container">
         <BlurFade>
           <div className="space-y-8">
             {/* Match Header */}

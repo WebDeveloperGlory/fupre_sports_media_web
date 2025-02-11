@@ -167,7 +167,7 @@ export default function CompetitionPage({
         <BackButton />
       </div>
 
-      <div className="pt-24 pb-6 space-y-4 md:space-y-6 max-w-6xl mx-auto">
+      <div className="pb-6 space-y-4 md:space-y-6 max-w-6xl mx-auto">
         <BlurFade>
           <div className="space-y-4 md:space-y-6">
             {/* Header */}
