@@ -37,9 +37,11 @@ export default function LiveMatchPage() {
       yellowCards: 0,
       redCards: 0
     },
-    competition: { name: 'Competition', _id: '1' },
+    competition: { name: 'Competition', _id: '1', type: 'league' },
     homeLineup: null,
-    awayLineup: null
+    awayLineup: null,
+    homePenalty: null,
+    awayPenalty: null
   });
 
   // TODO: Fetch match data using params.id
