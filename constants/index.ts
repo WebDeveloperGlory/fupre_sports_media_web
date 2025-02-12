@@ -89,10 +89,10 @@ export const liveFixtureInitialStateData = {
     awayPenalty: null
 }
 
-export const teamLogos = {
+export const teamLogos: Record<string, string> = {
     'Red Bull FC': '/images/team_logos/red_bull_fc.jpg',
     'Citizens': '/images/team_logos/citizens.jpg',
-    'Calakuta FC': '/images/team_logos/kalakuta_fc.jpg',
+    'Kalakuta FC': '/images/team_logos/kalakuta_fc.jpg',
     'Propellers': '/images/team_logos/propellers.jpg',
     'Rayos FC': '/images/team_logos/rayos_fc.jpg',
     'New Horizon': '/images/team_logos/new_horizon.jpg',

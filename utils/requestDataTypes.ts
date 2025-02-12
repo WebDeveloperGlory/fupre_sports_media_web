@@ -42,7 +42,15 @@ type Event = {
 type LeagueTableEntry = {
     team: Team,
     played: number,
-    wns: number,
+    points: number,
+    position: number,
+    goalDifference: number,
+}
+
+export type ExtendedLeagueTableEntry = {
+    team: Team,
+    played: number,
+    wins: number,
     draws: number,
     losses: number,
     goalsFor: number,
@@ -73,6 +81,55 @@ type CompetitionStats = {
     redCardsAvg: number,
     totalGoals: number,
     yellowCardsAvg: number,
+    numberOfTeams?: number,
+    teamList?: {
+        name: string,
+        _id: string,
+        shorthand: string,
+    }[],
+}
+
+type CompetitionFeaturedMatches = {
+    homeTeam: {
+        name: string,
+        shorthand: string,
+        department: string,
+    },
+    awayTeam: {
+        name: string,
+        shorthand: string,
+        department: string,
+    },
+    _id: string,
+    date: Date,
+}
+
+type TopPlayerStats = {
+    player: Player,
+    goals?: number,
+    assists?: number,
+    team: string,
+    appearances: number,
+}
+
+type UpcomingFixtures = {
+    awayTeam: Team & { shorthand: string, level: string, department: string },
+    homeTeam: Team & { shorthand: string, level: string, department: string },
+    date: Date,
+    stadium: string,
+    status: string,
+    _id: string,
+    result?: Result,
+}
+
+type CompletedFixtures = {
+    awayTeam: Team & { shorthand: string, level: string, department: string },
+    homeTeam: Team & { shorthand: string, level: string, department: string },
+    date: Date,
+    result: Result,
+    status: string,
+    _id: string,
+    stadium?: string,
 }
 
 export interface ExtendedTeam {
@@ -121,11 +178,24 @@ export interface Competition {
     status: string,
     groupStage: [],
     knockoutRounds: KnockoutRounds[] | [],
-    leagueTable: LeagueTableEntry[] | [],
+    leagueTable: ExtendedLeagueTableEntry[] | [],
     __v: number,
     type: string,
     stats: CompetitionStats,
     rounds: string[] | [],
+}
+
+export interface CompetitionOverview {
+    featuredMatches: CompetitionFeaturedMatches[] | [],
+    leagueFacts: CompetitionStats,
+    table: LeagueTableEntry[] | [],
+    topScorers: TopPlayerStats[] | [],
+    topAssists: TopPlayerStats[] | [],
+}
+
+export interface CompetitionFixtures {
+    completedMatches: CompletedFixtures[] | [],
+    upcomingMatches: UpcomingFixtures[] | [],
 }
 
 export interface LiveFixture {

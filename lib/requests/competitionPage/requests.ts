@@ -132,7 +132,7 @@ export const getIndividualCompetitionOverview = async ( id: string ) => {
 export const getLeagueTable = async ( id: string ) => {
     try {
         const response = await axiosInstance.get( `${ API_URL }/competition/${ id }/league-table` );
-        const { data } = response;
+        const { data }: { data: SuccessRequest } = response;
 
         if( data.code === '99' ) {
             throw data
@@ -154,7 +154,7 @@ export const getLeagueTable = async ( id: string ) => {
 export const getTopPlayers = async ( id: string ) => {
     try {
         const response = await axiosInstance.get( `${ API_URL }/competition/${ id }/top-players` );
-        const { data } = response;
+        const { data }: { data: SuccessRequest } = response;
 
         if( data.code === '99' ) {
             throw data
@@ -176,7 +176,7 @@ export const getTopPlayers = async ( id: string ) => {
 export const getTopTeams = async ( id: string, type: string = 'average' ) => {
     try {
         const response = await axiosInstance.get( `${ API_URL }/competition/${ id }/top-teams?statType=${ type }` );
-        const { data } = response;
+        const { data }: { data: SuccessRequest } = response;
 
         if( data.code === '99' ) {
             throw data
@@ -198,7 +198,7 @@ export const getTopTeams = async ( id: string, type: string = 'average' ) => {
 export const getAllTeamStats = async ( id: string, type: string = 'average' ) => {
     try {
         const response = await axiosInstance.get( `${ API_URL }/competition/${ id }/team-stats?statType=${ type }` );
-        const { data } = response;
+        const { data }: { data: SuccessRequest } = response;
 
         if( data.code === '99' ) {
             throw data
@@ -220,7 +220,7 @@ export const getAllTeamStats = async ( id: string, type: string = 'average' ) =>
 export const getAllPlayerStats = async ( id: string, page: number, limit: number, teamId: string ) => {
     try {
         const response = await axiosInstance.get( `${ API_URL }/competition/${ id }/player-stats?page=${ page }&limit=${ limit }${ teamId ? `&teamId=${ teamId }` : '' }` );
-        const { data } = response;
+        const { data }: { data: SuccessRequest } = response;
 
         if( data.code === '99' ) {
             throw data
@@ -242,7 +242,7 @@ export const getAllPlayerStats = async ( id: string, page: number, limit: number
 export const getAllCompetitionFixtures = async ( id: string ) => {
     try {
         const response = await axiosInstance.get( `${ API_URL }/competition/${ id }/fixtures` );
-        const { data } = response;
+        const { data }: { data: SuccessRequest } = response;
 
         if( data.code === '99' ) {
             throw data
