@@ -4,10 +4,11 @@ import { BlurFade } from "@/components/ui/blur-fade";
 import { BackButton } from "@/components/ui/back-button";
 import { Trophy, Calendar, Clock, ChevronDown, ChevronUp, Users } from "lucide-react";
 import { notFound } from "next/navigation";
-import { use, useState } from "react";
+import { use, useEffect, useState } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
+import { getIndividualCompetition } from "@/lib/requests/competitionPage/requests";
 
 // Demo data
 const competitions = [
@@ -141,12 +142,27 @@ export default function CompetitionPage({
   params: Promise<{ type: string; id: string }> 
 }) {
   const resolvedParams = use(params);
-  const competition = competitions.find(c => c.id === parseInt(resolvedParams.id));
+  const competition = competitions[0];
+  const [ loading, setLoading ] = useState<boolean>( true );
   const [isTableOpen, setIsTableOpen] = useState(true);
   const [isFixturesOpen, setIsFixturesOpen] = useState(true);
   const [isScorersOpen, setIsScorersOpen] = useState(true);
   const [isTeamsOpen, setIsTeamsOpen] = useState(true);
   
+  useEffect( () => {
+    const fetchData = async () => {
+      const data = await getIndividualCompetition( resolvedParams.id );
+      if( data && data.code === '00' ){
+        console.log( data.data )
+      }
+      setLoading( false );
+    }
+
+    if( loading ) {
+      fetchData();
+    }
+  }, [ loading ]);
+
   if (!competition || competition.type !== resolvedParams.type) {
     notFound();
   }
