@@ -1,5 +1,4 @@
 import { EventTypes } from "@/utils/stateTypes";
-import { position } from "html2canvas/dist/types/css/property-descriptors/position";
 
 export const getCurrentDate = (): string => {
 	const today = new Date();
@@ -25,20 +24,6 @@ export const EVENT_TYPES: EventTypes = {
     halftime: 'halftime',
     fulltime: 'fulltime'
 };
-
-
-const homeLineup = [
-    { name: 'John Doe', _id: '12345' },
-    { name: 'John Hoe', _id: '12346' },
-    { name: 'John Moe', _id: '12347' },
-    { name: 'John Soe', _id: '12348' },
-];
-const awayLineup = [
-    { name: 'James Doe', _id: '12355' },
-    { name: 'James Hoe', _id: '12356' },
-    { name: 'James Moe', _id: '12357' },
-    { name: 'James Soe', _id: '12358' },
-]
 
 export const liveFixtureInitialStateData = {
 	homeTeam: {
@@ -102,4 +87,16 @@ export const liveFixtureInitialStateData = {
     awayScore: 0,
     homePenalty: null,
     awayPenalty: null
+}
+
+export const teamLogos = {
+    'Red Bull FC': '/images/team_logos/red_bull_fc.jpg',
+    'Citizens': '/images/team_logos/citizens.jpg',
+    'Calakuta FC': '/images/team_logos/kalakuta_fc.jpg',
+    'Propellers': '/images/team_logos/propellers.jpg',
+    'Rayos FC': '/images/team_logos/rayos_fc.jpg',
+    'New Horizon': '/images/team_logos/new_horizon.jpg',
+    'Seventeen FC': '/images/team_logos/seventeen_fc.jpg',
+    'Twale FC': '/images/team_logos/twale_fc.jpg',
+    'Matadors FC': '/images/team_logos/matadors_fc.jpg',
 }
