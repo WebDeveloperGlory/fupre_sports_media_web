@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation';
 import { liveFixtureInitialStateData } from '@/constants'
 import { LiveStatState, Players } from '@/utils/stateTypes';
@@ -11,13 +11,26 @@ import Log from '@/components/liveAdmin/Log';
 import LineUps from '@/components/liveAdmin/LineUps';
 import Time from '@/components/liveAdmin/Time';
 import ShareButton from '@/components/share/ShareButton';
+import { getLiveFixtureDetails } from '@/lib/requests/competitionPage/requests';
 
 const IndividualLivePage = () => {
     const params = useParams();
 
+    const [ loading, setLoading ] = useState<boolean>( true );
     const [ statValues, setStatValues ] = useState<LiveStatState>( liveFixtureInitialStateData );
     const [ hasPenalties, setHasPenalties ] = useState<boolean>( false );
     const [ activeTab, setActiveTab ] = useState<string>( 'timer' );
+
+    useEffect( () => {
+        const fetchData = async () => {
+            // const data = await getLiveFixtureDetails( params.id )
+            setLoading( false );
+        }
+
+        if( loading ) {
+            fetchData();
+        }
+    }, [ loading ]);
 
   return (
     <div>

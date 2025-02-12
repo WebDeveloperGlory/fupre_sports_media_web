@@ -151,3 +151,11 @@ export interface LiveFixture {
     matchEvents: Event[],
     createdAt: Date;
 }
+
+export interface LiveMatchUpdateRequestBody {
+    result?: Result, 
+    statistics?: Statistics, 
+    matchEvents?: Event[] | [], 
+    homeLineup?: LineUp, 
+    awayLineup?: LineUp
+}
