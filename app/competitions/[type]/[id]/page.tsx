@@ -79,7 +79,7 @@ export default function CompetitionPage({
   const endDate = formattedEndDate ? formattedEndDate.split(' ')[ 0 ] : null;
 
   return (
-    <main className="min-h-screen px-4 md:px-6">
+    <main className="min-h-screen md:px-6">
       {/* Back Button */}
       <div className="fixed top-[72px] left-4 md:left-8 z-10">
         <BackButton />
