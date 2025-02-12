@@ -197,7 +197,6 @@ export default function MatchStatsPage() {
                     {matchData.status === 'completed' ? 'Full Time' : 'Upcoming'}
                   </span>
                 </div>
-
                 <div className="flex flex-col md:flex-row items-center justify-between gap-8 md:gap-16 w-full">
                   <div className="flex flex-col items-center gap-4 md:w-1/3">
                     <div className="relative w-16 h-16 md:w-20 md:h-20">

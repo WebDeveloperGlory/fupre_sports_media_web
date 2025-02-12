@@ -4,11 +4,22 @@ import { BlurFade } from "@/components/ui/blur-fade";
 import { BackButton } from "@/components/ui/back-button";
 import { Trophy, Calendar, Clock, ChevronDown, ChevronUp, Users } from "lucide-react";
 import { notFound } from "next/navigation";
+<<<<<<< HEAD
 import { use, useEffect, useState } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 import { getIndividualCompetition } from "@/lib/requests/competitionPage/requests";
+=======
+import { use, useState, useEffect } from "react";
+import Image from "next/image";
+import { AnimatePresence, motion } from "framer-motion";
+import Link from "next/link";
+import { getIndividualCompetition, getIndividualCompetitionOverview } from "@/lib/requests/competitionPage/requests";
+import { Competition } from "@/utils/requestDataTypes";
+import { Loader } from "@/components/ui/loader";
+import { format } from "date-fns";
+>>>>>>> 98eebcb488c4f512bf77ddff4dac43fecd6841c0
 
 // Demo data
 const competitions = [
@@ -136,18 +147,58 @@ const topScorers = [
   }
 ];
 
+interface CompetitionTeam {
+  name: string;
+  logo: string;
+  played: number;
+  won: number;
+  drawn: number;
+  lost: number;
+  points: number;
+  gf: number;
+  ga: number;
+  form: string[];
+}
+
+interface Fixture {
+  id: string;
+  homeTeam: string;
+  awayTeam: string;
+  date: string;
+  time: string;
+  venue: string;
+  status: string;
+  score?: {
+    home: number;
+    away: number;
+  };
+}
+
+interface CompetitionOverview {
+  teams: CompetitionTeam[];
+  fixtures: Fixture[];
+  topScorers: any[]; // We'll keep this as any for now since we haven't seen its structure
+}
+
 export default function CompetitionPage({ 
   params 
 }: { 
   params: Promise<{ type: string; id: string }> 
 }) {
   const resolvedParams = use(params);
+<<<<<<< HEAD
   const competition = competitions[0];
   const [ loading, setLoading ] = useState<boolean>( true );
+=======
+  const [loading, setLoading] = useState(true);
+  const [competition, setCompetition] = useState<Competition | null>(null);
+  const [overview, setOverview] = useState<CompetitionOverview | null>(null);
+>>>>>>> 98eebcb488c4f512bf77ddff4dac43fecd6841c0
   const [isTableOpen, setIsTableOpen] = useState(true);
   const [isFixturesOpen, setIsFixturesOpen] = useState(true);
   const [isScorersOpen, setIsScorersOpen] = useState(true);
   const [isTeamsOpen, setIsTeamsOpen] = useState(true);
+<<<<<<< HEAD
   
   useEffect( () => {
     const fetchData = async () => {
@@ -164,17 +215,60 @@ export default function CompetitionPage({
   }, [ loading ]);
 
   if (!competition || competition.type !== resolvedParams.type) {
+=======
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const competitionData = await getIndividualCompetition(resolvedParams.id);
+      const overviewData = await getIndividualCompetitionOverview(resolvedParams.id);
+
+      if (competitionData && competitionData.code === '00') {
+        setCompetition(competitionData.data);
+      }
+
+      if (overviewData && overviewData.code === '00') {
+        setOverview(overviewData.data);
+      }
+
+      setLoading(false);
+    };
+
+    fetchData();
+  }, [resolvedParams.id]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader />
+      </div>
+    );
+  }
+
+  if (!competition || !overview) {
+>>>>>>> 98eebcb488c4f512bf77ddff4dac43fecd6841c0
     notFound();
   }
 
   // Sort teams by points, then goal difference
-  const sortedTeams = [...competition.teams].sort((a, b) => {
+  const sortedTeams = overview?.teams ? [...overview.teams].sort((a, b) => {
     if (b.points !== a.points) return b.points - a.points;
     const aGD = a.gf - a.ga;
     const bGD = b.gf - b.ga;
     if (bGD !== aGD) return bGD - aGD;
     return b.gf - a.gf;
-  });
+  }) : [];
+
+  // Update the date display in the fixtures section
+  const formatDate = (dateString: string | Date) => {
+    try {
+      if (dateString instanceof Date) {
+        return format(dateString, 'MMM dd, yyyy');
+      }
+      return format(new Date(dateString), 'MMM dd, yyyy');
+    } catch (error) {
+      return 'Invalid date';
+    }
+  };
 
   return (
     <main className="min-h-screen px-4 md:px-6">
@@ -202,7 +296,7 @@ export default function CompetitionPage({
                     {competition.status}
                   </span>
                   <span className="text-xs text-muted-foreground">
-                    {competition.startDate} - {competition.endDate}
+                    {formatDate(competition.startDate)} - {formatDate(competition.endDate)}
                   </span>
                 </div>
               </div>
@@ -226,7 +320,7 @@ export default function CompetitionPage({
               </button>
 
               <AnimatePresence>
-                {isTeamsOpen && (
+                {isTeamsOpen && overview?.teams && (
                   <motion.div
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: "auto", opacity: 1 }}
@@ -236,7 +330,7 @@ export default function CompetitionPage({
                   >
                     <div className="p-4 border-t border-border">
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                        {competition.teams.map((team) => (
+                        {overview.teams.map((team: CompetitionTeam) => (
                           <Link
                             key={team.name}
                             href={`/teams/${team.name.toLowerCase().replace(/\s+/g, '-')}`}
@@ -280,7 +374,7 @@ export default function CompetitionPage({
               </button>
 
               <AnimatePresence>
-                {isFixturesOpen && (
+                {isFixturesOpen && overview?.fixtures && (
                   <motion.div
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: "auto", opacity: 1 }}
@@ -290,7 +384,7 @@ export default function CompetitionPage({
                   >
                     <div className="p-4 border-t border-border">
                       <div className="grid gap-3">
-                        {competition.fixtures.map((fixture) => (
+                        {overview.fixtures.map((fixture: Fixture) => (
                           <div 
                             key={fixture.id}
                             className="p-3 border border-border rounded-lg hover:bg-accent/50 transition-colors"
@@ -299,7 +393,7 @@ export default function CompetitionPage({
                               <div className="flex items-center gap-3 text-xs text-muted-foreground">
                                 <div className="flex items-center gap-1">
                                   <Calendar className="w-3 h-3" />
-                                  <span>{new Date(fixture.date).toLocaleDateString()}</span>
+                                  <span>{formatDate(fixture.date)}</span>
                                 </div>
                                 <div className="flex items-center gap-1">
                                   <Clock className="w-3 h-3" />
