@@ -2,30 +2,48 @@
 
 import { BlurFade } from "@/components/ui/blur-fade";
 import Image from "next/image";
-import { FC, useState } from "react";
-import { ChevronDown, ChevronUp, Trophy, Calendar } from "lucide-react";
+import { FC, useEffect, useState } from "react";
+import { ChevronDown, ChevronUp, Trophy, Calendar, AlertCircle } from "lucide-react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import useTimerStore from "@/stores/timerStore";
 import useLiveStore from "@/stores/liveStore";
 import { liveFixtureInitialStateData } from "@/constants";
-
-const competitions = [
-  {
-    id: 1,
-    name: "FUPRE Super League",
-    type: "league",
-    status: "ongoing",
-    startDate: "March 19th",
-    endDate: "April 30th",
-  }
-];
+import { getAllCompetitions, getLiveFixture, getLiveFixtureDetails } from "@/lib/requests/competitionPage/requests";
+import { Loader } from "@/components/ui/loader";
+import { Competition, LiveFixture } from "@/utils/requestDataTypes";
+import { format } from "date-fns";
 
 const FootballPage: FC = () => {
-  const [isCompetitionsOpen, setIsCompetitionsOpen] = useState(false);
-  const { time, half, injuryTime } = useTimerStore();
-  const { matchEvents } = useLiveStore();
-  const [statValues, setStatValues] = useState(liveFixtureInitialStateData);
+  const [ loading, setLoading ] = useState<boolean>( true );
+  const [ competitions, setCompetitions ] = useState<Competition[] | null>( null );
+  const [ liveFixture, setLiveFixture ] = useState<LiveFixture | null>( null );
+  const [ isCompetitionsOpen, setIsCompetitionsOpen ] = useState<boolean>( false );
+
+  useEffect(() => {
+    const fetchData = async() => {
+      const competitionsData = await getAllCompetitions();
+      if( competitionsData && competitionsData.code === '00' ) {
+        setCompetitions( competitionsData.data );
+      }
+
+      const liveData = await getLiveFixture();
+      if( liveData && liveData.code === '00' && liveData.data.length > 0 ) {
+        const data = await getLiveFixtureDetails( liveData.data[ 0 ]._id );
+        if( data && data.code === '00' ) {
+          setLiveFixture( data.data )
+        }
+      } else {
+        setLiveFixture( null );
+      }
+      console.log({ competitionsData, liveData, liveFixture });
+      setLoading( false );
+    };
+
+    if( loading ) {
+      fetchData();
+    }
+  }, [ loading ]);
 
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
@@ -33,7 +51,11 @@ const FootballPage: FC = () => {
     return `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
   };
 
-  const totalTime = time + injuryTime;
+  const totalTime = liveFixture ? liveFixture.time : 0;
+
+  if( loading ) {
+    return <Loader />;
+  }
 
   return (
     <main className="min-h-screen">
@@ -49,72 +71,89 @@ const FootballPage: FC = () => {
                     <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                     <h2 className="text-lg font-semibold text-emerald-500">LIVE NOW</h2>
                   </div>
-                  <Link
-                    href="/fixtures/1/stats"
-                    className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full text-sm font-medium transition-colors"
-                  >
-                    View Stats
-                  </Link>
+                  {
+                    liveFixture && (
+                      <Link
+                        href={ `/live/${ liveFixture._id }` }
+                        className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full text-sm font-medium transition-colors"
+                        aria-disabled={true}
+                      >
+                        View Stats
+                      </Link>
+                    )
+                  }
                 </div>
                 
-                <div className="bg-card/40 backdrop-blur-sm rounded-xl p-6 border border-border">
-                  <div className="flex flex-col md:flex-row items-center justify-between gap-8 md:gap-16">
-                    <div className="flex flex-col items-center gap-4 md:w-1/3">
-                      <div className="relative w-16 h-16 md:w-24 md:h-24">
-                        <Image
-                          src="/team-logos/team-a.png"
-                          alt={statValues.homeTeam.name}
-                          fill
-                          className="object-contain"
-                        />
-                      </div>
-                      <span className="text-base md:text-lg font-medium text-center">{statValues.homeTeam.name}</span>
-                    </div>
-
-                    <div className="flex flex-col items-center gap-2 md:w-1/6">
-                      <div className="text-4xl md:text-6xl font-bold tracking-tighter">
-                        <span>{statValues.homeScore}</span>
-                        <span className="text-muted-foreground mx-3">-</span>
-                        <span>{statValues.awayScore}</span>
-                        {statValues.homePenalty !== null && statValues.awayPenalty !== null && (
-                          <div className="text-sm text-muted-foreground text-center mt-1">
-                            ({statValues.homePenalty} - {statValues.awayPenalty})
+                {
+                  liveFixture && (
+                    <div className="bg-card/40 backdrop-blur-sm rounded-xl p-6 border border-border">
+                      <div className="flex flex-col md:flex-row items-center justify-between gap-8 md:gap-16">
+                        <div className="flex flex-col items-center gap-4 md:w-1/3">
+                          <div className="relative w-16 h-16 md:w-24 md:h-24">
+                            <Image
+                              src="/team-logos/team-a.png"
+                              alt={ liveFixture.homeTeam.name }
+                              fill
+                              className="object-contain"
+                            />
                           </div>
-                        )}
-                      </div>
-                      <div className="flex flex-col items-center">
-                        <span className="text-sm text-muted-foreground">{formatTime(totalTime)}</span>
-                        {injuryTime > 0 && (
-                          <span className="text-xs text-red-500">+{Math.floor(injuryTime / 60)}'</span>
-                        )}
-                      </div>
-                    </div>
+                          <span className="text-base md:text-lg font-medium text-center">{ liveFixture.homeTeam.name }</span>
+                        </div>
 
-                    <div className="flex flex-col items-center gap-4 md:w-1/3">
-                      <div className="relative w-16 h-16 md:w-24 md:h-24">
-                        <Image
-                          src="/team-logos/team-b.png"
-                          alt={statValues.awayTeam.name}
-                          fill
-                          className="object-contain"
-                        />
-                      </div>
-                      <span className="text-base md:text-lg font-medium text-center">{statValues.awayTeam.name}</span>
-                    </div>
-                  </div>
+                        <div className="flex flex-col items-center gap-2 md:w-1/6">
+                          <div className="text-4xl md:text-6xl font-bold tracking-tighter">
+                            <span>{ liveFixture.result.homeScore }</span>
+                            <span className="text-muted-foreground mx-3">-</span>
+                            <span>{ liveFixture.result.awayScore }</span>
+                            { liveFixture.result.homePenalty !== null && liveFixture.result.awayPenalty !== null && (
+                              <div className="text-sm text-muted-foreground text-center mt-1">
+                                ({liveFixture.result.homePenalty} - {liveFixture.result.awayPenalty})
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex flex-col items-center">
+                            <span className="text-sm text-muted-foreground">{formatTime(totalTime)}</span>
+                            {/* {injuryTime > 0 && (
+                              <span className="text-xs text-red-500">+{Math.floor(injuryTime / 60)}'</span>
+                            )} */}
+                          </div>
+                        </div>
 
-                  <div className="mt-6 flex items-center justify-center gap-4 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-1">
-                      <Trophy className="w-4 h-4" />
-                      <span>FUPRE Super League</span>
+                        <div className="flex flex-col items-center gap-4 md:w-1/3">
+                          <div className="relative w-16 h-16 md:w-24 md:h-24">
+                            <Image
+                              src="/team-logos/team-b.png"
+                              alt={ liveFixture.awayTeam.name }
+                              fill
+                              className="object-contain"
+                            />
+                          </div>
+                          <span className="text-base md:text-lg font-medium text-center">{ liveFixture.awayTeam.name }</span>
+                        </div>
+                      </div>
+
+                      <div className="mt-6 flex items-center justify-center gap-4 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-1">
+                          <Trophy className="w-4 h-4" />
+                          <span>{ liveFixture.competition?.name || 'Friendly' }</span>
+                        </div>
+                        <span>•</span>
+                        <div className="flex items-center gap-1">
+                          <Calendar className="w-4 h-4" />
+                          <span>Today</span>
+                        </div>
+                      </div>
                     </div>
-                    <span>•</span>
-                    <div className="flex items-center gap-1">
-                      <Calendar className="w-4 h-4" />
-                      <span>Today</span>
+                  )
+                }
+                {
+                  !liveFixture && (
+                    <div className="flex justify-center items-center flex-col gap-2 mb-2">
+                      <AlertCircle className="w-10 h-10" />
+                      <p>No Live Fixtures Now.</p>
                     </div>
-                  </div>
-                </div>
+                  )
+                }
               </div>
             </div>
           </div>
@@ -146,34 +185,48 @@ const FootballPage: FC = () => {
                   className="overflow-hidden"
                 >
                   <div className="p-6 grid gap-4 border-t border-border">
-                    {competitions.map((competition) => (
-                      <Link
-                        key={competition.id}
-                        href={`/competitions/${competition.type}/${competition.id}`}
-                        className="block p-4 rounded-lg border border-border hover:bg-accent/50 transition-colors"
-                      >
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <h3 className="font-medium">{competition.name}</h3>
-                            <p className="text-sm text-muted-foreground">
-                              {competition.startDate} - {competition.endDate}
-                            </p>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                              competition.status === 'ongoing' 
-                                ? 'bg-emerald-500/10 text-emerald-500' 
-                                : 'bg-orange-500/10 text-orange-500'
-                            }`}>
-                              {competition.status}
-                            </span>
-                            <span className="px-2 py-1 rounded-full text-xs font-medium bg-secondary text-secondary-foreground">
-                              {competition.type}
-                            </span>
-                          </div>
-                        </div>
-                      </Link>
-                    ))}
+                    {
+                      competitions && competitions.map((competition) => {
+                        const formattedStartDate = competition.startDate ? format( competition.startDate, "yyyy-MM-dd HH:mm" ) : null;
+                        const formattedEndDate = competition.endDate ? format( competition.endDate, "yyyy-MM-dd HH:mm" ) : null;
+                        const startDate = formattedStartDate ? formattedStartDate.split(' ')[ 0 ] : null;
+                        const endDate = formattedEndDate ? formattedEndDate.split(' ')[ 0 ] : null;
+
+                        return (
+                          <Link
+                            key={competition._id}
+                            href={`/competitions/${competition.type}/${competition._id}`}
+                            className="block p-4 rounded-lg border border-border hover:bg-accent/50 transition-colors"
+                          >
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <h3 className="font-medium">{competition.name}</h3>
+                                <p className="text-sm text-muted-foreground">
+                                  { startDate || 'Unknown' } - { endDate || 'Unknown' }
+                                </p>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                  competition.status === 'ongoing' 
+                                    ? 'bg-emerald-500/10 text-emerald-500' 
+                                    : 'bg-orange-500/10 text-orange-500'
+                                }`}>
+                                  { competition.status }
+                                </span>
+                                <span className="px-2 py-1 rounded-full text-xs font-medium bg-secondary text-secondary-foreground">
+                                  { competition.type }
+                                </span>
+                              </div>
+                            </div>
+                          </Link>
+                        )
+                      })
+                    }
+                    {
+                      !competitions && (
+                        <div className="text-center">No competitions available</div>
+                      )
+                    }
                   </div>
                 </motion.div>
               )}
