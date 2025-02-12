@@ -31,7 +31,7 @@ export default function RootLayout({
             <LoadingOverlay />
             <NavigationEvents />
             <Navbar />
-            <main className="px-4 pt-8 pb-24 md:px-6 md:pt-24 md:pb-6">
+            <main className="px-4 pt-20 pb-20 md:px-6 md:pt-24 md:pb-6">
               {children}
             </main>
           </ThemeProvider>
