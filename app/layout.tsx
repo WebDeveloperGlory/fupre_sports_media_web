@@ -42,9 +42,9 @@ export default async function RootLayout({
               <AuthWrapper data={ availableCookies } />
               <LoadingOverlay />
               <NavigationEvents />
-              <Navbar />
+        <Navbar />
               <main className="px-4 pt-8 pb-20 md:px-6 md:pt-24 md:pb-6">
-                {children}
+        {children}
               </main>
             </ToastProvider>
           </ThemeProvider>

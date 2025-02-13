@@ -3,10 +3,11 @@
 import { BlurFade } from "@/components/ui/blur-fade";
 import { BackButton } from "@/components/ui/back-button";
 import Image from "next/image";
-import { Trophy, Calendar, Clock, Users, ChevronDown, ChevronUp, Activity, Target, Flag } from "lucide-react";
+import { Trophy, Calendar, Clock, Users, History, Swords } from "lucide-react";
 import { notFound } from "next/navigation";
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { cn } from "@/utils/cn";
 
 // Demo data - replace with actual data from your API
 const matchData = {
@@ -15,7 +16,7 @@ const matchData = {
   homeTeam: {
     name: "Mechanical Stars",
     logo: "/team-logos/team-a.png",
-    score: 2,
+    form: ["W", "W", "L", "D", "W"],
     lineup: {
       formation: "4-3-3",
       starting: [
@@ -37,23 +38,12 @@ const matchData = {
         { number: 16, name: "Joe Davis", position: "MID" },
         { number: 20, name: "Ryan Moore", position: "FWD" }
       ]
-    },
-    stats: {
-      possession: 55,
-      shots: 12,
-      shotsOnTarget: 6,
-      corners: 5,
-      fouls: 8,
-      yellowCards: 2,
-      redCards: 0,
-      offsides: 3,
-      saves: 4
     }
   },
   awayTeam: {
     name: "Chemical Warriors",
     logo: "/team-logos/team-b.png",
-    score: 1,
+    form: ["L", "W", "W", "D", "W"],
     lineup: {
       formation: "4-2-3-1",
       starting: [
@@ -75,68 +65,64 @@ const matchData = {
         { number: 17, name: "Ken Short", position: "MID" },
         { number: 19, name: "Lee Grant", position: "FWD" }
       ]
-    },
-    stats: {
-      possession: 45,
-      shots: 8,
-      shotsOnTarget: 3,
-      corners: 3,
-      fouls: 10,
-      yellowCards: 1,
-      redCards: 0,
-      offsides: 2,
-      saves: 6
     }
   },
   date: "2024-03-19",
   time: "15:00",
   venue: "FUPRE Main Ground",
-  status: "completed",
+  status: "upcoming",
   referee: "Michael Johnson",
-  attendance: 500
+  headToHead: {
+    totalMatches: 8,
+    homeWins: 3,
+    draws: 2,
+    awayWins: 3,
+    lastMatches: [
+      {
+        date: "2024-02-15",
+        competition: "Unity Cup",
+        homeTeam: "Mechanical Stars",
+        awayTeam: "Chemical Warriors",
+        score: "2-1"
+      },
+      {
+        date: "2023-11-30",
+        competition: "League",
+        homeTeam: "Chemical Warriors",
+        awayTeam: "Mechanical Stars",
+        score: "0-0"
+      },
+      {
+        date: "2023-09-15",
+        competition: "League",
+        homeTeam: "Mechanical Stars",
+        awayTeam: "Chemical Warriors",
+        score: "1-2"
+      }
+    ]
+  }
 };
 
-function QuickStat({ icon, label, home, away }: { icon: React.ReactNode; label: string; home: number; away: number }) {
-  return (
-    <div className="bg-card/40 backdrop-blur-sm rounded-lg md:rounded-xl p-3 md:p-4 border border-border">
-      <div className="flex items-center gap-1.5 md:gap-2 mb-2 md:mb-3">
-        {icon}
-        <span className="text-xs md:text-sm font-medium">{label}</span>
-      </div>
-      <div className="flex items-center justify-between">
-        <span className="text-lg md:text-xl font-semibold text-emerald-500">{home}</span>
-        <span className="text-lg md:text-xl font-semibold text-emerald-500">{away}</span>
-      </div>
-    </div>
-  );
-}
-
-function StatBar({ label, home, away }: { label: string; home: number; away: number }) {
-  const total = home + away;
-  const homePercent = total === 0 ? 50 : (home / total) * 100;
-  const awayPercent = total === 0 ? 50 : (away / total) * 100;
+function FormIndicator({ result }: { result: string }) {
+  const getColor = (result: string) => {
+    switch (result) {
+      case "W":
+        return "bg-emerald-500";
+      case "D":
+        return "bg-orange-500";
+      case "L":
+        return "bg-red-500";
+      default:
+        return "bg-muted";
+    }
+  };
 
   return (
-    <div className="space-y-2">
-      <div className="flex justify-between text-sm">
-        <span className="font-medium text-emerald-500">{home}</span>
-        <span className="font-medium">{label}</span>
-        <span className="font-medium text-emerald-500">{away}</span>
-      </div>
-      <div className="flex h-2 bg-muted rounded-full overflow-hidden">
-        <motion.div
-          initial={{ width: 0 }}
-          animate={{ width: `${homePercent}%` }}
-          transition={{ duration: 1, ease: "easeOut" }}
-          className="bg-emerald-500"
-        />
-        <motion.div
-          initial={{ width: 0 }}
-          animate={{ width: `${awayPercent}%` }}
-          transition={{ duration: 1, ease: "easeOut" }}
-          className="bg-emerald-500/50"
-        />
-      </div>
+    <div className={cn(
+      "w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium text-white",
+      getColor(result)
+    )}>
+      {result}
     </div>
   );
 }
@@ -191,8 +177,7 @@ const LineupSection = ({ team, side }: { team: typeof matchData.homeTeam, side: 
 };
 
 export default function MatchStatsPage() {
-  const [isStatsOpen, setIsStatsOpen] = useState(true);
-  const [isLineupsOpen, setIsLineupsOpen] = useState(true);
+  const [activeTab, setActiveTab] = useState<'details' | 'lineups'>('details');
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-background to-background/50">
@@ -237,17 +222,15 @@ export default function MatchStatsPage() {
                     </span>
                   </div>
 
-                  {/* Score */}
+                  {/* VS */}
                   <div className="flex flex-col items-center justify-center">
                     <div className="bg-card shadow-xl rounded-lg md:rounded-xl p-2 md:p-3 border border-border min-w-[90px] md:min-w-[120px]">
                       <div className="text-2xl md:text-4xl font-bold tracking-tighter text-center">
-                        <span className="text-emerald-500">{matchData.homeTeam.score}</span>
-                        <span className="mx-2 md:mx-3 text-muted-foreground">-</span>
-                        <span className="text-emerald-500">{matchData.awayTeam.score}</span>
+                        <span className="text-muted-foreground">VS</span>
                       </div>
                       <div className="flex items-center justify-center gap-1 md:gap-1.5 mt-0.5 md:mt-1 text-[10px] md:text-xs text-muted-foreground">
                         <Clock className="w-3 h-3 md:w-3.5 md:h-3.5" />
-                        <span>Full Time</span>
+                        <span>Upcoming</span>
                       </div>
                     </div>
                   </div>
@@ -291,138 +274,163 @@ export default function MatchStatsPage() {
               </div>
             </div>
 
-            {/* Quick Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
-              <QuickStat
-                icon={<Activity className="w-4 h-4 md:w-5 md:h-5 text-emerald-500" />}
-                label="Total Shots"
-                home={matchData.homeTeam.stats.shots}
-                away={matchData.awayTeam.stats.shots}
-              />
-              <QuickStat
-                icon={<Target className="w-4 h-4 md:w-5 md:h-5 text-emerald-500" />}
-                label="On Target"
-                home={matchData.homeTeam.stats.shotsOnTarget}
-                away={matchData.awayTeam.stats.shotsOnTarget}
-              />
-              <QuickStat
-                icon={<Flag className="w-4 h-4 md:w-5 md:h-5 text-emerald-500" />}
-                label="Corners"
-                home={matchData.homeTeam.stats.corners}
-                away={matchData.awayTeam.stats.corners}
-              />
-              <QuickStat
-                icon={<Users className="w-4 h-4 md:w-5 md:h-5 text-emerald-500" />}
-                label="Offsides"
-                home={matchData.homeTeam.stats.offsides}
-                away={matchData.awayTeam.stats.offsides}
-              />
+            {/* Tabs */}
+            <div className="flex border-b border-border">
+              <button
+                onClick={() => setActiveTab('details')}
+                className={cn(
+                  "px-4 py-2 text-sm font-medium transition-colors",
+                  activeTab === 'details'
+                    ? "text-emerald-500 border-b-2 border-emerald-500"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                Details
+              </button>
+              <button
+                onClick={() => setActiveTab('lineups')}
+                className={cn(
+                  "px-4 py-2 text-sm font-medium transition-colors",
+                  activeTab === 'lineups'
+                    ? "text-emerald-500 border-b-2 border-emerald-500"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                Lineups
+              </button>
             </div>
 
-            {/* Match Stats */}
-            <div className="bg-card/40 backdrop-blur-sm rounded-xl md:rounded-2xl p-4 md:p-6 border border-border">
-              <h2 className="text-base md:text-lg font-semibold mb-4 md:mb-6 flex items-center gap-2">
-                <div className="w-1 h-1 rounded-full bg-emerald-500" />
-                Match Statistics
-              </h2>
-              <div className="space-y-4 md:space-y-6">
-                <StatBar 
-                  label="Possession %" 
-                  home={matchData.homeTeam.stats.possession} 
-                  away={matchData.awayTeam.stats.possession} 
-                />
-                <StatBar 
-                  label="Shots" 
-                  home={matchData.homeTeam.stats.shots} 
-                  away={matchData.awayTeam.stats.shots} 
-                />
-                <StatBar 
-                  label="Shots on Target" 
-                  home={matchData.homeTeam.stats.shotsOnTarget} 
-                  away={matchData.awayTeam.stats.shotsOnTarget} 
-                />
-                <StatBar 
-                  label="Corners" 
-                  home={matchData.homeTeam.stats.corners} 
-                  away={matchData.awayTeam.stats.corners} 
-                />
-                <StatBar 
-                  label="Fouls" 
-                  home={matchData.homeTeam.stats.fouls} 
-                  away={matchData.awayTeam.stats.fouls} 
-                />
-
-                {/* Cards Section */}
-                <div className="grid grid-cols-2 gap-4 pt-4">
-                  <div className="space-y-3">
+            {activeTab === 'details' ? (
+              <>
+                {/* Team Forms */}
+                <div className="bg-card/40 backdrop-blur-sm rounded-xl md:rounded-2xl p-4 md:p-6 border border-border">
+                  <h2 className="text-base md:text-lg font-semibold mb-4 md:mb-6 flex items-center gap-2">
+                    <History className="w-4 h-4 md:w-5 md:h-5 text-emerald-500" />
+                    <span>Team Forms</span>
+                  </h2>
+                  <div className="space-y-4">
+                    {/* Home Team Form */}
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className="w-4 h-6 bg-yellow-500 rounded-sm" />
-                        <span className="text-sm">Yellow Cards</span>
+                      <div className="flex items-center gap-3">
+                        <div className="relative w-8 h-8 md:w-10 md:h-10">
+                          <Image
+                            src={matchData.homeTeam.logo}
+                            alt={matchData.homeTeam.name}
+                            fill
+                            className="object-contain"
+                          />
+                        </div>
+                        <span className="font-medium">{matchData.homeTeam.name}</span>
                       </div>
-                      <span className="font-semibold">{matchData.homeTeam.stats.yellowCards}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <div className="w-4 h-6 bg-red-500 rounded-sm" />
-                        <span className="text-sm">Red Cards</span>
-                      </div>
-                      <span className="font-semibold">{matchData.homeTeam.stats.redCards}</span>
-                    </div>
-                  </div>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="font-semibold">{matchData.awayTeam.stats.yellowCards}</span>
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm">Yellow Cards</span>
-                        <div className="w-4 h-6 bg-yellow-500 rounded-sm" />
+                        {matchData.homeTeam.form.map((result, index) => (
+                          <FormIndicator key={index} result={result} />
+                        ))}
                       </div>
                     </div>
+                    {/* Away Team Form */}
                     <div className="flex items-center justify-between">
-                      <span className="font-semibold">{matchData.awayTeam.stats.redCards}</span>
+                      <div className="flex items-center gap-3">
+                        <div className="relative w-8 h-8 md:w-10 md:h-10">
+                          <Image
+                            src={matchData.awayTeam.logo}
+                            alt={matchData.awayTeam.name}
+                            fill
+                            className="object-contain"
+                          />
+                        </div>
+                        <span className="font-medium">{matchData.awayTeam.name}</span>
+                      </div>
                       <div className="flex items-center gap-2">
-                        <span className="text-sm">Red Cards</span>
-                        <div className="w-4 h-6 bg-red-500 rounded-sm" />
+                        {matchData.awayTeam.form.map((result, index) => (
+                          <FormIndicator key={index} result={result} />
+                        ))}
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
 
-            {/* Lineups */}
-            <div className="bg-card/40 backdrop-blur-sm rounded-xl md:rounded-2xl p-4 md:p-6 border border-border">
-              <h2 className="text-base md:text-lg font-semibold mb-4 md:mb-6 flex items-center gap-2">
-                <div className="w-1 h-1 rounded-full bg-emerald-500" />
-                Team Lineups
-              </h2>
-              <div className="grid md:grid-cols-2 gap-6 md:gap-8">
-                <LineupSection team={matchData.homeTeam} side="home" />
-                <LineupSection team={matchData.awayTeam} side="away" />
-              </div>
-            </div>
+                {/* Head to Head */}
+                <div className="bg-card/40 backdrop-blur-sm rounded-xl md:rounded-2xl p-4 md:p-6 border border-border">
+                  <h2 className="text-base md:text-lg font-semibold mb-4 md:mb-6 flex items-center gap-2">
+                    <Swords className="w-4 h-4 md:w-5 md:h-5 text-emerald-500" />
+                    <span>Head to Head</span>
+                  </h2>
+                  
+                  {/* Overall Stats */}
+                  <div className="grid grid-cols-3 gap-4 mb-6">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-emerald-500">{matchData.headToHead.homeWins}</div>
+                      <div className="text-sm text-muted-foreground">Home Wins</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{matchData.headToHead.draws}</div>
+                      <div className="text-sm text-muted-foreground">Draws</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-emerald-500">{matchData.headToHead.awayWins}</div>
+                      <div className="text-sm text-muted-foreground">Away Wins</div>
+                    </div>
+                  </div>
 
-            {/* Match Details */}
-            <div className="bg-card/40 backdrop-blur-sm rounded-xl md:rounded-2xl p-4 md:p-6 border border-border">
-              <h2 className="text-base md:text-lg font-semibold mb-4 md:mb-6 flex items-center gap-2">
-                <div className="w-1 h-1 rounded-full bg-emerald-500" />
-                Match Details
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
-                <div className="p-3 md:p-4 bg-card/40 backdrop-blur-sm rounded-lg md:rounded-xl border border-border">
-                  <div className="text-xs md:text-sm text-muted-foreground">Referee</div>
-                  <div className="text-sm md:text-base font-medium">{matchData.referee}</div>
+                  {/* Last Matches */}
+                  <h3 className="text-sm font-medium text-muted-foreground mb-3">Last Matches</h3>
+                  <div className="space-y-3">
+                    {matchData.headToHead.lastMatches.map((match, index) => (
+                      <div
+                        key={index}
+                        className="bg-card/40 backdrop-blur-sm rounded-lg p-3 border border-border"
+                      >
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-muted-foreground">{new Date(match.date).toLocaleDateString()}</span>
+                          <span className="text-xs bg-secondary px-2 py-0.5 rounded-full">
+                            {match.competition}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between mt-2">
+                          <span className="font-medium">{match.homeTeam}</span>
+                          <span className="font-bold mx-3">{match.score}</span>
+                          <span className="font-medium">{match.awayTeam}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <div className="p-3 md:p-4 bg-card/40 backdrop-blur-sm rounded-lg md:rounded-xl border border-border">
-                  <div className="text-xs md:text-sm text-muted-foreground">Venue</div>
-                  <div className="text-sm md:text-base font-medium">{matchData.venue}</div>
+
+                {/* Match Details */}
+                <div className="bg-card/40 backdrop-blur-sm rounded-xl md:rounded-2xl p-4 md:p-6 border border-border">
+                  <h2 className="text-base md:text-lg font-semibold mb-4 md:mb-6 flex items-center gap-2">
+                    <div className="w-1 h-1 rounded-full bg-emerald-500" />
+                    Match Details
+                  </h2>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
+                    <div className="p-3 md:p-4 bg-card/40 backdrop-blur-sm rounded-lg md:rounded-xl border border-border">
+                      <div className="text-xs md:text-sm text-muted-foreground">Referee</div>
+                      <div className="text-sm md:text-base font-medium">{matchData.referee}</div>
+                    </div>
+                    <div className="p-3 md:p-4 bg-card/40 backdrop-blur-sm rounded-lg md:rounded-xl border border-border">
+                      <div className="text-xs md:text-sm text-muted-foreground">Venue</div>
+                      <div className="text-sm md:text-base font-medium">{matchData.venue}</div>
+                    </div>
+                    <div className="p-3 md:p-4 bg-card/40 backdrop-blur-sm rounded-lg md:rounded-xl border border-border">
+                      <div className="text-xs md:text-sm text-muted-foreground">Status</div>
+                      <div className="text-sm md:text-base font-medium capitalize">{matchData.status}</div>
+                    </div>
+                  </div>
                 </div>
-                <div className="p-3 md:p-4 bg-card/40 backdrop-blur-sm rounded-lg md:rounded-xl border border-border">
-                  <div className="text-xs md:text-sm text-muted-foreground">Attendance</div>
-                  <div className="text-sm md:text-base font-medium">{matchData.attendance}</div>
+              </>
+            ) : (
+              <div className="bg-card/40 backdrop-blur-sm rounded-xl md:rounded-2xl p-4 md:p-6 border border-border">
+                <h2 className="text-base md:text-lg font-semibold mb-4 md:mb-6 flex items-center gap-2">
+                  <Users className="w-4 h-4 md:w-5 md:h-5 text-emerald-500" />
+                  <span>Team Lineups</span>
+                </h2>
+                <div className="grid md:grid-cols-2 gap-6 md:gap-8">
+                  <LineupSection team={matchData.homeTeam} side="home" />
+                  <LineupSection team={matchData.awayTeam} side="away" />
                 </div>
               </div>
-            </div>
+            )}
           </div>
         </BlurFade>
       </div>
