@@ -234,6 +234,7 @@ export interface UserProfile {
     name: string,
     email: string,
     status: string,
+    role: string,
     competitions: {
         _id: string, 
         name: string, 
