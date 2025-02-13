@@ -7,6 +7,7 @@ import { LoadingProvider } from "@/providers/loading-provider";
 import { LoadingOverlay } from "@/components/ui/loading-overlay";
 import { cn } from "@/utils/cn";
 import { NavigationEvents } from '@/components/navigation-events';
+import ToastProvider from '@/components/toast/ToastProvider';
 
 const spaceGrotesk = Space_Grotesk({ 
   subsets: ['latin'],
@@ -28,12 +29,14 @@ export default function RootLayout({
       <body className={spaceGrotesk.className}>
         <LoadingProvider>
           <ThemeProvider>
-            <LoadingOverlay />
-            <NavigationEvents />
-            <Navbar />
-            <main className="px-4 pt-8 pb-20 md:px-6 md:pt-24 md:pb-6">
-              {children}
-            </main>
+            <ToastProvider>
+              <LoadingOverlay />
+              <NavigationEvents />
+              <Navbar />
+              <main className="px-4 pt-8 pb-20 md:px-6 md:pt-24 md:pb-6">
+                {children}
+              </main>
+            </ToastProvider>
           </ThemeProvider>
         </LoadingProvider>
       </body>
