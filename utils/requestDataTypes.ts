@@ -229,3 +229,19 @@ export interface LiveMatchUpdateRequestBody {
     homeLineup?: LineUp, 
     awayLineup?: LineUp
 }
+
+export interface UserProfile {
+    name: string,
+    email: string,
+    status: string,
+    competitions: {
+        _id: string, 
+        name: string, 
+        description: string, 
+        status: string,
+        fixtures: number,
+        teams: number
+    } | null,
+    team: ExtendedTeam | null,
+    nextFixtures: Fixture[] | [],
+}

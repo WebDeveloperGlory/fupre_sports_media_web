@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { liveFixtureInitialStateData } from '@/constants'
 import { LiveStatState, Players } from '@/utils/stateTypes';
 import Timer from '@/components/liveAdmin/Timer';
@@ -12,9 +12,14 @@ import LineUps from '@/components/liveAdmin/LineUps';
 import Time from '@/components/liveAdmin/Time';
 import ShareButton from '@/components/share/ShareButton';
 import { getLiveFixtureDetails } from '@/lib/requests/competitionPage/requests';
+import useAuthStore from '@/stores/authStore';
+import { toast } from 'react-toastify';
 
 const IndividualLivePage = () => {
     const params = useParams();
+    const router = useRouter();
+
+    const { jwt } = useAuthStore();
 
     const [ loading, setLoading ] = useState<boolean>( true );
     const [ statValues, setStatValues ] = useState<LiveStatState>( liveFixtureInitialStateData );
@@ -23,6 +28,10 @@ const IndividualLivePage = () => {
 
     useEffect( () => {
         const fetchData = async () => {
+            if( !jwt ) {
+                toast.error('Please Login First');
+                setTimeout(() => router.push( '/admin' ), 1000);
+            }
             // const data = await getLiveFixtureDetails( params.id )
             setLoading( false );
         }
@@ -31,7 +40,11 @@ const IndividualLivePage = () => {
             fetchData();
         }
     }, [ loading ]);
-
+    
+    if( !jwt ) {
+        toast.error('Please Login First');
+        setTimeout(() => router.push( '/admin' ), 1000);
+    }
   return (
     <div>
         {/* Header */}

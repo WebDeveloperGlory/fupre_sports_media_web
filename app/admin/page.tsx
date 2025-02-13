@@ -4,13 +4,12 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react'
 import { toast } from 'react-toastify';
 import { jwtDecode } from 'jwt-decode';
-// import useUserStore from '@/stores/userStore';
-// import useAuthStore from '@/stores/authStore';
+import useAuthStore from '@/stores/authStore';
+import { loginUser } from '@/lib/requests/auth/requests';
 
 const AdminPage = () => {
   const router = useRouter();
-//   const { setUserDetails } = useUserStore();
-//   const { setJwt } = useAuthStore();
+  const { setJwt } = useAuthStore();
 
   const [ email, setEmail ] = useState( '' );
   const [ password, setPassword ] = useState( '' );
@@ -18,23 +17,16 @@ const AdminPage = () => {
   const handleSubmit = async ( e: React.FormEvent<HTMLFormElement> ) => {
     e.preventDefault();
 
-    // const data = await loginUser({ email, password });
-    // if( data.code === '99' ) {
-    //   toast.error( data.message );
-    // } else {
-    //   toast.success( data.message );
-    //   const { role } = jwtDecode( data.data );
-    //   setUserDetails( jwtDecode( data.data ) );
-    //   setJwt( data.data );
-
-    //   if( role === 'super-admin' ) {
-    //     router.push( '/admin/super-admin/dashboard' );
-    //   } else if( role === 'team-admin' ) {
-    //     router.push( '/admin/team-admin/dashboard' );
-    //   } else {
-    //     router.push( '/admin/competition-admin/dashboard' );
-    //   }
-    // }
+    const data = await loginUser( email, password );
+    if( data ) {
+      if( data.code === '99' ) {
+        toast.error( data.message );
+      } else {
+        toast.success( data.message );
+        setJwt( data.data );
+        setTimeout(() => router.push( '/admin/dashboard' ), 1000)
+      }
+    }
   };
 
   return (

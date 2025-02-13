@@ -8,6 +8,8 @@ import { LoadingOverlay } from "@/components/ui/loading-overlay";
 import { cn } from "@/utils/cn";
 import { NavigationEvents } from '@/components/navigation-events';
 import ToastProvider from '@/components/toast/ToastProvider';
+import { cookies } from 'next/headers';
+import AuthWrapper from '@/components/wrappers/AuthWrapper';
 
 const spaceGrotesk = Space_Grotesk({ 
   subsets: ['latin'],
@@ -19,17 +21,25 @@ export const metadata = {
   description: 'Your one-stop destination for FUPRE sports news and updates',
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const cookieStore = await cookies(); // Await the promise
+  const availableCookies = Array.from(cookieStore.getAll()).map((cookie) => [
+    cookie.name,
+    { value: cookie.value },
+  ]) as [string, { value: string }][];
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={spaceGrotesk.className}>
         <LoadingProvider>
           <ThemeProvider>
             <ToastProvider>
+              {/* AuthWrapper for jwt */}
+              <AuthWrapper data={ availableCookies } />
               <LoadingOverlay />
               <NavigationEvents />
               <Navbar />
