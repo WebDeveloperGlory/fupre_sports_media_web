@@ -401,7 +401,6 @@ export default function CompetitionPage({
                             <th className="text-left py-6 px-4 font-medium text-muted-foreground">Team</th>
                             <th className="text-center py-6 px-4 font-medium text-muted-foreground">Matches</th>
                             <th className="text-center py-6 px-4 font-medium text-muted-foreground">Goals</th>
-                            <th className="text-center py-6 px-4 font-medium text-muted-foreground">Assists</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -472,7 +471,6 @@ export default function CompetitionPage({
                             <th className="text-left py-6 px-4 font-medium text-muted-foreground">Player</th>
                             <th className="text-left py-6 px-4 font-medium text-muted-foreground">Team</th>
                             <th className="text-center py-6 px-4 font-medium text-muted-foreground">Matches</th>
-                            <th className="text-center py-6 px-4 font-medium text-muted-foreground">Goals</th>
                             <th className="text-center py-6 px-4 font-medium text-muted-foreground">Assists</th>
                           </tr>
                         </thead>
