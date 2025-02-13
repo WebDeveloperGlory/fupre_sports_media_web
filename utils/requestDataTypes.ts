@@ -242,7 +242,7 @@ export interface UserProfile {
         status: string,
         fixtures: number,
         teams: number
-    } | null,
+    }[] | null,
     team: ExtendedTeam | null,
     nextFixtures: Fixture[] | [],
 }

@@ -6,6 +6,7 @@ export interface UserStore {
     jwt: string | null,
     setUserProfile: ( userProfile: UserProfile ) => void,
     setJwt: ( jwt: string ) => void,
+    clearUserData: () => void,
 }
 
 const useAuthStore = create<UserStore>( ( set ) => ({
@@ -13,6 +14,7 @@ const useAuthStore = create<UserStore>( ( set ) => ({
     jwt: null,
     setUserProfile: ( userProfile: UserProfile ) => set({ userProfile }),
     setJwt: ( jwt: string ) => set({ jwt }),
+    clearUserData: () => set({ jwt: null, userProfile: null }),
 }));
 
 export default useAuthStore;

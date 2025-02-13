@@ -1,7 +1,7 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
-import { useParams, useRouter } from 'next/navigation';
+import React, { use, useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation';
 import { liveFixtureInitialStateData } from '@/constants'
 import { LiveStatState, Players } from '@/utils/stateTypes';
 import Timer from '@/components/liveAdmin/Timer';
@@ -14,9 +14,13 @@ import ShareButton from '@/components/share/ShareButton';
 import { getLiveFixtureDetails } from '@/lib/requests/competitionPage/requests';
 import useAuthStore from '@/stores/authStore';
 import { toast } from 'react-toastify';
+import { Loader } from '@/components/ui/loader';
 
-const IndividualLivePage = () => {
-    const params = useParams();
+const IndividualLivePage = (
+    { params }:
+    { params: Promise<{ id: string }> }
+) => {
+    const resolvedParams = use( params );
     const router = useRouter();
 
     const { jwt } = useAuthStore();
@@ -28,22 +32,20 @@ const IndividualLivePage = () => {
 
     useEffect( () => {
         const fetchData = async () => {
-            if( !jwt ) {
-                toast.error('Please Login First');
-                setTimeout(() => router.push( '/admin' ), 1000);
-            }
-            // const data = await getLiveFixtureDetails( params.id )
+            // const data = await getLiveFixtureDetails( resolvedParams.id )
             setLoading( false );
         }
 
-        if( loading ) {
-            fetchData();
+        if( !jwt ) {
+            toast.error('Please Login First');
+            setTimeout(() => router.push( '/admin' ), 1000);
+        } else {
+            if( loading ) fetchData();
         }
-    }, [ loading ]);
-    
-    if( !jwt ) {
-        toast.error('Please Login First');
-        setTimeout(() => router.push( '/admin' ), 1000);
+    }, [ loading, resolvedParams.id ]);
+
+    if( loading ) {
+        return <Loader />
     }
   return (
     <div>
