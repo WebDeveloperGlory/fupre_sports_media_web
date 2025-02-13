@@ -52,7 +52,7 @@ export default function LiveMatchPage() {
     <main className="min-h-screen bg-gradient-to-b from-background to-background/50">
       <div className="pt-24 pb-6 px-4 md:px-6">
         {/* Back Button */}
-        <div className="fixed top-24 left-4 md:left-8 z-10">
+        <div className="fixed top-8 left-4 md:left-8 z-10">
           <BackButton />
         </div>
 
@@ -92,14 +92,14 @@ export default function LiveMatchPage() {
                   </div>
 
                   {/* Score */}
-                  <div className="flex flex-col items-center">
-                    <div className="bg-card shadow-xl rounded-xl p-4 border border-border">
-                      <div className="text-3xl md:text-4xl font-bold tracking-tighter">
+                  <div className="flex flex-col items-center justify-center">
+                    <div className="bg-card shadow-xl rounded-xl p-3 border border-border min-w-[120px]">
+                      <div className="text-3xl md:text-4xl font-bold tracking-tighter text-center">
                         <span className="text-emerald-500">{statValues.homeScore}</span>
-                        <span className="mx-2 text-muted-foreground">-</span>
+                        <span className="mx-3 text-muted-foreground">-</span>
                         <span className="text-emerald-500">{statValues.awayScore}</span>
                       </div>
-                      <div className="flex items-center justify-center gap-1.5 mt-1.5 text-xs text-muted-foreground">
+                      <div className="flex items-center justify-center gap-1.5 mt-1 text-xs text-muted-foreground">
                         <Clock className="w-3.5 h-3.5" />
                         <span>{half} • {Math.floor(time / 60)}'</span>
                       </div>
