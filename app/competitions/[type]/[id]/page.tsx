@@ -81,11 +81,11 @@ export default function CompetitionPage({
   return (
     <main className="min-h-screen md:px-6">
       {/* Back Button */}
-      <div className="fixed top-[72px] left-4 md:left-8 z-10">
+      <div className="fixed top-8 left-4 md:left-8 z-10">
         <BackButton />
       </div>
 
-      <div className="pb-6 space-y-4 md:space-y-6 max-w-6xl mx-auto">
+      <div className="pt-16 pb-6 space-y-4 md:space-y-6 max-w-6xl mx-auto">
         <BlurFade>
           <div className="space-y-4 md:space-y-6">
             {/* Header */}
