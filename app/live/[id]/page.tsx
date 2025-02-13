@@ -50,187 +50,189 @@ export default function LiveMatchPage() {
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-background to-background/50">
-      {/* Back Button */}
-      <div className="fixed top-20 left-4 md:left-8 z-10">
-        <BackButton />
-      </div>
+      <div className="pt-24 pb-6 px-4 md:px-6">
+        {/* Back Button */}
+        <div className="fixed top-24 left-4 md:left-8 z-10">
+          <BackButton />
+        </div>
 
-      <BlurFade>
-        <div className="max-w-5xl mx-auto px-4 md:px-6 space-y-6 py-6">
-          {/* Match Header */}
-          <div className="relative bg-card/40 backdrop-blur-sm rounded-2xl p-8 border border-border overflow-hidden">
-            {/* Background decoration */}
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-emerald-500/10 via-transparent to-transparent" />
-            
-            <div className="relative">
-              <div className="text-center mb-6">
-                <div className="inline-flex items-center gap-2 bg-emerald-500 text-white px-4 py-1.5 rounded-full text-sm font-medium">
-                  <Trophy className="w-4 h-4" />
-                  <span>{statValues.competition?.name || 'Friendly'}</span>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between gap-8 md:gap-16">
-                {/* Home Team */}
-                <div className="flex flex-col items-center gap-4 md:w-1/3">
-                  <motion.div 
-                    className="relative w-20 h-20 md:w-28 md:h-28"
-                    whileHover={{ scale: 1.05 }}
-                    transition={{ type: "spring", stiffness: 300 }}
-                  >
-                    <Image
-                      src="/team-logos/team-a.png"
-                      alt={statValues.homeTeam.name}
-                      fill
-                      className="object-contain"
-                    />
-                  </motion.div>
-                  <span className="text-base md:text-lg font-medium text-center">
-                    {statValues.homeTeam.name}
-                  </span>
-                </div>
-
-                {/* Score */}
-                <div className="flex flex-col items-center">
-                  <div className="bg-card shadow-xl rounded-2xl p-6 border border-border">
-                    <div className="text-4xl md:text-5xl font-bold tracking-tighter">
-                      <span className="text-emerald-500">{statValues.homeScore}</span>
-                      <span className="mx-3 text-muted-foreground">-</span>
-                      <span className="text-emerald-500">{statValues.awayScore}</span>
-                    </div>
-                    <div className="flex items-center justify-center gap-2 mt-2 text-sm text-muted-foreground">
-                      <Clock className="w-4 h-4" />
-                      <span>{half} • {Math.floor(time / 60)}'</span>
-                    </div>
+        <BlurFade>
+          <div className="max-w-4xl mx-auto space-y-6">
+            {/* Match Header */}
+            <div className="relative bg-card/40 backdrop-blur-sm rounded-2xl p-6 border border-border overflow-hidden">
+              {/* Background decoration */}
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-emerald-500/10 via-transparent to-transparent" />
+              
+              <div className="relative">
+                <div className="text-center mb-4">
+                  <div className="inline-flex items-center gap-2 bg-emerald-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+                    <Trophy className="w-3.5 h-3.5" />
+                    <span>{statValues.competition?.name || 'Friendly'}</span>
                   </div>
                 </div>
 
-                {/* Away Team */}
-                <div className="flex flex-col items-center gap-4 md:w-1/3">
-                  <motion.div 
-                    className="relative w-20 h-20 md:w-28 md:h-28"
-                    whileHover={{ scale: 1.05 }}
-                    transition={{ type: "spring", stiffness: 300 }}
-                  >
-                    <Image
-                      src="/team-logos/team-b.png"
-                      alt={statValues.awayTeam.name}
-                      fill
-                      className="object-contain"
-                    />
-                  </motion.div>
-                  <span className="text-base md:text-lg font-medium text-center">
-                    {statValues.awayTeam.name}
-                  </span>
+                <div className="flex items-center justify-between gap-4 md:gap-8">
+                  {/* Home Team */}
+                  <div className="flex flex-col items-center gap-3 w-1/3">
+                    <motion.div 
+                      className="relative w-16 h-16 md:w-20 md:h-20"
+                      whileHover={{ scale: 1.05 }}
+                      transition={{ type: "spring", stiffness: 300 }}
+                    >
+                      <Image
+                        src="/team-logos/team-a.png"
+                        alt={statValues.homeTeam.name}
+                        fill
+                        className="object-contain"
+                      />
+                    </motion.div>
+                    <span className="text-sm md:text-base font-medium text-center">
+                      {statValues.homeTeam.name}
+                    </span>
+                  </div>
+
+                  {/* Score */}
+                  <div className="flex flex-col items-center">
+                    <div className="bg-card shadow-xl rounded-xl p-4 border border-border">
+                      <div className="text-3xl md:text-4xl font-bold tracking-tighter">
+                        <span className="text-emerald-500">{statValues.homeScore}</span>
+                        <span className="mx-2 text-muted-foreground">-</span>
+                        <span className="text-emerald-500">{statValues.awayScore}</span>
+                      </div>
+                      <div className="flex items-center justify-center gap-1.5 mt-1.5 text-xs text-muted-foreground">
+                        <Clock className="w-3.5 h-3.5" />
+                        <span>{half} • {Math.floor(time / 60)}'</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Away Team */}
+                  <div className="flex flex-col items-center gap-3 w-1/3">
+                    <motion.div 
+                      className="relative w-16 h-16 md:w-20 md:h-20"
+                      whileHover={{ scale: 1.05 }}
+                      transition={{ type: "spring", stiffness: 300 }}
+                    >
+                      <Image
+                        src="/team-logos/team-b.png"
+                        alt={statValues.awayTeam.name}
+                        fill
+                        className="object-contain"
+                      />
+                    </motion.div>
+                    <span className="text-sm md:text-base font-medium text-center">
+                      {statValues.awayTeam.name}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* Quick Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <QuickStat
-              icon={<Activity className="w-5 h-5 text-emerald-500" />}
-              label="Total Shots"
-              home={statValues.home.shotsOnTarget + statValues.home.shotsOffTarget}
-              away={statValues.away.shotsOnTarget + statValues.away.shotsOffTarget}
-            />
-            <QuickStat
-              icon={<Target className="w-5 h-5 text-emerald-500" />}
-              label="On Target"
-              home={statValues.home.shotsOnTarget}
-              away={statValues.away.shotsOnTarget}
-            />
-            <QuickStat
-              icon={<Flag className="w-5 h-5 text-emerald-500" />}
-              label="Corners"
-              home={statValues.home.corners}
-              away={statValues.away.corners}
-            />
-            <QuickStat
-              icon={<Users className="w-5 h-5 text-emerald-500" />}
-              label="Offsides"
-              home={statValues.home.offsides}
-              away={statValues.away.offsides}
-            />
-          </div>
-
-          {/* Match Timeline */}
-          <div className="bg-card/40 backdrop-blur-sm rounded-2xl p-6 md:p-8 border border-border">
-            <h2 className="text-lg font-semibold mb-6 flex items-center gap-2">
-              <div className="w-1 h-1 rounded-full bg-emerald-500" />
-              Match Timeline
-            </h2>
-            <Timeline events={matchEvents} statValues={statValues} />
-          </div>
-
-          {/* Detailed Stats */}
-          <div className="bg-card/40 backdrop-blur-sm rounded-2xl p-6 md:p-8 border border-border">
-            <h2 className="text-lg font-semibold mb-6 flex items-center gap-2">
-              <div className="w-1 h-1 rounded-full bg-emerald-500" />
-              Match Statistics
-            </h2>
-            <div className="space-y-6">
-              <StatBar
-                label="Shots"
+            {/* Quick Stats */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <QuickStat
+                icon={<Activity className="w-5 h-5 text-emerald-500" />}
+                label="Total Shots"
                 home={statValues.home.shotsOnTarget + statValues.home.shotsOffTarget}
                 away={statValues.away.shotsOnTarget + statValues.away.shotsOffTarget}
               />
-              <StatBar
-                label="Shots on Target"
+              <QuickStat
+                icon={<Target className="w-5 h-5 text-emerald-500" />}
+                label="On Target"
                 home={statValues.home.shotsOnTarget}
                 away={statValues.away.shotsOnTarget}
               />
-              <StatBar
+              <QuickStat
+                icon={<Flag className="w-5 h-5 text-emerald-500" />}
                 label="Corners"
                 home={statValues.home.corners}
                 away={statValues.away.corners}
               />
-              <StatBar
-                label="Fouls"
-                home={statValues.home.fouls}
-                away={statValues.away.fouls}
+              <QuickStat
+                icon={<Users className="w-5 h-5 text-emerald-500" />}
+                label="Offsides"
+                home={statValues.home.offsides}
+                away={statValues.away.offsides}
               />
+            </div>
 
-              {/* Cards Section */}
-              <div className="grid grid-cols-2 gap-4 pt-4">
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-6 bg-yellow-500 rounded-sm" />
-                      <span className="text-sm">Yellow Cards</span>
+            {/* Match Timeline */}
+            <div className="bg-card/40 backdrop-blur-sm rounded-2xl p-6 border border-border">
+              <h2 className="text-lg font-semibold mb-6 flex items-center gap-2">
+                <div className="w-1 h-1 rounded-full bg-emerald-500" />
+                Match Timeline
+              </h2>
+              <Timeline events={matchEvents} statValues={statValues} />
+            </div>
+
+            {/* Detailed Stats */}
+            <div className="bg-card/40 backdrop-blur-sm rounded-2xl p-6 border border-border">
+              <h2 className="text-lg font-semibold mb-6 flex items-center gap-2">
+                <div className="w-1 h-1 rounded-full bg-emerald-500" />
+                Match Statistics
+              </h2>
+              <div className="space-y-6">
+                <StatBar
+                  label="Shots"
+                  home={statValues.home.shotsOnTarget + statValues.home.shotsOffTarget}
+                  away={statValues.away.shotsOnTarget + statValues.away.shotsOffTarget}
+                />
+                <StatBar
+                  label="Shots on Target"
+                  home={statValues.home.shotsOnTarget}
+                  away={statValues.away.shotsOnTarget}
+                />
+                <StatBar
+                  label="Corners"
+                  home={statValues.home.corners}
+                  away={statValues.away.corners}
+                />
+                <StatBar
+                  label="Fouls"
+                  home={statValues.home.fouls}
+                  away={statValues.away.fouls}
+                />
+
+                {/* Cards Section */}
+                <div className="grid grid-cols-2 gap-4 pt-4">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-6 bg-yellow-500 rounded-sm" />
+                        <span className="text-sm">Yellow Cards</span>
+                      </div>
+                      <span className="font-semibold">{statValues.home.yellowCards}</span>
                     </div>
-                    <span className="font-semibold">{statValues.home.yellowCards}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-6 bg-red-500 rounded-sm" />
-                      <span className="text-sm">Red Cards</span>
-                    </div>
-                    <span className="font-semibold">{statValues.home.redCards}</span>
-                  </div>
-                </div>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="font-semibold">{statValues.away.yellowCards}</span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm">Yellow Cards</span>
-                      <div className="w-4 h-6 bg-yellow-500 rounded-sm" />
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-6 bg-red-500 rounded-sm" />
+                        <span className="text-sm">Red Cards</span>
+                      </div>
+                      <span className="font-semibold">{statValues.home.redCards}</span>
                     </div>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="font-semibold">{statValues.away.redCards}</span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm">Red Cards</span>
-                      <div className="w-4 h-6 bg-red-500 rounded-sm" />
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="font-semibold">{statValues.away.yellowCards}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm">Yellow Cards</span>
+                        <div className="w-4 h-6 bg-yellow-500 rounded-sm" />
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="font-semibold">{statValues.away.redCards}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm">Red Cards</span>
+                        <div className="w-4 h-6 bg-red-500 rounded-sm" />
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      </BlurFade>
+        </BlurFade>
+      </div>
     </main>
   );
 }
