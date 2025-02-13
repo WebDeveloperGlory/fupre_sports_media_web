@@ -98,14 +98,14 @@ const matchData = {
 
 function QuickStat({ icon, label, home, away }: { icon: React.ReactNode; label: string; home: number; away: number }) {
   return (
-    <div className="bg-card/40 backdrop-blur-sm rounded-xl p-4 border border-border">
-      <div className="flex items-center gap-2 mb-3">
+    <div className="bg-card/40 backdrop-blur-sm rounded-lg md:rounded-xl p-3 md:p-4 border border-border">
+      <div className="flex items-center gap-1.5 md:gap-2 mb-2 md:mb-3">
         {icon}
-        <span className="text-sm font-medium">{label}</span>
+        <span className="text-xs md:text-sm font-medium">{label}</span>
       </div>
       <div className="flex items-center justify-between">
-        <span className="text-xl font-semibold text-emerald-500">{home}</span>
-        <span className="text-xl font-semibold text-emerald-500">{away}</span>
+        <span className="text-lg md:text-xl font-semibold text-emerald-500">{home}</span>
+        <span className="text-lg md:text-xl font-semibold text-emerald-500">{away}</span>
       </div>
     </div>
   );
@@ -197,31 +197,31 @@ export default function MatchStatsPage() {
   return (
     <main className="min-h-screen bg-gradient-to-b from-background to-background/50">
       {/* Back Button */}
-      <div className="fixed top-8 left-4 md:left-8 z-10">
+      <div className="fixed top-4 left-3 md:top-8 md:left-8 z-10">
         <BackButton />
       </div>
 
-      <div className="pt-24 pb-6 px-4 md:px-6">
+      <div className="pt-16 pb-4 px-3 md:pt-24 md:pb-6 md:px-6">
         <BlurFade>
-          <div className="max-w-4xl mx-auto space-y-6">
+          <div className="max-w-4xl mx-auto space-y-4 md:space-y-6">
             {/* Match Header */}
-            <div className="relative bg-card/40 backdrop-blur-sm rounded-2xl p-6 border border-border overflow-hidden">
+            <div className="relative bg-card/40 backdrop-blur-sm rounded-xl md:rounded-2xl p-4 md:p-6 border border-border overflow-hidden">
               {/* Background decoration */}
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-emerald-500/10 via-transparent to-transparent" />
               
               <div className="relative">
-                <div className="text-center mb-4">
-                  <div className="inline-flex items-center gap-2 bg-emerald-500 text-white px-3 py-1 rounded-full text-sm font-medium">
-                    <Trophy className="w-3.5 h-3.5" />
+                <div className="text-center mb-3 md:mb-4">
+                  <div className="inline-flex items-center gap-2 bg-emerald-500 text-white px-2.5 py-1 md:px-3 md:py-1 rounded-full text-xs md:text-sm font-medium">
+                    <Trophy className="w-3 h-3 md:w-3.5 md:h-3.5" />
                     <span>{matchData.competition}</span>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between gap-4 md:gap-8">
+                <div className="flex items-center justify-between gap-2 md:gap-8">
                   {/* Home Team */}
-                  <div className="flex flex-col items-center gap-3 w-1/3">
+                  <div className="flex flex-col items-center gap-2 md:gap-3 w-1/3">
                     <motion.div 
-                      className="relative w-16 h-16 md:w-20 md:h-20"
+                      className="relative w-12 h-12 md:w-20 md:h-20"
                       whileHover={{ scale: 1.05 }}
                       transition={{ type: "spring", stiffness: 300 }}
                     >
@@ -232,30 +232,30 @@ export default function MatchStatsPage() {
                         className="object-contain"
                       />
                     </motion.div>
-                    <span className="text-sm md:text-base font-medium text-center">
+                    <span className="text-xs md:text-base font-medium text-center">
                       {matchData.homeTeam.name}
                     </span>
                   </div>
 
                   {/* Score */}
                   <div className="flex flex-col items-center justify-center">
-                    <div className="bg-card shadow-xl rounded-xl p-3 border border-border min-w-[120px]">
-                      <div className="text-3xl md:text-4xl font-bold tracking-tighter text-center">
+                    <div className="bg-card shadow-xl rounded-lg md:rounded-xl p-2 md:p-3 border border-border min-w-[90px] md:min-w-[120px]">
+                      <div className="text-2xl md:text-4xl font-bold tracking-tighter text-center">
                         <span className="text-emerald-500">{matchData.homeTeam.score}</span>
-                        <span className="mx-3 text-muted-foreground">-</span>
+                        <span className="mx-2 md:mx-3 text-muted-foreground">-</span>
                         <span className="text-emerald-500">{matchData.awayTeam.score}</span>
                       </div>
-                      <div className="flex items-center justify-center gap-1.5 mt-1 text-xs text-muted-foreground">
-                        <Clock className="w-3.5 h-3.5" />
+                      <div className="flex items-center justify-center gap-1 md:gap-1.5 mt-0.5 md:mt-1 text-[10px] md:text-xs text-muted-foreground">
+                        <Clock className="w-3 h-3 md:w-3.5 md:h-3.5" />
                         <span>Full Time</span>
                       </div>
                     </div>
                   </div>
 
                   {/* Away Team */}
-                  <div className="flex flex-col items-center gap-3 w-1/3">
+                  <div className="flex flex-col items-center gap-2 md:gap-3 w-1/3">
                     <motion.div 
-                      className="relative w-16 h-16 md:w-20 md:h-20"
+                      className="relative w-12 h-12 md:w-20 md:h-20"
                       whileHover={{ scale: 1.05 }}
                       transition={{ type: "spring", stiffness: 300 }}
                     >
@@ -266,25 +266,25 @@ export default function MatchStatsPage() {
                         className="object-contain"
                       />
                     </motion.div>
-                    <span className="text-sm md:text-base font-medium text-center">
+                    <span className="text-xs md:text-base font-medium text-center">
                       {matchData.awayTeam.name}
                     </span>
                   </div>
                 </div>
 
-                <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-muted-foreground mt-4">
+                <div className="flex flex-wrap items-center justify-center gap-2 md:gap-4 text-xs md:text-sm text-muted-foreground mt-3 md:mt-4">
                   <div className="flex items-center gap-1">
-                    <Trophy className="w-4 h-4" />
+                    <Trophy className="w-3 h-3 md:w-4 md:h-4" />
                     <span>{matchData.competition}</span>
                   </div>
                   <span>•</span>
                   <div className="flex items-center gap-1">
-                    <Calendar className="w-4 h-4" />
+                    <Calendar className="w-3 h-3 md:w-4 md:h-4" />
                     <span>{new Date(matchData.date).toLocaleDateString()}</span>
                   </div>
                   <span>•</span>
                   <div className="flex items-center gap-1">
-                    <Clock className="w-4 h-4" />
+                    <Clock className="w-3 h-3 md:w-4 md:h-4" />
                     <span>{matchData.time}</span>
                   </div>
                 </div>
@@ -292,27 +292,27 @@ export default function MatchStatsPage() {
             </div>
 
             {/* Quick Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
               <QuickStat
-                icon={<Activity className="w-5 h-5 text-emerald-500" />}
+                icon={<Activity className="w-4 h-4 md:w-5 md:h-5 text-emerald-500" />}
                 label="Total Shots"
                 home={matchData.homeTeam.stats.shots}
                 away={matchData.awayTeam.stats.shots}
               />
               <QuickStat
-                icon={<Target className="w-5 h-5 text-emerald-500" />}
+                icon={<Target className="w-4 h-4 md:w-5 md:h-5 text-emerald-500" />}
                 label="On Target"
                 home={matchData.homeTeam.stats.shotsOnTarget}
                 away={matchData.awayTeam.stats.shotsOnTarget}
               />
               <QuickStat
-                icon={<Flag className="w-5 h-5 text-emerald-500" />}
+                icon={<Flag className="w-4 h-4 md:w-5 md:h-5 text-emerald-500" />}
                 label="Corners"
                 home={matchData.homeTeam.stats.corners}
                 away={matchData.awayTeam.stats.corners}
               />
               <QuickStat
-                icon={<Users className="w-5 h-5 text-emerald-500" />}
+                icon={<Users className="w-4 h-4 md:w-5 md:h-5 text-emerald-500" />}
                 label="Offsides"
                 home={matchData.homeTeam.stats.offsides}
                 away={matchData.awayTeam.stats.offsides}
@@ -320,12 +320,12 @@ export default function MatchStatsPage() {
             </div>
 
             {/* Match Stats */}
-            <div className="bg-card/40 backdrop-blur-sm rounded-2xl p-6 border border-border">
-              <h2 className="text-lg font-semibold mb-6 flex items-center gap-2">
+            <div className="bg-card/40 backdrop-blur-sm rounded-xl md:rounded-2xl p-4 md:p-6 border border-border">
+              <h2 className="text-base md:text-lg font-semibold mb-4 md:mb-6 flex items-center gap-2">
                 <div className="w-1 h-1 rounded-full bg-emerald-500" />
                 Match Statistics
               </h2>
-              <div className="space-y-6">
+              <div className="space-y-4 md:space-y-6">
                 <StatBar 
                   label="Possession %" 
                   home={matchData.homeTeam.stats.possession} 
@@ -391,35 +391,35 @@ export default function MatchStatsPage() {
             </div>
 
             {/* Lineups */}
-            <div className="bg-card/40 backdrop-blur-sm rounded-2xl p-6 border border-border">
-              <h2 className="text-lg font-semibold mb-6 flex items-center gap-2">
+            <div className="bg-card/40 backdrop-blur-sm rounded-xl md:rounded-2xl p-4 md:p-6 border border-border">
+              <h2 className="text-base md:text-lg font-semibold mb-4 md:mb-6 flex items-center gap-2">
                 <div className="w-1 h-1 rounded-full bg-emerald-500" />
                 Team Lineups
               </h2>
-              <div className="grid md:grid-cols-2 gap-8">
+              <div className="grid md:grid-cols-2 gap-6 md:gap-8">
                 <LineupSection team={matchData.homeTeam} side="home" />
                 <LineupSection team={matchData.awayTeam} side="away" />
               </div>
             </div>
 
             {/* Match Details */}
-            <div className="bg-card/40 backdrop-blur-sm rounded-2xl p-6 border border-border">
-              <h2 className="text-lg font-semibold mb-6 flex items-center gap-2">
+            <div className="bg-card/40 backdrop-blur-sm rounded-xl md:rounded-2xl p-4 md:p-6 border border-border">
+              <h2 className="text-base md:text-lg font-semibold mb-4 md:mb-6 flex items-center gap-2">
                 <div className="w-1 h-1 rounded-full bg-emerald-500" />
                 Match Details
               </h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="p-4 bg-card/40 backdrop-blur-sm rounded-xl border border-border">
-                  <div className="text-sm text-muted-foreground">Referee</div>
-                  <div className="font-medium">{matchData.referee}</div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
+                <div className="p-3 md:p-4 bg-card/40 backdrop-blur-sm rounded-lg md:rounded-xl border border-border">
+                  <div className="text-xs md:text-sm text-muted-foreground">Referee</div>
+                  <div className="text-sm md:text-base font-medium">{matchData.referee}</div>
                 </div>
-                <div className="p-4 bg-card/40 backdrop-blur-sm rounded-xl border border-border">
-                  <div className="text-sm text-muted-foreground">Venue</div>
-                  <div className="font-medium">{matchData.venue}</div>
+                <div className="p-3 md:p-4 bg-card/40 backdrop-blur-sm rounded-lg md:rounded-xl border border-border">
+                  <div className="text-xs md:text-sm text-muted-foreground">Venue</div>
+                  <div className="text-sm md:text-base font-medium">{matchData.venue}</div>
                 </div>
-                <div className="p-4 bg-card/40 backdrop-blur-sm rounded-xl border border-border">
-                  <div className="text-sm text-muted-foreground">Attendance</div>
-                  <div className="font-medium">{matchData.attendance}</div>
+                <div className="p-3 md:p-4 bg-card/40 backdrop-blur-sm rounded-lg md:rounded-xl border border-border">
+                  <div className="text-xs md:text-sm text-muted-foreground">Attendance</div>
+                  <div className="text-sm md:text-base font-medium">{matchData.attendance}</div>
                 </div>
               </div>
             </div>
