@@ -154,16 +154,29 @@ export interface Fixture {
     type: string,
     competition?: {
         name: string,
-        id: string
+        _id: string
     },
     date: Date,
     stadium: string,
     status: string,
-    createdAt: Date,
+    createdAt?: Date,
     goalScorers?: GoalScorers[] | [],
-    __v: string,
+    __v?: string,
     statistics?: string,
     matchEvents: Event[] | [],
+}
+
+export interface FixtureTeamPlayers {
+    homeTeam: {
+        name: string,
+        players: Player[] | [],
+        _id: string
+    },
+    awayTeam: {
+        name: string,
+        players: Player[] | [],
+        _id: string
+    },
 }
 
 export interface Competition {

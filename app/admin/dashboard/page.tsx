@@ -31,7 +31,7 @@ const getNavLinks = ( role: string ) => {
       case 'competition-admin':
         return [
             { icon: Trophy, label: 'My Competitions', href: '/admin/competition_admin/competitions' },
-            { icon: PlayCircle, label: 'Live Matches', href: '/admin/super_admin/live_matches' },
+            { icon: PlayCircle, label: 'Live Matches', href: '/admin/competition_admin/live_matches' },
         ];
       case 'live-match-admin':
         return [
