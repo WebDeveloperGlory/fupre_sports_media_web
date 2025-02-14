@@ -12,7 +12,7 @@ export interface Team {
 export interface Players {
     name: string,
     position: string,
-    _id?: string
+    _id: string
 }
 
 export interface LineUp {
