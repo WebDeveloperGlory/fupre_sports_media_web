@@ -5,9 +5,10 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { useTheme } from '@/providers/theme-provider';
 import { motion } from 'framer-motion';
-import { Home, Trophy, Newspaper, Play, Menu, X } from 'lucide-react';
+import { Home, Trophy, Newspaper, Play, Menu, X, LayoutDashboard } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/utils/cn';
+import useAuthStore from '@/stores/authStore';
 
 const menuVariants = {
   hidden: { x: "100%", opacity: 0 },
@@ -18,6 +19,7 @@ const menuVariants = {
 const Navbar = () => {
   const { theme, toggleTheme } = useTheme();
   const pathname = usePathname();
+  const { jwt } = useAuthStore();
   const [openMobileMenu, setOpenMobileMenu] = useState<boolean>(false);
 
   const isActiveRoute = (path: string) => {
@@ -37,6 +39,9 @@ const Navbar = () => {
     { href: '/news', label: 'News', icon: Newspaper },
     { href: '/highlights', label: 'Highlights', icon: Play },
   ];
+  const adminLinks = [
+    { href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard }
+  ]
 
   return (
     <>
@@ -73,6 +78,22 @@ const Navbar = () => {
                 {link.label}
               </Link>
             ))}
+            {
+              jwt && adminLinks.map((link) => (
+                <Link
+                  key={link.label}
+                  href={link.href}
+                    className={cn(
+                      "text-[15px] font-medium transition-colors",
+                      isActiveRoute(link.href)
+                        ? "text-emerald-500" 
+                        : "text-navbar-muted hover:text-navbar-foreground"
+                    )}
+                >
+                  {link.label}
+                </Link>
+              ))
+            }
           </div>
 
             {/* Theme Toggle */}
@@ -234,6 +255,48 @@ const Navbar = () => {
                   );
                 })}
               </div>
+              {
+                jwt && (
+                  <>
+                    <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mt-4">
+                      Admin Navigation
+                    </h3>
+                    <div className="space-y-2 mt-2">
+                      {
+                        adminLinks.map((link) => {
+                          const Icon = link.icon;
+                          return (
+                            <motion.div
+                              key={link.label}
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                            >
+                              <Link
+                                href={link.href}
+                                onClick={() => setOpenMobileMenu(false)}
+                                className={cn(
+                                  "flex items-center gap-4 px-4 py-3 rounded-lg transition-all",
+                                  isActiveRoute(link.href)
+                                    ? "bg-emerald-500/10 text-emerald-500"
+                                    : "bg-secondary text-secondary-foreground hover:bg-accent hover:text-accent-foreground"
+                                )}
+                              >
+                                <Icon className={cn(
+                                  "w-5 h-5",
+                                  isActiveRoute(link.href)
+                                    ? "text-emerald-500"
+                                    : "text-muted-foreground"
+                                )} />
+                                <h3 className="font-medium">{link.label}</h3>
+                              </Link>
+                            </motion.div>
+                          );
+                        })
+                      }
+                    </div>
+                  </>
+                )
+              }
             </div>
           </div>
         </motion.div>
