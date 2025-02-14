@@ -22,22 +22,33 @@ const FootballPage: FC = () => {
 
   useEffect(() => {
     const fetchData = async() => {
-      const competitionsData = await getAllCompetitions();
-      if( competitionsData && competitionsData.code === '00' ) {
-        setCompetitions( competitionsData.data );
-      }
-
-      const liveData = await getLiveFixture();
-      if( liveData && liveData.code === '00' && liveData.data.length > 0 ) {
-        const data = await getLiveFixtureDetails( liveData.data[ 0 ]._id );
-        if( data && data.code === '00' ) {
-          setLiveFixture( data.data )
+      try {
+        const competitionsData = await getAllCompetitions();
+        if( competitionsData && competitionsData.code === '00' ) {
+          setCompetitions( competitionsData.data );
         }
-      } else {
-        setLiveFixture( null );
+
+        const liveData = await getLiveFixture();
+        if( liveData && liveData.code === '00' && liveData.data && liveData.data.length > 0 ) {
+          try {
+            const data = await getLiveFixtureDetails( liveData.data[ 0 ]._id );
+            if( data && data.code === '00' ) {
+              setLiveFixture( data.data );
+            }
+          } catch (error) {
+            console.error('Error fetching live fixture details:', error);
+            setLiveFixture(null);
+          }
+        } else {
+          setLiveFixture( null );
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        setCompetitions(null);
+        setLiveFixture(null);
+      } finally {
+        setLoading( false );
       }
-      console.log({ competitionsData, liveData, liveFixture });
-      setLoading( false );
     };
 
     if( loading ) {
