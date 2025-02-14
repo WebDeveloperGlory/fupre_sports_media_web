@@ -215,7 +215,13 @@ export default function LiveMatchPage() {
                 <div className="w-1 h-1 rounded-full bg-emerald-500" />
                 Match Timeline
               </h2>
-              <Timeline events={matchEvents} statValues={statValues} />
+              <Timeline 
+                events={matchEvents} 
+                homeTeamId={ statValues.homeTeam._id }
+                awayTeamId={ statValues.awayTeam._id }
+                homeLineups={ statValues.homeLineup! }
+                awayLineups={ statValues.awayLineup! }
+              />
             </div>
 
             {/* Detailed Stats */}

@@ -7,7 +7,7 @@ type Result = {
     awayPenalty: number | null
 }
 
-interface Statistics {
+export interface Statistics {
     shotsOnTarget: number;
     shotsOffTarget: number;
     fouls: number;
@@ -162,8 +162,17 @@ export interface Fixture {
     createdAt?: Date,
     goalScorers?: GoalScorers[] | [],
     __v?: string,
-    statistics?: string,
+    statistics?: {
+        home: Statistics,
+        away: Statistics,
+        createdAt: Date,
+        fixture: string,
+        _id: string,
+        __v: number
+    },
     matchEvents: Event[] | [],
+    referee?: string,
+    round?: string
 }
 
 export interface FixtureTeamPlayers {

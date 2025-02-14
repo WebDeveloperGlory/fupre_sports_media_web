@@ -1,5 +1,5 @@
 import { Event } from '@/stores/liveStore';
-import { LiveStatState, Players } from '@/utils/stateTypes';
+import { LineUp, Players } from '@/utils/stateTypes';
 import { motion } from 'framer-motion';
 
 const getEventIcon = (event: Event) => {
@@ -69,13 +69,16 @@ const getEventText = (event: Event, players: Players[]) => {
 };
 
 interface TimelineProps {
-  events: Event[];
-  statValues: LiveStatState;
+  events: Event[],
+  homeTeamId: string,
+  awayTeamId: string,
+  homeLineups: LineUp,
+  awayLineups: LineUp,
 }
 
-export function Timeline({ events, statValues }: TimelineProps) {
-  const homeLineup = statValues.homeLineup ? statValues.homeLineup.startingXI : [];
-  const awayLineup = statValues.awayLineup ? statValues.awayLineup.startingXI : [];
+export function Timeline({ events, homeTeamId, awayTeamId, homeLineups, awayLineups }: TimelineProps) {
+  const homeLineup = homeLineups ? homeLineups.startingXI : [];
+  const awayLineup = awayLineups ? awayLineups.startingXI : [];
 
   return (
     <div className="space-y-4">
@@ -92,9 +95,9 @@ export function Timeline({ events, statValues }: TimelineProps) {
           <div className="space-y-4">
             {events.map((event) => {
               const playerList = event.team !== null
-                ? event.team._id === statValues.homeTeam._id
+                ? event.team._id === homeTeamId
                   ? homeLineup
-                  : event.team._id === statValues.awayTeam._id
+                  : event.team._id === awayTeamId
                     ? awayLineup
                     : []
                 : [];

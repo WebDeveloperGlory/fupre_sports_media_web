@@ -1,3 +1,5 @@
+import { Fixture } from "./requestDataTypes"
+
 interface Competition {
     name: string,
     _id: string
@@ -62,4 +64,21 @@ export interface LiveStatState {
     awayScore: number,
     homePenalty: number | null,
     awayPenalty: number | null
+}
+
+export type TeamForm = {
+    awayTeamForm: string[],
+    homeTeamForm: string[],
+}
+
+export type LastFixture = {
+    awayLastFixtures: Fixture[],
+    homeLastFixtures: Fixture[],
+}
+
+export type Head2Head = {
+    homeWins: number,
+    awayWins: number,
+    draws: number,
+    fixtures: Fixture[],
 }
