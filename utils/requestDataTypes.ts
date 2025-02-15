@@ -268,3 +268,89 @@ export interface UserProfile {
     team: ExtendedTeam | null,
     nextFixtures: Fixture[] | [],
 }
+
+type SummaryData = {
+    title: string,
+    data: {
+        matches: number,
+        goalsScored: number,
+        goalsConceded: number
+    }
+}
+
+type AttackingData = {
+    title: string,
+    data: {
+        goalsPerGame: number,
+        offsidesPerGame: number,
+        cornersPerGame: number
+    }
+}
+
+type DefendingData = {
+    title: string,
+    data: {
+        yellowCardsPerGame: number,
+        redCardsPerGame: number,
+        goalsConcededPerGame: number,
+        foulsPerGame: number,
+        cleanSheets: number
+    }
+}
+
+export interface TeamStatData {
+    attack: AttackingData, 
+    defense: DefendingData, 
+    summary: SummaryData
+}
+
+type TeamPlayerStats = {
+    name: string;
+    position: string;
+    totalGoals: number;
+    totalAssists: number;
+    totalYellowCards: number;
+    totalRedCards: number;
+};
+  
+type TeamCompetition = {
+    competition: {
+      _id: string;
+      name: string;
+    };
+    status: string;
+    _id: string;
+};
+  
+type TopStats = {
+    topScorers: TeamPlayerStats[];
+    topAssisters: TeamPlayerStats[];
+    topYellowCards: TeamPlayerStats[];
+    topRedCards: TeamPlayerStats[];
+};
+  
+export interface TeamOverviewData {
+    info: {
+        playerCount: number;
+        department: string;
+        level: string;
+    };
+    competitions: TeamCompetition[];
+    recentPerformance: string[];
+    nextFixture: Fixture | null;
+    topStats: TopStats;
+};
+
+type PlayerCategory = {
+    name: string;
+    players: Player[];
+};
+  
+export interface TeamPlayersData {
+    players: PlayerCategory[];
+};
+
+export interface TeamFixtureType {
+    title: string;
+    fixtures: Fixture[];
+};
