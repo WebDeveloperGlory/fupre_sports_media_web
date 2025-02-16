@@ -6,18 +6,35 @@ import Link from "next/link";
 import { Trophy, Calendar, Clock, MapPin, ArrowRight, Users, Newspaper, Play } from "lucide-react";
 import Image from "next/image";
 
-export default async function HomePage() {
-    const data = await getTodaysFixtures();
-    const generalInfoData = await getGeneralInfo();
-    let todayFixtureList: Fixture[] | null = null;
-    let generalInfo: GeneralInfo | null = null;
+export async function getData() {
+  try {
+    const data1 = await getTodaysFixtures();
+    const data2 = await getGeneralInfo();
 
-    if( data && data.code === '00' ) {
-      todayFixtureList = data.data;
-    }
-    if( generalInfoData && generalInfoData.data ) {
-      generalInfo = generalInfoData.data;
-    }
+    return {
+      props: { data1: data1.data, data2: data2.data },
+    };
+  } catch (error) {
+    console.error("Error fetching data:", error);
+    return { props: { data1: null, data2: null } };
+  }
+}
+
+export default async function HomePage() {
+    const data = await getData();
+    const todayFixtureList = data.props.data1;
+    const generalInfo = data.props.data2;
+    // const data = await getTodaysFixtures();
+    // const generalInfoData = await getGeneralInfo();
+    // let todayFixtureList: Fixture[] | null = null;
+    // let generalInfo: GeneralInfo | null = null;
+
+    // if( data && data.code === '00' ) {
+    //   todayFixtureList = data.data;
+    // }
+    // if( generalInfoData && generalInfoData.data ) {
+    //   generalInfo = generalInfoData.data;
+    // }
     let todaysFixture: Fixture | null = todayFixtureList ? todayFixtureList[ 0 ] : null;
 
     const formattedDate = todaysFixture ? format( todaysFixture.date, "yyyy-MM-dd HH:mm" ) : null;
@@ -54,16 +71,16 @@ export default async function HomePage() {
               {/* Quick Stats */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mt-6 sm:mt-8 w-full max-w-xs sm:max-w-2xl lg:max-w-4xl mx-auto">
                 {
-                  generalInfoData && (
+                  generalInfo && (
                     <>
                       <div className="bg-card/40 backdrop-blur-sm rounded-lg lg:rounded-xl p-3 sm:p-4 lg:p-6 border border-border hover:bg-accent/50 transition-all duration-300">
                         <Trophy className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-emerald-500 mb-2" />
-                        <div className="text-lg sm:text-xl lg:text-2xl font-bold">{ generalInfoData.data.ongoingCompetitionsCount || 'Unknown' }</div>
+                        <div className="text-lg sm:text-xl lg:text-2xl font-bold">{ generalInfo.ongoingCompetitionsCount || 'Unknown' }</div>
                         <div className="text-xs sm:text-sm text-muted-foreground">Active Tournaments</div>
                       </div>
                       <div className="bg-card/40 backdrop-blur-sm rounded-lg lg:rounded-xl p-3 sm:p-4 lg:p-6 border border-border hover:bg-accent/50 transition-all duration-300">
                         <Users className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-emerald-500 mb-2" />
-                        <div className="text-lg sm:text-xl lg:text-2xl font-bold">{ generalInfoData.data.teamCount || 'Unknown' }</div>
+                        <div className="text-lg sm:text-xl lg:text-2xl font-bold">{ generalInfo.teamCount || 'Unknown' }</div>
                         <div className="text-xs sm:text-sm text-muted-foreground">Registered Teams</div>
                       </div>
                     </>
