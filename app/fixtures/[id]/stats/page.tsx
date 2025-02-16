@@ -11,7 +11,7 @@ import { cn } from "@/utils/cn";
 import { getFixtureData, getFixtureTeamFormAndMatchData } from "@/lib/requests/fixturePage/requests";
 import { Fixture } from "@/utils/requestDataTypes";
 import { Loader } from "@/components/ui/loader";
-import { teamLogos } from "@/constants";
+import { emptyStats, teamLogos } from "@/constants";
 import { format } from "date-fns";
 import { Head2Head, LastFixture, LineUp, TeamForm } from "@/utils/stateTypes";
 import Stats from "@/components/fixturepage/Stats";
@@ -258,8 +258,8 @@ export default function MatchStatsPage({
             {
               fixtureData && fixtureData.status === 'completed' && activeTab === 'stats' && (
                 <Stats 
-                  home={ fixtureData.statistics!.home }
-                  away={ fixtureData.statistics!.away }
+                  home={ fixtureData.statistics ? fixtureData.statistics.home : emptyStats }
+                  away={ fixtureData.statistics ? fixtureData.statistics.away : emptyStats }
                   fixtureData={ fixtureData }
                 />
               )

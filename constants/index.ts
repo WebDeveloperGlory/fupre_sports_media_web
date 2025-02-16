@@ -1,3 +1,4 @@
+import { Statistics } from "@/utils/requestDataTypes";
 import { EventTypes } from "@/utils/stateTypes";
 
 export const getCurrentDate = (): string => {
@@ -24,6 +25,16 @@ export const EVENT_TYPES: EventTypes = {
     halftime: 'halftime',
     fulltime: 'fulltime'
 };
+
+export const emptyStats: Statistics = {
+    shotsOnTarget: 0,
+    shotsOffTarget: 0,
+    fouls: 0,
+    yellowCards: 0,
+    redCards: 0,
+    offsides: 0,
+    corners: 0
+}
 
 export const liveFixtureInitialStateData = {
 	homeTeam: {
