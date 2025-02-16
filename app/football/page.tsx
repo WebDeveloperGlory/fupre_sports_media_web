@@ -88,7 +88,7 @@ const FootballPage: FC = () => {
                   {
                     liveFixture && (
                       <Link
-                        href={ `/live/${ liveFixture._id }` }
+                        href={ `/live/${ liveFixture.fixtureId }` }
                         className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full text-sm font-medium transition-colors"
                         aria-disabled={true}
                       >
