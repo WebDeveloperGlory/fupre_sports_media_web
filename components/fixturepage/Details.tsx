@@ -117,7 +117,7 @@ const Details = (
         <div className="space-y-3">
             {
             head2head?.fixtures.map(( fixture, index ) => {
-                const formattedDate = fixtureData ? format( fixtureData.date, "yyyy-MM-dd HH:mm" ) : null;
+                const formattedDate = fixture ? format( fixture.date, "yyyy-MM-dd HH:mm" ) : null;
                 const date = formattedDate ? formattedDate.split(' ')[ 0 ] : null;
                 const time = formattedDate ? formattedDate.split(' ')[ 1 ] : null;
 
@@ -183,7 +183,7 @@ const Details = (
         <div className="space-y-3">
             {
             activeTeamFixturesTab === 'home' && lastFixtures?.homeLastFixtures.map(( fixture, index ) => {
-                const formattedDate = fixtureData ? format( fixtureData.date, "yyyy-MM-dd HH:mm" ) : null;
+                const formattedDate = fixture ? format( fixture.date, "yyyy-MM-dd HH:mm" ) : null;
                 const date = formattedDate ? formattedDate.split(' ')[ 0 ] : null;
                 const time = formattedDate ? formattedDate.split(' ')[ 1 ] : null;
 
@@ -231,7 +231,7 @@ const Details = (
             }
             {
             activeTeamFixturesTab === 'away' && lastFixtures?.awayLastFixtures.map(( fixture, index ) => {
-                const formattedDate = fixtureData ? format( fixtureData.date, "yyyy-MM-dd HH:mm" ) : null;
+                const formattedDate = fixture ? format( fixture.date, "yyyy-MM-dd HH:mm" ) : null;
                 const date = formattedDate ? formattedDate.split(' ')[ 0 ] : null;
                 const time = formattedDate ? formattedDate.split(' ')[ 1 ] : null;
 
