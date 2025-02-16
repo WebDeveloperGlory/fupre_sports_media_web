@@ -1,6 +1,6 @@
 import { BlurFade } from "@/components/ui/blur-fade";
-import { getTodaysFixtures } from "@/lib/requests/homePage/requests";
-import { Fixture } from "@/utils/requestDataTypes";
+import { getGeneralInfo, getTodaysFixtures } from "@/lib/requests/homePage/requests";
+import { Fixture, GeneralInfo } from "@/utils/requestDataTypes";
 import { format } from 'date-fns';
 import Link from "next/link";
 import { Trophy, Calendar, Clock, MapPin, ArrowRight, Users, Newspaper, Play } from "lucide-react";
@@ -8,16 +8,23 @@ import Image from "next/image";
 
 export default async function HomePage() {
     const data = await getTodaysFixtures();
+    const generalInfoData = await getGeneralInfo();
     let todayFixtureList: Fixture[] | null = null;
+    let generalInfo: GeneralInfo | null = null;
 
     if( data && data.code === '00' ) {
       todayFixtureList = data.data;
+    }
+    if( generalInfoData && generalInfoData.data ) {
+      generalInfo = generalInfoData.data;
     }
     let todaysFixture: Fixture | null = todayFixtureList ? todayFixtureList[ 0 ] : null;
 
     const formattedDate = todaysFixture ? format( todaysFixture.date, "yyyy-MM-dd HH:mm" ) : null;
     const date = formattedDate ? formattedDate.split(' ')[ 0 ] : null;
     const time = formattedDate ? formattedDate.split(' ')[ 1 ] : null;
+    const formattedStartDate = ( generalInfo?.featuredCompetition && generalInfo.featuredCompetition.startDate ) ? format( generalInfo?.featuredCompetition.startDate, "MMMM dd" ) : null;
+    const formattedEndDate = ( generalInfo?.featuredCompetition && generalInfo.featuredCompetition.endDate ) ? format( generalInfo?.featuredCompetition.endDate, "MMMM dd" ) : null;
 
   return (
     <main className="min-h-screen">
@@ -46,12 +53,12 @@ export default async function HomePage() {
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mt-6 sm:mt-8 w-full max-w-xs sm:max-w-2xl lg:max-w-4xl mx-auto">
                 <div className="bg-card/40 backdrop-blur-sm rounded-lg lg:rounded-xl p-3 sm:p-4 lg:p-6 border border-border hover:bg-accent/50 transition-all duration-300">
                   <Trophy className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-emerald-500 mb-2" />
-                  <div className="text-lg sm:text-xl lg:text-2xl font-bold">1</div>
+                  <div className="text-lg sm:text-xl lg:text-2xl font-bold">{ generalInfo?.ongoingCompetitionsCount || 'Unknown' }</div>
                   <div className="text-xs sm:text-sm text-muted-foreground">Active Tournaments</div>
                 </div>
                 <div className="bg-card/40 backdrop-blur-sm rounded-lg lg:rounded-xl p-3 sm:p-4 lg:p-6 border border-border hover:bg-accent/50 transition-all duration-300">
                   <Users className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-emerald-500 mb-2" />
-                  <div className="text-lg sm:text-xl lg:text-2xl font-bold">10</div>
+                  <div className="text-lg sm:text-xl lg:text-2xl font-bold">{ generalInfo?.teamCount || 'Unknown' }</div>
                   <div className="text-xs sm:text-sm text-muted-foreground">Registered Teams</div>
                 </div>
                 <div className="bg-card/40 backdrop-blur-sm rounded-lg lg:rounded-xl p-3 sm:p-4 lg:p-6 border border-border hover:bg-accent/50 transition-all duration-300">
@@ -75,33 +82,44 @@ export default async function HomePage() {
                     <span className="inline-block px-2.5 sm:px-3 py-1 rounded-full bg-emerald-500 text-emerald-50 text-xs sm:text-sm font-medium mb-3 sm:mb-4">
                       FEATURED TOURNAMENT
                     </span>
-                    <h2 className="text-xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-2 sm:mb-4">
-                      FUPRE Super League
-                    </h2>
-                    <p className="text-base sm:text-lg lg:text-xl text-emerald-500 mb-3 sm:mb-4 lg:mb-6">
-                      March 19th - April 30th
-                    </p>
-                    <div className="flex flex-wrap gap-2 sm:gap-4 mb-4 sm:mb-6">
-                      <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-muted-foreground">
-                        <Trophy className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                        <span>12 Teams</span>
-                      </div>
-                      <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-muted-foreground">
-                        <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                        <span>6 Weeks</span>
-                      </div>
-                      <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-muted-foreground">
-                        <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                        <span>FUPRE Main Ground</span>
-                      </div>
-                    </div>
-                    <Link 
-                      href="/competitions/league/1"
-                      className="inline-flex items-center gap-2 px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 lg:py-3 rounded-full bg-emerald-500 text-emerald-50 text-xs sm:text-sm lg:text-base font-medium hover:bg-emerald-600 transition-colors group"
-                    >
-                      VIEW FIXTURES
-                      <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 group-hover:translate-x-1 transition-transform" />
-                    </Link>
+                    {
+                      generalInfo && generalInfo.featuredCompetition && (
+                        <>
+                          <h2 className="text-xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-2 sm:mb-4">
+                            { generalInfo.featuredCompetition.name }
+                          </h2>
+                          <p className="text-base sm:text-lg lg:text-xl text-emerald-500 mb-3 sm:mb-4 lg:mb-6">
+                            { formattedStartDate || 'Unknown' } - { formattedEndDate || 'Unknown' }
+                          </p>
+                          <div className="flex flex-wrap gap-2 sm:gap-4 mb-4 sm:mb-6">
+                            <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-muted-foreground">
+                              <Trophy className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                              <span>{ generalInfo.featuredCompetition.teams || 'Unknown' } teams</span>
+                            </div>
+                            <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-muted-foreground">
+                              <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                              <span>{ generalInfo.featuredCompetition.weeks || 'Unknown' } Weeks</span>
+                            </div>
+                            <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-muted-foreground">
+                              <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                              <span>FUPRE Main Ground</span>
+                            </div>
+                          </div>
+                          <Link
+                            href={`/competitions/${ generalInfo.featuredCompetition.type }/${ generalInfo.featuredCompetition._id }`}
+                            className="inline-flex items-center gap-2 px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 lg:py-3 rounded-full bg-emerald-500 text-emerald-50 text-xs sm:text-sm lg:text-base font-medium hover:bg-emerald-600 transition-colors group"
+                          >
+                            VIEW FIXTURES
+                            <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 group-hover:translate-x-1 transition-transform" />
+                          </Link>
+                        </>
+                      )
+                    }
+                    {
+                      !generalInfo || !generalInfo.featuredCompetition && (
+                        <div>No Featured Competitions</div>
+                      )
+                    }
                   </div>
                 </div>
               </div>

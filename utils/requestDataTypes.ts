@@ -132,6 +132,13 @@ type CompletedFixtures = {
     stadium?: string,
 }
 
+export interface GeneralInfo { 
+    fixtureCount: number,
+    allCompetitionsCount: number,
+    ongoingCompetitionsCount: number,
+    teamCount: number,
+    featuredCompetition: Competition & { weeks: number, teams: number }
+}
 export interface ExtendedTeam {
     _id: string;
     name: string;
