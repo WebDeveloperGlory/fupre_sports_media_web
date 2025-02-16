@@ -30,6 +30,9 @@ const Navbar = () => {
         pathname.startsWith('/fixtures') || 
         pathname.startsWith('/live');
     }
+    if (path === '/news') {
+      return pathname === '/news' || pathname.startsWith('/news/');
+    }
     return pathname === path;
   };
 

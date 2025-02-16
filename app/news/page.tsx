@@ -7,13 +7,22 @@ import Link from "next/link";
 
 const latestArticles = [
   {
+    id: 2,
+    title: "Propellers Penalized for Fielding Ineligible Player, Lose Points and Face Fine",
+    excerpt: "The FUPRE Super League Board has issued a disciplinary action against Propellers FC for fielding an ineligible player, 'Jala,' in their recent match against Rayos FC.",
+    author: "Churchill Usaide",
+    date: "Mar 15, 2024",
+    readTime: "2 min read",
+    image: "/images/news/News 2.jpg"
+  },
+  {
     id: 1,
-    title: "With strict enforcement of league rules, teams are expected to adhere to the regulations",
-    excerpt: "The board emphasized that the fine aligns with FSL rules and must be settled 24 hours before the team's next game.",
-    author: "FSL Media Team",
-    date: "Mar 13, 2024",
-    readTime: "1 min read",
-    image: "/images/news/News 1.jpg",
+    title: "FUPRE Super League Fines Propellers FC for Rule Violations",
+    excerpt: "In a significant development for the FUPRE Super League (FSL), Propellers FC has been handed a substantial fine following multiple rule violations during their recent fixture.",
+    author: "Churchill Usaide",
+    date: "Mar 14, 2024",
+    readTime: "3 min read",
+    image: "/images/news/News 1.jpg"
   }
 ];
 
@@ -28,11 +37,12 @@ export default function NewsPage() {
             {latestArticles.map((article) => (
               <article key={article.id} className="group">
                 <div className="grid md:grid-cols-5 gap-6 items-start">
-                  <div className="md:col-span-2 aspect-[4/3] relative rounded-lg overflow-hidden">
+                  <div className="md:col-span-2 aspect-[16/9] relative rounded-lg overflow-hidden">
                     <Image
                       src={article.image}
                       alt={article.title}
                       fill
+                      priority
                       className="object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                   </div>
