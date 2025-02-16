@@ -13,7 +13,7 @@ const latestArticles = [
     author: "FSL Media Team",
     date: "Mar 13, 2024",
     readTime: "1 min read",
-    image: "/assets/Newsimages/News 1.jpg",
+    image: "/images/news/News 1.jpg",
   }
 ];
 
