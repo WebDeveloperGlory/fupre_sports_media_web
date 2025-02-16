@@ -5,46 +5,28 @@ import { Clock } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
-// Temporary mock data
+// News data
 const featuredArticle = {
   id: 1,
-  title: "FUPRE Football Team Dominates Regional Championship",
-  excerpt: "An in-depth look at how our university's football team achieved their remarkable victory in the latest regional championship, featuring exclusive interviews with players and coaching staff.",
-  author: "John Doe",
-  authorRole: "Sports Editor",
-  date: "Mar 12, 2024",
-  readTime: "6 min read",
-  image: "https://picsum.photos/seed/featured/1200/600",
+  title: "FUPRE Super League: Propellers Fined for Uniform and Late Arrival Violation",
+  excerpt: "The FUPRE Super League Board has fined Propellers FC a total of ₦6,000 for breaching league regulations during their match against Rayos FC.",
+  author: "FSL Media Team",
+  authorRole: "Sports News",
+  date: "Mar 13, 2024",
+  readTime: "2 min read",
+  image: "/assets/Newsimages/News 1.jpg",
 };
 
 const latestArticles = [
   {
     id: 1,
-    title: "Student Athletes Balance Sports and Academics",
-    excerpt: "How FUPRE's student athletes maintain academic excellence while excelling in sports.",
-    author: "Robert Brown",
-    date: "Mar 8, 2024",
-    readTime: "4 min read",
-    image: "https://picsum.photos/seed/latest1/800/400",
-  },
-  {
-    id: 2,
-    title: "Volleyball Team's Training Innovation",
-    excerpt: "New training methodologies adopted by the volleyball team are showing promising results.",
-    author: "Emma Davis",
-    date: "Mar 7, 2024",
-    readTime: "3 min read",
-    image: "https://picsum.photos/seed/latest2/800/400",
-  },
-  {
-    id: 3,
-    title: "Sports Psychology Workshop Success",
-    excerpt: "Recent workshop helps athletes develop mental toughness and resilience.",
-    author: "Tom Wilson",
-    date: "Mar 6, 2024",
-    readTime: "4 min read",
-    image: "https://picsum.photos/seed/latest3/800/400",
-  },
+    title: "With strict enforcement of league rules, teams are expected to adhere to the regulations",
+    excerpt: "The board emphasized that the fine aligns with FSL rules and must be settled 24 hours before the team's next game.",
+    author: "FSL Media Team",
+    date: "Mar 13, 2024",
+    readTime: "1 min read",
+    image: "/assets/Newsimages/News 1.jpg",
+  }
 ];
 
 export default function NewsPage() {
@@ -149,4 +131,4 @@ export default function NewsPage() {
       </div>
     </div>
   );
-} 
+}

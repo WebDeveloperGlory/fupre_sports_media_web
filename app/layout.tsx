@@ -1,7 +1,7 @@
 // app/layout.tsx
 import '@/assets/styles/globals.css';
 import { Space_Grotesk } from 'next/font/google';
-import { Analytics } from "@vercel/analytics/react"
+import { Analytics } from '@vercel/analytics/react';
 import Navbar from '@/components/Navbar';
 import { ThemeProvider } from '@/providers/theme-provider';
 import { LoadingProvider } from "@/providers/loading-provider";
