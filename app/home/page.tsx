@@ -53,22 +53,16 @@ export default async function HomePage() {
 
               {/* Quick Stats */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mt-6 sm:mt-8 w-full max-w-xs sm:max-w-2xl lg:max-w-4xl mx-auto">
-                {
-                  generalInfo && (
-                    <>
-                      <div className="bg-card/40 backdrop-blur-sm rounded-lg lg:rounded-xl p-3 sm:p-4 lg:p-6 border border-border hover:bg-accent/50 transition-all duration-300">
-                        <Trophy className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-emerald-500 mb-2" />
-                        <div className="text-lg sm:text-xl lg:text-2xl font-bold">{ generalInfo.ongoingCompetitionsCount || 'Unknown' }</div>
-                        <div className="text-xs sm:text-sm text-muted-foreground">Active Tournaments</div>
-                      </div>
-                      <div className="bg-card/40 backdrop-blur-sm rounded-lg lg:rounded-xl p-3 sm:p-4 lg:p-6 border border-border hover:bg-accent/50 transition-all duration-300">
-                        <Users className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-emerald-500 mb-2" />
-                        <div className="text-lg sm:text-xl lg:text-2xl font-bold">{ generalInfo.teamCount || 'Unknown' }</div>
-                        <div className="text-xs sm:text-sm text-muted-foreground">Registered Teams</div>
-                      </div>
-                    </>
-                  )
-                }
+                <div className="bg-card/40 backdrop-blur-sm rounded-lg lg:rounded-xl p-3 sm:p-4 lg:p-6 border border-border hover:bg-accent/50 transition-all duration-300">
+                  <Trophy className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-emerald-500 mb-2" />
+                  <div className="text-lg sm:text-xl lg:text-2xl font-bold">{ generalInfo?.ongoingCompetitionsCount || 'Unknown' }</div>
+                  <div className="text-xs sm:text-sm text-muted-foreground">Active Tournaments</div>
+                </div>
+                <div className="bg-card/40 backdrop-blur-sm rounded-lg lg:rounded-xl p-3 sm:p-4 lg:p-6 border border-border hover:bg-accent/50 transition-all duration-300">
+                  <Users className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-emerald-500 mb-2" />
+                  <div className="text-lg sm:text-xl lg:text-2xl font-bold">{ generalInfo?.teamCount || 'Unknown' }</div>
+                  <div className="text-xs sm:text-sm text-muted-foreground">Registered Teams</div>
+                </div>
                 <div className="bg-card/40 backdrop-blur-sm rounded-lg lg:rounded-xl p-3 sm:p-4 lg:p-6 border border-border hover:bg-accent/50 transition-all duration-300">
                   <Play className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-emerald-500 mb-2" />
                   <div className="text-lg sm:text-xl lg:text-2xl font-bold">24</div>

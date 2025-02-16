@@ -28,7 +28,7 @@ const fixturesArr: Fixture[] = [
       "startingXI": [],
       "subs": []
     },
-    "_id": "678220108afb07cd44ca3e65",
+    _id: "678220108afb07cd44ca3e65",
     "homeTeam": {
       "_id": "6781bc4cf161889b9a4b00d9",
       "name": "Dragonborn Drifters"
