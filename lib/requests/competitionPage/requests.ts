@@ -65,7 +65,7 @@ export const getLiveFixture = async () => {
 
 export const getLiveFixtureDetails = async ( id: string ) => {
     try {
-        const response = await axiosInstance.get( `${ API_URL }/live-fixtures/${ id }` );
+        const response = await axiosInstance.get( `${ API_URL }/fixture/${ id }?live=true` );
         const { data }: { data: SuccessRequest } = response;
 
         if( data.code === '99' ) {

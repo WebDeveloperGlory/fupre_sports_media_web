@@ -5,99 +5,30 @@ import { Clock } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
-// Temporary mock data
-const featuredArticle = {
-  id: 1,
-  title: "FUPRE Football Team Dominates Regional Championship",
-  excerpt: "An in-depth look at how our university's football team achieved their remarkable victory in the latest regional championship, featuring exclusive interviews with players and coaching staff.",
-  author: "John Doe",
-  authorRole: "Sports Editor",
-  date: "Mar 12, 2024",
-  readTime: "6 min read",
-  image: "https://picsum.photos/seed/featured/1200/600",
-};
-
 const latestArticles = [
   {
-    id: 1,
-    title: "Student Athletes Balance Sports and Academics",
-    excerpt: "How FUPRE's student athletes maintain academic excellence while excelling in sports.",
-    author: "Robert Brown",
-    date: "Mar 8, 2024",
-    readTime: "4 min read",
-    image: "https://picsum.photos/seed/latest1/800/400",
-  },
-  {
     id: 2,
-    title: "Volleyball Team's Training Innovation",
-    excerpt: "New training methodologies adopted by the volleyball team are showing promising results.",
-    author: "Emma Davis",
-    date: "Mar 7, 2024",
-    readTime: "3 min read",
-    image: "https://picsum.photos/seed/latest2/800/400",
+    title: "Propellers Penalized for Fielding Ineligible Player, Lose Points and Face Fine",
+    excerpt: "The FUPRE Super League Board has issued a disciplinary action against Propellers FC for fielding an ineligible player, 'Jala,' in their recent match against Rayos FC.",
+    author: "Churchill Usaide",
+    date: "Mar 15, 2024",
+    readTime: "2 min read",
+    image: "/images/news/News 2.jpg"
   },
   {
-    id: 3,
-    title: "Sports Psychology Workshop Success",
-    excerpt: "Recent workshop helps athletes develop mental toughness and resilience.",
-    author: "Tom Wilson",
-    date: "Mar 6, 2024",
-    readTime: "4 min read",
-    image: "https://picsum.photos/seed/latest3/800/400",
-  },
+    id: 1,
+    title: "FUPRE Super League Fines Propellers FC for Rule Violations",
+    excerpt: "In a significant development for the FUPRE Super League (FSL), Propellers FC has been handed a substantial fine following multiple rule violations during their recent fixture.",
+    author: "Churchill Usaide",
+    date: "Mar 14, 2024",
+    readTime: "3 min read",
+    image: "/images/news/News 1.jpg"
+  }
 ];
 
 export default function NewsPage() {
   return (
     <div className="min-h-screen">
-      {/* Featured Article */}
-      <BlurFade>
-        <div className="relative bg-card border-b border-black/20">
-          <div className="p-4 md:p-8">
-            <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 items-center">
-              <div className="flex-1 space-y-4">
-                <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight">
-                  {featuredArticle.title}
-                </h1>
-                <p className="text-base lg:text-lg text-muted-foreground">
-                  {featuredArticle.excerpt}
-                </p>
-                <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-2">
-                    <div className="relative w-10 h-10 rounded-full bg-muted overflow-hidden">
-                      <Image
-                        src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${featuredArticle.author}`}
-                        alt={featuredArticle.author}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                    <div>
-                      <p className="font-medium text-foreground">{featuredArticle.author}</p>
-                      <p>{featuredArticle.authorRole}</p>
-                    </div>
-                  </div>
-                  <span>·</span>
-                  <div className="flex items-center gap-1">
-                    <Clock className="w-4 h-4" />
-                    <span>{featuredArticle.readTime}</span>
-                  </div>
-                  <span>{featuredArticle.date}</span>
-                </div>
-              </div>
-              <div className="lg:flex-1 w-full aspect-[16/9] relative rounded-lg overflow-hidden">
-                <Image
-                  src={featuredArticle.image}
-                  alt={featuredArticle.title}
-                  fill
-                  className="object-cover"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </BlurFade>
-
       <div className="p-4 md:p-8">
         {/* Latest Articles */}
         <BlurFade delay={0.1}>
@@ -105,12 +36,13 @@ export default function NewsPage() {
           <div className="grid gap-8 max-w-4xl">
             {latestArticles.map((article) => (
               <article key={article.id} className="group">
-                <Link href={`/news/${article.id}`} className="grid md:grid-cols-5 gap-6 items-start">
-                  <div className="md:col-span-2 aspect-[4/3] relative rounded-lg overflow-hidden">
+                <div className="grid md:grid-cols-5 gap-6 items-start">
+                  <div className="md:col-span-2 aspect-[16/9] relative rounded-lg overflow-hidden">
                     <Image
                       src={article.image}
                       alt={article.title}
                       fill
+                      priority
                       className="object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                   </div>
@@ -134,14 +66,26 @@ export default function NewsPage() {
                         <span>{article.author}</span>
                       </div>
                       <span>·</span>
+                      <span>{article.date}</span>
+                      <span>·</span>
                       <div className="flex items-center gap-1">
                         <Clock className="w-4 h-4" />
                         <span>{article.readTime}</span>
                       </div>
-                      <span>{article.date}</span>
+                    </div>
+                    <div className="mt-4">
+                      <Link 
+                        href={`/news/${article.id}`}
+                        className="inline-flex items-center px-4 py-2 text-sm font-medium text-emerald-500 hover:text-emerald-600 transition-colors"
+                      >
+                        Read More
+                        <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </Link>
                     </div>
                   </div>
-                </Link>
+                </div>
               </article>
             ))}
           </div>
@@ -149,4 +93,4 @@ export default function NewsPage() {
       </div>
     </div>
   );
-} 
+}

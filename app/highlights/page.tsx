@@ -7,6 +7,30 @@ import { BackButton } from "@/components/ui/back-button";
 // YouTube video data
 const highlights = [
   {
+    id: 4,
+    videoId: "sAryUL5_oVw",
+    title: "SEVENTEEN FC (1) VS (2) NEW HORIZONS HIGHLIGHTS|| FSL 24/25 SEASON",
+    date: "Feb 15, 2025",
+    views: "47 views",
+    category: "Football",
+  },
+  {
+    id: 3,
+    videoId: "vLFyWYHQROs",
+    title: "CITIZENS (2) - (0) RED BULLS HIGHLIGHTS|| FSL 23/24 SEASON",
+    date: "Feb 5, 2025",
+    views: "13 views",
+    category: "Football",
+  },
+  {
+    id: 2,
+    videoId: "HziHwzKdzUk",
+    title: "PROPELLERS (2) - (1) RAYOS FC HIGHLIGHTS|| FSL 24/25 SEASON",
+    date: "Feb 1, 2025",
+    views: "45 views",
+    category: "Football",
+  },
+  {
     id: 1,
     videoId: "XBFJQicmp7Q",
     title: "Earth Science (2) Vs (0) Maritime Highlights || Unity Cup 24/25 season",
@@ -21,7 +45,7 @@ export default function HighlightsPage() {
     <div className="min-h-screen">
       <div className="space-y-6">
         <BlurFade>
-          <div className="pb-4 border-b border-border">
+          <div className="pb-4 border-b border-border flex justify-center items-center">
             <h1 className="text-2xl font-semibold">Match Highlights</h1>
           </div>
         </BlurFade>
@@ -40,12 +64,7 @@ export default function HighlightsPage() {
             </BlurFade>
           ))}
         </div>
-
-        {/* Back Button */}
-        <div className="flex justify-center">
-          <BackButton />
-        </div>
       </div>
     </div>
   );
-} 
+}
