@@ -63,28 +63,6 @@ export const getLiveFixture = async () => {
     }
 }
 
-export const getLiveFixtureDetails = async ( id: string ) => {
-    try {
-        const response = await axiosInstance.get( `${ API_URL }/fixture/${ id }?live=true` );
-        const { data }: { data: SuccessRequest } = response;
-
-        if( data.code === '99' ) {
-            throw data
-        }
-        return data;
-    } catch( err: any ) {
-        const { response } = err as CustomError;
-
-        if( err?.status && err?.message ) {
-            console.error( `Error ${ err.status }: `, response?.data.message )
-            return response?.data || null;
-        } else {
-            console.error('Error fetching live fixture: ', err );
-            return null;
-        }
-    }
-}
-
 export const getIndividualCompetition = async ( id: string ) => {
     try {
         const response = await axiosInstance.get( `${ API_URL }/competition/${ id }` );

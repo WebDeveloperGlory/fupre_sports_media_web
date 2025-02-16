@@ -8,11 +8,12 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import useTimerStore from "@/stores/timerStore";
 import useLiveStore from "@/stores/liveStore";
-import { liveFixtureInitialStateData } from "@/constants";
-import { getAllCompetitions, getLiveFixture, getLiveFixtureDetails } from "@/lib/requests/competitionPage/requests";
+import { liveFixtureInitialStateData, teamLogos } from "@/constants";
+import { getAllCompetitions, getLiveFixture } from "@/lib/requests/competitionPage/requests";
 import { Loader } from "@/components/ui/loader";
 import { Competition, LiveFixture } from "@/utils/requestDataTypes";
 import { format } from "date-fns";
+import { getLiveFixtureDetails } from "@/lib/requests/liveAdminPage/requests";
 
 const FootballPage: FC = () => {
   const [ loading, setLoading ] = useState<boolean>( true );
@@ -57,12 +58,14 @@ const FootballPage: FC = () => {
   }, [ loading ]);
 
   const formatTime = (seconds: number) => {
+    if( seconds === 0 ) return `0`
     const minutes = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
   };
 
   const totalTime = liveFixture ? liveFixture.time : 0;
+  console.log( liveFixture )
 
   if( loading ) {
     return <Loader />;
@@ -102,10 +105,10 @@ const FootballPage: FC = () => {
                         <div className="flex flex-col items-center gap-4 md:w-1/3">
                           <div className="relative w-16 h-16 md:w-24 md:h-24">
                             <Image
-                              src="/team-logos/team-a.png"
+                              src={ teamLogos[ liveFixture.homeTeam.name ] || '/images/team_logos/default.jpg' }
                               alt={ liveFixture.homeTeam.name }
                               fill
-                              className="object-contain"
+                              className="object-contain rounded-full"
                             />
                           </div>
                           <span className="text-base md:text-lg font-medium text-center">{ liveFixture.homeTeam.name }</span>
@@ -133,10 +136,10 @@ const FootballPage: FC = () => {
                         <div className="flex flex-col items-center gap-4 md:w-1/3">
                           <div className="relative w-16 h-16 md:w-24 md:h-24">
                             <Image
-                              src="/team-logos/team-b.png"
+                              src={ teamLogos[ liveFixture.awayTeam.name ] || '/images/team_logos/default.jpg' }
                               alt={ liveFixture.awayTeam.name }
                               fill
-                              className="object-contain"
+                              className="object-contain rounded-full"
                             />
                           </div>
                           <span className="text-base md:text-lg font-medium text-center">{ liveFixture.awayTeam.name }</span>

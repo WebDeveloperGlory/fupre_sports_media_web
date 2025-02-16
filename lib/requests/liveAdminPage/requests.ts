@@ -26,7 +26,7 @@ interface LineUp {
 
 const API_URL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_PROD_API_URL : process.env.NEXT_PUBLIC_DEV_API_URL;
 
-export const getAllTodayFixturesAdmin = async ( token: string ) => {
+export const getAllUpcomingFixturesAdmin = async ( token: string ) => {
     try {
         const response = await axiosInstance.get(
             `${ API_URL }/live-fixtures/fixtures`,
@@ -56,11 +56,65 @@ export const getAllTodayFixturesAdmin = async ( token: string ) => {
     }
 }
 
-export const initializeLiveFixture = async ( fixtureId: string, token: string ) => {
+export const getLiveFixtureDetails = async ( fixtureId: string ) => {
+    try {
+        const response = await axiosInstance.get(
+            `${ API_URL }/live-fixtures/fixtures/${fixtureId}`,
+        );
+        const { data }: { data: SuccessRequest } = response;
+
+        if( data.code === '99' ) {
+            throw data
+        }
+        return data;
+    } catch( err: any ) {
+        const { response } = err as CustomError;
+
+        if( err?.status && err?.message ) {
+            console.error( `Error ${ err.status }: `, response?.data.message )
+            return response?.data || null;
+        } else {
+            console.error('Error fetching live fixture: ', err );
+            return null;
+        }
+    }
+}
+
+export const getAllLiveAdmins = async ( token: string ) => {
+    try {
+        const response = await axiosInstance.get(
+            `${ API_URL }/live-fixtures/admins`,
+            {
+                headers: {
+                    Authorization: `Bearer ${ token }`
+                },
+                withCredentials: true
+            }
+        );
+        const { data }: { data: SuccessRequest } = response;
+
+        if( data.code === '99' ) {
+            throw data
+        }
+        return data;
+    } catch( err: any ) {
+        const { response } = err as CustomError;
+
+        if( err?.status && err?.message ) {
+            console.error( `Error ${ err.status }: `, response?.data.message )
+            return response?.data || null;
+        } else {
+            console.error('Error fetching competitions: ', err );
+            return null;
+        }
+    }
+}
+
+export const initializeLiveFixture = async ( fixtureId: string, adminId: string, token: string ) => {
     try {
         const response = await axiosInstance.post(
             `${ API_URL }/live-fixtures/initialize`,
-            fixtureId,
+            { fixtureId, adminId },
             {
                 headers: {
                     Authorization: `Bearer ${ token }`
