@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Trophy, Calendar, Clock, MapPin, ArrowRight, Users, Newspaper, Play } from "lucide-react";
 import Image from "next/image";
 
-export async function getData() {
+async function getData() {
   try {
     const data1 = await getTodaysFixtures();
     const data2 = await getGeneralInfo();
