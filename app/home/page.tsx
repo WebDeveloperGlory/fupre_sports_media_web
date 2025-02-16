@@ -6,35 +6,18 @@ import Link from "next/link";
 import { Trophy, Calendar, Clock, MapPin, ArrowRight, Users, Newspaper, Play } from "lucide-react";
 import Image from "next/image";
 
-async function getData() {
-  try {
-    const data1 = await getTodaysFixtures();
-    const data2 = await getGeneralInfo();
-
-    return {
-      props: { data1: data1.data, data2: data2.data },
-    };
-  } catch (error) {
-    console.error("Error fetching data:", error);
-    return { props: { data1: null, data2: null } };
-  }
-}
-
 export default async function HomePage() {
-    const data = await getData();
-    const todayFixtureList = data.props.data1;
-    const generalInfo = data.props.data2;
-    // const data = await getTodaysFixtures();
-    // const generalInfoData = await getGeneralInfo();
-    // let todayFixtureList: Fixture[] | null = null;
-    // let generalInfo: GeneralInfo | null = null;
+    const data = await getTodaysFixtures();
+    const generalInfoData = await getGeneralInfo();
+    let todayFixtureList: Fixture[] | null = null;
+    let generalInfo: GeneralInfo | null = null;
 
-    // if( data && data.code === '00' ) {
-    //   todayFixtureList = data.data;
-    // }
-    // if( generalInfoData && generalInfoData.data ) {
-    //   generalInfo = generalInfoData.data;
-    // }
+    if( data && data.code === '00' ) {
+      todayFixtureList = data.data;
+    }
+    if( generalInfoData && generalInfoData.data ) {
+      generalInfo = generalInfoData.data;
+    }
     let todaysFixture: Fixture | null = todayFixtureList ? todayFixtureList[ 0 ] : null;
 
     const formattedDate = todaysFixture ? format( todaysFixture.date, "yyyy-MM-dd HH:mm" ) : null;
