@@ -26,6 +26,8 @@ export default async function HomePage() {
     const formattedStartDate = ( generalInfo?.featuredCompetition && generalInfo.featuredCompetition.startDate ) ? format( generalInfo?.featuredCompetition.startDate, "MMMM dd" ) : null;
     const formattedEndDate = ( generalInfo?.featuredCompetition && generalInfo.featuredCompetition.endDate ) ? format( generalInfo?.featuredCompetition.endDate, "MMMM dd" ) : null;
 
+    console.log( generalInfo )
+
   return (
     <main className="min-h-screen">
       {/* Hero Section */}
