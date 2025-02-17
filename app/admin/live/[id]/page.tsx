@@ -14,6 +14,7 @@ import ShareButton from '@/components/share/ShareButton';
 import useAuthStore from '@/stores/authStore';
 import { toast } from 'react-toastify';
 import { Loader } from '@/components/ui/loader';
+import { getLiveFixtureDetails } from '@/lib/requests/liveAdminPage/requests';
 
 const IndividualLivePage = (
     { params }:
@@ -31,7 +32,11 @@ const IndividualLivePage = (
 
     useEffect( () => {
         const fetchData = async () => {
-            // const data = await getLiveFixtureDetails( resolvedParams.id )
+            const data = await getLiveFixtureDetails( resolvedParams.id );
+            if( data && data.data ) {
+                // setStatValues( data.data );
+            }
+            console.log({ data })
             setLoading( false );
         }
 

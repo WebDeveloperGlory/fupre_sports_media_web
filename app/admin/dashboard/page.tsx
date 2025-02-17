@@ -27,15 +27,17 @@ const getNavLinks = ( role: string ) => {
             { icon: Users, label: 'All Players', href: '/admin/super_admin/players' },
             { icon: Trophy, label: 'All Competitions', href: '/admin/super_admin/competitions' },
             { icon: PlayCircle, label: 'Live Matches', href: '/admin/super_admin/live_matches' },
+            { icon: Calendar, label: 'Live', href: '/admin/live' },
         ];
       case 'competition-admin':
         return [
             { icon: Trophy, label: 'My Competitions', href: '/admin/competition_admin/competitions' },
             { icon: PlayCircle, label: 'Live Matches', href: '/admin/competition_admin/live_matches' },
+            { icon: Calendar, label: 'Live', href: '/admin/live' },
         ];
       case 'live-match-admin':
         return [
-            { icon: Calendar, label: 'Fixtures', href: '/admin/live_match_admin/fixtures' },
+            { icon: Calendar, label: 'Fixtures', href: '/admin/live' },
         ];
       default:
         return [];

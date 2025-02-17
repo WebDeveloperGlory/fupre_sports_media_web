@@ -19,12 +19,12 @@ const AdminPage = () => {
 
     const data = await loginUser( email, password );
     if( data ) {
-      if( data.code === '99' ) {
-        toast.error( data.message );
-      } else {
+      if( data.code === '00' ) {
         toast.success( data.message );
         setJwt( data.data );
         setTimeout(() => router.push( '/admin/dashboard' ), 1000)
+      } else {
+        toast.error( data.message );        
       }
     }
   };
