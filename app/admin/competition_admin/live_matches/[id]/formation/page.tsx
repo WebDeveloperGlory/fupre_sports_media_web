@@ -1,7 +1,7 @@
 'use client'
 
 import { getFixtureTeamPlayerData } from '@/lib/requests/fixturePage/requests';
-import { updateFixtureFormation } from '@/lib/requests/liveAdminPage/requests';
+import { updateFixtureFormation, updateLiveFixtureFormation } from '@/lib/requests/liveAdminPage/requests';
 import useAuthStore from '@/stores/authStore';
 import { Fixture, FixtureTeamPlayers } from '@/utils/requestDataTypes';
 import { Players } from '@/utils/stateTypes';
@@ -74,6 +74,7 @@ const FormationPage = (
     if( data && data.code === '00' ) {
       toast.success( data.message )
       console.log( data.data )
+      setTimeout( () => router.push('/admin/competition_admin/live_matches'), 1000 )
     } else {
       toast.error( data?.message );
     }

@@ -361,3 +361,9 @@ export interface TeamFixtureType {
     title: string;
     fixtures: Fixture[];
 };
+
+export interface LiveAdmins {
+    name: string,
+    email: string,
+    _id: string
+}

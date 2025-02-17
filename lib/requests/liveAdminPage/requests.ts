@@ -172,6 +172,37 @@ export const updateFixtureFormation = async ( fixtureId: string, homeLineup: Lin
     }
 }
 
+export const updateLiveFixtureFormation = async ( fixtureId: string, homeLineup: LineUp, awayLineup: LineUp, token: string ) => {
+    try {
+        const response = await axiosInstance.put(
+            `${ API_URL }/fixture/${ fixtureId }/formation`,
+            { homeLineup, awayLineup },
+            {
+                headers: {
+                    Authorization: `Bearer ${ token }`
+                },
+                withCredentials: true
+            }
+        );
+        const { data }: { data: SuccessRequest } = response;
+
+        if( data.code === '99' ) {
+            throw data
+        }
+        return data;
+    } catch( err: any ) {
+        const { response } = err as CustomError;
+
+        if( err?.status && err?.message ) {
+            console.error( `Error ${ err.status }: `, response?.data.message )
+            return response?.data || null;
+        } else {
+            console.error('Error fetching competitions: ', err );
+            return null;
+        }
+    }
+}
+
 export const updateLiveFixture = async ( fixtureId: string, updateData: LiveMatchUpdateRequestBody ) => {
     try {
         const response = await axiosInstance.post(
