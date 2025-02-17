@@ -259,6 +259,15 @@ export interface LiveMatchUpdateRequestBody {
     awayLineup?: LineUp
 }
 
+export interface CompetitionAdminCreateFixtureRequestBody {
+    homeTeam: string,
+    awayTeam: string,
+    date: string,
+    stadium: string,
+    referee: string,
+    round: string
+}
+
 export interface UserProfile {
     name: string,
     email: string,

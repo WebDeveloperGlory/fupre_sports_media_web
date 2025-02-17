@@ -11,7 +11,6 @@ import Log from '@/components/liveAdmin/Log';
 import LineUps from '@/components/liveAdmin/LineUps';
 import Time from '@/components/liveAdmin/Time';
 import ShareButton from '@/components/share/ShareButton';
-import { getLiveFixtureDetails } from '@/lib/requests/competitionPage/requests';
 import useAuthStore from '@/stores/authStore';
 import { toast } from 'react-toastify';
 import { Loader } from '@/components/ui/loader';

@@ -1,4 +1,5 @@
 import axiosInstance from "@/lib/config/axiosInstance";
+import { CompetitionAdminCreateFixtureRequestBody } from "@/utils/requestDataTypes";
 
 interface CustomError {
     status?: number;
@@ -59,6 +60,68 @@ export const getAdminCompetitionDetails = async ( token: string, competitionId: 
     try {
         const response = await axiosInstance.get(
             `${ API_URL }/admin/competitions/${ competitionId }`,
+            {
+                headers: {
+                    Authorization: `Bearer ${ token }`
+                },
+                withCredentials: true
+            }
+        );
+        const { data }: { data: SuccessRequest } = response;
+
+        if( data.code === '99' ) {
+            throw data
+        }
+        return data;
+    } catch( err: any ) {
+        const { response } = err as CustomError;
+
+        if( err?.status && err?.message ) {
+            console.error( `Error ${ err.status }: `, response?.data.message )
+            return response?.data || null;
+        } else {
+            console.error('Error fetching competitions: ', err );
+            return null;
+        }
+    }
+}
+
+export const getAdminCompetitionFixtures = async ( token: string, competitionId: string ) => {
+    try {
+        const response = await axiosInstance.get(
+            `${ API_URL }/admin/competitions/${ competitionId }/fixtures`,
+            {
+                headers: {
+                    Authorization: `Bearer ${ token }`
+                },
+                withCredentials: true
+            }
+        );
+        const { data }: { data: SuccessRequest } = response;
+
+        if( data.code === '99' ) {
+            throw data
+        }
+        return data;
+    } catch( err: any ) {
+        const { response } = err as CustomError;
+
+        if( err?.status && err?.message ) {
+            console.error( `Error ${ err.status }: `, response?.data.message )
+            return response?.data || null;
+        } else {
+            console.error('Error fetching competitions: ', err );
+            return null;
+        }
+    }
+}
+
+
+export const createCompetitionFixture = async ( token: string, competitionId: string, updateData: any ) => {
+    try {
+        const response = await axiosInstance.post(
+            `${ API_URL }/competition/${competitionId}/fixtures`,
+            { fixtures: [ updateData ] },
             {
                 headers: {
                     Authorization: `Bearer ${ token }`
