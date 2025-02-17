@@ -367,3 +367,27 @@ export interface LiveAdmins {
     email: string,
     _id: string
 }
+
+type AdminComp = {
+    name: string, 
+    type: string,
+    startDate: Date,
+    endDate: Date,
+    status: string,
+    _id: string
+}
+
+export interface AdminCompetition extends AdminComp {
+    teams: string[],
+    fixtures: string[],
+}
+
+export interface ExtendedAdminCompetition extends AdminComp {
+    teams: {
+        team: Team,
+        squadList: Player[]
+    }[],
+    fixtures: Fixture[],
+    rounds: string[],
+    description: string
+}
