@@ -6,7 +6,7 @@ import { Timeline } from '@/components/live/Timeline';
 import { BlurFade } from '@/components/ui/blur-fade';
 import { BackButton } from '@/components/ui/back-button';
 import { motion } from 'framer-motion';
-import { Trophy, Clock, Activity, Target, Flag, Users } from 'lucide-react';
+import { Trophy, Clock, Activity, Target, Flag, Users, PieChart } from 'lucide-react';
 import { getLiveFixtureDetails } from '@/lib/requests/liveAdminPage/requests';
 import { LiveFixture } from '@/utils/requestDataTypes';
 import { teamLogos } from '@/constants';
@@ -59,6 +59,73 @@ function StatBar({ label, home, away }: { label: string; home: number; away: num
           transition={{ duration: 1, ease: "easeOut" }}
           className="bg-emerald-500/50"
         />
+      </div>
+    </motion.div>
+  );
+}
+
+function PossessionBar({ home, away }: { home: number; away: number }) {
+  return (
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="bg-black/80 backdrop-blur-sm rounded-xl p-4 border border-border/20"
+    >
+      <div className="flex items-center gap-2 mb-2">
+        <Clock className="w-4 h-4 text-emerald-500" />
+        <span className="text-sm font-medium text-white">Possession</span>
+      </div>
+      <div className="flex items-center gap-4">
+        <span className="text-emerald-500 font-medium">{home}%</span>
+        <div className="flex-1 h-1.5 bg-muted/20 rounded-full overflow-hidden">
+          <div className="flex h-full">
+            <div 
+              className="h-full bg-emerald-500 transition-all duration-500"
+              style={{ width: `${home}%` }}
+            />
+            <div 
+              className="h-full bg-emerald-500/50 transition-all duration-500"
+              style={{ width: `${away}%` }}
+            />
+          </div>
+        </div>
+        <span className="text-emerald-500 font-medium">{away}%</span>
+      </div>
+    </motion.div>
+  );
+}
+
+function CardsBar({ home, away }: { home: { yellow: number; red: number }; away: { yellow: number; red: number } }) {
+  return (
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="bg-black/80 backdrop-blur-sm rounded-xl p-4 border border-border/20"
+    >
+      <div className="flex items-center gap-2 mb-2">
+        <span className="text-sm font-medium text-white">Cards</span>
+      </div>
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
+            <div className="w-3 h-4 bg-yellow-500 rounded-sm" />
+            <span className="text-white font-medium">{home.yellow}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <div className="w-3 h-4 bg-red-500 rounded-sm" />
+            <span className="text-white font-medium">{home.red}</span>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
+            <div className="w-3 h-4 bg-yellow-500 rounded-sm" />
+            <span className="text-white font-medium">{away.yellow}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <div className="w-3 h-4 bg-red-500 rounded-sm" />
+            <span className="text-white font-medium">{away.red}</span>
+          </div>
+        </div>
       </div>
     </motion.div>
   );
@@ -197,6 +264,24 @@ export default function LiveMatchPage({
                       away={ liveFixture.statistics.away.offsides }
                     />
                   </div>
+                  <div className="col-span-2 md:col-span-4">
+                    <PossessionBar
+                      home={ liveFixture.statistics.home.possession || 50 }
+                      away={ liveFixture.statistics.away.possession || 50 }
+                    />
+                  </div>
+                  <div className="col-span-2 md:col-span-4">
+                    <CardsBar 
+                      home={{ 
+                        yellow: liveFixture.statistics.home.yellowCards, 
+                        red: liveFixture.statistics.home.redCards 
+                      }} 
+                      away={{ 
+                        yellow: liveFixture.statistics.away.yellowCards, 
+                        red: liveFixture.statistics.away.redCards 
+                      }} 
+                    />
+                  </div>
 
                   {/* Match Timeline */}
                   <div className="bg-card/40 backdrop-blur-sm rounded-xl md:rounded-2xl p-4 md:p-6 border border-border">
@@ -211,90 +296,6 @@ export default function LiveMatchPage({
                       homeLineups={ liveFixture.homeLineup }
                       awayLineups={ liveFixture.awayLineup }
                     />
-                  </div>
-
-                  {/* Detailed Stats */}
-                  <div className="bg-card/40 backdrop-blur-sm rounded-xl md:rounded-2xl p-4 md:p-6 border border-border">
-                    <h2 className="text-base md:text-lg font-semibold mb-4 md:mb-6 flex items-center gap-2">
-                      <div className="w-1 h-1 rounded-full bg-emerald-500" />
-                      Match Statistics
-                    </h2>
-                    <div className="space-y-4 md:space-y-6">
-                      <StatBar
-                        label="Shots"
-                        home={ liveFixture.statistics.home.shotsOnTarget + liveFixture.statistics.home.shotsOffTarget }
-                        away={ liveFixture.statistics.away.shotsOnTarget + liveFixture.statistics.away.shotsOffTarget }
-                      />
-                      <StatBar
-                        label="Shots on Target"
-                        home={ liveFixture.statistics.home.shotsOnTarget }
-                        away={ liveFixture.statistics.away.shotsOnTarget }
-                      />
-                      <StatBar
-                        label="Corners"
-                        home={ liveFixture.statistics.home.corners }
-                        away={ liveFixture.statistics.away.corners }
-                      />
-                      <StatBar
-                        label="Fouls"
-                        home={ liveFixture.statistics.home.fouls }
-                        away={ liveFixture.statistics.away.fouls }
-                      />
-
-                      {/* Cards Section */}
-                      <div className="grid grid-cols-2 gap-4 pt-4">
-                        <div className="space-y-3">
-                          <motion.div 
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            className="flex items-center justify-between"
-                          >
-                            <div className="flex items-center gap-2">
-                              <div className="w-4 h-6 bg-yellow-500 rounded-sm" />
-                              <span className="text-sm">Yellow Cards</span>
-                            </div>
-                            <span className="font-semibold">{ liveFixture.statistics.home.yellowCards }</span>
-                          </motion.div>
-                          <motion.div 
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: 0.1 }}
-                            className="flex items-center justify-between"
-                          >
-                            <div className="flex items-center gap-2">
-                              <div className="w-4 h-6 bg-red-500 rounded-sm" />
-                              <span className="text-sm">Red Cards</span>
-                            </div>
-                            <span className="font-semibold">{ liveFixture.statistics.home.redCards }</span>
-                          </motion.div>
-                        </div>
-                        <div className="space-y-3">
-                          <motion.div 
-                            initial={{ opacity: 0, x: 20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            className="flex items-center justify-between"
-                          >
-                            <span className="font-semibold">{ liveFixture.statistics.away.yellowCards }</span>
-                            <div className="flex items-center gap-2">
-                              <span className="text-sm">Yellow Cards</span>
-                              <div className="w-4 h-6 bg-yellow-500 rounded-sm" />
-                            </div>
-                          </motion.div>
-                          <motion.div 
-                            initial={{ opacity: 0, x: 20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: 0.1 }}
-                            className="flex items-center justify-between"
-                          >
-                            <span className="font-semibold">{ liveFixture.statistics.away.redCards }</span>
-                            <div className="flex items-center gap-2">
-                              <span className="text-sm">Red Cards</span>
-                              <div className="w-4 h-6 bg-red-500 rounded-sm" />
-                            </div>
-                          </motion.div>
-                        </div>
-                      </div>
-                    </div>
                   </div>
                 </>
               )

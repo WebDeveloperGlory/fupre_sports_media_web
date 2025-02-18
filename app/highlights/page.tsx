@@ -7,6 +7,14 @@ import { BackButton } from "@/components/ui/back-button";
 // YouTube video data
 const highlights = [
   {
+    id: 5,
+    videoId: "IdV6OYycymQ",
+    title: "TWALE FC (1) - (3) KALAKUTA FC HIGHLIGHTS|| FSL 24/25 SEASON",
+    date: "Mar 20, 2025",
+    views: "47 views",
+    category: "Football",
+  },
+  {
     id: 4,
     videoId: "sAryUL5_oVw",
     title: "SEVENTEEN FC (1) VS (2) NEW HORIZONS HIGHLIGHTS|| FSL 24/25 SEASON",
