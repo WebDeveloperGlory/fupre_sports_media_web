@@ -149,7 +149,28 @@ const LiveEvents = (
         </div>
 
         <div className='p-4 pt-2'>
-          <PossessionTracker />
+          <PossessionTracker
+            homeTeamTime={ statValues.home.possessionTime || 0 }
+            awayTeamTime={ statValues.away.possessionTime || 0 }
+            setHomeTeamTime={
+              ( timeDiff: number ) => setStatValues( ( prev: LiveStatState ) => ({
+                ...prev,
+                home: {
+                  ...prev.home,
+                  possessionTime: prev.home.possessionTime + timeDiff
+                }
+              }))
+            }
+            setAwayTeamTime={
+              ( timeDiff: number ) => setStatValues( ( prev: LiveStatState ) => ({
+                ...prev,
+                away: {
+                  ...prev.away,
+                  possessionTime: prev.away.possessionTime + timeDiff
+                }
+              }))
+            }
+          />
           
           <StatDisplay
             label='Goals'

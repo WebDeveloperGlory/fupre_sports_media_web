@@ -69,6 +69,8 @@ const getEventText = ( event: Event, players: Players[] ) => {
     }
 };
 
+const EXCLUDED_PLAYER_EVENT_TYPE = ['foul', 'corner', 'offside', 'kickoff', 'halftime', 'fulltime']
+
 const LogCard = (
     { event, onDelete, onEdit, homePlayers, awayPlayers, homeTeam, awayTeam }:
     { event: Event, onDelete: ( id: number ) => void, onEdit: ( id: number, updatedEvent: Event ) => void, homePlayers: Players[] | [], awayPlayers: Players[] | [], homeTeam: Team, awayTeam: Team }
@@ -174,7 +176,7 @@ const LogCard = (
                         </div>
             
                         {
-                            playerList.length > 0 && (
+                            playerList.length > 0 && !EXCLUDED_PLAYER_EVENT_TYPE.includes( event.eventType ) && (
                                 <div className="flex items-center space-x-2">
                                     <User className="w-4 h-4 text-gray-400" />
                                     <select

@@ -235,7 +235,7 @@ export const updateLiveFixtureFormation = async ( fixtureId: string, homeLineup:
 
 export const updateLiveFixture = async ( token: string, fixtureId: string, updateData: LiveMatchUpdateRequestBody ) => {
     try {
-        const response = await axiosInstance.post(
+        const response = await axiosInstance.put(
             `${ API_URL }/live-fixtures/update/${ fixtureId }`,
             updateData,
             {

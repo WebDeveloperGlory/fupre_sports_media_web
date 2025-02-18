@@ -90,7 +90,7 @@ const Timer = () => {
                 <button 
                     onClick={ handleKickoff }
                     className="col-span-2 bg-gray-800 text-white py-2 rounded-lg disabled:opacity-50"
-                    disabled={ kickOffClicked }
+                    disabled={ kickOffClicked || time !== 0 }
                 >
                     KickOff
                 </button>

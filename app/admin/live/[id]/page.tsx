@@ -14,7 +14,7 @@ import ShareButton from '@/components/share/ShareButton';
 import useAuthStore from '@/stores/authStore';
 import { toast } from 'react-toastify';
 import { Loader } from '@/components/ui/loader';
-import { getLiveFixtureDetails } from '@/lib/requests/liveAdminPage/requests';
+import { getLiveFixtureDetails, updateLiveFixture } from '@/lib/requests/liveAdminPage/requests';
 import { BackButton } from '@/components/ui/back-button';
 import useLiveStore from '@/stores/liveStore';
 import useTimerStore from '@/stores/timerStore';
@@ -27,8 +27,8 @@ const IndividualLivePage = (
     const router = useRouter();
 
     const { jwt } = useAuthStore();
-    const { setServerMatchEvents } = useLiveStore();
-    const { setTime } = useTimerStore();
+    const { matchEvents, setServerMatchEvents } = useLiveStore();
+    const { time, setTime } = useTimerStore();
 
     const [ loading, setLoading ] = useState<boolean>( true );
     const [ statValues, setStatValues ] = useState<LiveStatState>( liveFixtureInitialStateData );
@@ -69,6 +69,34 @@ const IndividualLivePage = (
 
     if( loading ) {
         return <Loader />
+    };
+
+    const handleStatUpload = async () => {
+        const requestBodyData = {
+            result: {
+                homeScore: statValues.homeScore,
+                awayScore: statValues.awayScore,
+                homePenalty: statValues.homePenalty,
+                awayPenalty: statValues.awayPenalty,
+            },
+            statistics: {
+                home: statValues.home,
+                away: statValues.away
+            },
+            matchEvents,
+            time
+        }
+
+        if( window.confirm( 'Save To Database?' ) ) {
+            const data = await updateLiveFixture( jwt!, resolvedParams.id, requestBodyData );
+            if( data && data.code === '00' ) {
+                toast.success( data.message )
+            } else {
+                toast.error( data?.message || 'An Error Occurred' );
+            }
+        } else {
+            toast.error( 'Save Cancelled' );
+        }
     }
   return (
     <div>
@@ -79,8 +107,21 @@ const IndividualLivePage = (
 
         {/* Header */}
         <div className='py-10 md:py-0 pb-2 flex items-center justify-center text-primary flex-col'>
-            <ShareButton statValues={ statValues } />
+            {/* Buttons */}
+            <div className='flex gap-2 items-center'>
+                {/* Update Backend Button */}
+                <button
+                    onClick={ handleStatUpload }
+                    className='bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded mb-4'
+                >
+                    Upload Data
+                </button>
 
+                {/* Share Button */}
+                <ShareButton statValues={ statValues } />
+            </div>
+
+            {/* Time Display */}
             <Time />
 
             <p>{ statValues.competition?.name || 'Friendly' }</p>

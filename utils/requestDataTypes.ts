@@ -15,7 +15,7 @@ export interface Statistics {
     redCards: number;
     offsides: number;
     corners: number;
-    possessionTime?: number
+    possessionTime: number
 }
 
 type GoalScorers = {
@@ -254,10 +254,14 @@ export interface LiveFixture {
 
 export interface LiveMatchUpdateRequestBody {
     result?: Result, 
-    statistics?: Statistics, 
+    statistics?: {
+        home: Statistics, 
+        away: Statistics,
+    }, 
     matchEvents?: Event[] | [], 
     homeLineup?: LineUp, 
-    awayLineup?: LineUp
+    awayLineup?: LineUp,
+    time?: number,
 }
 
 export interface CompetitionAdminCreateFixtureRequestBody {

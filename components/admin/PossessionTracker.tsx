@@ -1,8 +1,9 @@
 import React, { useState } from 'react'
 
-const PossessionTracker = () => {
-    const [ homeTeamTime, setHomeTeamTime ] = useState<number>( 0 );
-    const [ awayTeamTime, setAwayTeamTime ] = useState<number>( 0 );
+const PossessionTracker = (
+    { homeTeamTime, awayTeamTime, setHomeTeamTime, setAwayTeamTime }: 
+    { homeTeamTime: number, awayTeamTime: number, setHomeTeamTime: ( timeDiff: number ) => void, setAwayTeamTime: ( timeDiff: number ) => void, }
+) => {
     const [ startTime, setStartTime ] = useState<number | null>( null );
     const [ currentTeam, setCurrentTeam ] = useState<"home" | "away" | null>( null );
 
@@ -18,9 +19,9 @@ const PossessionTracker = () => {
         const timeDiff = ( Date.now() - startTime ) / 1000; // Convert ms to seconds
 
         if ( currentTeam === "home") {
-            setHomeTeamTime( ( prev ) => prev + timeDiff );
+            setHomeTeamTime( timeDiff );
         } else {
-            setAwayTeamTime( ( prev ) => prev + timeDiff );
+            setAwayTeamTime( timeDiff );
         }
 
         // Reset
