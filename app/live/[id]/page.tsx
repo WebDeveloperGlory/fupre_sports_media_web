@@ -6,7 +6,7 @@ import { Timeline } from '@/components/live/Timeline';
 import { BlurFade } from '@/components/ui/blur-fade';
 import { BackButton } from '@/components/ui/back-button';
 import { motion } from 'framer-motion';
-import { Trophy, Clock, Activity, Target, Flag, Users } from 'lucide-react';
+import { Trophy, Clock, Activity, Target, Flag, Users, PieChart } from 'lucide-react';
 import { getLiveFixtureDetails } from '@/lib/requests/liveAdminPage/requests';
 import { LiveFixture } from '@/utils/requestDataTypes';
 import { teamLogos } from '@/constants';
@@ -59,6 +59,31 @@ function StatBar({ label, home, away }: { label: string; home: number; away: num
           transition={{ duration: 1, ease: "easeOut" }}
           className="bg-emerald-500/50"
         />
+      </div>
+    </motion.div>
+  );
+}
+
+function PossessionBar({ home, away }: { home: number; away: number }) {
+  return (
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="bg-black/80 backdrop-blur-sm rounded-xl p-4 border border-border/20"
+    >
+      <div className="flex items-center gap-2 mb-2">
+        <Clock className="w-4 h-4 text-emerald-500" />
+        <span className="text-sm font-medium text-white">Possession</span>
+      </div>
+      <div className="flex items-center gap-4">
+        <span className="text-emerald-500 font-medium">{home}%</span>
+        <div className="flex-1 h-1.5 bg-muted/20 rounded-full overflow-hidden">
+          <div 
+            className="h-full bg-emerald-500 transition-all duration-500"
+            style={{ width: `${home}%` }}
+          />
+        </div>
+        <span className="text-emerald-500 font-medium">{away}%</span>
       </div>
     </motion.div>
   );
@@ -195,6 +220,12 @@ export default function LiveMatchPage({
                       label="Offsides"
                       home={ liveFixture.statistics.home.offsides }
                       away={ liveFixture.statistics.away.offsides }
+                    />
+                  </div>
+                  <div className="col-span-2 md:col-span-4">
+                    <PossessionBar
+                      home={ liveFixture.statistics.home.possession || 50 }
+                      away={ liveFixture.statistics.away.possession || 50 }
                     />
                   </div>
 

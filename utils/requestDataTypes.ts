@@ -15,6 +15,7 @@ export interface Statistics {
     redCards: number;
     offsides: number;
     corners: number;
+    possession: number;
 }
 
 type GoalScorers = {
