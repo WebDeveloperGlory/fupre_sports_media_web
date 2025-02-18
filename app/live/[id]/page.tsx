@@ -89,6 +89,42 @@ function PossessionBar({ home, away }: { home: number; away: number }) {
   );
 }
 
+function CardsBar({ home, away }: { home: { yellow: number; red: number }; away: { yellow: number; red: number } }) {
+  return (
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="bg-black/80 backdrop-blur-sm rounded-xl p-4 border border-border/20"
+    >
+      <div className="flex items-center gap-2 mb-2">
+        <span className="text-sm font-medium text-white">Cards</span>
+      </div>
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
+            <div className="w-3 h-4 bg-yellow-500 rounded-sm" />
+            <span className="text-white font-medium">{home.yellow}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <div className="w-3 h-4 bg-red-500 rounded-sm" />
+            <span className="text-white font-medium">{home.red}</span>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
+            <div className="w-3 h-4 bg-yellow-500 rounded-sm" />
+            <span className="text-white font-medium">{away.yellow}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <div className="w-3 h-4 bg-red-500 rounded-sm" />
+            <span className="text-white font-medium">{away.red}</span>
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
 export default function LiveMatchPage({ 
   params 
 }: { 
@@ -226,6 +262,18 @@ export default function LiveMatchPage({
                     <PossessionBar
                       home={ liveFixture.statistics.home.possession || 50 }
                       away={ liveFixture.statistics.away.possession || 50 }
+                    />
+                  </div>
+                  <div className="col-span-2 md:col-span-4">
+                    <CardsBar 
+                      home={{ 
+                        yellow: liveFixture.statistics.home.yellowCards, 
+                        red: liveFixture.statistics.home.redCards 
+                      }} 
+                      away={{ 
+                        yellow: liveFixture.statistics.away.yellowCards, 
+                        red: liveFixture.statistics.away.redCards 
+                      }} 
                     />
                   </div>
 
