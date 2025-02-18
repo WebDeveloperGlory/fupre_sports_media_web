@@ -489,7 +489,7 @@ export default function CompetitionPage({
                                   <div className="flex items-center gap-4">
                                     <div className="relative w-8 h-8">
                                       <Image
-                                        src={ teamLogos[ 'Kalakuta FC' ] || '/images/team_logos/default.jpg' }
+                                        src={ teamLogos[ entry.team ] || '/images/team_logos/default.jpg' }
                                         alt={`${ entry.team } logo`}
                                         fill
                                         className="object-contain"
