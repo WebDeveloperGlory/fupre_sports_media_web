@@ -94,6 +94,11 @@ const Stats = (
     { home, away, fixtureData }: 
     { home: Statistics | undefined, away: Statistics | undefined, fixtureData: Fixture }
 ) => {
+  // Calculate total elapsed game time
+  const totalElapsedGameTime = ( home && away ) ? home.possessionTime + away.possessionTime : 0;
+  const homePossession = totalElapsedGameTime > 0 ? ( home!.possessionTime / totalElapsedGameTime ) * 100 : 50;
+  const awayPossession = 100 - homePossession; // Ensures total is always 100%
+
   return (
     <div className='space-y-4 md:space-y-6'>
         {/* Quick Stats */}
@@ -122,13 +127,19 @@ const Stats = (
                 home={home ? home.offsides : 0}
                 away={away ? away.offsides : 0}
             />
+            <QuickStat
+              icon={<Users className="w-4 h-4 md:w-5 md:h-5 text-emerald-500" />}
+              label="Fouls"
+              home={ home ? home.fouls : 0 }
+              away={ away ? away.fouls : 0 }
+            />
         </div>
 
         {/* Possession Bar */}
         <div className="col-span-2 md:col-span-4">
             <PossessionBar
-                home={home ? home.possession || 50 : 50}
-                away={away ? away.possession || 50 : 50}
+                home={ Number( homePossession.toFixed( 2 ) ) }
+                away={ Number( awayPossession.toFixed( 2 ) ) }
             />
         </div>
 

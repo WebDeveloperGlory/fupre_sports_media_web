@@ -154,6 +154,11 @@ export default function LiveMatchPage({
     if( loading ) fetchData();
   }, [ loading, resolvedParams.id ])
 
+  // Calculate total elapsed game time
+  const totalElapsedGameTime = liveFixture ? liveFixture.statistics.home.possessionTime + liveFixture.statistics.home.possessionTime : 0;
+  const homePossession = totalElapsedGameTime > 0 ? ( liveFixture!.statistics.home.possessionTime / totalElapsedGameTime ) * 100 : 50;
+  const awayPossession = 100 - homePossession; // Ensures total is always 100%
+
   return (
     <main className="min-h-screen">
       {/* Back Button */}
@@ -263,11 +268,17 @@ export default function LiveMatchPage({
                       home={ liveFixture.statistics.home.offsides }
                       away={ liveFixture.statistics.away.offsides }
                     />
+                    <QuickStat
+                      icon={<Users className="w-4 h-4 md:w-5 md:h-5 text-emerald-500" />}
+                      label="Fouls"
+                      home={ liveFixture.statistics.home.fouls }
+                      away={ liveFixture.statistics.away.fouls }
+                    />
                   </div>
                   <div className="col-span-2 md:col-span-4">
                     <PossessionBar
-                      home={ liveFixture.statistics.home.possession || 50 }
-                      away={ liveFixture.statistics.away.possession || 50 }
+                      home={ Number( homePossession.toFixed( 2 ) ) }
+                      away={ Number( awayPossession.toFixed( 2 ) ) }
                     />
                   </div>
                   <div className="col-span-2 md:col-span-4">

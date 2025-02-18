@@ -19,7 +19,11 @@ export interface Statistics {
 }
 
 type GoalScorers = {
-    id: string,
+    team: string,
+    id: {
+        _id: string,
+        name: string
+    },
     time: number,
     _id: string
 }
