@@ -115,7 +115,7 @@ const LiveEvents = (
     }
   return (
     <div>
-      <div className='px-4 lg:px-6 py-4 pb-3 w-full tracking-wide'>
+      <div className='py-4 pb-3 w-full tracking-wide'>
         {/* Penalty Checkbox */}
         { 
           statValues.competition?.type === 'knockout' && (

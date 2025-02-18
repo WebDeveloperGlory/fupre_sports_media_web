@@ -15,6 +15,7 @@ import useAuthStore from '@/stores/authStore';
 import { toast } from 'react-toastify';
 import { Loader } from '@/components/ui/loader';
 import { getLiveFixtureDetails } from '@/lib/requests/liveAdminPage/requests';
+import { BackButton } from '@/components/ui/back-button';
 
 const IndividualLivePage = (
     { params }:
@@ -53,8 +54,13 @@ const IndividualLivePage = (
     }
   return (
     <div>
+        {/* Back Button */}
+        <div className="fixed top-6 left-4 md:left-8 z-10">
+            <BackButton />
+        </div>
+
         {/* Header */}
-        <div className='py-6 pb-2 px-4 flex items-center justify-center text-primary flex-col'>
+        <div className='py-10 md:py-0 pb-2 flex items-center justify-center text-primary flex-col'>
             <ShareButton statValues={ statValues } />
 
             <Time />

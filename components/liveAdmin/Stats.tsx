@@ -3,7 +3,7 @@ import React from 'react'
 
 const Stats = ({ homeStats, awayStats }: { homeStats: FixtureStats, awayStats: FixtureStats }) => {
   return (
-    <div className='px-4 lg:px-6 py-4 pb-3 w-full'>
+    <div className='py-4 pb-3 w-full'>
         <div className="bg-muted rounded-lg p-6">
             <h3 className="text-center text-sm font-semibold mb-4">Match Stats</h3>
             <div>

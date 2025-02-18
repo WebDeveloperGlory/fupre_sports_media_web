@@ -16,7 +16,7 @@ const Log = (
         updateMatchEvents( id, updatedEvent );
     };
   return (
-    <div className='px-4 lg:px-6 py-4 pb-3 w-full'>
+    <div className='py-4 pb-3 w-full'>
         {
             matchEvents.length > 0 && matchEvents.map( ( event ) => (
                 <LogCard
