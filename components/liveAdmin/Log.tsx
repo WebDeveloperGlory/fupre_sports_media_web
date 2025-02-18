@@ -7,7 +7,7 @@ const Log = (
     { statValues, homeLineup, awayLineup }: 
     { statValues: LiveStatState, homeLineup: Players[] | [], awayLineup: Players[] | [] }
 ) => {
-    const { matchEvents, setMatchEvents, deleteMatchEvents, updateMatchEvents } = useLiveStore();
+    const { matchEvents, deleteMatchEvents, updateMatchEvents } = useLiveStore();
 
     const handleDeleteEvent = ( id: number ) => {
         deleteMatchEvents( id );

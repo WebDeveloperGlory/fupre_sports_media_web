@@ -17,6 +17,7 @@ export interface LiveStore {
     hasMatchEvents: boolean,
     kickOffClicked: boolean,
     setMatchEvents: ( event: Event ) => void,
+    setServerMatchEvents: ( events: Event[] ) => void,
     deleteMatchEvents: ( eventId: number ) => void,
     updateMatchEvents: ( eventId: number, updatedEvent: Event ) => void,
     setHasMatchEvents: ( checked: boolean ) => void,
@@ -32,6 +33,7 @@ const useLiveStore = create<LiveStore>( ( set ) => ({
         matchEvents: [ ...state.matchEvents, event ],
         currentEventId: state.currentEventId + 1
     })),
+    setServerMatchEvents: ( events: Event[] ) => set({ matchEvents: events }),
     deleteMatchEvents: ( eventId: number ) => set( ( state: LiveStore ) => {
         const filteredEvents = [ ...state.matchEvents ].filter( ( event: Event ) => event.id !== eventId );
 

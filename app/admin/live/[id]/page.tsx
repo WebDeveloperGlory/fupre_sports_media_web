@@ -16,6 +16,8 @@ import { toast } from 'react-toastify';
 import { Loader } from '@/components/ui/loader';
 import { getLiveFixtureDetails } from '@/lib/requests/liveAdminPage/requests';
 import { BackButton } from '@/components/ui/back-button';
+import useLiveStore from '@/stores/liveStore';
+import useTimerStore from '@/stores/timerStore';
 
 const IndividualLivePage = (
     { params }:
@@ -25,6 +27,8 @@ const IndividualLivePage = (
     const router = useRouter();
 
     const { jwt } = useAuthStore();
+    const { setServerMatchEvents } = useLiveStore();
+    const { setTime } = useTimerStore();
 
     const [ loading, setLoading ] = useState<boolean>( true );
     const [ statValues, setStatValues ] = useState<LiveStatState>( liveFixtureInitialStateData );
@@ -35,7 +39,21 @@ const IndividualLivePage = (
         const fetchData = async () => {
             const data = await getLiveFixtureDetails( resolvedParams.id );
             if( data && data.data ) {
-                // setStatValues( data.data );
+                const { homeTeam, awayTeam, homeLineup, awayLineup, competition, statistics, result, matchEvents, time } = data.data;
+
+                setStatValues({
+                    homeLineup, awayLineup,
+                    homeTeam, awayTeam,
+                    competition,
+                    home: statistics.home,
+                    away: statistics.away,
+                    homeScore: result.homeScore,
+                    awayScore: result.awayScore,
+                    homePenalty: result.homePenalty,
+                    awayPenalty: result.awayPenalty
+                });
+                setServerMatchEvents( matchEvents );
+                setTime( time );
             }
             console.log({ data })
             setLoading( false );
