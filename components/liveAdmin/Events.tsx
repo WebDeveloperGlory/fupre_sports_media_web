@@ -4,6 +4,7 @@ import useLiveStore from '@/stores/liveStore';
 import { EVENT_TYPES } from '@/constants';
 import useTimerStore from '@/stores/timerStore';
 import { MinusCircle, PlusCircle } from 'lucide-react';
+import PossessionTracker from '../admin/PossessionTracker';
 
 const LiveEvents = (
   { statValues, hasPenalties, setStatValues, setHasPenalties }: 
@@ -77,6 +78,17 @@ const LiveEvents = (
             id: currentEventId
           }
         );
+        setMatchEvents(
+          {
+            time: currentTime,
+            eventType: EVENT_TYPES.assist,
+            player: null,
+            team: teamDetails,
+            substitutedFor: null,
+            commentary: null,
+            id: currentEventId + 2000
+          }
+        )
         console.log( matchEvents )
       }
     }
@@ -115,7 +127,7 @@ const LiveEvents = (
                 onChange={(e) => handlePenaltyChange(e.target.checked)}
                 className="w-4 h-4 text-blue-600 cursor-pointer"
               />
-              <label htmlFor="penalties" className="ml-2 text-gray-700 cursor-pointer">
+              <label htmlFor="penalties" className="ml-2 text-muted-foreground cursor-pointer">
                 Match went to penalties
               </label>
             </div>
@@ -131,12 +143,14 @@ const LiveEvents = (
             onChange={ ( e ) => handleMatchEventsChange( e.target.checked ) }
             className="w-4 h-4 text-blue-600 cursor-pointer"
           />
-          <label htmlFor="matchEvents" className="ml-2 text-gray-700 cursor-pointer">
+          <label htmlFor="matchEvents" className="ml-2 text-muted-foreground cursor-pointer">
             Enable Match Events
           </label>
         </div>
 
         <div className='p-4 pt-2'>
+          <PossessionTracker />
+          
           <StatDisplay
             label='Goals'
             homeValue={ statValues.homeScore }

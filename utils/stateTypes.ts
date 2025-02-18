@@ -46,7 +46,8 @@ export interface FixtureStats {
     yellowCards: number,
     redCards: number,
     offsides: number,
-    corners: number
+    corners: number,
+    possessionTime?: number
 }
 
 export interface LiveStatState {

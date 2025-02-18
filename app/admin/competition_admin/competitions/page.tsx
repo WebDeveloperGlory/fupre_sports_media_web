@@ -100,7 +100,7 @@ const CompetitionAdminCompetitionsPage = () => {
                 
                 <Link
                   href={`/admin/competition_admin/competitions/${ comp._id }`}
-                  className="flex items-center justify-between border-t md:border-t-0 md:border-l p-4 bg-gray-50 dark:bg-gray-900"
+                  className="flex items-center justify-between border-t md:border-t-0 md:border-l p-4 bg-gray-50 dark:bg-gray-800"
                 >
                   <div className="flex items-center gap-1 text-sm text-gray-500">
                     <span>{ comp.fixtures.length }</span>

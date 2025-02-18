@@ -83,7 +83,8 @@ export const liveFixtureInitialStateData = {
         yellowCards: 0,
         redCards: 0,
         offsides: 0,
-        corners: 0
+        corners: 0,
+        possessionTime: 0,
     },
     away: {
         shotsOnTarget: 0,
@@ -92,7 +93,8 @@ export const liveFixtureInitialStateData = {
         yellowCards: 0,
         redCards: 0,
         offsides: 0,
-        corners: 0
+        corners: 0,
+        possessionTime: 0,
     },
 	homeScore: 0,
     awayScore: 0,
