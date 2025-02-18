@@ -341,7 +341,7 @@ export default function CompetitionPage({
                                 <td className="text-center py-4 px-3">
                                   <div className="flex items-center justify-center gap-1">
                                     { 
-                                      entry.form.map((result, i) => (
+                                      [ ...entry.form ].reverse().map((result, i) => (
                                         <span
                                           key={i}
                                           className={`w-6 h-6 flex items-center justify-center rounded-full text-xs font-medium ${
