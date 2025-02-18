@@ -171,6 +171,37 @@ export const initializeLiveFixture = async ( fixtureId: string, adminId: string,
     }
 }
 
+export const endLiveFixture = async ( fixtureId: string, token: string ) => {
+    try {
+        const response = await axiosInstance.post(
+            `${ API_URL }/live-fixtures/finalize`,
+            { fixtureId },
+            {
+                headers: {
+                    Authorization: `Bearer ${ token }`
+                },
+                withCredentials: true
+            }
+        );
+        const { data }: { data: SuccessRequest } = response;
+
+        if( data.code === '99' ) {
+            throw data
+        }
+        return data;
+    } catch( err: any ) {
+        const { response } = err as CustomError;
+
+        if( err?.status && err?.message ) {
+            console.error( `Error ${ err.status }: `, response?.data.message )
+            return response?.data || null;
+        } else {
+            console.error('Error ending live: ', err );
+            return null;
+        }
+    }
+}
+
 export const updateFixtureFormation = async ( fixtureId: string, homeLineup: LineUp, awayLineup: LineUp, token: string ) => {
     try {
         const response = await axiosInstance.put(

@@ -14,7 +14,7 @@ import ShareButton from '@/components/share/ShareButton';
 import useAuthStore from '@/stores/authStore';
 import { toast } from 'react-toastify';
 import { Loader } from '@/components/ui/loader';
-import { getLiveFixtureDetails, updateLiveFixture } from '@/lib/requests/liveAdminPage/requests';
+import { endLiveFixture, getLiveFixtureDetails, updateLiveFixture } from '@/lib/requests/liveAdminPage/requests';
 import { BackButton } from '@/components/ui/back-button';
 import useLiveStore from '@/stores/liveStore';
 import useTimerStore from '@/stores/timerStore';
@@ -28,7 +28,7 @@ const IndividualLivePage = (
 
     const { jwt } = useAuthStore();
     const { matchEvents, setServerMatchEvents } = useLiveStore();
-    const { time, setTime } = useTimerStore();
+    const { time, isGameOver, setTime } = useTimerStore();
 
     const [ loading, setLoading ] = useState<boolean>( true );
     const [ statValues, setStatValues ] = useState<LiveStatState>( liveFixtureInitialStateData );
@@ -98,6 +98,19 @@ const IndividualLivePage = (
             toast.error( 'Save Cancelled' );
         }
     }
+    const handleLiveEnd = async () => {
+        if( window.confirm( 'End Game?' ) ) {
+            const data = await endLiveFixture( resolvedParams.id, jwt! );
+            if( data && data.code === '00' ) {
+                toast.success( data.message );
+                router.push('/admin/live');
+            } else {
+                toast.error( data?.message || 'An Error Occurred' );
+            }
+        } else {
+            toast.error( 'End Cancelled' );
+        }
+    }
   return (
     <div>
         {/* Back Button */}
@@ -108,7 +121,7 @@ const IndividualLivePage = (
         {/* Header */}
         <div className='py-10 md:py-0 pb-2 flex items-center justify-center text-primary flex-col'>
             {/* Buttons */}
-            <div className='flex gap-2 items-center'>
+            <div className='flex gap-2 items-center flex-wrap justify-center'>
                 {/* Update Backend Button */}
                 <button
                     onClick={ handleStatUpload }
@@ -119,6 +132,15 @@ const IndividualLivePage = (
 
                 {/* Share Button */}
                 <ShareButton statValues={ statValues } />
+
+                {/* End Game Button */}
+                <button
+                    onClick={ handleLiveEnd }
+                    className='bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded mb-4 disabled:opacity-50'
+                    disabled={ !isGameOver }
+                >
+                    End Live
+                </button>
             </div>
 
             {/* Time Display */}

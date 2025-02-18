@@ -7,6 +7,7 @@ export interface TimerStore {
     half: string;
     injuryTime: number;
     isPenaltyShootout: boolean;
+    isGameOver: boolean;
     startTimer: () => void;
     stopTimer: () => void;
     pauseTimer: () => void;
@@ -14,6 +15,7 @@ export interface TimerStore {
     setHalf: (newHalf: string) => void;
     setInjuryTime: (newInjuryTime: number) => void;
     startPenaltyShootout: () => void;
+    handleGameOver: () => void;
 }
 
 const useTimerStore = create<TimerStore>((set) => ({
@@ -23,6 +25,7 @@ const useTimerStore = create<TimerStore>((set) => ({
     half: 'First Half', // Current half of the match
     injuryTime: 0, // Injury time in seconds for the current half
     isPenaltyShootout: false, // Indicates if the game is in a penalty shootout
+    isGameOver: false,
 
     startTimer: () => set({ isRunning: true, isPaused: false }),
 
@@ -44,6 +47,8 @@ const useTimerStore = create<TimerStore>((set) => ({
     setInjuryTime: (newInjuryTime: number) => set({ injuryTime: newInjuryTime }),
 
     startPenaltyShootout: () => set({ isPenaltyShootout: true, isRunning: false, isPaused: false }),
+
+    handleGameOver: () => set({ isGameOver: true }),
 }));
 
 export default useTimerStore;

@@ -20,6 +20,7 @@ const Timer = () => {
       setHalf,
       setInjuryTime,
       startPenaltyShootout,
+      handleGameOver,
     } = useTimerStore();
     const { currentEventId, kickOffClicked, setMatchEvents, setKickOffClicked } = useLiveStore();
 
@@ -35,7 +36,8 @@ const Timer = () => {
                 commentary: null,
                 id: currentEventId
             })
-        }
+        };
+        handleGameOver();
     };
   
     const handleNextHalf = () => {
