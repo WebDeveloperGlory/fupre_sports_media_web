@@ -78,10 +78,16 @@ function PossessionBar({ home, away }: { home: number; away: number }) {
       <div className="flex items-center gap-4">
         <span className="text-emerald-500 font-medium">{home}%</span>
         <div className="flex-1 h-1.5 bg-muted/20 rounded-full overflow-hidden">
-          <div 
-            className="h-full bg-emerald-500 transition-all duration-500"
-            style={{ width: `${home}%` }}
-          />
+          <div className="flex h-full">
+            <div 
+              className="h-full bg-emerald-500 transition-all duration-500"
+              style={{ width: `${home}%` }}
+            />
+            <div 
+              className="h-full bg-emerald-500/50 transition-all duration-500"
+              style={{ width: `${away}%` }}
+            />
+          </div>
         </div>
         <span className="text-emerald-500 font-medium">{away}%</span>
       </div>
