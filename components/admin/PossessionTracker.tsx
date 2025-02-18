@@ -26,6 +26,7 @@ const PossessionTracker = () => {
         // Reset
         setStartTime( null );
         setCurrentTeam( null );
+        console.log( homeTeamTime, awayTeamTime )
     };
 
     // Calculate total elapsed game time
@@ -33,7 +34,7 @@ const PossessionTracker = () => {
     const homePossession = totalElapsedGameTime > 0 ? ( homeTeamTime / totalElapsedGameTime ) * 100 : 50;
     const awayPossession = 100 - homePossession; // Ensures total is always 100%
   return (
-    <div>
+    <div className='flex items-center flex-col md:flex-row gap-4'>
         <button 
             onClick={ () => startPossession( 'home' ) } 
             disabled={ currentTeam !== null } 
@@ -42,18 +43,18 @@ const PossessionTracker = () => {
           Start Possession for Team A
         </button>
         <button 
-            onClick={ () => startPossession( 'away' ) } 
-            disabled={ currentTeam !== null } 
-            className="bg-red-500 text-white px-4 py-2 rounded disabled:opacity-50"
-        >
-          Start Possession for Team B
-        </button>
-        <button 
             onClick={ stopPossession } 
             disabled={ currentTeam === null } 
             className="bg-gray-500 text-white px-4 py-2 rounded disabled:opacity-50"
         >
           Stop Possession
+        </button>
+        <button 
+            onClick={ () => startPossession( 'away' ) } 
+            disabled={ currentTeam !== null } 
+            className="bg-red-500 text-white px-4 py-2 rounded disabled:opacity-50"
+        >
+          Start Possession for Team B
         </button>
         <p>📊 Current Possession: Home Team { homePossession.toFixed( 2 ) }% - Away Team { awayPossession.toFixed( 2 ) }%</p>
     </div>
