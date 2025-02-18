@@ -33,7 +33,8 @@ export const emptyStats: Statistics = {
     yellowCards: 0,
     redCards: 0,
     offsides: 0,
-    corners: 0
+    corners: 0,
+    possessionTime: 0,
 }
 
 export const liveFixtureInitialStateData = {
