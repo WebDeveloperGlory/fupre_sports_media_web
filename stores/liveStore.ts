@@ -31,7 +31,7 @@ const useLiveStore = create<LiveStore>( ( set ) => ({
     kickOffClicked: false,
     setMatchEvents: ( event: Event ) => set( ( state: LiveStore ) => ({ 
         matchEvents: [ ...state.matchEvents, event ],
-        currentEventId: state.currentEventId + 1
+        currentEventId: event.eventType === 'assist' ? state.currentEventId : state.currentEventId + 1
     })),
     setServerMatchEvents: ( events: Event[] ) => set({ matchEvents: events, currentEventId: events.length }),
     deleteMatchEvents: ( eventId: number ) => set( ( state: LiveStore ) => {

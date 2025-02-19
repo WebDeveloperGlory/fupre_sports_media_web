@@ -4,8 +4,8 @@ import LogCard from './LogCard';
 import { LiveStatState, Players } from '@/utils/stateTypes';
 
 const Log = (
-    { statValues, homeLineup, awayLineup }: 
-    { statValues: LiveStatState, homeLineup: Players[] | [], awayLineup: Players[] | [] }
+    { statValues, homeLineup, awayLineup, homeSubs, awaySubs }: 
+    { statValues: LiveStatState, homeLineup: Players[], awayLineup: Players[], homeSubs: Players[], awaySubs: Players[] }
 ) => {
     const { matchEvents, deleteMatchEvents, updateMatchEvents } = useLiveStore();
 
@@ -23,7 +23,9 @@ const Log = (
                     key={ event.id }
                     event={ event }
                     homePlayers={ homeLineup }
+                    homeSubs={ homeSubs }
                     awayPlayers={ awayLineup }
+                    awaySubs={ awaySubs }
                     homeTeam={ statValues.homeTeam }
                     awayTeam={ statValues.awayTeam }
                     onEdit={ handleEditEvent }

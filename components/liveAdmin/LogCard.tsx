@@ -72,11 +72,12 @@ const getEventText = ( event: Event, players: Players[] ) => {
 const EXCLUDED_PLAYER_EVENT_TYPE = ['foul', 'corner', 'offside', 'kickoff', 'halftime', 'fulltime']
 
 const LogCard = (
-    { event, onDelete, onEdit, homePlayers, awayPlayers, homeTeam, awayTeam }:
-    { event: Event, onDelete: ( id: number ) => void, onEdit: ( id: number, updatedEvent: Event ) => void, homePlayers: Players[] | [], awayPlayers: Players[] | [], homeTeam: Team, awayTeam: Team }
+    { event, onDelete, onEdit, homePlayers, awayPlayers, homeTeam, awayTeam, homeSubs, awaySubs }:
+    { event: Event, onDelete: ( id: number ) => void, onEdit: ( id: number, updatedEvent: Event ) => void, homePlayers: Players[], awayPlayers: Players[], homeSubs: Players[], awaySubs: Players[], homeTeam: Team, awayTeam: Team }
 ) => {
     const [ isEditing, setIsEditing ] = useState( false );
     const [ isExpanded, setIsExpanded ] = useState( false );
+    const [ isSub, setIsSub ] = useState<boolean>( false );
     const [ editedEvent, setEditedEvent ] = useState({
         time: event.time,
         player: event.player,
@@ -84,11 +85,15 @@ const LogCard = (
     });
     const playerList = event.team !== null
         ? event.team._id === homeTeam._id
-            ? homePlayers
+            ? isSub
+                ? homeSubs
+                : homePlayers
             : event.team._id === awayTeam._id
-                ? awayPlayers
+                ? isSub
+                    ? awaySubs
+                    : awayPlayers
                 : []
-        : []
+        : [];
 
     const handleSave = () => {
         onEdit( event.id, {
@@ -174,6 +179,20 @@ const LogCard = (
                             />
                             <span className="text-sm text-gray-500">minutes</span>
                         </div>
+
+                        {/* Match Events Checkbox */}
+                        <div className="my-2 flex items-center cursor-pointer">
+                            <input
+                                type="checkbox"
+                                id="isSub"
+                                checked={ isSub }
+                                onChange={ ( e ) => setIsSub( e.target.checked ) }
+                                className="w-4 h-4 text-blue-600 cursor-pointer"
+                            />
+                            <label htmlFor="isSub" className="ml-2 text-black cursor-pointer">
+                                Involved Player Is Sub?
+                            </label>
+                        </div>
             
                         {
                             playerList.length > 0 && !EXCLUDED_PLAYER_EVENT_TYPE.includes( event.eventType ) && (
@@ -182,8 +201,9 @@ const LogCard = (
                                     <select
                                         value={ editedEvent.player?._id }
                                         onChange= { handlePlayerSelect }
-                                        className="border rounded px-2 py-1 text-black cursor-pointer"
+                                        className="border rounded px-2 py-1 text-black cursor-pointer  max-h-40 overflow-auto"
                                     >
+                                        <option value=''>Select Player</option>
                                         {
                                             playerList?.map( player => (
                                                 <option key={ player._id } value={ player._id }>

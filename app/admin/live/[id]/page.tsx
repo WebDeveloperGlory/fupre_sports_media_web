@@ -148,8 +148,8 @@ const IndividualLivePage = (
 
             <p>{ statValues.competition?.name || 'Friendly' }</p>
 
-            <div className='flex items-center justify-center gap-6'>
-                <div className='text-right'>
+            <div className='flex items-center justify-center gap-6 mt-2'>
+                <div className='text-right basis-5/12'>
                     <h2 className='text-lg'>{ statValues.homeTeam.name || 'Unknown Team' }</h2>
                     <div className='flex gap-2 justify-end items-center w-full text-right'>
                         { statValues.competition?.type === 'knockout' && hasPenalties && statValues.homePenalty !== null && (
@@ -158,8 +158,8 @@ const IndividualLivePage = (
                         <h2 className='text-2xl text-orange-500 font-bold'>{ statValues.homeScore }</h2>
                     </div>
                 </div>
-                <h2 className='text-lg md:text-xl'>vs</h2>
-                <div className='text-left'>
+                <h2 className='text-lg md:text-xl basis-1/12 text-center'>vs</h2>
+                <div className='text-left basis-5/12'>
                     <h2 className='text-lg'>{ statValues.awayTeam.name || 'Unknown Team' }</h2>
                     <div className='flex gap-2 justify-start items-center w-full text-left'>
                         <h2 className='text-2xl text-orange-500 font-bold'>{ statValues.awayScore }</h2>
@@ -212,7 +212,9 @@ const IndividualLivePage = (
             { activeTab === 'log' && <Log 
                 statValues={ statValues }
                 homeLineup={ statValues.homeLineup ? statValues.homeLineup.startingXI : [] }
+                homeSubs={ statValues.homeLineup ? statValues.homeLineup.subs : [] }
                 awayLineup={ statValues.awayLineup ? statValues.awayLineup.startingXI : [] }
+                awaySubs={ statValues.awayLineup ? statValues.awayLineup.subs : [] }
             /> }
             { activeTab === 'lineups' && <LineUps /> }
         </div>
