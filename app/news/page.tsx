@@ -7,6 +7,15 @@ import Link from "next/link";
 
 const latestArticles = [
   {
+    id: 3,
+    title: "Current Champions vs Past Champions: A Clash of Titans",
+    excerpt: "Will Citizens remember that it was Seventeen that helped them clinch the title on the final day? No, it's football and it's a new season. Seventeen are kicking off their season with tough fixtures.",
+    author: "Churchill Usaide",
+    date: "Mar 19, 2024",
+    readTime: "2 min read",
+    image: "/images/news/Today's game.jpg"
+  },
+  {
     id: 2,
     title: "Propellers Penalized for Fielding Ineligible Player, Lose Points and Face Fine",
     excerpt: "The FUPRE Super League Board has issued a disciplinary action against Propellers FC for fielding an ineligible player, 'Jala,' in their recent match against Rayos FC.",
@@ -37,13 +46,14 @@ export default function NewsPage() {
             {latestArticles.map((article) => (
               <article key={article.id} className="group">
                 <div className="grid md:grid-cols-5 gap-6 items-start">
-                  <div className="md:col-span-2 aspect-[16/9] relative rounded-lg overflow-hidden">
+                  <div className="md:col-span-2 relative">
                     <Image
                       src={article.image}
                       alt={article.title}
-                      fill
+                      width={800}
+                      height={450}
+                      className="w-full h-auto rounded-lg group-hover:scale-105 transition-transform duration-300"
                       priority
-                      className="object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                   </div>
                   <div className="md:col-span-3 space-y-3">

@@ -71,7 +71,7 @@ export default async function HomePage() {
                 </div>
                 <div className="bg-card/40 backdrop-blur-sm rounded-lg lg:rounded-xl p-3 sm:p-4 lg:p-6 border border-border hover:bg-accent/50 transition-all duration-300">
                   <Newspaper className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-emerald-500 mb-2" />
-                  <div className="text-lg sm:text-xl lg:text-2xl font-bold">2</div>
+                  <div className="text-lg sm:text-xl lg:text-2xl font-bold">3</div>
                   <div className="text-xs sm:text-sm text-muted-foreground">News Articles</div>
                 </div>
               </div>

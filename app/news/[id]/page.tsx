@@ -8,6 +8,15 @@ import { useParams } from "next/navigation";
 
 const articles = [
   {
+    id: 3,
+    title: "Current Champions vs Past Champions: A Clash of Titans",
+    content: "Will Citizens remember that it was Seventeen that helped them clinch the title on the final day? No, it's football and it's a new season. Seventeen are kicking off their season with tough fixtures but how will they react to their loss courtesy of a painful last minute winner in their first game?\n\nCitizens on the other hand also left it late vs Rebull but they will step into the match in high spirits after winning the Super Coppa final.\n\nExpect the fire, expect the flames, two big teams battle for the title. Citizens will walk in as favourites but you never know who will walk out as winners!\n\nCurrent Champs vs Past Champs\nTime: 4PM\nBe there!",
+    author: "Churchill Usaide",
+    date: "Mar 19, 2024",
+    readTime: "2 min read",
+    image: "/images/news/Today's game.jpg"
+  },
+  {
     id: 2,
     title: "Propellers Penalized for Fielding Ineligible Player, Lose Points and Face Fine",
     content: "Effurun, Nigeria – The FUPRE Super League Board has issued a disciplinary action against Propellers FC for fielding an ineligible player, \"Jala,\" in their recent match against Rayos FC.\n\nAs a consequence, the league committee has deducted one point from Propellers FC and imposed a ₦10,000 fine on the team. The board reaffirmed that the punishment follows FSL regulations, and the fine must be paid 24 hours before the club's next fixture.\n\nThe league's leadership, including President Okunrobo Ezeh and SUG Director of Sports Amos S. Oghenekaro, stressed the importance of compliance with player eligibility rules, warning that similar infractions will be met with strict sanctions.\n\nThis decision is expected to serve as a deterrent to other teams, reinforcing the integrity of the FUPRE Super League.",
@@ -75,12 +84,14 @@ export default function NewsArticlePage() {
             </div>
           </header>
 
-          <div className="aspect-[16/9] relative rounded-lg overflow-hidden">
+          <div className="w-full relative">
             <Image
               src={article.image}
               alt={article.title}
-              fill
-              className="object-cover"
+              width={1200}
+              height={675}
+              className="w-full h-auto rounded-lg"
+              priority
             />
           </div>
 
