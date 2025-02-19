@@ -5,6 +5,7 @@ import { format } from 'date-fns';
 import Link from "next/link";
 import { Trophy, Calendar, Clock, MapPin, ArrowRight, Users, Newspaper, Play } from "lucide-react";
 import Image from "next/image";
+import { teamLogos } from "@/constants";
 
 export default async function HomePage() {
     const data = await getTodaysFixtures();
@@ -144,10 +145,10 @@ export default async function HomePage() {
                     <div className="flex flex-col items-center sm:items-end gap-2 sm:flex-1">
                       <div className="relative w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16">
                         <Image
-                          src="/team-logos/team-a.png"
+                          src={ teamLogos[ todaysFixture.homeTeam.name ] || '/images/team_logos/default.jpg' }
                           alt={todaysFixture.homeTeam.name}
                           fill
-                          className="object-contain"
+                          className="object-contain rounded-full"
                         />
                       </div>
                       <div className="text-sm sm:text-base lg:text-lg font-medium text-center sm:text-right">
@@ -168,10 +169,10 @@ export default async function HomePage() {
                     <div className="flex flex-col items-center sm:items-start gap-2 sm:flex-1">
                       <div className="relative w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16">
                         <Image
-                          src="/team-logos/team-b.png"
+                          src={ teamLogos[ todaysFixture.awayTeam.name ] || '/images/team_logos/default.jpg' }
                           alt={todaysFixture.awayTeam.name}
                           fill
-                          className="object-contain"
+                          className="object-contain rounded-full"
                         />
                       </div>
                       <div className="text-sm sm:text-base lg:text-lg font-medium text-center sm:text-left">
