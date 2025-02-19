@@ -1,7 +1,7 @@
 import React from 'react'
 import { motion } from 'framer-motion';
 import { Fixture, Statistics } from '@/utils/requestDataTypes';
-import { Activity, Flag, Target, Users, Clock } from 'lucide-react';
+import { Activity, Flag, Target, Users, Clock, Goal } from 'lucide-react';
 import { Timeline } from '../live/Timeline';
 
 function QuickStat({ icon, label, home, away }: { icon: React.ReactNode; label: string; home: number; away: number }) {
@@ -90,6 +90,80 @@ function CardsBar({ home, away }: { home: { yellow: number; red: number }; away:
   );
 }
 
+function Goalscorers({ fixtureData }: { fixtureData: Fixture }) {
+  // Get goalscorers from goalScorers array for completed matches
+  const goalscorersFromArray = fixtureData.goalScorers || [];
+  
+  // Get goalscorers from matchEvents for live matches
+  const goalscorersFromEvents = fixtureData.matchEvents
+    .filter(event => event.eventType === 'goal')
+    .map(event => ({
+      team: event.team!,
+      id: {
+        _id: event.player!._id,
+        name: event.player!.name
+      },
+      time: event.time,
+      _id: event.id.toString()
+    }));
+
+  // Use goalScorers array for completed matches, matchEvents for live matches
+  const goalscorers = fixtureData.status === 'live' ? goalscorersFromEvents : goalscorersFromArray;
+
+  // Separate goalscorers by team
+  const homeTeamScorers = goalscorers.filter(scorer => scorer.team._id === fixtureData.homeTeam._id);
+  const awayTeamScorers = goalscorers.filter(scorer => scorer.team._id === fixtureData.awayTeam._id);
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="bg-black/80 backdrop-blur-sm rounded-xl p-4 border border-border/20"
+    >
+      <div className="flex items-center gap-2 mb-4">
+        <Goal className="w-4 h-4 text-emerald-500" />
+        <span className="text-sm font-medium text-white">Goalscorers</span>
+      </div>
+      
+      <div className="grid grid-cols-2 gap-4">
+        {/* Home Team Scorers */}
+        <div>
+          <h3 className="text-sm text-emerald-500 mb-2">{fixtureData.homeTeam.name}</h3>
+          {homeTeamScorers.length > 0 ? (
+            <div className="space-y-2">
+              {homeTeamScorers.map(scorer => (
+                <div key={scorer._id} className="text-sm text-white flex items-center gap-2">
+                  <span>{scorer.id.name}</span>
+                  <span className="text-muted-foreground">{scorer.time}'</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">No goals</p>
+          )}
+        </div>
+
+        {/* Away Team Scorers */}
+        <div>
+          <h3 className="text-sm text-emerald-500 mb-2">{fixtureData.awayTeam.name}</h3>
+          {awayTeamScorers.length > 0 ? (
+            <div className="space-y-2">
+              {awayTeamScorers.map(scorer => (
+                <div key={scorer._id} className="text-sm text-white flex items-center gap-2">
+                  <span>{scorer.id.name}</span>
+                  <span className="text-muted-foreground">{scorer.time}'</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">No goals</p>
+          )}
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
 const Stats = (
     { home, away, fixtureData }: 
     { home: Statistics | undefined, away: Statistics | undefined, fixtureData: Fixture }
@@ -141,6 +215,11 @@ const Stats = (
                 home={ Number( homePossession.toFixed( 2 ) ) }
                 away={ Number( awayPossession.toFixed( 2 ) ) }
             />
+        </div>
+
+        {/* Goalscorers */}
+        <div className="col-span-2 md:col-span-4">
+            <Goalscorers fixtureData={fixtureData} />
         </div>
 
         {/* Cards Bar */}
