@@ -93,7 +93,7 @@ export function Timeline({ events, homeTeamId, awayTeamId, homeLineups, awayLine
 
           {/* Events */}
           <div className="space-y-4">
-            {events.map((event) => {
+            {[...events].reverse().map((event) => {
               const playerList = event.team !== null
                 ? event.team._id === homeTeamId
                   ? homeLineup
