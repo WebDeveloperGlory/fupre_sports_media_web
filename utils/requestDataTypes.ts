@@ -22,7 +22,8 @@ type GoalScorers = {
     team: string,
     id: {
         _id: string,
-        name: string
+        name: string, 
+        team: string,
     },
     time: number,
     _id: string
@@ -172,7 +173,7 @@ export interface Fixture {
     stadium: string,
     status: string,
     createdAt?: Date,
-    goalScorers?: GoalScorers[] | [],
+    goalScorers: GoalScorers[],
     __v?: string,
     statistics?: {
         home: Statistics,

@@ -111,8 +111,8 @@ function Goalscorers({ fixtureData }: { fixtureData: Fixture }) {
   const goalscorers = fixtureData.status === 'live' ? goalscorersFromEvents : goalscorersFromArray;
 
   // Separate goalscorers by team
-  const homeTeamScorers = goalscorers.filter(scorer => scorer.team._id === fixtureData.homeTeam._id);
-  const awayTeamScorers = goalscorers.filter(scorer => scorer.team._id === fixtureData.awayTeam._id);
+  const homeTeamScorers = goalscorers.filter(scorer => scorer.team === fixtureData.homeTeam._id);
+  const awayTeamScorers = goalscorers.filter(scorer => scorer.team === fixtureData.awayTeam._id);
 
   return (
     <motion.div 
@@ -219,7 +219,7 @@ const Stats = (
 
         {/* Goalscorers */}
         <div className="col-span-2 md:col-span-4">
-            <Goalscorers fixtureData={fixtureData} />
+            <Goalscorers fixtureData={ fixtureData } />
         </div>
 
         {/* Cards Bar */}
