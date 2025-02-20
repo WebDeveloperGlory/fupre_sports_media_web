@@ -6,7 +6,7 @@ import { Timeline } from '@/components/live/Timeline';
 import { BlurFade } from '@/components/ui/blur-fade';
 import { BackButton } from '@/components/ui/back-button';
 import { motion } from 'framer-motion';
-import { Trophy, Clock, Activity, Target, Flag, Users, PieChart } from 'lucide-react';
+import { Trophy, Clock, Activity, Target, Flag, Users, PieChart, Goal } from 'lucide-react';
 import { getLiveFixtureDetails } from '@/lib/requests/liveAdminPage/requests';
 import { LiveFixture } from '@/utils/requestDataTypes';
 import { teamLogos } from '@/constants';
@@ -155,7 +155,7 @@ export default function LiveMatchPage({
   }, [ loading, resolvedParams.id ])
 
   // Calculate total elapsed game time
-  const totalElapsedGameTime = liveFixture ? liveFixture.statistics.home.possessionTime + liveFixture.statistics.home.possessionTime : 0;
+  const totalElapsedGameTime = liveFixture ? liveFixture.statistics.home.possessionTime + liveFixture.statistics.away.possessionTime : 0;
   const homePossession = totalElapsedGameTime > 0 ? ( liveFixture!.statistics.home.possessionTime / totalElapsedGameTime ) * 100 : 50;
   const awayPossession = 100 - homePossession; // Ensures total is always 100%
 
@@ -242,6 +242,11 @@ export default function LiveMatchPage({
                     </div>
                   </div>
 
+                  {/* Goalscorers */}
+                  <div className="col-span-2 md:col-span-4">
+                      <Goalscorers fixtureData={ liveFixture } />
+                  </div>
+
                   {/* Quick Stats */}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
                     <QuickStat
@@ -321,4 +326,75 @@ export default function LiveMatchPage({
       </div>
     </main>
   );
-} 
+}
+
+function Goalscorers({ fixtureData }: { fixtureData: LiveFixture }) {
+  // Get goalscorers from matchEvents for live matches
+  const goalscorersFromEvents = fixtureData.matchEvents
+    .filter(event => event.eventType === 'goal')
+    .map(event => ({
+      team: event.team!._id,
+      id: {
+        _id: event.player?._id,
+        name: event.player?.name
+      },
+      time: event.time,
+      _id: event.id.toString()
+    }));
+
+  // Use goalScorers array for completed matches, matchEvents for live matches
+  const goalscorers = goalscorersFromEvents;
+
+  // Separate goalscorers by team
+  const homeTeamScorers = goalscorers.filter(scorer => scorer.team === fixtureData.homeTeam._id);
+  const awayTeamScorers = goalscorers.filter(scorer => scorer.team === fixtureData.awayTeam._id);
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="bg-black/80 backdrop-blur-sm rounded-xl p-4 border border-border/20"
+    >
+      <div className="flex items-center gap-2 mb-4">
+        <Goal className="w-4 h-4 text-emerald-500" />
+        <span className="text-sm font-medium text-white">Goalscorers</span>
+      </div>
+      
+      <div className="grid grid-cols-2 gap-4">
+        {/* Home Team Scorers */}
+        <div>
+          <h3 className="text-sm text-emerald-500 mb-2">{fixtureData.homeTeam.name}</h3>
+          {homeTeamScorers.length > 0 ? (
+            <div className="space-y-2">
+              {homeTeamScorers.map(scorer => (
+                <div key={scorer._id} className="text-sm text-white flex items-center gap-2">
+                  <span>{scorer.id.name}</span>
+                  <span className="text-muted-foreground">{scorer.time}'</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">No goals</p>
+          )}
+        </div>
+
+        {/* Away Team Scorers */}
+        <div>
+          <h3 className="text-sm text-emerald-500 mb-2">{fixtureData.awayTeam.name}</h3>
+          {awayTeamScorers.length > 0 ? (
+            <div className="space-y-2">
+              {awayTeamScorers.map(( scorer, index ) => (
+                <div key={ scorer._id || index} className="text-sm text-white flex items-center gap-2">
+                  <span>{scorer.id.name || 'Unknown'}</span>
+                  <span className="text-muted-foreground">{scorer.time}'</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">No goals</p>
+          )}
+        </div>
+      </div>
+    </motion.div>
+  );
+}
