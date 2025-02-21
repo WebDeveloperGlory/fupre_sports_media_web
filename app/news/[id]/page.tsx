@@ -12,7 +12,7 @@ const articles = [
     title: "Current Champions vs Past Champions: A Clash of Titans",
     content: "Will Citizens remember that it was Seventeen that helped them clinch the title on the final day? No, it's football and it's a new season. Seventeen are kicking off their season with tough fixtures but how will they react to their loss courtesy of a painful last minute winner in their first game?\n\nCitizens on the other hand also left it late vs Rebull but they will step into the match in high spirits after winning the Super Coppa final.\n\nExpect the fire, expect the flames, two big teams battle for the title. Citizens will walk in as favourites but you never know who will walk out as winners!\n\nCurrent Champs vs Past Champs\nTime: 4PM\nBe there!",
     author: "Churchill Usaide",
-    date: "Mar 19, 2024",
+    date: "Feb 19, 2025",
     readTime: "2 min read",
     image: "/images/news/Today's game.jpg"
   },
@@ -21,7 +21,7 @@ const articles = [
     title: "Propellers Penalized for Fielding Ineligible Player, Lose Points and Face Fine",
     content: "Effurun, Nigeria – The FUPRE Super League Board has issued a disciplinary action against Propellers FC for fielding an ineligible player, \"Jala,\" in their recent match against Rayos FC.\n\nAs a consequence, the league committee has deducted one point from Propellers FC and imposed a ₦10,000 fine on the team. The board reaffirmed that the punishment follows FSL regulations, and the fine must be paid 24 hours before the club's next fixture.\n\nThe league's leadership, including President Okunrobo Ezeh and SUG Director of Sports Amos S. Oghenekaro, stressed the importance of compliance with player eligibility rules, warning that similar infractions will be met with strict sanctions.\n\nThis decision is expected to serve as a deterrent to other teams, reinforcing the integrity of the FUPRE Super League.",
     author: "Churchill Usaide",
-    date: "Mar 15, 2024",
+    date: "Feb 15, 2025",
     readTime: "2 min read",
     image: "/images/news/News 2.jpg"
   },
@@ -30,7 +30,7 @@ const articles = [
     title: "FUPRE Super League Fines Propellers FC for Rule Violations",
     content: "In a significant development for the FUPRE Super League (FSL), Propellers FC has been handed a substantial fine following multiple rule violations during their recent fixture. The league's disciplinary committee announced the decision after a thorough review of match officials' reports and video evidence from the game.\n\nThe violations included unsportsmanlike conduct, repeated confrontations with match officials, and failure to control team supporters. The fine, which amounts to a considerable sum, must be settled within 48 hours before the team's next scheduled match.\n\n'We take the integrity of our league very seriously,' stated James Okoye, the FSL Chief Disciplinary Officer. 'This action serves as a clear message that no team is above the rules, regardless of their standing or history in the competition.'\n\nPropellers FC has accepted the ruling and issued a formal apology to the league, match officials, and fans. The team's management has also announced internal measures to prevent similar incidents in the future.\n\nThis decision has sparked discussions about discipline in university sports, with many observers praising the FSL's firm stance on maintaining professional standards. The league has announced plans to conduct a comprehensive workshop on rules and regulations for all participating teams before the next season begins.",
     author: "Churchill Usaide",
-    date: "Mar 14, 2024",
+    date: "Feb 14, 2025",
     readTime: "3 min read",
     image: "/images/news/News 1.jpg"
   }

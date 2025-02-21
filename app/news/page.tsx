@@ -11,7 +11,7 @@ const latestArticles = [
     title: "Current Champions vs Past Champions: A Clash of Titans",
     excerpt: "Will Citizens remember that it was Seventeen that helped them clinch the title on the final day? No, it's football and it's a new season. Seventeen are kicking off their season with tough fixtures.",
     author: "Churchill Usaide",
-    date: "Mar 19, 2024",
+    date: "Feb 19, 2025",
     readTime: "2 min read",
     image: "/images/news/Today's game.jpg"
   },
@@ -20,7 +20,7 @@ const latestArticles = [
     title: "Propellers Penalized for Fielding Ineligible Player, Lose Points and Face Fine",
     excerpt: "The FUPRE Super League Board has issued a disciplinary action against Propellers FC for fielding an ineligible player, 'Jala,' in their recent match against Rayos FC.",
     author: "Churchill Usaide",
-    date: "Mar 15, 2024",
+    date: "Feb 15, 2025",
     readTime: "2 min read",
     image: "/images/news/News 2.jpg"
   },
@@ -29,7 +29,7 @@ const latestArticles = [
     title: "FUPRE Super League Fines Propellers FC for Rule Violations",
     excerpt: "In a significant development for the FUPRE Super League (FSL), Propellers FC has been handed a substantial fine following multiple rule violations during their recent fixture.",
     author: "Churchill Usaide",
-    date: "Mar 14, 2024",
+    date: "Feb 14, 2025",
     readTime: "3 min read",
     image: "/images/news/News 1.jpg"
   }
