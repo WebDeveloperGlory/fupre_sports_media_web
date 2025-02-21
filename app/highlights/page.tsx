@@ -7,6 +7,22 @@ import { BackButton } from "@/components/ui/back-button";
 // YouTube video data
 const highlights = [
   {
+    id: 7,
+    videoId: "y1BASn-gU5c",
+    title: "CITIZENS (4) - (2) SEVENTEEN FC HIGHLIGHTS|| FSL 24/25 SEASON",
+    date: "Feb 21, 2025",
+    views: "4 views",
+    category: "Football",
+  },
+  {
+    id: 6,
+    videoId: "kGms8wBnogM",
+    title: "MATADORS (3) - (1) TWALE FC HIGHLIGHTS|| FSL 24/25 SEASON",
+    date: "Feb 20, 2025",
+    views: "40 views",
+    category: "Football",
+  },
+  {
     id: 5,
     videoId: "IdV6OYycymQ",
     title: "TWALE FC (1) - (3) KALAKUTA FC HIGHLIGHTS|| FSL 24/25 SEASON",
