@@ -93,22 +93,9 @@ function CardsBar({ home, away }: { home: { yellow: number; red: number }; away:
 function Goalscorers({ fixtureData }: { fixtureData: Fixture }) {
   // Get goalscorers from goalScorers array for completed matches
   const goalscorersFromArray = fixtureData.goalScorers || [];
-  
-  // Get goalscorers from matchEvents for live matches
-  const goalscorersFromEvents = fixtureData.matchEvents
-    .filter(event => event.eventType === 'goal')
-    .map(event => ({
-      team: event.team!,
-      id: {
-        _id: event.player!._id,
-        name: event.player!.name
-      },
-      time: event.time,
-      _id: event.id.toString()
-    }));
 
   // Use goalScorers array for completed matches, matchEvents for live matches
-  const goalscorers = fixtureData.status === 'live' ? goalscorersFromEvents : goalscorersFromArray;
+  const goalscorers = goalscorersFromArray;
 
   // Separate goalscorers by team
   const homeTeamScorers = goalscorers.filter(scorer => scorer.team === fixtureData.homeTeam._id);
