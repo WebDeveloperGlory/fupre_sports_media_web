@@ -18,17 +18,19 @@ const Lineups = (
             <LineupSection 
                 lineUp={ fixtureData!.homeLineup } 
                 teamName={ fixtureData!.homeTeam.name }
+                status={ fixtureData!.status }
             />
             <LineupSection 
                 lineUp={ fixtureData!.awayLineup } 
-                teamName={ fixtureData!.awayTeam.name } 
+                teamName={ fixtureData!.awayTeam.name }
+                status={ fixtureData!.status } 
             />
         </div>
     </div>
   )
 }
 
-const LineupSection = ({ lineUp, teamName }: { lineUp: LineUp, teamName: string }) => {
+const LineupSection = ({ lineUp, teamName, status }: { lineUp: LineUp, teamName: string, status: string }) => {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
@@ -38,7 +40,7 @@ const LineupSection = ({ lineUp, teamName }: { lineUp: LineUp, teamName: string 
   
         {/* Starting XI */}
         <div>
-          <h4 className="text-sm font-medium text-muted-foreground mb-3">Starting XI</h4>
+          <h4 className="text-sm font-medium text-muted-foreground mb-3">{ status === 'upcoming' && 'Possible ' }Starting XI</h4>
           <div className="space-y-2">
             {
               lineUp.startingXI.length > 0 && lineUp.startingXI.map(( player, index ) => (
@@ -62,7 +64,7 @@ const LineupSection = ({ lineUp, teamName }: { lineUp: LineUp, teamName: string 
   
         {/* Substitutes */}
         <div>
-          <h4 className="text-sm font-medium text-muted-foreground mb-3">Substitutes</h4>
+          <h4 className="text-sm font-medium text-muted-foreground mb-3">{ status === 'upcoming' && 'Possible ' }Substitutes</h4>
           <div className="space-y-2">
             {
               lineUp.subs.length > 0 && lineUp.subs.map(( player, index ) => (
