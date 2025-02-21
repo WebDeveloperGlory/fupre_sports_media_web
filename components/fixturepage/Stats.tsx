@@ -131,9 +131,9 @@ function Goalscorers({ fixtureData }: { fixtureData: Fixture }) {
           <h3 className="text-sm text-emerald-500 mb-2">{fixtureData.homeTeam.name}</h3>
           {homeTeamScorers.length > 0 ? (
             <div className="space-y-2">
-              {homeTeamScorers.map(scorer => (
-                <div key={scorer._id} className="text-sm text-white flex items-center gap-2">
-                  <span>{scorer.id.name}</span>
+              {homeTeamScorers.map((scorer, index) => (
+                <div key={scorer?._id || index} className="text-sm text-white flex items-center gap-2">
+                  <span>{scorer?.id.name || 'Unknown'}</span>
                   <span className="text-muted-foreground">{scorer.time}'</span>
                 </div>
               ))}
@@ -148,9 +148,9 @@ function Goalscorers({ fixtureData }: { fixtureData: Fixture }) {
           <h3 className="text-sm text-emerald-500 mb-2">{fixtureData.awayTeam.name}</h3>
           {awayTeamScorers.length > 0 ? (
             <div className="space-y-2">
-              {awayTeamScorers.map(scorer => (
-                <div key={scorer._id} className="text-sm text-white flex items-center gap-2">
-                  <span>{scorer.id.name}</span>
+              {awayTeamScorers.map((scorer, index) => (
+                <div key={scorer?._id || index} className="text-sm text-white flex items-center gap-2">
+                  <span>{scorer?.id.name || 'Unknown'}</span>
                   <span className="text-muted-foreground">{scorer.time}'</span>
                 </div>
               ))}
