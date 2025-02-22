@@ -67,6 +67,20 @@ export type ExtendedLeagueTableEntry = {
     form: string[] | [],
 }
 
+export type KnockoutRoundsEntry = {
+    name: string,
+    fixtures: {
+        awayTeam: Team,
+        homeTeam: Team,
+        date: Date,
+        status: string,
+        _id: string,
+        result: Result
+    }[],
+    teams: Team[],
+    _id: string
+}
+
 type CompetitionTeam = {
     squadList: Player[] | [],
     team: string | Team,
