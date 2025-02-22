@@ -410,3 +410,8 @@ export interface ExtendedAdminCompetition extends AdminComp {
     rounds: string[],
     description: string
 }
+
+export interface LiveFixtureTeamPlayerLists {
+    homePlayers: Player[],
+    awayPlayers: Player[]
+}

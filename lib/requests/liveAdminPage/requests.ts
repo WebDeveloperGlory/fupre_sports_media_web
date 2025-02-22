@@ -294,3 +294,27 @@ export const updateLiveFixture = async ( token: string, fixtureId: string, updat
         }
     }
 }
+
+export const getLiveFixtureTeamPlayerList = async ( fixtureId: string ) => {
+    try {
+        const response = await axiosInstance.get(
+            `${ API_URL }/live-fixtures/fixtures/${ fixtureId }/players`,
+        );
+        const { data }: { data: SuccessRequest } = response;
+
+        if( data.code === '99' ) {
+            throw data
+        }
+        return data;
+    } catch( err: any ) {
+        const { response } = err as CustomError;
+
+        if( err?.status && err?.message ) {
+            console.error( `Error ${ err.status }: `, response?.data.message )
+            return response?.data || null;
+        } else {
+            console.error('Error fetching competitions: ', err );
+            return null;
+        }
+    }
+}
