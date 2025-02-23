@@ -47,7 +47,7 @@ const getEventText = ( event: Event, players: Players[] ) => {
             return `Red card shown to ${ event.team!.name }( ${ player } )`;
         case 'substitution':
             const subbed = players.find( p => p._id === event.substitutedFor?._id )?.name || '';
-            return `${ event.team!.name }( ${ player } replaces ${ subbed } )`;
+            return `${ event.team!.name }( ${ event.player?.name || 'Unknown' } replaces ${ subbed } )`;
         case 'foul': 
             return `Foul by ${ event.team!.name }`
         case 'corner': 

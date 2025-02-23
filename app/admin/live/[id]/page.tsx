@@ -14,10 +14,28 @@ import ShareButton from '@/components/share/ShareButton';
 import useAuthStore from '@/stores/authStore';
 import { toast } from 'react-toastify';
 import { Loader } from '@/components/ui/loader';
-import { endLiveFixture, getLiveFixtureDetails, updateLiveFixture } from '@/lib/requests/liveAdminPage/requests';
+import { endLiveFixture, getLiveFixtureDetails, getLiveFixtureTeamPlayerList, updateLiveFixture } from '@/lib/requests/liveAdminPage/requests';
 import { BackButton } from '@/components/ui/back-button';
 import useLiveStore from '@/stores/liveStore';
 import useTimerStore from '@/stores/timerStore';
+import { LiveFixtureTeamPlayerLists } from '@/utils/requestDataTypes';
+
+type CurrentLineups = {
+    home: Players[],
+    away: Players[]
+}
+type Substitutions = {
+    home: {
+        in: Players,
+        out: Players,
+        time: number
+    }[],
+    away: {
+        in: Players,
+        out: Players,
+        time: number    
+    }[]
+}
 
 const IndividualLivePage = (
     { params }:
@@ -32,8 +50,17 @@ const IndividualLivePage = (
 
     const [ loading, setLoading ] = useState<boolean>( true );
     const [ statValues, setStatValues ] = useState<LiveStatState>( liveFixtureInitialStateData );
+    const [ players, setPlayers ] = useState<LiveFixtureTeamPlayerLists | null>( null );
     const [ hasPenalties, setHasPenalties ] = useState<boolean>( false );
     const [ activeTab, setActiveTab ] = useState<string>( 'timer' );
+    const [ currentLineups, setCurrentLineups ] = useState<CurrentLineups>({
+        home: [],
+        away: [],
+    });
+    const [ substitutions, setSubstitutions ] = useState<Substitutions>({
+        home: [],
+        away: []
+    });
 
     useEffect( () => {
         const fetchData = async () => {
@@ -52,10 +79,19 @@ const IndividualLivePage = (
                     homePenalty: result.homePenalty,
                     awayPenalty: result.awayPenalty
                 });
+                setCurrentLineups({
+                    home: homeLineup.startingXI,
+                    away: awayLineup.startingXI
+                })
                 setServerMatchEvents( matchEvents );
                 setTime( time );
             }
-            console.log({ data })
+
+            const playerData = await getLiveFixtureTeamPlayerList( resolvedParams.id );
+            if( playerData && playerData.code === '00' ) {
+                setPlayers( playerData.data );
+            }
+            console.log({ data, playerData })
             setLoading( false );
         }
 
@@ -72,6 +108,18 @@ const IndividualLivePage = (
     };
 
     const handleStatUpload = async () => {
+        const homeSubs = matchEvents
+            .filter( event => event.eventType === 'substitution' )
+            .map( event => event.team?._id === statValues.homeTeam._id ? event.player : null )
+            .filter( player => player !== null );
+        const awaySubs = matchEvents
+            .filter( event => event.eventType === 'substitution' )
+            .map( event => event.team?._id === statValues.awayTeam._id ? event.player : null )
+            .filter( player => player !== null );
+
+        const currentHomeSubs = statValues.homeLineup ? statValues.homeLineup.subs : [];
+        const currentAwaySubs = statValues.awayLineup ? statValues.awayLineup.subs : [];
+
         const requestBodyData = {
             result: {
                 homeScore: statValues.homeScore,
@@ -84,7 +132,17 @@ const IndividualLivePage = (
                 away: statValues.away
             },
             matchEvents,
-            time
+            time,
+            homeLineup: {
+                formation: statValues.homeLineup ? statValues.homeLineup.formation : null,
+                startingXI: statValues.homeLineup ? statValues.homeLineup.startingXI : [],
+                subs: [ ...currentHomeSubs, ...homeSubs ]
+            },
+            awayLineup: {
+                formation: statValues.awayLineup ? statValues.awayLineup.formation : null,
+                startingXI: statValues.awayLineup ? statValues.awayLineup.startingXI : [],
+                subs: [ ...currentAwaySubs, ...awaySubs ]
+            },
         }
 
         if( window.confirm( 'Save To Database?' ) ) {
@@ -212,11 +270,18 @@ const IndividualLivePage = (
             { activeTab === 'log' && <Log 
                 statValues={ statValues }
                 homeLineup={ statValues.homeLineup ? statValues.homeLineup.startingXI : [] }
-                homeSubs={ statValues.homeLineup ? statValues.homeLineup.subs : [] }
                 awayLineup={ statValues.awayLineup ? statValues.awayLineup.startingXI : [] }
-                awaySubs={ statValues.awayLineup ? statValues.awayLineup.subs : [] }
             /> }
-            { activeTab === 'lineups' && <LineUps /> }
+            { activeTab === 'lineups' && <LineUps 
+                awayPlayers={ players ? players.awayPlayers : [] }
+                homePlayers={ players ? players.homePlayers : [] }
+                currentLineups={ currentLineups }
+                setCurrentLineups={ setCurrentLineups }
+                substitutions={ substitutions }
+                setSubstitutions={ setSubstitutions }
+                homeTeam={ statValues.homeTeam }
+                awayTeam={ statValues.awayTeam }
+            /> }
         </div>
     </div>
   )

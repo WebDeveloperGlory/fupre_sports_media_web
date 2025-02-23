@@ -4,10 +4,19 @@ import LogCard from './LogCard';
 import { LiveStatState, Players } from '@/utils/stateTypes';
 
 const Log = (
-    { statValues, homeLineup, awayLineup, homeSubs, awaySubs }: 
-    { statValues: LiveStatState, homeLineup: Players[], awayLineup: Players[], homeSubs: Players[], awaySubs: Players[] }
+    { statValues, homeLineup, awayLineup }: 
+    { statValues: LiveStatState, homeLineup: Players[], awayLineup: Players[] }
 ) => {
     const { matchEvents, deleteMatchEvents, updateMatchEvents } = useLiveStore();
+
+    const homeSubs = matchEvents
+            .filter( event => event.eventType === 'substitution' )
+            .map( event => event.team?._id === statValues.homeTeam._id ? event.player : null )
+            .filter( player => player !== null );
+    const awaySubs = matchEvents
+        .filter( event => event.eventType === 'substitution' )
+        .map( event => event.team?._id === statValues.awayTeam._id ? event.player : null )
+        .filter( player => player !== null );
 
     const handleDeleteEvent = ( id: number ) => {
         deleteMatchEvents( id );

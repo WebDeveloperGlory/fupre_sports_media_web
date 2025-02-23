@@ -8,8 +8,8 @@ import { use, useState, useEffect } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
-import { getAllCompetitionFixtures, getIndividualCompetition, getIndividualCompetitionOverview, getLeagueTable } from "@/lib/requests/competitionPage/requests";
-import { Competition, CompetitionFixtures, CompetitionOverview, ExtendedLeagueTableEntry } from "@/utils/requestDataTypes";
+import { getAllCompetitionFixtures, getIndividualCompetition, getIndividualCompetitionOverview, getKnockoutRounds, getLeagueTable } from "@/lib/requests/competitionPage/requests";
+import { Competition, CompetitionFixtures, CompetitionOverview, ExtendedLeagueTableEntry, KnockoutRoundsEntry } from "@/utils/requestDataTypes";
 import { Loader } from "@/components/ui/loader";
 import { format } from "date-fns";
 import { teamLogos } from "@/constants";
@@ -27,7 +27,8 @@ export default function CompetitionPage({
   const [ competition, setCompetition ] = useState<Competition | null>( null );
   const [ overview, setOverview ] = useState<CompetitionOverview | null>( null );
   const [ fixtures, setFixtures ] = useState<CompetitionFixtures | null>( null );
-  const [ table, setTable ] = useState<ExtendedLeagueTableEntry[] | []>( [] );
+  const [ table, setTable ] = useState<ExtendedLeagueTableEntry[]>( [] );
+  const [ knockoutRounds, setKnockoutRounds ] = useState<KnockoutRoundsEntry[]>( [] );
   const [ isTableOpen, setIsTableOpen ] = useState<boolean>( true );
   const [ isFixturesOpen, setIsFixturesOpen ] = useState<boolean>( true );
   const [ fixtureOpenType, setFixtureOpenType ] = useState<keyof CompetitionFixtures>( 'upcomingMatches' );
@@ -41,6 +42,7 @@ export default function CompetitionPage({
       const competitionData = await getIndividualCompetition( resolvedParams.id );
       const overviewData = await getIndividualCompetitionOverview( resolvedParams.id );
       const leagueTableData = await getLeagueTable( resolvedParams.id );
+      const knockoutRoundsData = await getKnockoutRounds( resolvedParams.id );
       const fixtureData = await getAllCompetitionFixtures( resolvedParams.id );
 
       if ( competitionData && competitionData.code === '00' ) {
@@ -52,11 +54,14 @@ export default function CompetitionPage({
       if( leagueTableData && leagueTableData.code === '00' ) {
         setTable( leagueTableData.data );
       }
+      if( knockoutRoundsData && knockoutRoundsData.code === '00' ) {
+        setKnockoutRounds( knockoutRoundsData.data );
+      }
       if( fixtureData && fixtureData.code === '00' ) {
         setFixtures( fixtureData.data );
       }
 
-      console.log( competitionData, overviewData, leagueTableData, fixtureData );
+      console.log( competitionData, overviewData, leagueTableData, knockoutRoundsData, fixtureData );
       setLoading( false );
     };
 

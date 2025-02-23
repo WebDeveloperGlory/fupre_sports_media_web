@@ -67,6 +67,20 @@ export type ExtendedLeagueTableEntry = {
     form: string[] | [],
 }
 
+export type KnockoutRoundsEntry = {
+    name: string,
+    fixtures: {
+        awayTeam: Team,
+        homeTeam: Team,
+        date: Date,
+        status: string,
+        _id: string,
+        result: Result
+    }[],
+    teams: Team[],
+    _id: string
+}
+
 type CompetitionTeam = {
     squadList: Player[] | [],
     team: string | Team,
@@ -278,6 +292,12 @@ export interface CompetitionAdminCreateFixtureRequestBody {
     round: string
 }
 
+export interface EditPlayerRequestBody {
+    name?: string,
+    position?: string,
+    number?: number
+}
+
 export interface UserProfile {
     name: string,
     email: string,
@@ -409,4 +429,9 @@ export interface ExtendedAdminCompetition extends AdminComp {
     fixtures: Fixture[],
     rounds: string[],
     description: string
+}
+
+export interface LiveFixtureTeamPlayerLists {
+    homePlayers: Player[],
+    awayPlayers: Player[]
 }
