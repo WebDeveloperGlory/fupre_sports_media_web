@@ -14,6 +14,7 @@ export interface Team {
 export interface Players {
     name: string,
     position: string,
+    number?: number,
     _id: string
 }
 

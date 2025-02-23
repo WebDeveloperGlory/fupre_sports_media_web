@@ -292,6 +292,12 @@ export interface CompetitionAdminCreateFixtureRequestBody {
     round: string
 }
 
+export interface EditPlayerRequestBody {
+    name?: string,
+    position?: string,
+    number?: number
+}
+
 export interface UserProfile {
     name: string,
     email: string,
