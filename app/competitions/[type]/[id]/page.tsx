@@ -13,6 +13,7 @@ import { Competition, CompetitionFixtures, CompetitionOverview, ExtendedLeagueTa
 import { Loader } from "@/components/ui/loader";
 import { format } from "date-fns";
 import { teamLogos } from "@/constants";
+import { KnockoutBracket } from "@/components/competition/KnockoutBracket";
 
 const fixtureButtons: ( keyof CompetitionFixtures )[] = [ 'upcomingMatches', 'completedMatches' ];
 
@@ -33,6 +34,7 @@ export default function CompetitionPage({
   const [ isScorersOpen, setIsScorersOpen ] = useState<boolean>( true );
   const [ isAssistersOpen, setIsAssistersOpen ] = useState<boolean>( true );
   const [ isTeamsOpen, setIsTeamsOpen ] = useState<boolean>( true );
+  const [ isKnockoutOpen, setIsKnockoutOpen ] = useState<boolean>( true );
 
   useEffect(() => {
     const fetchData = async () => {
@@ -155,13 +157,140 @@ export default function CompetitionPage({
                               </div>
                               <div>
                                 <h3 className="font-medium">{team.name}</h3>
-                                {/* <p className="text-sm text-muted-foreground">
-                                  {team.played} matches played
-                                </p> */}
                               </div>
                             </Link>
                           ))
                         }
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Knockout Bracket Section */}
+            {competition.type === 'knockout' && (
+              <div className="bg-card rounded-lg border border-border overflow-hidden">
+                <button
+                  onClick={() => setIsKnockoutOpen(!isKnockoutOpen)}
+                  className="w-full px-4 py-3 flex items-center justify-between hover:bg-accent/50 transition-colors"
+                >
+                  <div className="flex items-center gap-2">
+                    <Trophy className="w-4 h-4 text-emerald-500" />
+                    <h2 className="text-base md:text-lg font-semibold">Knockout Bracket</h2>
+                  </div>
+                  {isKnockoutOpen ? (
+                    <ChevronUp className="w-4 h-4 text-muted-foreground" />
+                  ) : (
+                    <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                  )}
+                </button>
+
+                <AnimatePresence>
+                  {isKnockoutOpen && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="border-t border-border">
+                        <KnockoutBracket competition={competition} />
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            )}
+
+            {/* Top Scorers Section */}
+            <div className="bg-card rounded-lg border border-border overflow-hidden">
+              <button
+                onClick={() => setIsScorersOpen(!isScorersOpen)}
+                className="w-full px-4 py-3 flex items-center justify-between hover:bg-accent/50 transition-colors"
+              >
+                <h2 className="text-base md:text-lg font-semibold">Top Scorers</h2>
+                {isScorersOpen ? (
+                  <ChevronUp className="w-4 h-4 text-muted-foreground" />
+                ) : (
+                  <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                )}
+              </button>
+
+              <AnimatePresence>
+                {isScorersOpen && overview?.topScorers && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="p-4 border-t border-border">
+                      <div className="grid gap-3">
+                        {overview.topScorers.map((scorer) => (
+                          <div
+                            key={scorer.player._id}
+                            className="flex items-center justify-between p-3 rounded-lg border border-border hover:bg-accent/50 transition-colors"
+                          >
+                            <div>
+                              <h3 className="font-medium">{scorer.player.name}</h3>
+                              <p className="text-sm text-muted-foreground">{scorer.team}</p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-emerald-500 font-bold">{scorer.goals}</span>
+                              <span className="text-sm text-muted-foreground">goals</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Top Assists Section */}
+            <div className="bg-card rounded-lg border border-border overflow-hidden">
+              <button
+                onClick={() => setIsAssistersOpen(!isAssistersOpen)}
+                className="w-full px-4 py-3 flex items-center justify-between hover:bg-accent/50 transition-colors"
+              >
+                <h2 className="text-base md:text-lg font-semibold">Top Assists</h2>
+                {isAssistersOpen ? (
+                  <ChevronUp className="w-4 h-4 text-muted-foreground" />
+                ) : (
+                  <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                )}
+              </button>
+
+              <AnimatePresence>
+                {isAssistersOpen && overview?.topAssists && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="p-4 border-t border-border">
+                      <div className="grid gap-3">
+                        {overview.topAssists.map((assister) => (
+                          <div
+                            key={assister.player._id}
+                            className="flex items-center justify-between p-3 rounded-lg border border-border hover:bg-accent/50 transition-colors"
+                          >
+                            <div>
+                              <h3 className="font-medium">{assister.player.name}</h3>
+                              <p className="text-sm text-muted-foreground">{assister.team}</p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-emerald-500 font-bold">{assister.assists}</span>
+                              <span className="text-sm text-muted-foreground">assists</span>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   </motion.div>
@@ -193,7 +322,7 @@ export default function CompetitionPage({
                       transition={{ duration: 0.2 }}
                       className="overflow-hidden"
                     >
-                      {/* Slector Buttons */} {/* NOTICE MEEEEEEEEEEEEEEE FOR UI EDITSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS */}
+                      {/* Selector Buttons */}
                       <div className="grid grid-cols-2 gap-2">
                         {
                           fixtureButtons.map( ( entry, index ) => (
@@ -248,12 +377,9 @@ export default function CompetitionPage({
                                         <span className="font-bold">{ fixture.result.awayScore }</span>
                                       </div>
                                     ) : (
-                                      <span className="text-muted-foreground basis-2/12 text-center">vs</span>
+                                      <span className="text-xs text-muted-foreground basis-2/12 text-center">vs</span>
                                     )}
                                     <span className="font-medium basis-5/12 text-right">{ fixture.awayTeam.name }</span>
-                                  </div>
-                                  <div className="mt-2 text-xs text-center text-muted-foreground">
-                                    { fixture.stadium }
                                   </div>
                                 </div>
                               )
@@ -266,251 +392,6 @@ export default function CompetitionPage({
                 }
               </AnimatePresence>
             </div>
-
-            {/* League Table */}
-            <div className="bg-card rounded-xl border border-border overflow-hidden">
-              <button
-                onClick={() => setIsTableOpen(!isTableOpen)}
-                className="w-full px-4 md:px-6 py-4 flex items-center justify-between hover:bg-accent/50 transition-colors"
-              >
-                <h2 className="text-lg md:text-xl font-semibold">League Table</h2>
-                {isTableOpen ? (
-                  <ChevronUp className="w-5 h-5 text-muted-foreground" />
-                ) : (
-                  <ChevronDown className="w-5 h-5 text-muted-foreground" />
-                )}
-              </button>
-
-              <AnimatePresence>
-                {isTableOpen && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="overflow-hidden"
-                  >
-                    <div className="p-4 md:p-6 border-t border-border overflow-x-auto">
-                      <table className="w-full">
-                        <thead>
-                          <tr className="border-b border-border">
-                            <th className="text-left py-4 px-3 text-sm font-medium text-muted-foreground">Pos</th>
-                            <th className="text-left py-4 px-3 text-sm font-medium text-muted-foreground">Team</th>
-                            <th className="text-center py-4 px-3 text-sm font-medium text-muted-foreground">P</th>
-                            <th className="text-center py-4 px-3 text-sm font-medium text-muted-foreground">W</th>
-                            <th className="text-center py-4 px-3 text-sm font-medium text-muted-foreground">D</th>
-                            <th className="text-center py-4 px-3 text-sm font-medium text-muted-foreground">L</th>
-                            <th className="text-center py-4 px-3 text-sm font-medium text-muted-foreground">GF</th>
-                            <th className="text-center py-4 px-3 text-sm font-medium text-muted-foreground">GA</th>
-                            <th className="text-center py-4 px-3 text-sm font-medium text-muted-foreground">GD</th>
-                            <th className="text-center py-4 px-3 text-sm font-medium text-muted-foreground">Pts</th>
-                            <th className="text-center py-4 px-3 text-sm font-medium text-muted-foreground">Form</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {
-                            table.map(( entry, index ) => (
-                              <tr 
-                                key={ entry.team._id } 
-                                className="border-b border-border hover:bg-accent/50 transition-colors"
-                              >
-                                <td className="py-4 px-3 text-sm">{ index + 1 }</td>
-                                <td className="py-4 px-3">
-                                  <div className="flex items-center gap-3">
-                                    <div className="relative w-8 h-8">
-                                      <Image
-                                        src={ teamLogos[ entry.team.name ] || '/images/team_logos/default.jpg' }
-                                        alt={`${ entry.team.name } logo`}
-                                        fill
-                                        className="object-contain"
-                                      />
-                                    </div>
-                                    <span className="font-medium text-sm md:text-base">
-                                      { entry.team.name }
-                                    </span>
-                                  </div>
-                                </td>
-                                <td className="text-center py-4 px-3 text-sm">{ entry.played }</td>
-                                <td className="text-center py-4 px-3 text-sm">{ entry.wins }</td>
-                                <td className="text-center py-4 px-3 text-sm">{ entry.draws }</td>
-                                <td className="text-center py-4 px-3 text-sm">{ entry.losses }</td>
-                                <td className="text-center py-4 px-3 text-sm">{ entry.goalsFor }</td>
-                                <td className="text-center py-4 px-3 text-sm">{ entry.goalsAgainst }</td>
-                                <td className="text-center py-4 px-3 text-sm">{ entry.goalDifference }</td>
-                                <td className="text-center py-4 px-3 text-sm font-semibold">{ entry.points }</td>
-                                <td className="text-center py-4 px-3">
-                                  <div className="flex items-center justify-center gap-1">
-                                    { 
-                                      [ ...entry.form ].reverse().map((result, i) => (
-                                        <span
-                                          key={i}
-                                          className={`w-6 h-6 flex items-center justify-center rounded-full text-xs font-medium ${
-                                            result === 'W' 
-                                              ? 'bg-emerald-500/10 text-emerald-500' 
-                                              : result === 'D'
-                                              ? 'bg-orange-500/10 text-orange-500'
-                                              : 'bg-red-500/10 text-red-500'
-                                          }`}
-                                        >
-                                          {result}
-                                        </span>
-                                      ))
-                                    }
-                                  </div>
-                                </td>
-                              </tr>
-                            ))
-                          }
-                        </tbody>
-                      </table>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-
-            {/* Top Scorers */}
-            <div className="bg-card rounded-xl border border-border overflow-hidden">
-              <button
-                onClick={() => setIsScorersOpen(!isScorersOpen)}
-                className="w-full px-6 py-4 flex items-center justify-between hover:bg-accent/50 transition-colors"
-              >
-                <h2 className="text-xl font-semibold">Top Scorers</h2>
-                {isScorersOpen ? (
-                  <ChevronUp className="w-5 h-5 text-muted-foreground" />
-                ) : (
-                  <ChevronDown className="w-5 h-5 text-muted-foreground" />
-                )}
-              </button>
-
-              <AnimatePresence>
-                {isScorersOpen && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="overflow-hidden"
-                  >
-                    <div className="p-6 border-t border-border overflow-x-auto">
-                      <table className="w-full">
-                        <thead>
-                          <tr className="border-b border-border">
-                            <th className="text-left py-6 px-4 font-medium text-muted-foreground">Rank</th>
-                            <th className="text-left py-6 px-4 font-medium text-muted-foreground">Player</th>
-                            <th className="text-left py-6 px-4 font-medium text-muted-foreground">Team</th>
-                            <th className="text-center py-6 px-4 font-medium text-muted-foreground">Matches</th>
-                            <th className="text-center py-6 px-4 font-medium text-muted-foreground">Goals</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          { 
-                            overview.topScorers.map(( entry, index ) => (
-                              <tr 
-                                key={` ${entry.player._id} + ${ entry.team } + ${ index } `} 
-                                className="border-b border-border hover:bg-accent/50 transition-colors"
-                              >
-                                <td className="py-6 px-4">{ index + 1 }</td>
-                                <td className="py-6 px-4">
-                                  <span className="font-medium">{ entry.player.name }</span>
-                                </td>
-                                <td className="py-6 px-4">
-                                  <div className="flex items-center gap-4">
-                                    <div className="relative w-8 h-8">
-                                      <Image
-                                        src={ teamLogos[ entry.team ] || '/images/team_logos/default.jpg' }
-                                        alt={`${ entry.team } logo`}
-                                        fill
-                                        className="object-contain"
-                                      />
-                                    </div>
-                                    <span>{ entry.team }</span>
-                                  </div>
-                                </td>
-                                <td className="text-center py-6 px-4">{ entry.appearances }</td>
-                                <td className="text-center py-6 px-4 font-semibold">{ entry.goals }</td>
-                              </tr>
-                            ))
-                          }
-                        </tbody>
-                      </table>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-
-            {/* Top Assisters */}
-            <div className="bg-card rounded-xl border border-border overflow-hidden">
-              <button
-                onClick={() => setIsAssistersOpen( !isAssistersOpen ) }
-                className="w-full px-6 py-4 flex items-center justify-between hover:bg-accent/50 transition-colors"
-              >
-                <h2 className="text-xl font-semibold">Top Assists</h2>
-                {isAssistersOpen ? (
-                  <ChevronUp className="w-5 h-5 text-muted-foreground" />
-                ) : (
-                  <ChevronDown className="w-5 h-5 text-muted-foreground" />
-                )}
-              </button>
-
-              <AnimatePresence>
-                {isAssistersOpen && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="overflow-hidden"
-                  >
-                    <div className="p-6 border-t border-border overflow-x-auto">
-                      <table className="w-full">
-                        <thead>
-                          <tr className="border-b border-border">
-                            <th className="text-left py-6 px-4 font-medium text-muted-foreground">Rank</th>
-                            <th className="text-left py-6 px-4 font-medium text-muted-foreground">Player</th>
-                            <th className="text-left py-6 px-4 font-medium text-muted-foreground">Team</th>
-                            <th className="text-center py-6 px-4 font-medium text-muted-foreground">Matches</th>
-                            <th className="text-center py-6 px-4 font-medium text-muted-foreground">Assists</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          { 
-                            overview.topAssists.map(( entry, index ) => (
-                              <tr 
-                                key={` ${entry.player._id} + ${ entry.team } + ${ index } `} 
-                                className="border-b border-border hover:bg-accent/50 transition-colors"
-                              >
-                                <td className="py-6 px-4">{ index + 1 }</td>
-                                <td className="py-6 px-4">
-                                  <span className="font-medium">{ entry.player.name }</span>
-                                </td>
-                                <td className="py-6 px-4">
-                                  <div className="flex items-center gap-4">
-                                    <div className="relative w-8 h-8">
-                                      <Image
-                                        src={ teamLogos[ entry.team ] || '/images/team_logos/default.jpg' }
-                                        alt={`${ entry.team } logo`}
-                                        fill
-                                        className="object-contain"
-                                      />
-                                    </div>
-                                    <span>{ entry.team }</span>
-                                  </div>
-                                </td>
-                                <td className="text-center py-6 px-4">{ entry.appearances }</td>
-                                <td className="text-center py-6 px-4">{ entry.assists }</td>
-                              </tr>
-                            ))
-                          }
-                        </tbody>
-                      </table>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-
           </div>
         </BlurFade>
       </div>

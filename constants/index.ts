@@ -114,3 +114,198 @@ export const teamLogos: Record<string, string> = {
     'Twale FC': '/images/team_logos/twale_fc.jpg',
     'Matadors FC': '/images/team_logos/matadors_fc.jpg',
 }
+
+export const mockInterLevelCompetition = {
+    _id: 'inter-level-2025',
+    name: 'Inter Level',
+    type: 'knockout',
+    status: 'ongoing',
+    startDate: new Date('2025-02-01'),
+    endDate: new Date('2025-02-28'),
+    description: 'Inter Level Knockout Competition 2025',
+    teams: [
+        {
+            team: {
+                _id: 'team1',
+                name: 'Matadors FC',
+                shorthand: 'MAT',
+            },
+            _id: 'team1-entry',
+            squadList: []
+        },
+        {
+            team: {
+                _id: 'team2',
+                name: 'Twale FC',
+                shorthand: 'TWL',
+            },
+            _id: 'team2-entry',
+            squadList: []
+        },
+        {
+            team: {
+                _id: 'team3',
+                name: 'Citizens',
+                shorthand: 'CIT',
+            },
+            _id: 'team3-entry',
+            squadList: []
+        },
+        {
+            team: {
+                _id: 'team4',
+                name: 'Seventeen FC',
+                shorthand: 'SVT',
+            },
+            _id: 'team4-entry',
+            squadList: []
+        }
+    ],
+    knockoutRounds: [
+        {
+            name: 'Semi Finals',
+            _id: 'semi-finals',
+            fixtures: [
+                {
+                    _id: 'sf1',
+                    homeTeam: {
+                        _id: 'team1',
+                        name: 'Matadors FC',
+                        shorthand: 'MAT',
+                    },
+                    awayTeam: {
+                        _id: 'team2',
+                        name: 'Twale FC',
+                        shorthand: 'TWL',
+                    },
+                    date: new Date('2025-02-20T15:00:00'),
+                    status: 'completed',
+                    result: {
+                        homeScore: 3,
+                        awayScore: 1,
+                        homePenalty: null,
+                        awayPenalty: null
+                    }
+                },
+                {
+                    _id: 'sf2',
+                    homeTeam: {
+                        _id: 'team3',
+                        name: 'Citizens',
+                        shorthand: 'CIT',
+                    },
+                    awayTeam: {
+                        _id: 'team4',
+                        name: 'Seventeen FC',
+                        shorthand: 'SVT',
+                    },
+                    date: new Date('2025-02-20T17:00:00'),
+                    status: 'completed',
+                    result: {
+                        homeScore: 4,
+                        awayScore: 2,
+                        homePenalty: null,
+                        awayPenalty: null
+                    }
+                }
+            ]
+        },
+        {
+            name: 'Final',
+            _id: 'final',
+            fixtures: [
+                {
+                    _id: 'f1',
+                    homeTeam: {
+                        _id: 'team1',
+                        name: 'Matadors FC',
+                        shorthand: 'MAT',
+                    },
+                    awayTeam: {
+                        _id: 'team3',
+                        name: 'Citizens',
+                        shorthand: 'CIT',
+                    },
+                    date: new Date('2025-02-25T16:00:00'),
+                    status: 'upcoming',
+                    result: {
+                        homeScore: null,
+                        awayScore: null,
+                        homePenalty: null,
+                        awayPenalty: null
+                    }
+                }
+            ]
+        }
+    ],
+    overview: {
+        leagueFacts: {
+            teamList: [
+                {
+                    _id: 'team1',
+                    name: 'Matadors FC',
+                    shorthand: 'MAT',
+                },
+                {
+                    _id: 'team2',
+                    name: 'Twale FC',
+                    shorthand: 'TWL',
+                },
+                {
+                    _id: 'team3',
+                    name: 'Citizens',
+                    shorthand: 'CIT',
+                },
+                {
+                    _id: 'team4',
+                    name: 'Seventeen FC',
+                    shorthand: 'SVT',
+                }
+            ]
+        },
+        topScorers: [
+            {
+                player: {
+                    _id: 'player1',
+                    name: 'John Doe',
+                    position: 'FW'
+                },
+                team: 'Matadors FC',
+                goals: 2,
+                appearances: 1
+            },
+            {
+                player: {
+                    _id: 'player2',
+                    name: 'Jane Smith',
+                    position: 'FW'
+                },
+                team: 'Citizens',
+                goals: 2,
+                appearances: 1
+            }
+        ],
+        topAssists: [
+            {
+                player: {
+                    _id: 'player3',
+                    name: 'Mike Johnson',
+                    position: 'MF'
+                },
+                team: 'Matadors FC',
+                assists: 1,
+                appearances: 1
+            },
+            {
+                player: {
+                    _id: 'player4',
+                    name: 'Sarah Wilson',
+                    position: 'MF'
+                },
+                team: 'Citizens',
+                assists: 1,
+                appearances: 1
+            }
+        ]
+    }
+};

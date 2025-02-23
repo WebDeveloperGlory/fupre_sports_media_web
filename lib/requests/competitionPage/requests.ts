@@ -1,4 +1,5 @@
 import axiosInstance from "@/lib/config/axiosInstance";
+import { mockInterLevelCompetition } from "@/constants";
 
 interface CustomError {
     status?: number;
@@ -27,6 +28,12 @@ export const getAllCompetitions = async () => {
         if( data.code === '99' ) {
             throw data
         }
+
+        // Add the mock Inter Level competition to the list
+        if (data.code === '00' && Array.isArray(data.data)) {
+            data.data.unshift(mockInterLevelCompetition);
+        }
+
         return data;
     } catch( err: any ) {
         const { response } = err as CustomError;
@@ -65,6 +72,15 @@ export const getLiveFixture = async () => {
 
 export const getIndividualCompetition = async ( id: string ) => {
     try {
+        // Return mock Inter Level competition if ID matches
+        if (id === mockInterLevelCompetition._id) {
+            return {
+                code: '00',
+                message: 'Success',
+                data: mockInterLevelCompetition
+            };
+        }
+
         const response = await axiosInstance.get( `${ API_URL }/competition/${ id }` );
         const { data }: { data: SuccessRequest } = response;
 
@@ -87,6 +103,15 @@ export const getIndividualCompetition = async ( id: string ) => {
 
 export const getIndividualCompetitionOverview = async ( id: string ) => {
     try {
+        // Return mock Inter Level competition overview if ID matches
+        if (id === mockInterLevelCompetition._id) {
+            return {
+                code: '00',
+                message: 'Success',
+                data: mockInterLevelCompetition.overview
+            };
+        }
+
         const response = await axiosInstance.get( `${ API_URL }/competition/${ id }/overview` );
         const { data }: { data: SuccessRequest } = response;
 
@@ -109,6 +134,15 @@ export const getIndividualCompetitionOverview = async ( id: string ) => {
 
 export const getLeagueTable = async ( id: string ) => {
     try {
+        // Return empty array for knockout competitions
+        if (id === mockInterLevelCompetition._id) {
+            return {
+                code: '00',
+                message: 'Success',
+                data: []
+            };
+        }
+
         const response = await axiosInstance.get( `${ API_URL }/competition/${ id }/league-table` );
         const { data }: { data: SuccessRequest } = response;
 
@@ -131,6 +165,15 @@ export const getLeagueTable = async ( id: string ) => {
 
 export const getTopPlayers = async ( id: string ) => {
     try {
+        // Return mock Inter Level competition top players if ID matches
+        if (id === mockInterLevelCompetition._id) {
+            return {
+                code: '00',
+                message: 'Success',
+                data: mockInterLevelCompetition.overview.topScorers
+            };
+        }
+
         const response = await axiosInstance.get( `${ API_URL }/competition/${ id }/top-players` );
         const { data }: { data: SuccessRequest } = response;
 
@@ -153,6 +196,15 @@ export const getTopPlayers = async ( id: string ) => {
 
 export const getTopTeams = async ( id: string, type: string = 'average' ) => {
     try {
+        // Return empty array for knockout competitions
+        if (id === mockInterLevelCompetition._id) {
+            return {
+                code: '00',
+                message: 'Success',
+                data: []
+            };
+        }
+
         const response = await axiosInstance.get( `${ API_URL }/competition/${ id }/top-teams?statType=${ type }` );
         const { data }: { data: SuccessRequest } = response;
 
@@ -175,6 +227,15 @@ export const getTopTeams = async ( id: string, type: string = 'average' ) => {
 
 export const getAllTeamStats = async ( id: string, type: string = 'average' ) => {
     try {
+        // Return empty array for knockout competitions
+        if (id === mockInterLevelCompetition._id) {
+            return {
+                code: '00',
+                message: 'Success',
+                data: []
+            };
+        }
+
         const response = await axiosInstance.get( `${ API_URL }/competition/${ id }/team-stats?statType=${ type }` );
         const { data }: { data: SuccessRequest } = response;
 
@@ -197,6 +258,15 @@ export const getAllTeamStats = async ( id: string, type: string = 'average' ) =>
 
 export const getAllPlayerStats = async ( id: string, page: number, limit: number, teamId: string ) => {
     try {
+        // Return empty array for knockout competitions
+        if (id === mockInterLevelCompetition._id) {
+            return {
+                code: '00',
+                message: 'Success',
+                data: []
+            };
+        }
+
         const response = await axiosInstance.get( `${ API_URL }/competition/${ id }/player-stats?page=${ page }&limit=${ limit }${ teamId ? `&teamId=${ teamId }` : '' }` );
         const { data }: { data: SuccessRequest } = response;
 
@@ -219,6 +289,22 @@ export const getAllPlayerStats = async ( id: string, page: number, limit: number
 
 export const getAllCompetitionFixtures = async ( id: string ) => {
     try {
+        // Return mock Inter Level competition fixtures if ID matches
+        if (id === mockInterLevelCompetition._id) {
+            const fixtures = mockInterLevelCompetition.knockoutRounds.reduce((acc: any[], round) => {
+                return [...acc, ...round.fixtures];
+            }, []);
+
+            return {
+                code: '00',
+                message: 'Success',
+                data: {
+                    upcomingMatches: fixtures.filter(f => f.status === 'upcoming'),
+                    completedMatches: fixtures.filter(f => f.status === 'completed')
+                }
+            };
+        }
+
         const response = await axiosInstance.get( `${ API_URL }/competition/${ id }/fixtures` );
         const { data }: { data: SuccessRequest } = response;
 
