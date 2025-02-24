@@ -241,7 +241,7 @@ export const getAllCompetitionFixtures = async ( id: string ) => {
 
 export const getKnockoutRounds = async (id: string) => {
     try {
-        const response = await axiosInstance.get(`${API_URL}/competition/${id}/knockout-rounds`);
+        const response = await axiosInstance.get(`${API_URL}/competition/${id}/knockout/phases`);
         const { data }: { data: SuccessRequest } = response;
 
         if (data.code === '99') {

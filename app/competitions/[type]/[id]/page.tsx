@@ -14,6 +14,7 @@ import { Loader } from "@/components/ui/loader";
 import { format } from "date-fns";
 import { teamLogos } from "@/constants";
 import { KnockoutBracket } from "@/components/competition/KnockoutBracket";
+import LeagueTable from "@/components/competition/LeagueTable";
 
 const fixtureButtons: ( keyof CompetitionFixtures )[] = [ 'upcomingMatches', 'completedMatches' ];
 
@@ -201,7 +202,40 @@ export default function CompetitionPage({
                       className="overflow-hidden"
                     >
                       <div className="border-t border-border">
-                        <KnockoutBracket competition={competition} />
+                        <KnockoutBracket knockoutRounds={ knockoutRounds } />
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            )}
+
+            {/* League Table */}
+            {competition.type === 'league' && (
+              <div className="bg-card rounded-xl border border-border overflow-hidden">
+                <button
+                  onClick={() => setIsTableOpen(!isTableOpen)}
+                  className="w-full px-4 md:px-6 py-4 flex items-center justify-between hover:bg-accent/50 transition-colors"
+                >
+                  <h2 className="text-lg md:text-xl font-semibold">League Table</h2>
+                  {isTableOpen ? (
+                    <ChevronUp className="w-5 h-5 text-muted-foreground" />
+                  ) : (
+                    <ChevronDown className="w-5 h-5 text-muted-foreground" />
+                  )}
+                </button>
+
+                <AnimatePresence>
+                  {isTableOpen && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="p-4 md:p-6 border-t border-border overflow-x-auto">
+                        <LeagueTable table={ table } />
                       </div>
                     </motion.div>
                   )}
@@ -249,6 +283,13 @@ export default function CompetitionPage({
                             </div>
                           </div>
                         ))}
+                        {
+                          overview.topScorers.length === 0 && (
+                            <div className="text-center text-muted-foreground">
+                              No top scorers yet
+                            </div>
+                          )
+                        }
                       </div>
                     </div>
                   </motion.div>
@@ -296,6 +337,13 @@ export default function CompetitionPage({
                             </div>
                           </div>
                         ))}
+                        {
+                          overview.topAssists.length === 0 && (
+                            <div className="text-center text-muted-foreground">
+                              No top assists yet
+                            </div>
+                          )
+                        }
                       </div>
                     </div>
                   </motion.div>

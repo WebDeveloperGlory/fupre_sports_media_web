@@ -1,4 +1,4 @@
-import { Competition, Fixture } from "@/utils/requestDataTypes";
+import { Competition, Fixture, KnockoutRoundsEntry } from "@/utils/requestDataTypes";
 import { format } from "date-fns";
 import Link from "next/link";
 import { Calendar, Clock } from "lucide-react";
@@ -7,9 +7,7 @@ interface KnockoutBracketProps {
   competition: Competition;
 }
 
-export const KnockoutBracket = ({ competition }: KnockoutBracketProps) => {
-  const knockoutRounds = competition.knockoutRounds;
-
+export const KnockoutBracket = ({ knockoutRounds }: { knockoutRounds: KnockoutRoundsEntry[] }) => {
   if (!knockoutRounds || knockoutRounds.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">
