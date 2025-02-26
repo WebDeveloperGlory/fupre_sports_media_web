@@ -8,10 +8,10 @@ import { BackButton } from "@/components/ui/back-button";
 const highlights = [
   {
     id: 7,
-    videoId: "y1BASngU5c",
+    videoId: "y1BASn-gU5c",
     title: "CITIZENS (4) - (2) SEVENTEEN FC HIGHLIGHTS|| FSL 24/25 SEASON",
     date: "Feb 21, 2025",
-    views: "4 views",
+    views: "48 views",
     category: "Football",
   },
   {
