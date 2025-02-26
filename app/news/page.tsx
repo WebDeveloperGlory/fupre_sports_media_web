@@ -65,13 +65,20 @@ export default function NewsPage() {
                     </p>
                     <div className="flex items-center gap-4 text-sm text-muted-foreground">
                       <div className="flex items-center gap-2">
-                        <div className="relative w-6 h-6 rounded-full bg-muted overflow-hidden">
-                          <Image
-                            src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${article.author}`}
-                            alt={article.author}
-                            fill
-                            className="object-cover"
-                          />
+                        <div className="relative w-6 h-6 rounded-full bg-muted overflow-hidden flex items-center justify-center text-muted-foreground">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="w-4 h-4"
+                          >
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                            <circle cx="12" cy="7" r="4" />
+                          </svg>
                         </div>
                         <span>{article.author}</span>
                       </div>
