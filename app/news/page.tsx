@@ -4,6 +4,8 @@ import { BlurFade } from "@/components/ui/blur-fade";
 import { Clock } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { NewsSkeletonList } from "@/components/ui/news-skeleton";
+import { Suspense } from "react";
 
 const latestArticles = [
   {
@@ -40,7 +42,9 @@ export default function NewsPage() {
     <div className="min-h-screen">
       <div className="p-4 md:p-8">
         {/* Latest Articles */}
-        <BlurFade delay={0.1}>
+        <Suspense fallback={<NewsSkeletonList />}>
+        </Suspense>
+          <BlurFade delay={0.1}>
           <h2 className="text-2xl font-bold mb-6">Latest Stories</h2>
           <div className="grid gap-8 max-w-4xl">
             {latestArticles.map((article) => (
