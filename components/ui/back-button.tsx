@@ -9,10 +9,10 @@ export function BackButton() {
   return (
     <button
       onClick={() => router.back()}
-      className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-secondary text-secondary-foreground hover:bg-accent transition-colors cursor-pointer"
+      className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-secondary text-secondary-foreground hover:bg-accent transition-colors cursor-pointer"
+      aria-label="Go back"
     >
-      <ChevronLeft className="w-4 h-4" />
-      <span>Back</span>
+      <ChevronLeft className="w-5 h-5" />
     </button>
   );
-} 
+}
