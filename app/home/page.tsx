@@ -201,11 +201,16 @@ export default async function HomePage() {
                       {todaysFixture.competition?.name || 'Friendly'}
                     </span>
                   </div>
-                  <div className="text-center">
-                    <span className="inline-block px-2.5 sm:px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-500 text-xs sm:text-sm font-medium">
-                      { todaysFixture.status }
-                    </span>
-                  </div>
+                  {
+                    todaysFixture.status === 'live' && (
+                      <div className="text-center">
+                        <span className="inline-block px-2.5 sm:px-3 py-1 rounded-full bg-red-500/10 text-red-500 text-xs sm:text-sm font-medium">
+                          { todaysFixture.status }
+                        </span>
+                      </div>
+                    )
+                  }
+                  
                 </div>
               ) : (
                 <div className="text-center text-muted-foreground py-6 sm:py-8">
