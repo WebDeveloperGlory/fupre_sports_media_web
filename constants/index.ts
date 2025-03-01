@@ -113,7 +113,7 @@ export const teamLogos: Record<string, string> = {
     'Seventeen FC': '/images/team_logos/seventeen_fc.jpg',
     'Twale FC': '/images/team_logos/twale_fc.jpg',
     'Matadors FC': '/images/team_logos/matadors_fc.jpg',
-    'Electrical 300lvl': '/images/team_logos/electrical.jpg',
+    'Electrical 300lvl': '/images/team_logos/electrical.jpeg',
     'Mechanical 300lvl': '/images/team_logos/mechanical.jpg',
 }
 
