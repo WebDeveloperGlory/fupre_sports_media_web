@@ -2,6 +2,7 @@
 
 import { use, useEffect, useState } from 'react';
 import Image from 'next/image';
+import io from 'socket.io-client';
 import { Timeline } from '@/components/live/Timeline';
 import { BlurFade } from '@/components/ui/blur-fade';
 import { BackButton } from '@/components/ui/back-button';
@@ -10,6 +11,8 @@ import { Trophy, Clock, Activity, Target, Flag, Users, PieChart, Goal } from 'lu
 import { getLiveFixtureDetails } from '@/lib/requests/liveAdminPage/requests';
 import { LiveFixture } from '@/utils/requestDataTypes';
 import { teamLogos } from '@/constants';
+
+const API_URL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_PROD_API_URL : process.env.NEXT_PUBLIC_DEV_API_URL;
 
 function QuickStat({ icon, label, home, away }: { icon: React.ReactNode; label: string; home: number; away: number }) {
   return (
@@ -137,6 +140,7 @@ export default function LiveMatchPage({
   params: Promise<{ id: string }> 
 }) {
   const resolvedParams = use(params);
+  const socket = io( API_URL );
 
   const [ loading, setLoading ] = useState<boolean>( true );
   const [ liveFixture, setLiveFixture ] = useState<LiveFixture | null>( null );
@@ -150,8 +154,25 @@ export default function LiveMatchPage({
       };
       setLoading( false );
     }
+
+    socket.emit( "joinMatch", resolvedParams.id );
+
+    socket.on("matchUpdate", (updatedData) => {
+      console.log("Live match update received:", updatedData);
+      // Update UI with new match data
+      setLiveFixture( ( prevFixture ) => ({
+          ...prevFixture,
+          ...updatedData
+        })
+      );
+    });
     
     if( loading ) fetchData();
+
+    // Cleanup on unmount
+    return () => {
+      socket.off(`match-${ resolvedParams.id }`);
+    };
   }, [ loading, resolvedParams.id ])
 
   // Calculate total elapsed game time
