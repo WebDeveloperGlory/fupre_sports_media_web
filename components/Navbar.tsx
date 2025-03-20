@@ -9,6 +9,7 @@ import { Home, Trophy, Newspaper, Play, Menu, X, LayoutDashboard } from 'lucide-
 import { usePathname } from 'next/navigation';
 import { cn } from '@/utils/cn';
 import useAuthStore from '@/stores/authStore';
+import { User } from 'lucide-react';
 
 const menuVariants = {
   hidden: { x: "100%", opacity: 0 },
@@ -46,6 +47,7 @@ const Navbar = () => {
     { href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard }
   ]
 
+  // Add these inside the desktop navbar's right section
   return (
     <>
       {/* Desktop Navbar */}
@@ -99,32 +101,42 @@ const Navbar = () => {
             }
           </div>
 
-            {/* Theme Toggle */}
-            <button
-              onClick={toggleTheme}
-              className="p-2 text-navbar-muted hover:text-navbar-foreground transition-colors"
-              aria-label="Toggle theme"
-            >
-              {theme === 'dark' ? (
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
-                  />
-                </svg>
+            {/* Modified auth section */}
+            <div className="flex items-center gap-4">
+              <Link
+                href={jwt ? "/profile" : "/auth/login"}
+                className="p-2 hover:bg-muted rounded-full transition-colors"
+              >
+                <User className="w-5 h-5" />
+              </Link>
+              
+              {/* Theme toggle */}
+              <button
+                onClick={toggleTheme}
+                className="p-2 text-navbar-muted hover:text-navbar-foreground transition-colors"
+                aria-label="Toggle theme"
+              >
+                {theme === 'dark' ? (
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+                    />
+                  </svg>
                 ) : (
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
-                  />
-                </svg>
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+                    />
+                  </svg>
                 )}
-            </button>
+              </button>
+            </div>
           </div>
         </nav>
       </div>
@@ -136,9 +148,9 @@ const Navbar = () => {
             {navLinks.map((link) => {
               const Icon = link.icon;
               return (
-              <Link
-                key={link.label}
-                href={link.href}
+                <Link
+                  key={link.label}
+                  href={link.href}
                   className={cn(
                     "flex flex-col items-center justify-center space-y-1 transition-colors",
                     isActiveRoute(link.href)
@@ -187,6 +199,14 @@ const Navbar = () => {
                 FSM
               </Link>
               <div className="flex items-center gap-4">
+                {/* Profile Link */}
+                <Link
+                  href={jwt ? "/profile" : "/auth/login"}
+                  className="p-2 rounded-lg bg-secondary text-secondary-foreground hover:bg-muted transition-all"
+                >
+                  <User className="w-5 h-5" />
+                </Link>
+
                 {/* Theme Toggle Button */}
                 <button
                   onClick={toggleTheme}
@@ -306,6 +326,6 @@ const Navbar = () => {
       )}
     </>
   );
-}
+};
 
 export default Navbar;
