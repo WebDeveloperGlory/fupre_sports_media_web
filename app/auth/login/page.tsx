@@ -9,19 +9,16 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-export default function SignupPage() {
+export default function LoginPage() {
   const router = useRouter();
-  const { signup } = useAuthStore();
+  const { login } = useAuthStore();
   const [formData, setFormData] = useState({
-    name: '',
     email: '',
     password: '',
-    confirmPassword: '',
   });
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [emailError, setEmailError] = useState('');
-  const [passwordError, setPasswordError] = useState('');
 
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -33,29 +30,16 @@ export default function SignupPage() {
     return true;
   };
 
-  const validatePassword = () => {
-    if (formData.password.length < 6) {
-      setPasswordError('Password must be at least 6 characters');
-      return false;
-    }
-    if (formData.password !== formData.confirmPassword) {
-      setPasswordError('Passwords do not match');
-      return false;
-    }
-    setPasswordError('');
-    return true;
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validateEmail(formData.email) || !validatePassword()) return;
+    if (!validateEmail(formData.email)) return;
     
     setIsLoading(true);
     try {
-      await signup(formData.name, formData.email, formData.password);
+      await login(formData.email, formData.password);
       router.push('/');
     } catch (error) {
-      console.error('Signup failed:', error);
+      console.error('Login failed:', error);
     } finally {
       setIsLoading(false);
     }
@@ -80,28 +64,14 @@ export default function SignupPage() {
               >
                 <ArrowLeft className="h-4 w-4" />
               </Button>
-              <CardTitle className="text-2xl font-bold">Create an account</CardTitle>
+              <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
             </div>
             <CardDescription className="text-muted-foreground">
-              Enter your details to create your account
+              Enter your credentials to access your account
             </CardDescription>
           </CardHeader>
           <form onSubmit={handleSubmit}>
             <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <label htmlFor="name" className="text-sm font-medium">
-                  Full Name
-                </label>
-                <Input
-                  id="name"
-                  type="text"
-                  placeholder="Enter your full name"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  required
-                  className="bg-background border-input focus:border-emerald-500 focus:ring-emerald-500/20"
-                />
-              </div>
               <div className="space-y-2">
                 <label htmlFor="email" className="text-sm font-medium">
                   Email
@@ -132,7 +102,7 @@ export default function SignupPage() {
                   <Input
                     id="password"
                     type={showPassword ? "text" : "password"}
-                    placeholder="Create a password"
+                    placeholder="Enter your password"
                     value={formData.password}
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                     required
@@ -151,25 +121,6 @@ export default function SignupPage() {
                   </button>
                 </div>
               </div>
-              <div className="space-y-2">
-                <label htmlFor="confirmPassword" className="text-sm font-medium">
-                  Confirm Password
-                </label>
-                <Input
-                  id="confirmPassword"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Confirm your password"
-                  value={formData.confirmPassword}
-                  onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                  required
-                  className={`bg-background border-input focus:border-emerald-500 focus:ring-emerald-500/20 ${
-                    passwordError ? 'border-red-500' : ''
-                  }`}
-                />
-                {passwordError && (
-                  <p className="text-sm text-red-500">{passwordError}</p>
-                )}
-              </div>
             </CardContent>
             <CardFooter className="flex flex-col space-y-4">
               <Button 
@@ -177,17 +128,17 @@ export default function SignupPage() {
                 className="w-full bg-emerald-500 hover:bg-emerald-600 text-white" 
                 disabled={isLoading}
               >
-                {isLoading ? 'Creating account...' : 'Create account'}
+                {isLoading ? 'Signing in...' : 'Sign in'}
               </Button>
               
               <div className="text-center text-sm">
-                Already have an account?{" "}
+                Don't have an account?{" "}
                 <Button 
                   variant="link" 
                   className="p-0 h-auto text-emerald-500 hover:text-emerald-600"
-                  onClick={() => router.push('/auth/login')}
+                  onClick={() => router.push('/auth/signup')}
                 >
-                  Sign in
+                  Sign up
                 </Button>
               </div>
             </CardFooter>

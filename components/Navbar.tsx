@@ -202,7 +202,8 @@ const Navbar = () => {
                 {/* Profile Link */}
                 <Link
                   href={jwt ? "/profile" : "/auth/login"}
-                  className="p-2 rounded-lg bg-secondary text-secondary-foreground hover:bg-muted transition-all"
+                  onClick={() => setOpenMobileMenu(false)}
+                  className="p-2 rounded-full bg-secondary text-secondary-foreground hover:bg-muted transition-all"
                 >
                   <User className="w-5 h-5" />
                 </Link>
@@ -210,7 +211,7 @@ const Navbar = () => {
                 {/* Theme Toggle Button */}
                 <button
                   onClick={toggleTheme}
-                  className="p-2 rounded-lg bg-secondary text-secondary-foreground hover:bg-muted transition-all"
+                  className="p-2 rounded-full bg-secondary text-secondary-foreground hover:bg-muted transition-all"
                   aria-label="Toggle theme"
                 >
                   {theme === "dark" ? (
