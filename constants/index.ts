@@ -113,8 +113,12 @@ export const teamLogos: Record<string, string> = {
     'Seventeen FC': '/images/team_logos/seventeen_fc.jpg',
     'Twale FC': '/images/team_logos/twale_fc.jpg',
     'Matadors FC': '/images/team_logos/matadors_fc.jpg',
-    'Electrical 300lvl': '/images/team_logos/electrical.jpeg',
-    'Mechanical 300lvl': '/images/team_logos/mechanical.jpg',
+    'Electrical 100lvl (2019/2020)': '/images/team_logos/electrical.jpeg',
+    'Electrical 200lvl (2020/2021)': '/images/team_logos/electrical.jpeg',
+    'Electrical 300lvl (2021/2022)': '/images/team_logos/electrical.jpeg',
+    'Electrical 400lvl (2023/2024)': '/images/team_logos/electrical.jpeg',
+    'Electrical 500lvl (2024/2025)': '/images/team_logos/electrical.jpeg',
+    'Mechanical 300lvl (2021/2022)': '/images/team_logos/mechanical.jpg',
 }
 
 export const mockInterLevelCompetition = {

@@ -30,7 +30,7 @@ export function NewsArticleSkeleton() {
 
 export function NewsSkeletonList() {
   return (
-    <BlurFade delay={0.1}>
+    <BlurFade>
       <div className="h-8 w-48 bg-muted rounded mb-6" />
       <div className="grid gap-8 max-w-4xl">
         {[1, 2, 3].map((i) => (
