@@ -51,7 +51,7 @@ const IndividualLivePage = (
     const [ loading, setLoading ] = useState<boolean>( true );
     const [ statValues, setStatValues ] = useState<LiveStatState>( liveFixtureInitialStateData );
     const [ players, setPlayers ] = useState<LiveFixtureTeamPlayerLists | null>( null );
-    const [ hasPenalties, setHasPenalties ] = useState<boolean>( false );
+    const [ hasPenalties, setHasPenalties ] = useState<boolean>( true );
     const [ activeTab, setActiveTab ] = useState<string>( 'timer' );
     const [ currentLineups, setCurrentLineups ] = useState<CurrentLineups>({
         home: [],

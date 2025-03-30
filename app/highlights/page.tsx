@@ -77,7 +77,7 @@ export default function HighlightsPage() {
         {/* Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-8">
           {highlights.map((highlight) => (
-            <BlurFade key={highlight.id} delay={0.1 * highlight.id}>
+            <BlurFade key={highlight.id}>
               <YouTubeVideo
                 videoId={highlight.videoId}
                 title={highlight.title}
