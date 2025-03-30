@@ -1,16 +1,23 @@
+import { UserProfile } from "@/utils/requestDataTypes";
 import { create } from 'zustand';
 
 interface UserStore {
-  jwt: string | null;
-  userProfile: string | null;
+  jwt: string | null,
+  setUserProfile: ( userProfile: UserProfile ) => void,
+  setJwt: ( jwt: string ) => void,
+  clearUserData: () => void,
   login: (email: string, password: string) => Promise<void>;
   signup: (name: string, email: string, password: string) => Promise<void>;
   logout: () => void;
+  userProfile: UserProfile | null,
 }
 
 const useAuthStore = create<UserStore>((set) => ({
   jwt: null,
   userProfile: null,
+  setUserProfile: ( userProfile: UserProfile ) => set({ userProfile }),
+  setJwt: ( jwt: string ) => set({ jwt }),
+  clearUserData: () => set({ jwt: null, userProfile: null }),
   login: async (email: string, password: string) => {
     try {
       // TODO: Replace with your actual API endpoint
