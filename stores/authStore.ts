@@ -2,6 +2,7 @@ import { create } from 'zustand';
 
 interface UserStore {
   jwt: string | null;
+  userProfile: string | null;
   login: (email: string, password: string) => Promise<void>;
   signup: (name: string, email: string, password: string) => Promise<void>;
   logout: () => void;
@@ -9,6 +10,7 @@ interface UserStore {
 
 const useAuthStore = create<UserStore>((set) => ({
   jwt: null,
+  userProfile: null,
   login: async (email: string, password: string) => {
     try {
       // TODO: Replace with your actual API endpoint
