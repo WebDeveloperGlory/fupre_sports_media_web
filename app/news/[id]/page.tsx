@@ -55,7 +55,7 @@ export default function NewsArticlePage() {
 
   return (
     <div className="min-h-screen">
-      <BlurFade delay={0.1}>
+      <BlurFade>
         <article className="max-w-4xl mx-auto p-4 md:p-8 space-y-6">
           <div className="mb-6">
             <BackButton />

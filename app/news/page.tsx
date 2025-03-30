@@ -44,7 +44,7 @@ export default function NewsPage() {
         {/* Latest Articles */}
         <Suspense fallback={<NewsSkeletonList />}>
         </Suspense>
-          <BlurFade delay={0.1}>
+          <BlurFade>
           <h2 className="text-2xl font-bold mb-6">Latest Stories</h2>
           <div className="grid gap-8 max-w-4xl">
             {latestArticles.map((article) => (
