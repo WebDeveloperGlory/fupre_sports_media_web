@@ -22,7 +22,7 @@ type GoalScorers = {
     team: string,
     id: {
         _id: string,
-        name: string, 
+        name: string,
         team: string,
     },
     time: number,
@@ -152,7 +152,7 @@ type CompletedFixtures = {
     stadium?: string,
 }
 
-export interface GeneralInfo { 
+export interface GeneralInfo {
     fixtureCount: number,
     allCompetitionsCount: number,
     ongoingCompetitionsCount: number,
@@ -272,13 +272,13 @@ export interface LiveFixture {
 }
 
 export interface LiveMatchUpdateRequestBody {
-    result?: Result, 
+    result?: Result,
     statistics?: {
-        home: Statistics, 
+        home: Statistics,
         away: Statistics,
-    }, 
-    matchEvents?: Event[] | [], 
-    homeLineup?: LineUp, 
+    },
+    matchEvents?: Event[] | [],
+    homeLineup?: LineUp,
     awayLineup?: LineUp,
     time?: number,
 }
@@ -304,9 +304,9 @@ export interface UserProfile {
     status: string,
     role: string,
     competitions: {
-        _id: string, 
-        name: string, 
-        description: string, 
+        _id: string,
+        name: string,
+        description: string,
         status: string,
         fixtures: number,
         teams: number
@@ -345,8 +345,8 @@ type DefendingData = {
 }
 
 export interface TeamStatData {
-    attack: AttackingData, 
-    defense: DefendingData, 
+    attack: AttackingData,
+    defense: DefendingData,
     summary: SummaryData
 }
 
@@ -358,7 +358,7 @@ type TeamPlayerStats = {
     totalYellowCards: number;
     totalRedCards: number;
 };
-  
+
 type TeamCompetition = {
     competition: {
       _id: string;
@@ -367,14 +367,14 @@ type TeamCompetition = {
     status: string;
     _id: string;
 };
-  
+
 type TopStats = {
     topScorers: TeamPlayerStats[];
     topAssisters: TeamPlayerStats[];
     topYellowCards: TeamPlayerStats[];
     topRedCards: TeamPlayerStats[];
 };
-  
+
 export interface TeamOverviewData {
     info: {
         playerCount: number;
@@ -391,7 +391,7 @@ type PlayerCategory = {
     name: string;
     players: Player[];
 };
-  
+
 export interface TeamPlayersData {
     players: PlayerCategory[];
 };
@@ -408,7 +408,7 @@ export interface LiveAdmins {
 }
 
 type AdminComp = {
-    name: string, 
+    name: string,
     type: string,
     startDate: Date,
     endDate: Date,
@@ -434,4 +434,50 @@ export interface ExtendedAdminCompetition extends AdminComp {
 export interface LiveFixtureTeamPlayerLists {
     homePlayers: Player[],
     awayPlayers: Player[]
+}
+
+// TOTS (Team of the Season) Types
+export interface TOTSPlayer {
+    _id: string;
+    name: string;
+    position: string;
+    team: {
+        _id: string;
+        name: string;
+        shorthand?: string;
+    };
+    votes?: number;
+    adminVotes?: number;
+}
+
+export interface TOTSSession {
+    _id: string;
+    name: string;
+    description: string;
+    startDate: Date;
+    endDate: Date;
+    isActive: boolean;
+    isFinalized: boolean;
+    createdAt: Date;
+    updatedAt: Date;
+}
+
+export interface TOTSSessionWithPlayers extends TOTSSession {
+    players: TOTSPlayer[];
+}
+
+export interface TOTSResult {
+    _id: string;
+    sessionId: string;
+    players: TOTSPlayer[];
+    totalVotes: number;
+    createdAt: Date;
+}
+
+export interface TOTSUserVote {
+    _id: string;
+    sessionId: string;
+    userId: string;
+    playerIds: string[];
+    createdAt: Date;
 }

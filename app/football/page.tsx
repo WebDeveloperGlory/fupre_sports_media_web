@@ -75,6 +75,31 @@ const FootballPage: FC = () => {
     <main className="min-h-screen">
       <BlurFade>
         <div className="space-y-6">
+          {/* TOTS Promotional Banner */}
+          <Link href="/football/tots">
+            <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-800 p-6 shadow-lg hover:shadow-xl transition-all">
+              <div className="absolute -right-12 -top-12 h-36 w-36 rounded-full bg-emerald-500/20 blur-xl"></div>
+              <div className="absolute -bottom-12 -left-12 h-36 w-36 rounded-full bg-emerald-500/20 blur-xl"></div>
+
+              <div className="relative flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/10 backdrop-blur-sm">
+                    <Trophy className="h-8 w-8 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold text-white">Team of the Season 2023/24</h2>
+                    <p className="text-sm text-emerald-100 mt-1">Vote for your favorite players and see who makes the cut!</p>
+                  </div>
+                </div>
+                <div className="md:text-right">
+                  <span className="inline-block px-4 py-2 bg-white/10 backdrop-blur-sm text-white rounded-full text-sm font-medium hover:bg-white/20 transition-colors">
+                    Vote Now
+                  </span>
+                </div>
+              </div>
+            </div>
+          </Link>
+
           {/* Hero - Live Matches */}
           <div className="relative bg-gradient-to-br from-emerald-500/20 via-background to-background rounded-xl border border-border overflow-hidden">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,_var(--tw-gradient-stops))] from-emerald-500/10 via-background to-background" />
@@ -97,7 +122,7 @@ const FootballPage: FC = () => {
                     )
                   }
                 </div>
-                
+
                 {
                   liveFixture && (
                     <div className="bg-card/40 backdrop-blur-sm rounded-xl p-6 border border-border">
@@ -221,8 +246,8 @@ const FootballPage: FC = () => {
                               </div>
                               <div className="flex items-center gap-2">
                                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                  competition.status === 'ongoing' 
-                                    ? 'bg-emerald-500/10 text-emerald-500' 
+                                  competition.status === 'ongoing'
+                                    ? 'bg-emerald-500/10 text-emerald-500'
                                     : 'bg-orange-500/10 text-orange-500'
                                 }`}>
                                   { competition.status }
@@ -252,4 +277,4 @@ const FootballPage: FC = () => {
   );
 };
 
-export default FootballPage; 
+export default FootballPage;

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { useTheme } from '@/providers/theme-provider';
 import { motion } from 'framer-motion';
-import { Home, Trophy, Newspaper, Play, Menu, X, LayoutDashboard } from 'lucide-react';
+import { Home, Trophy, Newspaper, Play, Menu, X, LayoutDashboard, Award } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/utils/cn';
 import useAuthStore from '@/stores/authStore';
@@ -26,10 +26,14 @@ const Navbar = () => {
   const isActiveRoute = (path: string) => {
     if (path === '/') return pathname === '/home';
     if (path === '/football') {
-      return pathname === '/football' || 
-        pathname.startsWith('/competitions') || 
-        pathname.startsWith('/fixtures') || 
-        pathname.startsWith('/live');
+      return pathname === '/football' ||
+        pathname.startsWith('/competitions') ||
+        pathname.startsWith('/fixtures') ||
+        pathname.startsWith('/live') ||
+        pathname.startsWith('/football/tots');
+    }
+    if (path === '/football/tots') {
+      return pathname.startsWith('/football/tots');
     }
     if (path === '/news') {
       return pathname === '/news' || pathname.startsWith('/news/');
@@ -40,9 +44,19 @@ const Navbar = () => {
   const navLinks = [
     { href: '/', label: 'Home', icon: Home },
     { href: '/football', label: 'Football', icon: Trophy },
+    { href: '/football/tots', label: 'TOTS', icon: Award },
     { href: '/news', label: 'News', icon: Newspaper },
     { href: '/highlights', label: 'Highlights', icon: Play },
   ];
+
+  // Mobile bottom navigation links (excluding TOTS)
+  const mobileBottomNavLinks = [
+    { href: '/', label: 'Home', icon: Home },
+    { href: '/football', label: 'Football', icon: Trophy },
+    { href: '/news', label: 'News', icon: Newspaper },
+    { href: '/highlights', label: 'Highlights', icon: Play },
+  ];
+
   const adminLinks = [
     { href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard }
   ]
@@ -55,12 +69,12 @@ const Navbar = () => {
         <nav className="mx-auto max-w-2xl rounded-full bg-navbar">
           <div className="relative h-12 flex items-center justify-between px-4">
           {/* Logo */}
-            <Link 
-              href="/" 
+            <Link
+              href="/"
               className={cn(
                 "text-lg font-semibold transition-colors",
-                isActiveRoute('/') 
-                  ? "text-emerald-500" 
+                isActiveRoute('/')
+                  ? "text-emerald-500"
                   : "text-navbar-foreground hover:text-navbar-foreground/80"
               )}
             >
@@ -76,7 +90,7 @@ const Navbar = () => {
                   className={cn(
                     "text-[15px] font-medium transition-colors",
                     isActiveRoute(link.href)
-                      ? "text-emerald-500" 
+                      ? "text-emerald-500"
                       : "text-navbar-muted hover:text-navbar-foreground"
                   )}
               >
@@ -91,7 +105,7 @@ const Navbar = () => {
                     className={cn(
                       "text-[15px] font-medium transition-colors",
                       isActiveRoute(link.href)
-                        ? "text-emerald-500" 
+                        ? "text-emerald-500"
                         : "text-navbar-muted hover:text-navbar-foreground"
                     )}
                 >
@@ -109,7 +123,7 @@ const Navbar = () => {
               >
                 <User className="w-5 h-5" />
               </Link>
-              
+
               {/* Theme toggle */}
               <button
                 onClick={toggleTheme}
@@ -145,7 +159,7 @@ const Navbar = () => {
       <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-navbar border-t border-navbar-muted/10">
         <nav className="h-16">
           <div className="grid grid-cols-5 h-full">
-            {navLinks.map((link) => {
+            {mobileBottomNavLinks.map((link) => {
               const Icon = link.icon;
               return (
                 <Link
@@ -154,7 +168,7 @@ const Navbar = () => {
                   className={cn(
                     "flex flex-col items-center justify-center space-y-1 transition-colors",
                     isActiveRoute(link.href)
-                      ? "text-emerald-500" 
+                      ? "text-emerald-500"
                       : "text-navbar-muted hover:text-navbar-foreground"
                   )}
                 >
@@ -187,12 +201,12 @@ const Navbar = () => {
             {/* Header */}
             <div className="flex justify-between items-center border-b border-border p-5">
               {/* Logo */}
-              <Link 
-                href="/" 
+              <Link
+                href="/"
                 className={cn(
                   "text-lg font-semibold transition-colors",
-                  isActiveRoute('/') 
-                    ? "text-emerald-500" 
+                  isActiveRoute('/')
+                    ? "text-emerald-500"
                     : "text-navbar-foreground hover:text-navbar-foreground/80"
                 )}
               >
@@ -234,7 +248,7 @@ const Navbar = () => {
                     </svg>
                   )}
                 </button>
-                
+
                 {/* Close Menu Button */}
                 <X
                   onClick={() => setOpenMobileMenu(false)}
@@ -279,6 +293,34 @@ const Navbar = () => {
                   );
                 })}
               </div>
+
+              {/* TOTS Promotional Banner */}
+              <div className="mt-6 mb-4">
+                <Link
+                  href="/football/tots"
+                  onClick={() => setOpenMobileMenu(false)}
+                >
+                  <motion.div
+                    className="relative overflow-hidden rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-800 p-4 shadow-lg"
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-emerald-500/20 blur-xl"></div>
+                    <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-emerald-500/20 blur-xl"></div>
+
+                    <div className="relative flex items-center gap-3">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/10 backdrop-blur-sm">
+                        <Award className="h-6 w-6 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-white">Team of the Season</h3>
+                        <p className="text-xs text-emerald-100">Vote for the best players now!</p>
+                      </div>
+                    </div>
+                  </motion.div>
+                </Link>
+              </div>
+
               {
                 jwt && (
                   <>

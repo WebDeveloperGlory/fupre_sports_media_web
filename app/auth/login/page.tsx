@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import useAuthStore from '@/stores/authStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,6 +11,7 @@ import { motion } from 'framer-motion';
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { login } = useAuthStore();
   const [formData, setFormData] = useState({
     email: '',
@@ -19,6 +20,15 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [emailError, setEmailError] = useState('');
+  const [redirectPath, setRedirectPath] = useState('/');
+
+  useEffect(() => {
+    // Get the redirect path from URL parameters
+    const redirect = searchParams.get('redirect');
+    if (redirect) {
+      setRedirectPath(redirect);
+    }
+  }, [searchParams]);
 
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -33,11 +43,11 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateEmail(formData.email)) return;
-    
+
     setIsLoading(true);
     try {
       await login(formData.email, formData.password);
-      router.push('/');
+      router.push(redirectPath);
     } catch (error) {
       console.error('Login failed:', error);
     } finally {
@@ -123,18 +133,18 @@ export default function LoginPage() {
               </div>
             </CardContent>
             <CardFooter className="flex flex-col space-y-4">
-              <Button 
-                type="submit" 
-                className="w-full bg-emerald-500 hover:bg-emerald-600 text-white" 
+              <Button
+                type="submit"
+                className="w-full bg-emerald-500 hover:bg-emerald-600 text-white"
                 disabled={isLoading}
               >
                 {isLoading ? 'Signing in...' : 'Sign in'}
               </Button>
-              
+
               <div className="text-center text-sm">
                 Don't have an account?{" "}
-                <Button 
-                  variant="link" 
+                <Button
+                  variant="link"
                   className="p-0 h-auto text-emerald-500 hover:text-emerald-600"
                   onClick={() => router.push('/auth/signup')}
                 >
