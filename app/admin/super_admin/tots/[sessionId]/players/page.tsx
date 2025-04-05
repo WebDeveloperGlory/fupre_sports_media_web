@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { BackButton } from "@/components/ui/back-button";
 import { Trophy, Users, ShieldAlert } from "lucide-react";
 import { TOTSPlayer, TOTSSession } from "@/utils/requestDataTypes";
@@ -13,15 +13,17 @@ import PlayerManagement from "@/components/tots/admin/PlayerManagement";
 import { canManageTOTS } from "@/utils/roleUtils";
 
 interface TOTSPlayerManagementPageProps {
-  params: {
+  params: Promise<{
     sessionId: string;
-  };
+  }>;
 }
 
 const TOTSPlayerManagementPage = ({ params }: TOTSPlayerManagementPageProps) => {
+  const resolvedParams = use(params);
+
   const router = useRouter();
   const { jwt } = useAuthStore();
-  const { sessionId } = params;
+  const { sessionId } = resolvedParams;
 
   const [session, setSession] = useState<TOTSSession | null>(null);
   const [players, setPlayers] = useState<TOTSPlayer[]>([]);

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { BackButton } from "@/components/ui/back-button";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,15 +16,17 @@ import { cn } from "@/lib/utils";
 import { canCastAdminVote } from "@/utils/roleUtils";
 
 interface AdminVotePageProps {
-  params: {
+  params: Promise<{
     sessionId: string;
-  };
+  }>;
 }
 
 const AdminVotePage = ({ params }: AdminVotePageProps) => {
+  const resolvedParams = use(params);
+
   const router = useRouter();
   const { jwt } = useAuthStore();
-  const { sessionId } = params;
+  const { sessionId } = resolvedParams;
 
   const [session, setSession] = useState<TOTSSessionWithPlayers | null>(null);
   const [loading, setLoading] = useState(true);
@@ -259,7 +261,8 @@ const AdminVotePage = ({ params }: AdminVotePageProps) => {
               </CardTitle>
               <CardDescription>
                 As an admin, your vote carries more weight in the final results. Select up to {maxSelections} players.
-                {canManageTOTS() && (
+                {/* {canManageTOTS() && ( */}
+                {(
                   <div className="mt-2 text-xs inline-flex items-center px-2 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300">
                     <ShieldAlert className="w-3 h-3 mr-1" />
                     Head Media Admin Vote

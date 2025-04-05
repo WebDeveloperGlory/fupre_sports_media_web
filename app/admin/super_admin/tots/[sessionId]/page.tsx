@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { BackButton } from "@/components/ui/back-button";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,15 +24,17 @@ import { useRouter } from "next/navigation";
 import { canCastAdminVote, canManageTOTS } from "@/utils/roleUtils";
 
 interface TOTSSessionManagementPageProps {
-  params: {
+  params: Promise<{
     sessionId: string;
-  };
+  }>;
 }
 
 const TOTSSessionManagementPage = ({ params }: TOTSSessionManagementPageProps) => {
+  const resolvedParams = use(params);
+
   const router = useRouter();
   const { jwt } = useAuthStore();
-  const { sessionId } = params;
+  const { sessionId } = resolvedParams;
 
   const [session, setSession] = useState<TOTSSessionWithPlayers | null>(null);
   const [loading, setLoading] = useState(true);
