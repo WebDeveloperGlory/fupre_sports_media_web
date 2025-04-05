@@ -145,6 +145,7 @@ export default function LoginPage() {
                 Don't have an account?{" "}
                 <Button
                   variant="link"
+                  type='button'
                   className="p-0 h-auto text-emerald-500 hover:text-emerald-600"
                   onClick={() => router.push('/auth/signup')}
                 >
