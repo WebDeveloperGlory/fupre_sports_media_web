@@ -6,10 +6,12 @@ import Link from "next/link";
 import { Trophy, Calendar, Clock, MapPin, ArrowRight, Users, Newspaper, Play } from "lucide-react";
 import Image from "next/image";
 import { teamLogos } from "@/constants";
+import { getHomepageData } from "@/lib/requests/v2/homepage/requests";
 
 export default async function HomePage() {
     const data = await getTodaysFixtures();
     const generalInfoData = await getGeneralInfo();
+    const result = await getHomepageData();
     let todayFixtureList: Fixture[] | null = null;
     let generalInfo: GeneralInfo | null = null;
 
@@ -28,6 +30,7 @@ export default async function HomePage() {
     const formattedEndDate = ( generalInfo?.featuredCompetition && generalInfo.featuredCompetition.endDate ) ? format( generalInfo?.featuredCompetition.endDate, "MMMM dd" ) : null;
 
     console.log( generalInfo )
+    console.log( result?.data )
 
   return (
     <main className="min-h-screen">
