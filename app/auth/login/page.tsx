@@ -8,11 +8,14 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { loginUser } from '@/lib/requests/v2/authentication/requests';
+import { toast } from 'react-toastify';
 
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { login } = useAuthStore();
+  const { setJwt, setUserProfile } = useAuthStore();
+
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -46,8 +49,15 @@ export default function LoginPage() {
 
     setIsLoading(true);
     try {
-      await login(formData.email, formData.password);
-      router.push(redirectPath);
+      const result = await loginUser( formData.email, formData.password );
+      if( result?.code === '00' ) {
+        setJwt( result.data.token );
+        setUserProfile( result.data.user );
+        router.push(redirectPath);
+      } else {
+        toast.error( result?.message || 'Login failed' );
+        setFormData({ ...formData, password: '' });
+      }
     } catch (error) {
       console.error('Login failed:', error);
     } finally {

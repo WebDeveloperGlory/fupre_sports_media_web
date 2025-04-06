@@ -8,10 +8,11 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { registerUser } from '@/lib/requests/v2/authentication/requests';
+import { toast } from 'react-toastify';
 
 export default function SignupPage() {
   const router = useRouter();
-  const { signup } = useAuthStore();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -52,8 +53,15 @@ export default function SignupPage() {
     
     setIsLoading(true);
     try {
-      await signup(formData.name, formData.email, formData.password);
-      router.push('/');
+      const result = await registerUser(formData.name, formData.email, formData.password);
+      if (result?.code === '00') {
+        toast.success( result.message || 'Signup successful' );
+        router.push('/auth/login');
+      } else {
+        toast.error( result?.message || 'Signup failed' );
+        setEmailError(result?.message || 'Signup failed');
+        setFormData({ ...formData, password: '', confirmPassword: '' });
+      }
     } catch (error) {
       console.error('Signup failed:', error);
     } finally {
