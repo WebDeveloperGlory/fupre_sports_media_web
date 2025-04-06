@@ -51,91 +51,34 @@ export const getAllTOTSSessions = async () => {
       }
   }
 }
-export const getAllTOTSSessions1 = async () => {
-  if (USE_MOCK_DATA) {
-    return {
-      code: '00',
-      message: 'Success',
-      data: mockTOTSSessions
-    };
-  }
 
+export const getSingleTOTSSession = async ( sessionId: string ) => {
   try {
-    const response = await axiosInstance.get(`${API_URL}/football/tots`);
-    const { data }: { data: SuccessRequest } = response;
+      const response = await axiosInstance.get(
+          `${ API_URL }/tots/${ sessionId }`
+      );
+      const { data }: { data: SuccessRequest } = response;
 
-    if (data.code === '99') {
-      throw data;
-    }
+      if( data.code === '99' ) {
+          throw data
+      }
+      return data;
+  } catch( err: any ) {
+      const { response } = err as CustomError;
 
-    return data;
-  } catch (error) {
-    const err = error as CustomError;
-    if (err.response) {
-      return err.response.data;
-    }
-    return {
-      code: '99',
-      message: 'Something went wrong',
-      data: null
-    };
+      if( err?.status && err?.message ) {
+          console.error( `Error ${ err.status }: `, response?.data.message )
+          return response?.data || null;
+      } else {
+          console.error('Error fetching tots sessions: ', err );
+          return null;
+      }
   }
-};
-
-export const getSingleTOTSSession = async (sessionId: string) => {
-  if (USE_MOCK_DATA) {
-    const session = mockTOTSSessions.find(s => s._id === sessionId);
-
-    if (!session) {
-      return {
-        code: '99',
-        message: 'Session not found',
-        data: null
-      };
-    }
-
-    return {
-      code: '00',
-      message: 'Success',
-      data: session
-    };
-  }
-
-  try {
-    const response = await axiosInstance.get(`${API_URL}/tots/${sessionId}`);
-    const { data }: { data: SuccessRequest } = response;
-
-    if (data.code === '99') {
-      throw data;
-    }
-
-    return data;
-  } catch (error) {
-    const err = error as CustomError;
-    if (err.response) {
-      return err.response.data;
-    }
-    return {
-      code: '99',
-      message: 'Something went wrong',
-      data: null
-    };
-  }
-};
+}
 
 export const getTOTSSessionPlayers = async (sessionId: string) => {
-  if (USE_MOCK_DATA) {
-    const players = mockTOTSPlayers[sessionId] || [];
-
-    return {
-      code: '00',
-      message: 'Success',
-      data: players
-    };
-  }
-
   try {
-    const response = await axiosInstance.get(`${API_URL}/football/tots/${sessionId}/players`);
+    const response = await axiosInstance.get(`${API_URL}/tots/${sessionId}/players`);
     const { data }: { data: SuccessRequest } = response;
 
     if (data.code === '99') {
@@ -197,29 +140,16 @@ export const getTOTSSessionResults = async (sessionId: string) => {
   }
 };
 
-export const getUserTOTSVote = async (sessionId: string) => {
-  if (USE_MOCK_DATA) {
-    const vote = mockUserVotes[sessionId];
-
-    if (!vote) {
-      return {
-        code: '99',
-        message: 'Vote not found',
-        data: null
-      };
-    }
-
-    return {
-      code: '00',
-      message: 'Success',
-      data: vote
-    };
-  }
-
+export const getUserTOTSVote = async (sessionId: string, token: string) => {
   try {
     const response = await axiosInstance.get(
-      `${API_URL}/football/tots/${sessionId}/vote/regular`,
-      { withCredentials: true }
+      `${API_URL}/tots/${sessionId}/vote/regular`,
+      {
+        headers: {
+            Authorization: `Bearer ${ token }`
+        },
+        withCredentials: true
+    }
     );
     const { data }: { data: SuccessRequest } = response;
 
