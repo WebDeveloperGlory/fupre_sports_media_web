@@ -72,12 +72,17 @@ export const loginUser = async ( email: string, password: string ) => {
     }
 }
 
-export const logoutUser = async () => {
+export const logoutUser = async ( token: string ) => {
     try {
         const response = await axiosInstance.post(
-            `${ API_URL }/v2/authentication/logout`, 
+            `${ API_URL }/v2/authentication/logout`,
             {},
-            { withCredentials: true },
+            {
+                headers: {
+                    Authorization: `Bearer ${ token }`
+                },
+                withCredentials: true
+            }
         );
         const { data }: { data: SuccessRequest } = response;
 

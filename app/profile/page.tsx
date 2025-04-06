@@ -12,6 +12,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { motion } from 'framer-motion';
 import useAuthStore from '@/stores/authStore';
 import { useRouter } from 'next/navigation';
+import { logoutUser } from '@/lib/requests/v2/authentication/requests';
 
 interface UserProfile {
   name: string;
@@ -31,7 +32,7 @@ interface Notification {
 
 export default function ProfilePage() {
   const router = useRouter();
-  const { logout } = useAuthStore();
+  const { jwt, clearUserData } = useAuthStore();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -89,8 +90,13 @@ export default function ProfilePage() {
       }
     };
 
-    fetchProfile();
-  }, []);
+    if( !jwt ) {
+        toast.error('Please Login First');
+        setTimeout(() => router.push( '/auth/login' ), 1000);
+    } else {
+        if( loading ) fetchProfile();
+    }
+  }, [ loading ]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -123,9 +129,16 @@ export default function ProfilePage() {
     ));
   };
 
-  const handleLogout = () => {
-    logout();
-    router.push('/');
+  const handleLogout = async () => {
+    const result = await logoutUser( jwt! );
+    if( result?.code === '00' ) {
+      toast.success('Logout successful!');
+      clearUserData();
+      router.push('/');
+    } else {
+      toast.error( result?.message || 'Logout failed! Please try again.');
+    }
+    console.log(result);
   };
 
   if (loading) {
