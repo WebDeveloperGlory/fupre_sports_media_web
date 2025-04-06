@@ -452,32 +452,113 @@ export interface TOTSPlayer {
 
 export interface TOTSSession {
     _id: string;
-    name: string;
-    description: string;
+    year: number;
+    competition: Competition;
     startDate: Date;
     endDate: Date;
     isActive: boolean;
-    isFinalized: boolean;
+    selectedFormation: string;
+    elegiblePlayers: {
+        GK: Player[];
+        DEF: Player[];
+        MID: Player[];
+        FWD: Player[];
+    };
     createdAt: Date;
     updatedAt: Date;
 }
 
 export interface TOTSSessionWithPlayers extends TOTSSession {
-    players: TOTSPlayer[];
+    players: {
+        GK: Player[];
+        DEF: Player[];
+        MID: Player[];
+        FWD: Player[];
+    }
 }
 
 export interface TOTSResult {
     _id: string;
-    sessionId: string;
-    players: TOTSPlayer[];
-    totalVotes: number;
-    createdAt: Date;
+    session: string | TOTSSession;
+    winningFormation: string;
+    winningFormationPercentage: number;
+    winningPlayers: {
+        GK: Player[];
+        DEF: Player[];
+        MID: Player[];
+        FWD: Player[];
+    }
+    winningPlayersVotes: {
+        GK: number
+        DEF: number
+        MID: number
+        FWD: number
+    },
+    winningPlayersPercentage: {
+        GK: number;
+        DEF: number;
+        MID: number;
+        FWD: number;
+    },
+    adminChoice: {
+        GK: Player[]
+        DEF: Player[]
+        MID: Player[]
+        FWD: Player[]
+    },
+    adminChoiceVotes: {
+        GK: number
+        DEF: number
+        MID: number
+        FWD: number
+    },
+    adminChoicePercentage: {
+        GK: number
+        DEF: number
+        MID: number
+        FWD: number
+    },
+    
+    // Final winners (combines the structure from your original schema)
+    finalWinners: {
+        GK: Player[]
+        DEF: Player[]
+        MID: Player[]
+        FWD: Player[]
+    },
+    votersChoice: {
+        formation: { type: String },
+        GK: Player[],
+        DEF: Player[]
+        MID: Player[]
+        FWD: Player[]
+    },
+    adminChoice_legacy: {
+        formation: string
+        GK: Player[]
+        DEF: Player[]
+        MID: Player[]
+        FWD: Player[]
+    },
+    finalWinner: {
+        formation: string
+        GK: Player[]
+        DEF: Player[]
+        MID: Player[]
+        FWD: Player[]
+    }
 }
 
 export interface TOTSUserVote {
     _id: string;
-    sessionId: string;
-    userId: string;
-    playerIds: string[];
-    createdAt: Date;
+    user: string;
+    session: string | TOTSSession;
+    selectedFormation: { type: 'String' },
+    selectedPlayers: {
+        GK: Player[],
+        DEF: Player[],
+        MID: Player[],
+        FWD: Player[],
+    },
+    submittedAt: Date;
 }

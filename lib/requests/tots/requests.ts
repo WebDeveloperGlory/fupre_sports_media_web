@@ -1,6 +1,23 @@
 import axiosInstance from "@/lib/config/axiosInstance";
-import { CustomError, SuccessRequest } from "@/utils/requestDataTypes";
 import { mockTOTSSessions, mockTOTSPlayers, mockTOTSResults, mockUserVotes, getSessionWithPlayers } from "@/lib/mock/totsData";
+
+interface CustomError {
+  status?: number;
+  message?: string;
+  response?: {
+      data: {
+          message: string,
+          code: string,
+          data?: any
+      };
+  };
+}
+
+interface SuccessRequest {
+  code: string,
+  message: string,
+  data?: any
+}
 
 const API_URL = process.env.NODE_ENV === 'production'
   ? process.env.NEXT_PUBLIC_PROD_API_URL
@@ -12,6 +29,29 @@ const USE_MOCK_DATA = true;
 // User-facing endpoints
 
 export const getAllTOTSSessions = async () => {
+  try {
+      const response = await axiosInstance.get(
+          `${ API_URL }/tots`
+      );
+      const { data }: { data: SuccessRequest } = response;
+
+      if( data.code === '99' ) {
+          throw data
+      }
+      return data;
+  } catch( err: any ) {
+      const { response } = err as CustomError;
+
+      if( err?.status && err?.message ) {
+          console.error( `Error ${ err.status }: `, response?.data.message )
+          return response?.data || null;
+      } else {
+          console.error('Error fetching tots sessions: ', err );
+          return null;
+      }
+  }
+}
+export const getAllTOTSSessions1 = async () => {
   if (USE_MOCK_DATA) {
     return {
       code: '00',
@@ -62,7 +102,7 @@ export const getSingleTOTSSession = async (sessionId: string) => {
   }
 
   try {
-    const response = await axiosInstance.get(`${API_URL}/football/tots/${sessionId}`);
+    const response = await axiosInstance.get(`${API_URL}/tots/${sessionId}`);
     const { data }: { data: SuccessRequest } = response;
 
     if (data.code === '99') {

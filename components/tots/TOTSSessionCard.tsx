@@ -13,8 +13,9 @@ interface TOTSSessionCardProps {
 }
 
 const TOTSSessionCard = ({ session }: TOTSSessionCardProps) => {
+  const now = new Date();
   const isActive = session.isActive;
-  const isFinalized = session.isFinalized;
+  const isFinalized = new Date(session.endDate) < now;
   
   return (
     <motion.div
@@ -26,8 +27,8 @@ const TOTSSessionCard = ({ session }: TOTSSessionCardProps) => {
         <CardHeader className="pb-2">
           <div className="flex justify-between items-start">
             <div>
-              <CardTitle className="text-xl font-bold">{session.name}</CardTitle>
-              <CardDescription className="mt-1">{session.description}</CardDescription>
+              <CardTitle className="text-xl font-bold">{session.competition.name}</CardTitle>
+              <CardDescription className="mt-1">{'Placeholder Description'}</CardDescription>
             </div>
             <div className="flex items-center">
               <Trophy className="w-5 h-5 text-emerald-500 mr-1" />

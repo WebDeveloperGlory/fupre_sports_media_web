@@ -41,9 +41,9 @@ const TOTSVotingPage = ({ params }: TOTSVotingPageProps) => {
     const fetchSessionData = async () => {
       try {
         // Fetch session details
-        const sessionResponse = await getSingleTOTSSession(sessionId);
-        if (sessionResponse && sessionResponse.code === "00") {
-          const sessionData = sessionResponse.data;
+        const response = await getSingleTOTSSession( sessionId );
+        if (response && response.code === "00") {
+          const sessionData = response.data.session;
 
           // Fetch players for this session
           const playersResponse = await getTOTSSessionPlayers(sessionId);
@@ -57,12 +57,13 @@ const TOTSVotingPage = ({ params }: TOTSVotingPageProps) => {
             });
 
             // Try to fetch user's existing vote if logged in
-            if (jwt) {
+            if ( jwt ) {
               try {
-                const voteResponse = await getUserTOTSVote(sessionId);
+                const voteResponse = await getUserTOTSVote( sessionId, jwt );
                 if (voteResponse && voteResponse.code === "00") {
                   setExistingVote(voteResponse.data);
-                  setSelectedPlayers(voteResponse.data.playerIds);
+                  console.log( voteResponse.data );
+                  // setSelectedPlayers(voteResponse.data);
                 }
               } catch (voteError) {
                 console.error("Error fetching user vote:", voteError);
@@ -73,7 +74,7 @@ const TOTSVotingPage = ({ params }: TOTSVotingPageProps) => {
             setError(playersResponse?.message || "Failed to fetch players");
           }
         } else {
-          setError(sessionResponse?.message || "Failed to fetch session details");
+          setError(response?.message || "Failed to fetch session details");
         }
       } catch (error) {
         console.error("Error fetching TOTS session data:", error);

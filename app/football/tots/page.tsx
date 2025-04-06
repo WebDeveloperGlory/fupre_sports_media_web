@@ -18,7 +18,8 @@ const TOTSPage = () => {
       try {
         const response = await getAllTOTSSessions();
         if (response && response.code === "00") {
-          setSessions(response.data);
+          console.log( response )
+          setSessions(response.data.sessions);
         } else {
           setError(response?.message || "Failed to fetch TOTS sessions");
         }
@@ -34,14 +35,17 @@ const TOTSPage = () => {
   }, []);
 
   // Filter active and inactive sessions
-  const activeSessions = sessions.filter(session => session.isActive && !session.isFinalized);
-  const finishedSessions = sessions.filter(session => session.isFinalized);
-  const upcomingSessions = sessions.filter(session => !session.isActive && !session.isFinalized);
+  const activeSessions = sessions.filter(session => session.isActive);
+  const now = new Date();
+  const finishedSessions = sessions.filter(session => new Date(session.endDate) < now);
+  const upcomingSessions = sessions.filter(
+    session => new Date(session.startDate) > now || !session.isActive
+  );
 
   return (
     <BlurFade>
-      <div className="max-w-6xl mx-auto pt-8">
-        <div className="mb-8 mt-8">
+      <div className="max-w-6xl mx-auto">
+        <div className="mb-8">
           <h1 className="text-3xl font-bold flex items-center gap-2">
             <Trophy className="w-8 h-8 text-emerald-500" />
             Team of the Season
