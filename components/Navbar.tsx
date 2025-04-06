@@ -20,7 +20,7 @@ const menuVariants = {
 const Navbar = () => {
   const { theme, toggleTheme } = useTheme();
   const pathname = usePathname();
-  const { jwt } = useAuthStore();
+  const { jwt, userProfile } = useAuthStore();
   const [openMobileMenu, setOpenMobileMenu] = useState<boolean>(false);
 
   const isActiveRoute = (path: string) => {
@@ -98,7 +98,7 @@ const Navbar = () => {
               </Link>
             ))}
             {
-              jwt && adminLinks.map((link) => (
+              jwt && userProfile && userProfile.role !== 'user' && adminLinks.map((link) => (
                 <Link
                   key={link.label}
                   href={link.href}
