@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { BlurFade } from "@/components/ui/blur-fade";
 import { BackButton } from "@/components/ui/back-button";
 import { AlertCircle } from "lucide-react";
@@ -12,13 +12,15 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 interface TOTSResultsPageProps {
-  params: {
+  params: Promise<{
     sessionId: string;
-  };
+  }>;
 }
 
 const TOTSResultsPage = ({ params }: TOTSResultsPageProps) => {
-  const { sessionId } = params;
+  const resolvedParams = use(params);
+
+  const { sessionId } = resolvedParams;
 
   const [session, setSession] = useState<TOTSSession | null>(null);
   const [results, setResults] = useState<TOTSResult | null>(null);

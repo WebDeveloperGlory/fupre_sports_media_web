@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { BlurFade } from "@/components/ui/blur-fade";
 import { BackButton } from "@/components/ui/back-button";
 import { Button } from "@/components/ui/button";
@@ -17,15 +17,17 @@ import Link from "next/link";
 import { canVote } from "@/utils/roleUtils";
 
 interface TOTSVotingPageProps {
-  params: {
+  params: Promise<{
     sessionId: string;
-  };
+  }>;
 }
 
 const TOTSVotingPage = ({ params }: TOTSVotingPageProps) => {
+  const resolvedParams = use(params);
+
   const router = useRouter();
   const { jwt } = useAuthStore();
-  const { sessionId } = params;
+  const { sessionId } = resolvedParams;
 
   const [session, setSession] = useState<TOTSSessionWithPlayers | null>(null);
   const [loading, setLoading] = useState(true);
