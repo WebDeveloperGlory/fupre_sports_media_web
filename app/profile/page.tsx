@@ -13,6 +13,7 @@ import { motion } from 'framer-motion';
 import useAuthStore from '@/stores/authStore';
 import { useRouter } from 'next/navigation';
 import { logoutUser } from '@/lib/requests/v2/authentication/requests';
+import { getProfile, markNotificationAsRead } from '@/lib/requests/v2/user/requests';
 
 interface UserProfile {
   name: string;
@@ -23,7 +24,7 @@ interface UserProfile {
 }
 
 interface Notification {
-  id: string;
+  _id: string;
   title: string;
   message: string;
   date: string;
@@ -32,62 +33,28 @@ interface Notification {
 
 export default function ProfilePage() {
   const router = useRouter();
-  const { jwt, clearUserData } = useAuthStore();
+
+  const { jwt, userProfile, setUserProfile, clearUserData } = useAuthStore();
+
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [activeTab, setActiveTab] = useState('profile');
-  const [profile, setProfile] = useState<UserProfile>({
-    name: '',
-    email: '',
-    bio: '',
-    favoriteTeam: '',
-  });
+  const [profile, setProfile] = useState<UserProfile>( userProfile! );
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [unreadCount, setUnreadCount] = useState<number | null>(null);
 
   useEffect(() => {
     // Fetch user profile data
     const fetchProfile = async () => {
-      try {
-        // Simulate API call with mock data
-        setTimeout(() => {
-          setProfile({
-            name: 'John Doe',
-            email: 'john.doe@example.com',
-            bio: 'Football enthusiast and stats lover',
-            favoriteTeam: 'Arsenal',
-          });
-          
-          setNotifications([
-            {
-              id: '1',
-              title: 'Welcome to FSM',
-              message: 'Thank you for joining our platform. Explore the latest football statistics!',
-              date: '2023-10-15',
-              read: false,
-            },
-            {
-              id: '2',
-              title: 'New Feature Available',
-              message: 'Check out our new match prediction algorithm in the Statistics section.',
-              date: '2023-10-10',
-              read: true,
-            },
-            {
-              id: '3',
-              title: 'Weekend Matches',
-              message: 'Don\'t miss the big matches this weekend. Set your reminders now!',
-              date: '2023-10-05',
-              read: true,
-            },
-          ]);
-          
-          setLoading(false);
-        }, 1000);
-      } catch (error) {
-        toast.error('Failed to load profile');
-        setLoading(false);
-      }
+      const data = await getProfile( jwt! );
+      if( data && data.code === '00' ) {
+        setNotifications( data.data.notifications );
+        setUnreadCount( data.data.unreadNotifications );
+        setUserProfile( data.data.user );
+        console.log( data );
+      };
+      setLoading( false );
     };
 
     if( !jwt ) {
@@ -123,10 +90,17 @@ export default function ProfilePage() {
     }
   };
 
-  const markAsRead = (id: string) => {
-    setNotifications(notifications.map(notification => 
-      notification.id === id ? { ...notification, read: true } : notification
-    ));
+  const markAsRead = async (id: string) => {
+    const result = await markNotificationAsRead( jwt!, id );
+    if( result?.code === '00' ) {
+      toast.success('Notification marked as read!');
+      setNotifications((prev) =>
+        prev.map((notification) =>
+          notification._id === id ? { ...notification, read: true } : notification
+        )
+      );
+      setUnreadCount((prev) => (prev !== null ? prev - 1 : null));
+    }
   };
 
   const handleLogout = async () => {
@@ -149,14 +123,12 @@ export default function ProfilePage() {
     );
   }
 
-  const unreadCount = notifications.filter(n => !n.read).length;
-
   return (
     <div className="min-h-screen bg-background">
       <BackButton />
       
       <BlurFade>
-        <div className="max-w-3xl mx-auto mt-8">
+        <div className="max-w-3xl mx-auto mt-4">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <div className="flex justify-between items-center mb-6">
               <TabsList className="bg-muted">
@@ -165,7 +137,7 @@ export default function ProfilePage() {
                 </TabsTrigger>
                 <TabsTrigger value="notifications" className="data-[state=active]:bg-emerald-500 data-[state=active]:text-white">
                   Notifications
-                  {unreadCount > 0 && (
+                  {unreadCount && unreadCount >= 1 && (
                     <span className="ml-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                       {unreadCount}
                     </span>
@@ -241,27 +213,21 @@ export default function ProfilePage() {
                       <label className="block text-sm font-medium mb-2">
                         Favorite Team
                       </label>
-                      <Input
+                      {/* <Input
                         type="text"
                         name="favoriteTeam"
                         value={profile.favoriteTeam}
                         onChange={handleChange}
                         className="focus:ring-emerald-500 focus:border-emerald-500"
                         disabled={!isEditing}
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium mb-2">
-                        Bio
-                      </label>
-                      <Textarea
-                        name="bio"
-                        value={profile.bio}
-                        onChange={handleChange}
-                        rows={4}
-                        className="focus:ring-emerald-500 focus:border-emerald-500 resize-none"
-                        disabled={!isEditing}
+                      /> */}
+                      <Input
+                        type="text"
+                        name="favoriteTeam"
+                        value="Not Implemented Yet"
+                        onChange={() => {}}
+                        className="focus:ring-emerald-500 focus:border-emerald-500"
+                        disabled={ true }
                       />
                     </div>
                   </div>
@@ -339,7 +305,7 @@ export default function ProfilePage() {
                   <div className="space-y-4">
                     {notifications.map((notification) => (
                       <motion.div
-                        key={notification.id}
+                        key={notification._id}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         className={`p-4 rounded-lg border ${
@@ -364,7 +330,7 @@ export default function ProfilePage() {
                             variant="link"
                             size="sm"
                             className="mt-2 p-0 h-auto text-emerald-600 dark:text-emerald-400"
-                            onClick={() => markAsRead(notification.id)}
+                            onClick={() => markAsRead(notification._id)}
                           >
                             Mark as read
                           </Button>
