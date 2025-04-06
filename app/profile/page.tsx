@@ -152,7 +152,7 @@ export default function ProfilePage() {
   const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
-    <div className="min-h-screen p-4 md:p-8 bg-background">
+    <div className="min-h-screen bg-background">
       <BackButton />
       
       <BlurFade>

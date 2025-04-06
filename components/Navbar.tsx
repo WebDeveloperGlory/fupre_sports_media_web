@@ -322,7 +322,7 @@ const Navbar = () => {
               </div>
 
               {
-                jwt && (
+                jwt && userProfile && userProfile.role !== 'user' && (
                   <>
                     <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mt-4">
                       Admin Navigation
