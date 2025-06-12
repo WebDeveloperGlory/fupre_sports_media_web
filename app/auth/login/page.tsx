@@ -10,6 +10,7 @@ import { Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { loginUser } from '@/lib/requests/v2/authentication/requests';
 import { toast } from 'react-toastify';
+import Link from 'next/link';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -66,32 +67,32 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-background">
+    <div className="flex items-center justify-center bg-background min-h-[calc(100vh-150px)]">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         className="w-full max-w-md"
       >
-        <Card className="border-border bg-card shadow-lg">
-          <CardHeader className="space-y-1">
+        <Card className="shadow-lg w-full max-w-md border-neutral-700 bg-neutral-900 text-white">
+          <CardHeader className="space-y-2">
             <div className="flex items-center gap-2">
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => router.back()}
-                className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground"
+                className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground md:hidden"
               >
                 <ArrowLeft className="h-4 w-4" />
               </Button>
-              <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
+              <CardTitle className="text-2xl font-bold text-white">Sign in</CardTitle>
             </div>
-            <CardDescription className="text-muted-foreground">
+            <CardDescription className="text-neutral-400">
               Enter your credentials to access your account
             </CardDescription>
           </CardHeader>
           <form onSubmit={handleSubmit}>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-5">
               <div className="space-y-2">
                 <label htmlFor="email" className="text-sm font-medium">
                   Email
@@ -115,9 +116,14 @@ export default function LoginPage() {
                 )}
               </div>
               <div className="space-y-2">
-                <label htmlFor="password" className="text-sm font-medium">
-                  Password
-                </label>
+                <div className='flex justify-between items-center'>
+                  <label htmlFor="password" className="text-sm font-medium">
+                    Password
+                  </label>
+                  <Link href="/auth/resetpassword" className='text-green-500 hover:text-green-400 hover:underline hover:underline-offset-4 text-sm font-medium'>
+                    Forgot password?
+                  </Link>
+                </div>
                 <div className="relative">
                   <Input
                     id="password"
@@ -141,26 +147,22 @@ export default function LoginPage() {
                   </button>
                 </div>
               </div>
-            </CardContent>
-            <CardFooter className="flex flex-col space-y-4">
               <Button
                 type="submit"
                 className="w-full bg-emerald-500 hover:bg-emerald-600 text-white"
                 disabled={isLoading}
               >
-                {isLoading ? 'Signing in...' : 'Sign in'}
+                {isLoading ? 'Signing in...' : 'Sign In'}
               </Button>
-
-              <div className="text-center text-sm">
-                Don't have an account?{" "}
-                <Button
-                  variant="link"
-                  type='button'
-                  className="p-0 h-auto text-emerald-500 hover:text-emerald-600"
-                  onClick={() => router.push('/auth/signup')}
-                >
-                  Sign up
-                </Button>
+            </CardContent>
+            <CardFooter className="flex flex-col space-y-4 border-t border-neutral-700 py-4 px-6">
+              <div className="text-center w-full">
+                <p className="text-neutral-400 text-sm">
+                  Don't have an account?{" "}
+                  <Link href="/auth/signup" className="text-green-500 hover:text-green-400 hover:underline hover:underline-offset-4 font-medium">
+                    Sign up
+                  </Link>
+                </p>
               </div>
             </CardFooter>
           </form>
