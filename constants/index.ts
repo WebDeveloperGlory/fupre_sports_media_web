@@ -1,5 +1,6 @@
 import { Statistics } from "@/utils/requestDataTypes";
 import { EventTypes } from "@/utils/stateTypes";
+import { CompetitionType } from "@/utils/v2requestData.enums";
 
 export const getCurrentDate = (): string => {
 	const today = new Date();
@@ -314,4 +315,640 @@ export const mockInterLevelCompetition = {
             }
         ]
     }
+};
+
+// Sample live football match data object
+export const liveMatchSample = {
+    _id: "507f1f77bcf86cd799439011",
+    fixture: "507f1f77bcf86cd799439012",
+    competition: {
+        type: CompetitionType.LEAGUE,
+        name: "Premier League",
+        _id: "507f1f77bcf86cd799439013"
+    },
+    homeTeam: {
+        name: "Arsenal",
+        shorthand: "ARS",
+        _id: "507f1f77bcf86cd799439014"
+    },
+    awayTeam: {
+        name: "Manchester City",
+        shorthand: "MCI",
+        _id: "507f1f77bcf86cd799439015"
+    },
+    matchType: "Premier League",
+    stadium: "Emirates Stadium",
+    matchDate: new Date("2025-06-13T19:00:00Z"),
+    kickoffTime: new Date("2025-06-13T19:00:00Z"),
+    referee: "Michael Oliver",
+    status: "2nd-half",
+    currentMinute: 67,
+    injuryTime: 0,
+    result: {
+        homeScore: 2,
+        awayScore: 1,
+        halftimeHomeScore: 1,
+        halftimeAwayScore: 0,
+        homePenalty: 0,
+        awayPenalty: 0
+    },
+    statistics: {
+        home: {
+            shotsOnTarget: 7,
+            shotsOffTarget: 4,
+            fouls: 8,
+            yellowCards: 2,
+            redCards: 0,
+            offsides: 3,
+            corners: 6,
+            possessionTime: 58
+        },
+        away: {
+            shotsOnTarget: 4,
+            shotsOffTarget: 6,
+            fouls: 12,
+            yellowCards: 3,
+            redCards: 1,
+            offsides: 2,
+            corners: 4,
+            possessionTime: 42
+        }
+    },
+    lineups: {
+        home: {
+            startingXI: [
+                {
+                    player: {
+                        name: "Aaron Ramsdale",
+                        position: "GK",
+                        _id: "507f1f77bcf86cd799439020"
+                    },
+                    position: "GK",
+                    shirtNumber: 1,
+                    isCaptain: false
+                },
+                {
+                    player: {
+                        name: "Ben White",
+                        position: "RB",
+                        _id: "507f1f77bcf86cd799439021"
+                    },
+                    position: "RB",
+                    shirtNumber: 2,
+                    isCaptain: false
+                },
+                {
+                    player: {
+                        name: "William Saliba",
+                        position: "CB",
+                        _id: "507f1f77bcf86cd799439022"
+                    },
+                    position: "CB",
+                    shirtNumber: 4,
+                    isCaptain: true
+                },
+                {
+                    player: {
+                        name: "Gabriel Magalhaes",
+                        position: "CB",
+                        _id: "507f1f77bcf86cd799439023"
+                    },
+                    position: "CB",
+                    shirtNumber: 6,
+                    isCaptain: false
+                },
+                {
+                    player: {
+                        name: "Oleksandr Zinchenko",
+                        position: "LB",
+                        _id: "507f1f77bcf86cd799439024"
+                    },
+                    position: "LB",
+                    shirtNumber: 3,
+                    isCaptain: false
+                },
+                {
+                    player: {
+                        name: "Thomas Partey",
+                        position: "DM",
+                        _id: "507f1f77bcf86cd799439025"
+                    },
+                    position: "DM",
+                    shirtNumber: 5,
+                    isCaptain: false
+                },
+                {
+                    player: {
+                        name: "Martin Odegaard",
+                        position: "CM",
+                        _id: "507f1f77bcf86cd799439026"
+                    },
+                    position: "CM",
+                    shirtNumber: 8,
+                    isCaptain: false
+                },
+                {
+                    player: {
+                        name: "Declan Rice",
+                        position: "CM",
+                        _id: "507f1f77bcf86cd799439027"
+                    },
+                    position: "CM",
+                    shirtNumber: 10,
+                    isCaptain: false
+                },
+                {
+                    player: {
+                        name: "Bukayo Saka",
+                        position: "RW",
+                        _id: "507f1f77bcf86cd799439028"
+                    },
+                    position: "RW",
+                    shirtNumber: 7,
+                    isCaptain: false
+                },
+                {
+                    player: {
+                        name: "Gabriel Martinelli",
+                        position: "LW",
+                        _id: "507f1f77bcf86cd799439029"
+                    },
+                    position: "LW",
+                    shirtNumber: 11,
+                    isCaptain: false
+                },
+                {
+                    player: {
+                        name: "Kai Havertz",
+                        position: "ST",
+                        _id: "507f1f77bcf86cd799439030"
+                    },
+                    position: "ST",
+                    shirtNumber: 9,
+                    isCaptain: false
+                }
+            ],
+            substitutes: [
+                {
+                    player: {
+                        name: "David Raya",
+                        position: "GK",
+                        _id: "507f1f77bcf86cd799439031"
+                    },
+                    position: "GK",
+                    shirtNumber: 12
+                },
+                {
+                    player: {
+                        name: "Takehiro Tomiyasu",
+                        position: "CB",
+                        _id: "507f1f77bcf86cd799439032"
+                    },
+                    position: "CB",
+                    shirtNumber: 15
+                },
+                {
+                    player: {
+                        name: "Jorginho",
+                        position: "CM",
+                        _id: "507f1f77bcf86cd799439033"
+                    },
+                    position: "CM",
+                    shirtNumber: 18
+                },
+                {
+                    player: {
+                        name: "Eddie Nketiah",
+                        position: "ST",
+                        _id: "507f1f77bcf86cd799439034"
+                    },
+                    position: "ST",
+                    shirtNumber: 14
+                }
+            ],
+            formation: "4-3-3",
+            coach: "Mikel Arteta"
+        },
+        away: {
+            startingXI: [
+                {
+                    player: {
+                        name: "Ederson",
+                        position: "GK",
+                        _id: "507f1f77bcf86cd799439040"
+                    },
+                    position: "GK",
+                    shirtNumber: 1,
+                    isCaptain: false
+                },
+                {
+                    player: {
+                        name: "Kyle Walker",
+                        position: "RB",
+                        _id: "507f1f77bcf86cd799439041"
+                    },
+                    position: "RB",
+                    shirtNumber: 2,
+                    isCaptain: false
+                },
+                {
+                    player: {
+                        name: "John Stones",
+                        position: "CB",
+                        _id: "507f1f77bcf86cd799439042"
+                    },
+                    position: "CB",
+                    shirtNumber: 5,
+                    isCaptain: true
+                },
+                {
+                    player: {
+                        name: "Ruben Dias",
+                        position: "CB",
+                        _id: "507f1f77bcf86cd799439043"
+                    },
+                    position: "CB",
+                    shirtNumber: 4,
+                    isCaptain: false
+                },
+                {
+                    player: {
+                        name: "Josko Gvardiol",
+                        position: "LB",
+                        _id: "507f1f77bcf86cd799439044"
+                    },
+                    position: "LB",
+                    shirtNumber: 3,
+                    isCaptain: false
+                },
+                {
+                    player: {
+                        name: "Rodri",
+                        position: "CM",
+                        _id: "507f1f77bcf86cd799439045"
+                    },
+                    position: "CM",
+                    shirtNumber: 6,
+                    isCaptain: false
+                },
+                {
+                    player: {
+                        name: "Bernardo Silva",
+                        position: "CM",
+                        _id: "507f1f77bcf86cd799439046"
+                    },
+                    position: "CM",
+                    shirtNumber: 8,
+                    isCaptain: false
+                },
+                {
+                    player: {
+                        name: "Kevin De Bruyne",
+                        position: "CAM",
+                        _id: "507f1f77bcf86cd799439047"
+                    },
+                    position: "CAM",
+                    shirtNumber: 10,
+                    isCaptain: false
+                },
+                {
+                    player: {
+                        name: "Phil Foden",
+                        position: "RW",
+                        _id: "507f1f77bcf86cd799439048"
+                    },
+                    position: "RW",
+                    shirtNumber: 7,
+                    isCaptain: false
+                },
+                {
+                    player: {
+                        name: "Jack Grealish",
+                        position: "LW",
+                        _id: "507f1f77bcf86cd799439049"
+                    },
+                    position: "LW",
+                    shirtNumber: 11,
+                    isCaptain: false
+                },
+                {
+                    player: {
+                        name: "Erling Haaland",
+                        position: "ST",
+                        _id: "507f1f77bcf86cd799439050"
+                    },
+                    position: "ST",
+                    shirtNumber: 9,
+                    isCaptain: false
+                }
+            ],
+            substitutes: [
+                {
+                    player: {
+                        name: "Stefan Ortega",
+                        position: "GK",
+                        _id: "507f1f77bcf86cd799439051"
+                    },
+                    position: "GK",
+                    shirtNumber: 12
+                },
+                {
+                    player: {
+                        name: "Nathan Ake",
+                        position: "DF",
+                        _id: "507f1f77bcf86cd799439052"
+                    },
+                    position: "DF",
+                    shirtNumber: 15
+                },
+                {
+                    player: {
+                        name: "Mateo Kovacic",
+                        position: "MF",
+                        _id: "507f1f77bcf86cd799439053"
+                    },
+                    position: "MF",
+                    shirtNumber: 16
+                }
+            ],
+            formation: "4-2-3-1",
+            coach: "Pep Guardiola"
+        }
+    },
+    substitutions: [
+        {
+            team: "away",
+            playerOut: {
+                name: "Phil Foden",
+                position: "RW",
+                _id: "507f1f77bcf86cd799439048"
+            },
+            playerIn: {
+                name: "Mateo Kovacic",
+                position: "MF",
+                _id: "507f1f77bcf86cd799439053"
+            },
+            minute: 62,
+            injury: false
+        }
+    ],
+    timeline: [
+        {
+            type: "goal",
+            team: {
+                name: "Arsenal",
+                shorthand: "ARS",
+                _id: "507f1f77bcf86cd799439014"
+            },
+            player: {
+                name: "Kai Havertz",
+                position: "ST",
+                _id: "507f1f77bcf86cd799439030"
+            },
+            relatedPlayer: {
+                name: "Declan Rice",
+                position: "CM",
+                _id: "507f1f77bcf86cd799439027"
+            },
+            minute: 23,
+            injuryTime: false,
+            description: "Great finish from close range after a perfect cross",
+            goalType: "regular",
+            cardType: null
+        },
+        {
+            type: "yellow-card",
+            team: {
+                name: "Manchester City",
+                shorthand: "MCI",
+                _id: "507f1f77bcf86cd799439015"
+            },
+            player: {
+                name: "Bernardo Silva",
+                position: "CM",
+                _id: "507f1f77bcf86cd799439046"
+            },
+            relatedPlayer: null,
+            minute: 35,
+            injuryTime: false,
+            description: "Cautioned for a late tackle",
+            goalType: null,
+            cardType: "first-yellow"
+        },
+        {
+            type: "goal",
+            team: {
+                name: "Manchester City",
+                shorthand: "MCI",
+                _id: "507f1f77bcf86cd799439015"
+            },
+            player: {
+                name: "Erling Haaland",
+                position: "ST",
+                _id: "507f1f77bcf86cd799439050"
+            },
+            relatedPlayer: {
+                name: "Kevin De Bruyne",
+                position: "CAM",
+                _id: "507f1f77bcf86cd799439047"
+            },
+            minute: 52,
+            injuryTime: false,
+            description: "Penalty conversion after VAR review",
+            goalType: "penalty",
+            cardType: null
+        },
+        {
+            type: "goal",
+            team: {
+                name: "Arsenal",
+                shorthand: "ARS",
+                _id: "507f1f77bcf86cd799439014"
+            },
+            player: {
+                name: "Bukayo Saka",
+                position: "RW",
+                _id: "507f1f77bcf86cd799439028"
+            },
+            relatedPlayer: null,
+            minute: 65,
+            injuryTime: false,
+            description: "Brilliant solo effort from the wing",
+            goalType: "regular",
+            cardType: null
+        },
+        {
+            type: "red-card",
+            team: {
+                name: "Manchester City",
+                shorthand: "MCI",
+                _id: "507f1f77bcf86cd799439015"
+            },
+            player: {
+                name: "John Stones",
+                position: "CB",
+                _id: "507f1f77bcf86cd799439042"
+            },
+            relatedPlayer: null,
+            minute: 66,
+            injuryTime: false,
+            description: "Second yellow card for dissent",
+            goalType: null,
+            cardType: "second-yellow"
+        }
+    ],
+    commentary: [
+        {
+            minute: 67,
+            injuryTime: false,
+            type: "regular",
+            text: "Arsenal are now in complete control after the red card. City struggling to create chances with ten men.",
+            eventId: "507f1f77bcf86cd799439060"
+        },
+        {
+            minute: 65,
+            injuryTime: false,
+            type: "important",
+            text: "GOAL! Arsenal 2-1 Manchester City. Saka cuts inside and curls a beautiful shot into the top corner!",
+            eventId: "507f1f77bcf86cd799439061"
+        },
+        {
+            minute: 66,
+            injuryTime: false,
+            type: "highlight",
+            text: "RED CARD! Stones is shown a second yellow for arguing with the referee. City down to ten men!",
+            eventId: "507f1f77bcf86cd799439062"
+        }
+    ],
+    streamLinks: [
+        {
+            platform: "Sky Sports",
+            url: "https://skysports.com/live-stream",
+            isOfficial: true,
+            requiresSubscription: true
+        },
+        {
+            platform: "ESPN+",
+            url: "https://espn.com/watch",
+            isOfficial: true,
+            requiresSubscription: true
+        }
+    ],
+    cheerMeter: {
+        official: {
+            home: 78,
+            away: 22
+        },
+        unofficial: {
+            home: 82,
+            away: 18
+        },
+        userVotes: [
+            {
+                userId: "507f1f77bcf86cd799439070",
+                team: "home",
+                isOfficial: false,
+                timestamp: new Date("2025-06-13T20:05:00Z")
+            },
+            {
+                userId: "507f1f77bcf86cd799439071",
+                team: "away",
+                isOfficial: false,
+                timestamp: new Date("2025-06-13T20:06:00Z")
+            }
+        ]
+    },
+    playerOfTheMatch: {
+        official: {
+            name: "Bukayo Saka",
+            position: "RW",
+            _id: "507f1f77bcf86cd799439028"
+        },
+        fanVotes: [
+            {
+                player: {
+                    name: "Bukayo Saka",
+                    position: "RW",
+                    _id: "507f1f77bcf86cd799439028"
+                },
+                votes: 1247
+            },
+            {
+                player: {
+                    name: "Kai Havertz",
+                    position: "ST",
+                    _id: "507f1f77bcf86cd799439030"
+                },
+                votes: 892
+            }
+        ],
+        userVotes: [
+            {
+                userId: "507f1f77bcf86cd799439080",
+                playerId: {
+                    name: "Bukayo Saka",
+                    position: "RW",
+                    _id: "507f1f77bcf86cd799439028"
+                },
+                timestamp: new Date("2025-06-13T20:07:00Z")
+            }
+        ]
+    },
+    playerRatings: {
+        player: {
+            name: "Bukayo Saka",
+            position: "RW",
+            _id: "507f1f77bcf86cd799439028"
+        },
+        team: "home",
+        rating: 8.7,
+        stats: {
+            goals: 1,
+            assists: 0,
+            shots: 3,
+            passes: 34,
+            tackles: 2,
+            saves: 0
+        }
+    },
+    odds: {
+        preMatch: {
+            homeWin: 2.10,
+            draw: 3.40,
+            awayWin: 3.20,
+            overUnder: [
+                {
+                    line: 2.5,
+                    over: 1.83,
+                    under: 1.95
+                },
+                {
+                    line: 3.5,
+                    over: 2.75,
+                    under: 1.42
+                }
+            ]
+        },
+        live: {
+            updatedAt: new Date("2025-06-13T20:07:00Z"),
+            homeWin: 1.35,
+            draw: 5.50,
+            awayWin: 8.00,
+            overUnder: [
+                {
+                    line: 3.5,
+                    over: 1.95,
+                    under: 1.83
+                }
+            ]
+        }
+    },
+    attendance: 59867,
+    weather: {
+        condition: "Clear",
+        temperature: 18,
+        humidity: 65
+    },
+    createdAt: new Date("2025-06-13T18:30:00Z"),
+    updatedAt: new Date("2025-06-13T20:07:30Z")
 };
