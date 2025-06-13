@@ -99,7 +99,7 @@ const TOTSPlayerManagementPage = ({ params }: TOTSPlayerManagementPageProps) => 
               Manage Players
             </h1>
             <p className="text-muted-foreground mt-1">
-              Add or remove players for {session.name}
+              Add or remove players for {session.competition.name}
             </p>
           </div>
 

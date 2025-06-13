@@ -453,6 +453,8 @@ export interface TOTSPlayer {
 export interface TOTSSession {
     _id: string;
     year: number;
+    name: string;
+    description: string;
     competition: Competition;
     startDate: Date;
     endDate: Date;
@@ -464,17 +466,19 @@ export interface TOTSSession {
         MID: Player[];
         FWD: Player[];
     };
+    isFinalized: boolean;
     createdAt: Date;
     updatedAt: Date;
 }
 
 export interface TOTSSessionWithPlayers extends TOTSSession {
-    players: {
-        GK: Player[];
-        DEF: Player[];
-        MID: Player[];
-        FWD: Player[];
-    }
+    // players: {
+    //     GK: Player[];
+    //     DEF: Player[];
+    //     MID: Player[];
+    //     FWD: Player[];
+    // }
+    players: TOTSPlayer[];
 }
 
 export interface TOTSResult {
