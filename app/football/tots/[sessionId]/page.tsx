@@ -1,4 +1,4 @@
-// 'use client';
+'use client';
 
 // import { use, useEffect, useState } from "react";
 // import { BlurFade } from "@/components/ui/blur-fade";
@@ -16,11 +16,11 @@
 // import Link from "next/link";
 // import { canVote } from "@/utils/roleUtils";
 
-// interface TOTSVotingPageProps {
-//   params: Promise<{
-//     sessionId: string;
-//   }>;
-// }
+interface TOTSVotingPageProps {
+  params: Promise<{
+    sessionId: string;
+  }>;
+}
 
 // type SelectedPlayers = {
 //   GK: string[];
@@ -29,7 +29,7 @@
 //   FWD: string[];
 // };
 
-// const TOTSVotingPage = ({ params }: TOTSVotingPageProps) => {
+const TOTSVotingPage = ({ params }: TOTSVotingPageProps) => {
 //   const resolvedParams = use(params);
 
 //   const router = useRouter();
@@ -251,7 +251,8 @@
 //     );
 //   }
 
-//   return (
+  return (
+    <>Hello</>
 //     <BlurFade>
 //       <div className="max-w-6xl mx-auto">
 //         <div className="fixed top-6 left-4 md:left-8 z-10">
@@ -355,7 +356,7 @@
 //         ) : null}
 //       </div>
 //     </BlurFade>
-//   );
-// };
+  );
+};
 
-// export default TOTSVotingPage;
+export default TOTSVotingPage;
