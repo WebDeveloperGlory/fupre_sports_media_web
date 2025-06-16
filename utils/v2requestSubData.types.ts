@@ -132,6 +132,7 @@ type Substitute = {
     player: ShortPopulatedPlayer,
     position: string,
     shirtNumber: number,
+    isCaptain?: boolean,
 }
 
 type PreMatchOdds = {

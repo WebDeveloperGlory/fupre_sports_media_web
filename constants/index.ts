@@ -336,7 +336,7 @@ export const liveMatchSample = {
         shorthand: "MCI",
         _id: "507f1f77bcf86cd799439015"
     },
-    matchType: "Premier League",
+    matchType: "league",
     stadium: "Emirates Stadium",
     matchDate: new Date("2025-06-13T19:00:00Z"),
     kickoffTime: new Date("2025-06-13T19:00:00Z"),
@@ -894,23 +894,42 @@ export const liveMatchSample = {
             }
         ]
     },
-    playerRatings: {
-        player: {
-            name: "Bukayo Saka",
-            position: "RW",
-            _id: "507f1f77bcf86cd799439028"
+    playerRatings: [
+        {
+            player: {
+                name: "Kai Havertz",
+                position: "ST",
+                _id: "507f1f77bcf86cd799439028"
+            },
+            team: "home",
+            rating: 7.5,
+            stats: {
+                goals: 0,
+                assists: 1,
+                shots: 2,
+                passes: 31,
+                tackles: 1,
+                saves: 0
+            }
         },
-        team: "home",
-        rating: 8.7,
-        stats: {
-            goals: 1,
-            assists: 0,
-            shots: 3,
-            passes: 34,
-            tackles: 2,
-            saves: 0
+        {
+            player: {
+                name: "Bukayo Saka",
+                position: "RW",
+                _id: "507f1f77bcf86cd799439028"
+            },
+            team: "home",
+            rating: 8.7,
+            stats: {
+                goals: 1,
+                assists: 0,
+                shots: 3,
+                passes: 34,
+                tackles: 2,
+                saves: 0
+            }
         }
-    },
+    ],
     odds: {
         preMatch: {
             homeWin: 2.10,

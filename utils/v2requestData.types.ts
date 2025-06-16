@@ -6,7 +6,7 @@ export interface IV2FootballLiveFixture {
     competition: ShortPopulatedCompetition;
     homeTeam: ShortPopulatedTeam;
     awayTeam: ShortPopulatedTeam;
-    matchType: string;
+    matchType: 'league' | 'knockout' | 'hybrid';
     stadium: string;
     matchDate: Date;
     kickoffTime: Date;
@@ -29,7 +29,7 @@ export interface IV2FootballLiveFixture {
     streamLinks: FixtureStreamLinks[];
     cheerMeter: FixtureCheerMeter;
     playerOfTheMatch: FixturePlayerOfTheMatch;
-    playerRatings: FixturePlayerRatings;
+    playerRatings: FixturePlayerRatings[];
     odds: FixtureOdds;
     attendance: number;
     weather: {
