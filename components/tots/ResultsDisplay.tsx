@@ -16,13 +16,13 @@ const ResultsDisplay = ({ session, result }: ResultsDisplayProps) => {
   // Group players by position
   const playersByPosition: Record<string, TOTSPlayer[]> = {};
 
-  result.players.forEach(player => {
-    const position = player.position;
-    if (!playersByPosition[position]) {
-      playersByPosition[position] = [];
-    }
-    playersByPosition[position].push(player);
-  });
+  // result.players.forEach(player => {
+  //   const position = player.position;
+  //   if (!playersByPosition[position]) {
+  //     playersByPosition[position] = [];
+  //   }
+  //   playersByPosition[position].push(player);
+  // });
 
   // Sort positions in logical order: GK, DEF, MID, FWD
   const positionOrder = ["Goalkeeper", "GK", "Defender", "DEF", "Midfielder", "MID", "Forward", "FWD", "Striker"];
@@ -60,7 +60,7 @@ const ResultsDisplay = ({ session, result }: ResultsDisplayProps) => {
           </div>
           <div className="flex items-center">
             <Users className="w-4 h-4 mr-1" />
-            <span>{result.totalVotes} votes</span>
+            {/* <span>{result.totalVotes} votes</span> */}
           </div>
         </div>
       </div>
