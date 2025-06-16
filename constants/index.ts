@@ -902,7 +902,20 @@ export const liveMatchSample = {
                 _id: "507f1f77bcf86cd799439028"
             },
             team: "home",
-            rating: 7.5,
+            official: {
+                rating: 7.5,
+                ratedBy: 'admin123'
+            },
+            fanRatings: {
+                average: 8,
+                count: 100,
+                distribution: {
+                    '1': 10, '2': 1, '3': 4,
+                    '4': 11, '5': 2, '6': 5,
+                    '7': 8, '8': 30, '9': 3,
+                    '10': 9
+                }
+            },
             stats: {
                 goals: 0,
                 assists: 1,
@@ -919,7 +932,20 @@ export const liveMatchSample = {
                 _id: "507f1f77bcf86cd799439028"
             },
             team: "home",
-            rating: 8.7,
+            official: {
+                rating: 7.5,
+                ratedBy: 'admin123'
+            },
+            fanRatings: {
+                average: 8,
+                count: 100,
+                distribution: {
+                    '1': 10, '2': 1, '3': 4,
+                    '4': 11, '5': 2, '6': 5,
+                    '7': 8, '8': 30, '9': 3,
+                    '10': 9
+                }
+            },
             stats: {
                 goals: 1,
                 assists: 0,

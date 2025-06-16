@@ -32,7 +32,7 @@ const Overview = ({ stream, playerRatings, playerOfTheMatch, homeLineup, awayLin
 
     // Others
     const choosenStream = stream ? stream[0] : null;
-    const sortedRatings = [ ...playerRatings ].sort((a,b) => b.rating - a.rating);
+    const sortedRatings = [ ...playerRatings ].sort((a,b) => b.fanRatings.average - a.fanRatings.average);
     const sortedPOTMVotes = [ ...playerOfTheMatch.fanVotes ].sort((a,b) => b.votes - a.votes);
     const playerStatString = ( 
         position: string, 
@@ -98,8 +98,9 @@ const Overview = ({ stream, playerRatings, playerOfTheMatch, homeLineup, awayLin
                             <div className='basis-1/12'>
                                 <div className='bg-muted rounded-lg px-2 py-1 flex items-center justify-center gap-2'>
                                     <Star className='w-5 h-5 text-emerald-500' />
-                                    { player.rating }
+                                    { player.fanRatings.average }
                                 </div>
+                                <p className='text-sm text-muted-foreground text-center mt-0.5'>{ player.fanRatings.count } votes</p>
                             </div>                            
                         </div>
                     ))

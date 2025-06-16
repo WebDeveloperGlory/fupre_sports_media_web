@@ -22,7 +22,7 @@ const Statistics = ({ homeStat, awayStat, ratings, home, away }: IStatistics ) =
     const awayPossession = 100 - homePossession; // Ensures total is always 100%
 
     // Sort Ratings
-    const sortedRatings = [ ...ratings ].sort((a,b) => b.rating - a.rating);
+    const sortedRatings = [ ...ratings ].sort((a,b) => b.fanRatings.average - a.fanRatings.average);
     const playerStatString = ( 
         position: string, 
         stats: { goals: number, assists: number, shots: number, passes: number, tackles: number, saves: number } 
@@ -112,8 +112,9 @@ const Statistics = ({ homeStat, awayStat, ratings, home, away }: IStatistics ) =
                                 <div className='basis-1/12'>
                                     <div className='bg-muted rounded-lg px-2 py-1 flex items-center justify-center gap-2'>
                                         <Star className='w-5 h-5 text-emerald-500' />
-                                        { player.rating }
+                                        { player.fanRatings.average }
                                     </div>
+                                    <p className='text-sm text-muted-foreground text-center mt-0.5'>{ player.fanRatings.count } votes</p>
                                 </div>                            
                             </div>
                         )) : sortedRatings.map( ( player, i ) => (
@@ -133,8 +134,9 @@ const Statistics = ({ homeStat, awayStat, ratings, home, away }: IStatistics ) =
                                 <div className='basis-1/12'>
                                     <div className='bg-muted rounded-lg px-2 py-1 flex items-center justify-center gap-2'>
                                         <Star className='w-5 h-5 text-emerald-500' />
-                                        { player.rating }
+                                        { player.fanRatings.average }
                                     </div>
+                                    <p className='text-sm text-muted-foreground text-center mt-0.5'>{ player.fanRatings.count } votes</p>
                                 </div>                            
                             </div>
                         ))

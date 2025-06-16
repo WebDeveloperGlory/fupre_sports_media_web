@@ -71,6 +71,12 @@ export default function LiveMatchPage({
   // Define possible first half statuses
   const possibleFirstHalfStatuses = ['pre-match', '1st-half', 'postponed'];
 
+  // Get player fan rating
+  const getPlayerFanRating = ( playerId: string ) => {
+    const foundPlayer = liveFixture?.playerRatings.find( player => player.player._id === playerId );
+    return foundPlayer ? foundPlayer.fanRatings.average : 0;
+  }
+
   // Calculate total elapsed game time
   const totalElapsedGameTime = liveFixture ? liveFixture.statistics.home.possessionTime + liveFixture.statistics.away.possessionTime : 0;
   const homePossession = totalElapsedGameTime > 0 ? ( liveFixture!.statistics.home.possessionTime / totalElapsedGameTime ) * 100 : 50;
@@ -392,15 +398,25 @@ export default function LiveMatchPage({
                             key={ i }
                             onClick={ () => setSelectedPlayer( player.player._id ) } 
                             className={`
-                              py-1 px-2 border rounded-md text-sm text-left cursor-pointer hover:border-emerald-500 ${
+                              py-1 px-2 border rounded-md text-sm text-left cursor-pointer hover:border-emerald-500 flex justify-between items-center ${
                                 selectedPlayer === player.player._id
                                   ? 'border-emerald-500 text-emerald-500'
                                   : ''
                               }
                             `}
                           >
-                            <p>{ player.player.name }</p>
-                            <span className='text-xs text-muted-foreground'>{ player.player.position }</span>
+                            <div>
+                              <p>{ player.player.name }</p>
+                              <span className='text-xs text-muted-foreground'>{ player.player.position }</span>
+                            </div>
+                            {
+                              modalType === 'vote' && (
+                                <div className='flex items-center gap-1 text-sm'>
+                                  <Star className='w-4 h-4 text-emerald-500' />
+                                  <p>{ getPlayerFanRating( player.player._id ) }</p>
+                                </div>
+                              )
+                            }
                           </div>
                         ))
                       )
@@ -412,15 +428,25 @@ export default function LiveMatchPage({
                             key={ i }
                             onClick={ () => setSelectedPlayer( player.player._id ) } 
                             className={`
-                              py-1 px-2 border rounded-md text-sm text-left cursor-pointer hover:border-emerald-500 ${
+                              py-1 px-2 border rounded-md text-sm text-left cursor-pointer hover:border-emerald-500 flex justify-between items-center ${
                                 selectedPlayer === player.player._id
                                   ? 'border-emerald-500 text-emerald-500'
                                   : ''
                               }
                             `}
                           >
-                            <p>{ player.player.name }</p>
-                            <span className='text-xs text-muted-foreground'>{ player.player.position }</span>
+                            <div>
+                              <p>{ player.player.name }</p>
+                              <span className='text-xs text-muted-foreground'>{ player.player.position }</span>
+                            </div>
+                            {
+                              modalType === 'vote' && (
+                                <div className='flex items-center gap-1 text-sm'>
+                                  <Star className='w-4 h-4 text-emerald-500' />
+                                  <p>{ getPlayerFanRating( player.player._id ) }</p>
+                                </div>
+                              )
+                            }                          
                           </div>
                         ))
                       )
