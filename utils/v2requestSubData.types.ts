@@ -29,6 +29,7 @@ export type FixtureResult = {
     halftimeAwayScore: number,
     homePenalty: number,
     awayPenalty: number,
+    winner?: 'home' | 'away' | 'draw',
 }
 
 export type FixtureStat = {
