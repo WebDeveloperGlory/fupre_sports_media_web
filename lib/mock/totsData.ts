@@ -1,7 +1,7 @@
 import { TOTSPlayer, TOTSResult, TOTSSession, TOTSSessionWithPlayers, TOTSUserVote } from "@/utils/requestDataTypes";
 
 // Mock TOTS Sessions
-export const mockTOTSSessions: TOTSSession[] = [
+export const mockTOTSSessions: any[] = [
   {
     _id: "tots-1",
     name: "Football TOTS 2023/24",
@@ -11,7 +11,9 @@ export const mockTOTSSessions: TOTSSession[] = [
     isActive: true,
     isFinalized: false,
     createdAt: new Date("2024-03-15"),
-    updatedAt: new Date("2024-03-15")
+    updatedAt: new Date("2024-03-15"),
+    year: 2025,
+    competition: { name: '', _id: '1234'},
   },
   {
     _id: "tots-2",
@@ -268,10 +270,11 @@ export const mockTOTSPlayers: Record<string, TOTSPlayer[]> = {
 };
 
 // Mock TOTS Results
-export const mockTOTSResults: Record<string, TOTSResult> = {
+// export const mockTOTSResults: Record<string, TOTSResult> = {
+export const mockTOTSResults: any = {
   "tots-2": {
     _id: "result-1",
-    sessionId: "tots-2",
+    session: "tots-2",
     players: mockTOTSPlayers["tots-2"],
     totalVotes: 416,
     createdAt: new Date("2024-04-16")
@@ -279,7 +282,8 @@ export const mockTOTSResults: Record<string, TOTSResult> = {
 };
 
 // Mock User Votes
-export const mockUserVotes: Record<string, TOTSUserVote> = {
+// export const mockUserVotes: Record<string, TOTSUserVote> = {
+export const mockUserVotes: any = {
   "tots-1": {
     _id: "vote-1",
     sessionId: "tots-1",
