@@ -1,4 +1,4 @@
-import { CompetitionSponsors, CompetitionStatus, CompetitionTypes } from "./v2requestData.enums"
+import { CompetitionSponsors, CompetitionStatus, CompetitionTypes, FixtureStatus } from "./v2requestData.enums"
 
 // Competition Admin //
 
@@ -48,7 +48,19 @@ export type CompFormFixture = {
     stadium: string;
     scheduledDate: Date;
     referee: string;
-    isDerby?: boolean
+    isDerby?: boolean;
+    isKnockoutRound?: boolean;
+    isGroupFixture?: boolean;
+    knockoutId?: string;
+    groupId?: string;
+}
+// Update fixture
+export type CompFormUpdateFixture = {
+    fixtureId: string;
+    scheduledDate?: Date;
+    status?: FixtureStatus;
+    postponedReason?: string;
+    rescheduledDate?: Date;
 }
 // Register team
 export type CompFormTeam = { teamId: string }

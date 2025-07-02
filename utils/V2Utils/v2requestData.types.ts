@@ -16,6 +16,7 @@ export interface IV2FootballLiveFixture {
     currentMinute: number;
     injuryTime: number;
     result: FixtureResult;
+    goalScorers: { player: string, team: string, time: number }[];
     statistics: {
         home: FixtureStat,
         away: FixtureStat
@@ -246,6 +247,7 @@ export interface IV2FootballFixture {
     rescheduledDate: Date;
 
     result: FixtureResult;
+    goalScorers: { player: string, team: string, time: number }[];
     statistics: {
         home: FixtureStat,
         away: FixtureStat
