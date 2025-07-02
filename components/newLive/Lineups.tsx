@@ -1,7 +1,7 @@
 'use client'
 
-import { TeamType } from '@/utils/v2requestData.enums';
-import { FixtureLineup, FixtureSubstitutions } from '@/utils/v2requestSubData.types'
+import { TeamType } from '@/utils/V2Utils/v2requestData.enums';
+import { FixtureLineup, FixtureSubstitutions } from '@/utils/V2Utils/v2requestSubData.types'
 import { ArrowLeft, ArrowRight, Users } from 'lucide-react'
 import React from 'react'
 

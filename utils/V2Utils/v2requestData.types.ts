@@ -1,4 +1,4 @@
-import { CoachRoles, TeamTypes } from "./v2requestData.enums";
+import { CoachRoles, CompetitionSponsors, CompetitionStatus, CompetitionTeamForm, CompetitionTypes, TeamTypes } from "./v2requestData.enums";
 import { FixtureCheerMeter, FixtureCommentary, FixtureLineup, FixtureOdds, FixturePlayerOfTheMatch, FixturePlayerRatings, FixtureResult, FixtureStat, FixtureStreamLinks, FixtureSubstitutions, FixtureTimeline, ShortPopulatedCompetition, ShortPopulatedTeam } from "./v2requestSubData.types";
 
 export interface IV2FootballLiveFixture {
@@ -38,6 +38,134 @@ export interface IV2FootballLiveFixture {
         temperature: number
         humidity: number
     };
+    createdAt: Date;
+    updatedAt: Date;
+}
+
+export interface IV2FootballCompetition {
+    _id: string;
+
+    name: string;
+    shorthand: string;
+    type: CompetitionTypes;
+    logo: string;
+    coverImage: string;
+    description: string;
+    status: CompetitionStatus;
+
+    format: {
+        groupStage?: {
+            numberOfGroups: number,
+            teamsPerGroup: number,
+            advancingPerGroup: number
+        },
+        knockoutStage?: {
+            hasTwoLegs: boolean,
+            awayGoalsRule: boolean,
+        },
+        leagueStage?: {
+            matchesPerTeam: number,
+            pointsSystem: {
+                win: number
+                draw: number
+                loss: number
+            }
+        }
+    };
+
+    season: string;
+    startDate: Date;
+    endDate: Date;
+    registrationDeadline?: Date;
+    currentStage?: string;
+
+    teams: {
+        team: string,
+        squad: {
+            player: string,
+            jerseyNumber: number,
+            isCaptain: boolean,
+            position: string
+        }[],
+    }[],
+
+    // Statistics (Aggregated)
+    stats: {
+        averageGoalsPerMatch: Number,
+        averageAttendance: Number,
+        cleanSheets: Number,
+        topScorers: {
+            player: string,
+            team: string,
+            goals: Number,
+            penalties: Number
+        }[],
+        topAssists: {
+            player: string,
+            team: string,
+            assists: Number
+        }[],
+        bestDefenses: {
+            team: string,
+            cleanSheets: Number,
+            goalsConceded: Number
+        }[]
+    },
+
+    leagueTable: ILeagueStandings[],
+    knockoutRounds: IKnockoutRounds[],
+    groupStage: IGroupTable[],
+
+    awards: {
+        player: {
+            name: string,
+            winner: {
+                player: string,
+                team: string,
+            } | null
+        }[],
+        team: {
+            name: string,
+            winner: string | null,
+        }[]
+    },
+
+    rules: {
+        substitutions: {
+            allowed: boolean,
+            maximum: number,
+        },
+        extraTime: boolean,
+        penalties: boolean,
+        matchDuration: {
+            normal: number, // minutes
+            extraTime: number
+        },
+        squadSize: {
+            min: number,
+            max: number
+        },
+    },
+    extraRules: {
+        title: string,
+        description: string,
+        lastUpdated: Date
+    }[],
+    sponsors: {
+        name: string,
+        logo: string | null,
+        tier: CompetitionSponsors
+    }[],
+
+    prizeMoney?: {
+        champion: number,
+        runnerUp: number,
+    },
+    isActive: boolean
+    isFeatured: boolean
+
+    admin: string
+
     createdAt: Date;
     updatedAt: Date;
 }
@@ -150,4 +278,49 @@ export interface TeamPlayerDetails {
         redCards: number,
         minutesPlayed: number,
     };
+}
+
+export interface ILeagueStandings {
+    _id: string;
+
+    team: string;
+    played: number;
+    points: number;
+    disciplinaryPoints: number;
+    wins: number;
+    losses: number;
+    draws: number;
+    goalsFor: number;
+    goalsAgainst: number;
+    goalDifference: number;
+    form: CompetitionTeamForm[],
+    position: number,
+}
+
+export interface IKnockoutRounds {
+    _id: string;
+
+    name: string,
+    fixtures: string[],
+    completed: boolean,
+}
+
+export interface IGroupTable {
+    _id: string;
+
+    name: string;
+    standings: ILeagueStandings[];
+    fixtures: string[];
+    qualificationRules: {
+        position: number,
+        destination: 'knockout' | 'playoffs' | 'eliminated',
+        knockoutRound: string,
+        isBestLoserCandidate: boolean
+    }[];
+    qualifiedTeams: {
+        team: string,
+        originalPosition: number,
+        qualifiedAs: string,
+        destination: string
+    }[];
 }

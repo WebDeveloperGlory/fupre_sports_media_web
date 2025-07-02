@@ -1,8 +1,8 @@
 'use client'
 
 import { Loader } from '@/components/ui/loader';
-import { CoachRoles, CompetitionType, TeamTypes, FavoriteFoot, PlayerRole } from '@/utils/v2requestData.enums';
-import { IV2FootballTeam, TeamPlayerDetails } from '@/utils/v2requestData.types';
+import { CoachRoles, CompetitionType, TeamTypes, FavoriteFoot, PlayerRole } from '@/utils/V2Utils/v2requestData.enums';
+import { IV2FootballTeam, TeamPlayerDetails } from '@/utils/V2Utils/v2requestData.types';
 import { MessageSquare, Plus, Star, Trash2, UserCog, UserPlus, Users } from 'lucide-react';
 import React, { use, useEffect, useState } from 'react'
 

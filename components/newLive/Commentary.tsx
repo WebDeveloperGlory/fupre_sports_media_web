@@ -1,6 +1,6 @@
 'use client'
 
-import { FixtureCommentary } from '@/utils/v2requestSubData.types'
+import { FixtureCommentary } from '@/utils/V2Utils/v2requestSubData.types'
 import { MessageSquare } from 'lucide-react'
 import React from 'react'
 

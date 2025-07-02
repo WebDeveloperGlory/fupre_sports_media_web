@@ -1,6 +1,6 @@
 'use client'
 
-import { FixtureStreamLinks, FixturePlayerRatings, FixtureLineup, FixtureOdds, FixturePlayerOfTheMatch } from '@/utils/v2requestSubData.types'
+import { FixtureStreamLinks, FixturePlayerRatings, FixtureLineup, FixtureOdds, FixturePlayerOfTheMatch } from '@/utils/V2Utils/v2requestSubData.types'
 import { Star, Trophy, Video } from 'lucide-react'
 import Link from 'next/link'
 import React, { useState } from 'react'

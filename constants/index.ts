@@ -1,6 +1,6 @@
 import { Statistics } from "@/utils/requestDataTypes";
 import { EventTypes } from "@/utils/stateTypes";
-import { CompetitionType } from "@/utils/v2requestData.enums";
+import { CompetitionType } from "@/utils/V2Utils/v2requestData.enums";
 
 export const getCurrentDate = (): string => {
 	const today = new Date();

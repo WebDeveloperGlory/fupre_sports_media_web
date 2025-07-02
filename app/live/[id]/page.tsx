@@ -9,7 +9,7 @@ import { Trophy, Clock, Activity, Target, Flag, Users, PieChart, Goal, CloudRain
 import { getLiveFixtureDetails } from '@/lib/requests/liveAdminPage/requests';
 import { LiveFixture } from '@/utils/requestDataTypes';
 import { liveMatchSample, teamLogos } from '@/constants';
-import { IV2FootballLiveFixture } from '@/utils/v2requestData.types';
+import { IV2FootballLiveFixture } from '@/utils/V2Utils/v2requestData.types';
 import Overview from '@/components/newLive/Overview';
 import PopUpModal from '@/components/modal/PopUpModal';
 import Timeline from '@/components/newLive/Timeline';

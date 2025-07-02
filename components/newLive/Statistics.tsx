@@ -1,6 +1,6 @@
 'use client'
 
-import { FixturePlayerRatings, FixtureStat } from '@/utils/v2requestSubData.types'
+import { FixturePlayerRatings, FixtureStat } from '@/utils/V2Utils/v2requestSubData.types'
 import { BarChart2, Star } from 'lucide-react'
 import React, { useState } from 'react'
 import { motion } from 'framer-motion';
