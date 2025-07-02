@@ -24,16 +24,17 @@ const Navbar = () => {
   const [openMobileMenu, setOpenMobileMenu] = useState<boolean>(false);
 
   const isActiveRoute = (path: string) => {
-    if (path === '/') return pathname === '/home';
-    if (path === '/football') {
-      return pathname === '/football' ||
+    if (path === '/') return pathname === '/sports';
+    if (path === '/sports/competitions') {
+      return pathname === '/sports/competitions' ||
+        pathname === '/sports/football' ||
+        pathname === '/sports/basketball' ||
         pathname.startsWith('/competitions') ||
         pathname.startsWith('/fixtures') ||
-        pathname.startsWith('/live') ||
-        pathname.startsWith('/football/tots');
+        pathname.startsWith('/live');
     }
-    if (path === '/football/tots') {
-      return pathname.startsWith('/football/tots');
+    if (path === '/sports/football/tots') {
+      return pathname.startsWith('/sports/football/tots');
     }
     if (path === '/news') {
       return pathname === '/news' || pathname.startsWith('/news/');
@@ -43,8 +44,8 @@ const Navbar = () => {
 
   const navLinks = [
     { href: '/', label: 'Home', icon: Home },
-    { href: '/football', label: 'Football', icon: Trophy },
-    { href: '/football/tots', label: 'TOTS', icon: Award },
+    { href: '/sports/competitions', label: 'Competitions', icon: Trophy },
+    { href: '/sports/football/tots', label: 'TOTS', icon: Award },
     { href: '/news', label: 'News', icon: Newspaper },
     { href: '/highlights', label: 'Highlights', icon: Play },
   ];
@@ -52,7 +53,7 @@ const Navbar = () => {
   // Mobile bottom navigation links (excluding TOTS)
   const mobileBottomNavLinks = [
     { href: '/', label: 'Home', icon: Home },
-    { href: '/football', label: 'Football', icon: Trophy },
+    { href: '/sports/competitions', label: 'Competitions', icon: Trophy },
     { href: '/news', label: 'News', icon: Newspaper },
     { href: '/highlights', label: 'Highlights', icon: Play },
   ];
