@@ -114,3 +114,11 @@ export enum CompetitionStatus {
     ONGOING = 'ongoing',
     CANCELLED = 'cancelled'
 }
+
+export enum FixtureStatus {
+    SCHEDULED = 'scheduled', 
+    LIVE = 'live', 
+    COMPLETED = 'completed', 
+    POSTPONED = 'postponed', 
+    CANCELED = 'canceled'
+}

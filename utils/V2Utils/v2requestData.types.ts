@@ -1,4 +1,4 @@
-import { CoachRoles, CompetitionSponsors, CompetitionStatus, CompetitionTeamForm, CompetitionTypes, TeamTypes } from "./v2requestData.enums";
+import { CoachRoles, CompetitionSponsors, CompetitionStatus, CompetitionTeamForm, CompetitionTypes, FixtureStatus, TeamTypes } from "./v2requestData.enums";
 import { FixtureCheerMeter, FixtureCommentary, FixtureLineup, FixtureOdds, FixturePlayerOfTheMatch, FixturePlayerRatings, FixtureResult, FixtureStat, FixtureStreamLinks, FixtureSubstitutions, FixtureTimeline, ShortPopulatedCompetition, ShortPopulatedTeam } from "./v2requestSubData.types";
 
 export interface IV2FootballLiveFixture {
@@ -227,6 +227,50 @@ export interface IV2FootballTeam {
     }
 
     admin: { _id: string, name: string, email: string };
+
+    createdAt: Date;
+    updatedAt: Date;
+}
+
+export interface IV2FootballFixture {
+    _id: string;
+    competition: string;
+    homeTeam: string; // hometeamID
+    awayTeam: string; // awayTeamID
+    matchType: string;
+    stadium: string;
+    
+    scheduledDate: Date;
+    status: FixtureStatus;
+    postponedReason: string;
+    rescheduledDate: Date;
+
+    result: FixtureResult;
+    statistics: {
+        home: FixtureStat,
+        away: FixtureStat
+    };
+
+    lineups: {
+            home: FixtureLineup,
+            away: FixtureLineup
+        };
+    substitutions: FixtureSubstitutions[];
+    
+    timeline: FixtureTimeline[];
+    commentary: FixtureCommentary[];
+
+    playerOfTheMatch: FixturePlayerOfTheMatch;
+    playerRatings: FixturePlayerRatings[];
+
+    referee: string;
+    attendance: number;
+    weather: {
+        condition: string,
+        temperature: number
+    };
+    highlights: FixtureStreamLinks[];
+    isDerby: Boolean;
 
     createdAt: Date;
     updatedAt: Date;
