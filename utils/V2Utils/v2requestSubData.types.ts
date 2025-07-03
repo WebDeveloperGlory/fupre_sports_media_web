@@ -51,6 +51,7 @@ export type FixtureLineup = {
 }
 
 export type FixtureSubstitutions = {
+    id: string,
     team: TeamType,
     playerOut: ShortPopulatedPlayer,
     playerIn: ShortPopulatedPlayer,
@@ -59,6 +60,7 @@ export type FixtureSubstitutions = {
 }
 
 export type FixtureTimeline = {
+    id: string,
     type: FixtureTimelineType,
     team: ShortPopulatedTeam,
     player: ShortPopulatedPlayer,
@@ -71,6 +73,7 @@ export type FixtureTimeline = {
 }
 
 export type FixtureCommentary = {
+    id: string,
     minute: number,
     injuryTime: boolean,
     type: 'important' | 'regular' | 'highlight',
