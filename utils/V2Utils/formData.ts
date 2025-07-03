@@ -1,4 +1,6 @@
-import { CompetitionSponsors, CompetitionStatus, CompetitionTypes, FixtureStatus } from "./v2requestData.enums"
+import { CompetitionSponsors, CompetitionStatus, CompetitionTypes, FixtureStatus, FixtureTimelineCardType, FixtureTimelineGoalType, FixtureTimelineType, LiveStatus, TeamType } from "./v2requestData.enums"
+import { FixtureLineup, FixtureStat, FixtureStreamLinks } from "./v2requestSubData.types";
+import { FixtureTimeline } from '../../../../../Backend/projects/fupre_sports_media_backend/app/v2/types/fixture.enums';
 
 // Competition Admin //
 
@@ -105,3 +107,81 @@ export type CompFormFormat = {
 }
 
 // End of Competition Admin //
+
+// Live Fixtures Admin //
+
+// Update live fixture status
+export type LiveFixStatusForm = { status: LiveStatus };
+// Update stats
+export type LiveFixStatForm = { stats: { home: FixtureStat, away: FixtureStat } };
+// Update lineups
+export type LiveFixLineupForm = { lineups: { home: FixtureLineup, away: FixtureLineup } };
+// Create timeline event
+export type LiveFixTimelineCreate = { event: FixtureTimeline }
+// Edit timeline event
+export type LiveFixTimelineEdit = {
+    eventId: string; // Id used to know which to edit
+    type?: FixtureTimelineType;
+    team?: TeamType;
+    player?: string;
+    relatedPlayer?: string; // assists
+    minute?: number;
+    injuryTime?: boolean;
+    description?: string;
+    goalType?: FixtureTimelineGoalType;
+    cardType?: FixtureTimelineCardType;
+}
+// Add substitution
+export type LiveFixSubCreate = {
+    team: TeamType;
+    playerOutId: string;
+    playerInId: string;
+    minute: number;
+    injuryTime?: boolean;
+    injury: boolean;
+};
+// Edit substitution
+export type LiveFixSubEdit = { substitutionId: string; updates: Partial<LiveFixSubCreate> }
+// Update score
+export type LiveFixScore = {
+    homeScore?: number;
+    awayScore?: number;
+    isHalftime?: boolean;
+    homePenalty?: number, 
+    awayPenalty?: number;
+};
+// Add goal scorer
+export type LivFixGoalScorer = {
+    playerId: string;
+    teamId: string;
+    time: number;
+    goalType?: FixtureTimelineGoalType;
+};
+// Update official potm
+export type LivFixPOTMOfficial = { playerId: string }
+// Update official player ratings
+export type LivFixPlayerRatingOfficial = {
+    playerId: string;
+    isHomePlayer: boolean;
+    rating: number; // 0-10
+    stats?: {
+        goals?: number;
+        assists?: number;
+        shots?: number;
+        passes?: number;
+        tackles?: number;
+        saves?: number;
+    };
+}[];
+// Perform genera updates
+export type LivFixGeneralUpdates = { 
+    weather?: { condition: string, temperature: number, humidity: number },
+    attendance?: number,
+    referee?: string,
+    kickoff?: Date,
+    stream?: FixtureStreamLinks
+}
+// Perform time updates
+export type LivFixTimeUpdates = { time: number }
+
+// End of Live Fixtures Admin //
