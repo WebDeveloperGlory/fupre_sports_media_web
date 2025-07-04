@@ -1,6 +1,18 @@
 import { CompetitionSponsors, CompetitionStatus, CompetitionTypes, FixtureStatus, FixtureTimelineCardType, FixtureTimelineGoalType, FixtureTimelineType, LiveStatus, TeamType } from "./v2requestData.enums"
 import { FixtureLineup, FixtureStat, FixtureStreamLinks } from "./v2requestSubData.types";
-import { FixtureTimeline } from '../../../../../Backend/projects/fupre_sports_media_backend/app/v2/types/fixture.enums';
+
+export type FixtureTimeline = {
+    id: string,
+    type: FixtureTimelineType,
+    team: TeamType,
+    player: string,
+    relatedPlayer?: string,
+    minute: number,
+    injuryTime?: boolean,
+    description: string,
+    goalType?: FixtureTimelineGoalType,
+    cardType?: FixtureTimelineCardType
+}
 
 // Competition Admin //
 

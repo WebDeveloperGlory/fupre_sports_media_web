@@ -336,6 +336,7 @@ export const liveMatchSample = {
         shorthand: "MCI",
         _id: "507f1f77bcf86cd799439015"
     },
+    goalScorers: [],
     matchType: "league",
     stadium: "Emirates Stadium",
     matchDate: new Date("2025-06-13T19:00:00Z"),
@@ -677,6 +678,7 @@ export const liveMatchSample = {
     },
     substitutions: [
         {
+            id: '1234jnsmfsjcscscs',
             team: "away",
             playerOut: {
                 name: "Phil Foden",
@@ -694,6 +696,7 @@ export const liveMatchSample = {
     ],
     timeline: [
         {
+            id: 'abshadkjnajnas5',
             type: "goal",
             team: {
                 name: "Arsenal",
@@ -717,6 +720,7 @@ export const liveMatchSample = {
             cardType: null
         },
         {
+            id: 'abshadkjnajnas4',
             type: "yellow-card",
             team: {
                 name: "Manchester City",
@@ -736,6 +740,7 @@ export const liveMatchSample = {
             cardType: "first-yellow"
         },
         {
+            id: 'abshadkjnajnas3',
             type: "goal",
             team: {
                 name: "Manchester City",
@@ -759,6 +764,7 @@ export const liveMatchSample = {
             cardType: null
         },
         {
+            id: 'abshadkjnajnas2',
             type: "goal",
             team: {
                 name: "Arsenal",
@@ -778,6 +784,7 @@ export const liveMatchSample = {
             cardType: null
         },
         {
+            id: 'abshadkjnajnas1',
             type: "red-card",
             team: {
                 name: "Manchester City",
@@ -799,6 +806,7 @@ export const liveMatchSample = {
     ],
     commentary: [
         {
+            id: '1',
             minute: 67,
             injuryTime: false,
             type: "regular",
@@ -806,6 +814,7 @@ export const liveMatchSample = {
             eventId: "507f1f77bcf86cd799439060"
         },
         {
+            id: '2',
             minute: 65,
             injuryTime: false,
             type: "important",
@@ -813,6 +822,7 @@ export const liveMatchSample = {
             eventId: "507f1f77bcf86cd799439061"
         },
         {
+            id: '3',
             minute: 66,
             injuryTime: false,
             type: "highlight",
