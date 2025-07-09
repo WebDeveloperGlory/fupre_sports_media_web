@@ -190,7 +190,7 @@ export type LivFixGeneralUpdates = {
     weather?: { condition: string, temperature: number, humidity: number },
     attendance?: number,
     referee?: string,
-    kickoff?: Date,
+    kickoff?: Date | string,
     stream?: FixtureStreamLinks
 }
 // Perform time updates
