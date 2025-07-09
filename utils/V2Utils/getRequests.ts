@@ -1,5 +1,6 @@
-import { CompetitionTeamForm, FixtureStatus, TeamTypes } from './v2requestData.enums';
-import { ILeagueStandings, IV2FootballCompetition, IV2FootballFixture } from './v2requestData.types';
+import { CompetitionTeamForm, FixtureStatus, PlayerRole, TeamTypes } from './v2requestData.enums';
+import { ILeagueStandings, IV2FootballCompetition, IV2FootballFixture, IV2FootballLiveFixture } from './v2requestData.types';
+import { ShortPopulatedCompetition, ShortPopulatedTeam } from './v2requestSubData.types';
 
 // COMPETITION //
 
@@ -160,10 +161,48 @@ export type CompetitionStatsData = {
 
 // END OF COMPETITION //
 
+// LIVE FIXTURES //
+
+// Get all live fixtures
+export type AllTodayFix = {
+    _id: string;
+    homeTeam: ShortPopulatedTeam;
+    awayTeam: ShortPopulatedTeam;
+    competition: ShortPopulatedCompetition;
+    scheduledDate: Date;
+    rescheduledDate: Date | null;
+    stadium: string;
+    status: FixtureStatus.SCHEDULED | FixtureStatus.LIVE | FixtureStatus.COMPLETED | FixtureStatus.POSTPONED | FixtureStatus.CANCELED;
+}
+// Get live fixture by ID
+export type LiveFixData = IV2FootballLiveFixture;
+// Get live fixture team players
+export type LiveFixPlayerData = {
+    homePlayers: {
+        _id: string;
+        name: string;
+        admissionYear: string;
+        role: PlayerRole;
+        position: string;
+        jerseyNumber: number;
+    }[];
+    awayPlayers: {
+        _id: string;
+        name: string;
+        admissionYear: string;
+        role: PlayerRole;
+        position: string;
+        jerseyNumber: number;
+    }[];
+}
+
+// END OF LIVE FIXTURES //
+
 // GENERAL //
 
 interface PopulatedTeamInFixture extends Omit<IV2FootballFixture, 'homeTeam' | 'awayTeam'> {
     homeTeam: { name: string; shorthand: string; logo: string; }
     awayTeam: { name: string; shorthand: string; logo: string; }
 }
+
 // END OF GENERAL //

@@ -159,8 +159,8 @@ export type LiveFixScore = {
     homeScore?: number;
     awayScore?: number;
     isHalftime?: boolean;
-    homePenalty?: number, 
-    awayPenalty?: number;
+    homePenalty?: number | null, 
+    awayPenalty?: number | null;
 };
 // Add goal scorer
 export type LivFixGoalScorer = {

@@ -11,6 +11,7 @@ export type ShortPopulatedCompetition = {
     _id: string;
     name: string;
     type: CompetitionType;
+    shorthand?: string;
 }
 
 export type ShortPopulatedTeam = {
@@ -25,10 +26,10 @@ export type ShortPopulatedTeam = {
 export type FixtureResult = {
     homeScore: number,
     awayScore: number,
-    halftimeHomeScore: number,
-    halftimeAwayScore: number,
-    homePenalty: number,
-    awayPenalty: number,
+    halftimeHomeScore: number | null,
+    halftimeAwayScore: number | null,
+    homePenalty: number | null,
+    awayPenalty: number | null,
     winner?: 'home' | 'away' | 'draw',
 }
 
@@ -62,7 +63,7 @@ export type FixtureSubstitutions = {
 export type FixtureTimeline = {
     id: string,
     type: FixtureTimelineType,
-    team: ShortPopulatedTeam,
+    team: TeamType,
     player: ShortPopulatedPlayer,
     relatedPlayer: ShortPopulatedPlayer | null,
     minute: number,

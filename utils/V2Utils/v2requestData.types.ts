@@ -1,5 +1,5 @@
 import { CoachRoles, CompetitionSponsors, CompetitionStatus, CompetitionTeamForm, CompetitionTypes, FixtureStatus, TeamTypes } from "./v2requestData.enums";
-import { FixtureCheerMeter, FixtureCommentary, FixtureLineup, FixtureOdds, FixturePlayerOfTheMatch, FixturePlayerRatings, FixtureResult, FixtureStat, FixtureStreamLinks, FixtureSubstitutions, FixtureTimeline, ShortPopulatedCompetition, ShortPopulatedTeam } from "./v2requestSubData.types";
+import { FixtureCheerMeter, FixtureCommentary, FixtureLineup, FixtureOdds, FixturePlayerOfTheMatch, FixturePlayerRatings, FixtureResult, FixtureStat, FixtureStreamLinks, FixtureSubstitutions, FixtureTimeline, ShortPopulatedCompetition, ShortPopulatedPlayer, ShortPopulatedTeam } from "./v2requestSubData.types";
 
 export interface IV2FootballLiveFixture {
     _id: string;
@@ -16,7 +16,7 @@ export interface IV2FootballLiveFixture {
     currentMinute: number;
     injuryTime: number;
     result: FixtureResult;
-    goalScorers: { player: string, team: string, time: number }[];
+    goalScorers: { player: ShortPopulatedPlayer, team: ShortPopulatedTeam, time: number }[];
     statistics: {
         home: FixtureStat,
         away: FixtureStat

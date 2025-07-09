@@ -698,11 +698,7 @@ export const liveMatchSample = {
         {
             id: 'abshadkjnajnas5',
             type: "goal",
-            team: {
-                name: "Arsenal",
-                shorthand: "ARS",
-                _id: "507f1f77bcf86cd799439014"
-            },
+            team: 'home',
             player: {
                 name: "Kai Havertz",
                 position: "ST",
@@ -742,11 +738,7 @@ export const liveMatchSample = {
         {
             id: 'abshadkjnajnas3',
             type: "goal",
-            team: {
-                name: "Manchester City",
-                shorthand: "MCI",
-                _id: "507f1f77bcf86cd799439015"
-            },
+            team: 'away',
             player: {
                 name: "Erling Haaland",
                 position: "ST",
