@@ -1,25 +1,29 @@
 'use client'
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Eye, EyeOff, ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { loginUser } from '@/lib/requests/v2/authentication/requests';
-import { toast } from 'react-toastify';
 import Link from 'next/link';
+import { generateOtp, resetPassword, validateOtp } from '@/lib/requests/v2/authentication/requests';
+import { toast } from 'react-toastify';
 
 export default function ResetPasswordPage() {
         const router = useRouter();
         const [formData, setFormData] = useState({
             email: '',
+            password: '',
+            confirmPassword: '',
         });
         const [isLoading, setIsLoading] = useState(false);
         const [otp, setOtp] = useState<string[]>(['', '', '', '']);
         const [isOTPStep, setIsOTPStep] = useState<boolean>( false );
-        const [emailError, setEmailError] = useState('');
+        const [showPassword, setShowPassword] = useState<boolean>(false);
+        const [emailError, setEmailError] = useState<string>('');
+        const [passwordError, setPasswordError] = useState<string>('');
 
         const validateEmail = (email: string) => {
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -30,23 +34,31 @@ export default function ResetPasswordPage() {
             setEmailError('');
             return true;
         };
+        const validatePassword = () => {
+            if (formData.password.length < 6) {
+                setPasswordError('Password must be at least 6 characters');
+                return false;
+            }
+            if (formData.password !== formData.confirmPassword) {
+                setPasswordError('Passwords do not match');
+                return false;
+            }
+            setPasswordError('');
+            return true;
+        };
         const handleEmailSubmit = async (e: React.FormEvent) => {
             e.preventDefault();
+            if (!validateEmail(formData.email) || !validatePassword()) return;
 
-            if (!validateEmail(formData.email)) return;
-
-            setIsLoading(true);
             try {
-                setIsOTPStep( true )
-                // const result = await loginUser( formData.email, formData.password );
-                // if( result?.code === '00' ) {
-                //     setJwt( result.data.token );
-                //     setUserProfile( result.data.user );
-                //     router.push(redirectPath);
-                // } else {
-                //     toast.error( result?.message || 'Login failed' );
-                //     setFormData({ ...formData, password: '' });
-                // }
+                const result = await generateOtp( formData.email );
+                if( result?.code === '00' ) {
+                    toast.success( result.message );
+                    setIsOTPStep( true );
+                } else {
+                    toast.error( result?.message || 'Login failed' );
+                    setFormData({ ...formData });
+                }
             } catch (error) {
                 console.error('Login failed:', error);
             } finally {
@@ -58,18 +70,22 @@ export default function ResetPasswordPage() {
 
             setIsLoading(true);
             try {
-                setIsOTPStep( false )
-                // const result = await loginUser( formData.email, formData.password );
-                // if( result?.code === '00' ) {
-                //     setJwt( result.data.token );
-                //     setUserProfile( result.data.user );
-                //     router.push(redirectPath);
-                // } else {
-                //     toast.error( result?.message || 'Login failed' );
-                //     setFormData({ ...formData, password: '' });
-                // }
+                const result = await validateOtp( formData.email, otp.join('') );
+                if( result?.code === '00' ) {
+                    const resetResult = await resetPassword( formData.email, formData.password, formData.confirmPassword );
+                    if( resetResult?.code === '00' ) {
+                        toast.success( result.message );
+                        toast.success( resetResult.message );
+                        router.push('/auth/login');
+                    } else {
+                        toast.error( result?.message || 'Reset failed' )
+                    }
+                } else {
+                    toast.error( result?.message || 'Reset failed' );
+                    setFormData({ ...formData });
+                }
             } catch (error) {
-                console.error('Login failed:', error);
+                console.error('Reset Failed:', error);
             } finally {
                 setIsLoading(false);
             }
@@ -104,7 +120,7 @@ export default function ResetPasswordPage() {
                         <CardDescription className="text-neutral-400">
                             {
                                 !isOTPStep ?
-                                    "Enter your email to recieve a verification code"
+                                    "Create new password and enter your email to recieve a verification code"
                                 :
                                     "Enter the verification code sent to your email"
                             }
@@ -138,6 +154,52 @@ export default function ResetPasswordPage() {
                                                 <p className="text-sm text-red-500">{emailError}</p>
                                             )
                                         }
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label htmlFor="password" className="text-sm font-medium">
+                                        Password
+                                        </label>
+                                        <div className="relative">
+                                            <Input
+                                                id="password"
+                                                type={showPassword ? "text" : "password"}
+                                                placeholder="Create a password"
+                                                value={formData.password}
+                                                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                                required
+                                                className="bg-background border-input focus:border-emerald-500 focus:ring-emerald-500/20"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowPassword(!showPassword)}
+                                                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                                            >
+                                                {showPassword ? (
+                                                    <EyeOff className="h-4 w-4" />
+                                                ) : (
+                                                    <Eye className="h-4 w-4" />
+                                                )}
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label htmlFor="confirmPassword" className="text-sm font-medium">
+                                        Confirm Password
+                                        </label>
+                                        <Input
+                                        id="confirmPassword"
+                                        type={showPassword ? "text" : "password"}
+                                        placeholder="Confirm your password"
+                                        value={formData.confirmPassword}
+                                        onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                                        required
+                                        className={`bg-background border-input focus:border-emerald-500 focus:ring-emerald-500/20 ${
+                                            passwordError ? 'border-red-500' : ''
+                                        }`}
+                                        />
+                                        {passwordError && (
+                                        <p className="text-sm text-red-500">{passwordError}</p>
+                                        )}
                                     </div>
                                     <Button
                                         type="submit"

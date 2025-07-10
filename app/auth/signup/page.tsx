@@ -8,12 +8,14 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Eye, EyeOff, ArrowLeft, RefreshCcw } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { registerUser } from '@/lib/requests/v2/authentication/requests';
+import { generateOtp, registerUser, validateOtp } from '@/lib/requests/v2/authentication/requests';
 import { toast } from 'react-toastify';
 import Link from 'next/link';
 
 export default function SignupPage() {
   const router = useRouter();
+  const { setJwt, setUserProfile } = useAuthStore();
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -56,16 +58,32 @@ export default function SignupPage() {
     
     setIsLoading(true);
     try {
-      setIsOTPStep( true );
-      // const result = await registerUser(formData.name, formData.email, formData.password);
-      // if (result?.code === '00') {
-      //   toast.success( result.message || 'Signup successful' );
-      //   router.push('/auth/login');
-      // } else {
-      //   toast.error( result?.message || 'Signup failed' );
-      //   setEmailError(result?.message || 'Signup failed');
-      //   setFormData({ ...formData, password: '', confirmPassword: '' });
-      // }
+      const { name, email, password } = formData;
+
+      const result = await registerUser( name, email, password );
+      if (result?.code === '00') {
+        const otpResult = await generateOtp( email );
+        if( otpResult?.code === '00' ) {
+          toast.success( result.message || 'OTP Sent' );
+          setIsOTPStep(true);
+        } else {
+          toast.error( otpResult?.message || 'Error Sending OTP' );
+        }
+      } else {
+        if( result?.message === 'Verify OTP' ) {
+          const otpResult = await generateOtp( email );
+          if( otpResult?.code === '00' ) {
+            toast.success( result.message || 'OTP Sent' );
+            setIsOTPStep(true);
+          } else {
+            toast.error( otpResult?.message || 'Error Sending OTP' );
+          }
+        } else {
+          toast.error( result?.message || 'Signup failed' );
+          setEmailError(result?.message || 'Signup failed');
+          setFormData({ ...formData, password: '', confirmPassword: '' });
+        }
+      }
     } catch (error) {
       console.error('Signup failed:', error);
     } finally {
@@ -77,21 +95,38 @@ export default function SignupPage() {
 
       setIsLoading(true);
       try {
-          setIsOTPStep( false )
-          // const result = await loginUser( formData.email, formData.password );
-          // if( result?.code === '00' ) {
-          //     setJwt( result.data.token );
-          //     setUserProfile( result.data.user );
-          //     router.push(redirectPath);
-          // } else {
-          //     toast.error( result?.message || 'Login failed' );
-          //     setFormData({ ...formData, password: '' });
-          // }
+        const result = await validateOtp( formData.email, otp.join('') );
+        if( result?.code === '00' ) {
+            toast.success( result.message || 'Signup successful' );
+            setJwt( result.data.token );
+            setUserProfile( result.data.user );
+            router.push('/');
+        } else {
+            toast.error( result?.message || 'Login failed' );
+            setFormData({ ...formData, password: '' });
+        }
       } catch (error) {
           console.error('Login failed:', error);
       } finally {
           setIsLoading(false);
       }
+  };
+  const handleResendOTP = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+        const result = await generateOtp( formData.email );
+        if( result?.code === '00' ) {
+            toast.success( result.message );
+        } else {
+            toast.error( result?.message || 'Resend Failed' );
+            setFormData({ ...formData });
+        }
+    } catch (error) {
+        console.error('Resend failed:', error);
+    } finally {
+        setIsLoading(false);
+    }
   };
   const handleOTPChange = ( index: number, value: string ) => {
       if( value.length > 1 ) {
@@ -278,7 +313,7 @@ export default function SignupPage() {
                       <Button
                         variant='link'
                         className='text-neutral-400 hover:text-white p-0 h-auto'
-                        onClick={() => setIsOTPStep(false)}
+                        onClick={handleResendOTP}
                         disabled={isLoading}
                       >
                         <RefreshCcw className='h-4 w-4 mr-2' />

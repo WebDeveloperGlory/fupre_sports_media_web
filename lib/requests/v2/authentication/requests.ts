@@ -17,12 +17,13 @@ interface SuccessRequest {
     data?: any
 }
 
-const API_URL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_PROD_API_URL : process.env.NEXT_PUBLIC_DEV_API_URL;
+const PART_API_URL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_PROD_API_URL : process.env.NEXT_PUBLIC_DEV_PARTIAL_API_URL;
+const API_URL = process.env.NEXT_PUBLIC_DEV_MODE === 'partial' ? PART_API_URL : `${PART_API_URL}/api/v2`;
 
 export const registerUser = async ( name: string, email: string, password: string ) => {
     try {
         const response = await axiosInstance.post(
-            `${ API_URL }/v2/authentication/register/regular`, 
+            `${ API_URL }/auth/signup/user`, 
             { name, email, password },
             { withCredentials: true }
         );
@@ -39,7 +40,7 @@ export const registerUser = async ( name: string, email: string, password: strin
             console.error( `Error ${ err.status }: `, response?.data.message )
             return response?.data || null;
         } else {
-            console.error('Error fetching fixtures: ', err );
+            console.error('Signup Error: ', err );
             return null;
         }
     }
@@ -48,7 +49,7 @@ export const registerUser = async ( name: string, email: string, password: strin
 export const loginUser = async ( email: string, password: string ) => {
     try {
         const response = await axiosInstance.post(
-            `${ API_URL }/v2/authentication/login`, 
+            `${ API_URL }/auth/login`, 
             { email, password },
             { withCredentials: true }
         );
@@ -75,7 +76,7 @@ export const loginUser = async ( email: string, password: string ) => {
 export const logoutUser = async ( token: string ) => {
     try {
         const response = await axiosInstance.post(
-            `${ API_URL }/v2/authentication/logout`,
+            `${ API_URL }/auth/logout`,
             {},
             {
                 headers: {
@@ -98,6 +99,87 @@ export const logoutUser = async ( token: string ) => {
             return response?.data || null;
         } else {
             console.error('Error fetching competitions: ', err );
+            return null;
+        }
+    }
+}
+
+export const generateOtp = async ( email: string ) => {
+    try {
+        const response = await axiosInstance.post(
+            `${ API_URL }/auth/otp/request`, 
+            { email },
+            { withCredentials: true }
+        );
+        const { data }: { data: SuccessRequest } = response;
+
+        if( data.code === '99' ) {
+            throw data
+        }
+        return data;
+    } catch( err: any ) {
+        const { response } = err as CustomError;
+        console.log( err, response );
+
+        if( err?.status && err?.message ) {
+            console.error( `Error ${ err.status }: `, response?.data.message )
+            return response?.data || null;
+        } else {
+            console.error('Error generating otp: ', err );
+            return null;
+        }
+    }
+}
+
+export const validateOtp = async ( email: string, otp: string ) => {
+    try {
+        const response = await axiosInstance.post(
+            `${ API_URL }/auth/otp/verify`, 
+            { email, otp },
+            { withCredentials: true }
+        );
+        const { data }: { data: SuccessRequest } = response;
+
+        if( data.code === '99' ) {
+            throw data
+        }
+        return data;
+    } catch( err: any ) {
+        const { response } = err as CustomError;
+        console.log( err, response );
+
+        if( err?.status && err?.message ) {
+            console.error( `Error ${ err.status }: `, response?.data.message )
+            return response?.data || null;
+        } else {
+            console.error('Error generating otp: ', err );
+            return null;
+        }
+    }
+}
+
+export const resetPassword = async ( email: string, newPassword: string, confirmNewPassword: string ) => {
+    try {
+        const response = await axiosInstance.post(
+            `${ API_URL }/auth/password/reset`, 
+            { email, newPassword, confirmNewPassword },
+            { withCredentials: true }
+        );
+        const { data }: { data: SuccessRequest } = response;
+
+        if( data.code === '99' ) {
+            throw data
+        }
+        return data;
+    } catch( err: any ) {
+        const { response } = err as CustomError;
+        console.log( err, response );
+
+        if( err?.status && err?.message ) {
+            console.error( `Error ${ err.status }: `, response?.data.message )
+            return response?.data || null;
+        } else {
+            console.error('Error generating otp: ', err );
             return null;
         }
     }

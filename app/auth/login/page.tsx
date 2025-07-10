@@ -52,6 +52,7 @@ export default function LoginPage() {
     try {
       const result = await loginUser( formData.email, formData.password );
       if( result?.code === '00' ) {
+        toast.success( result.message || 'Login Successful' );
         setJwt( result.data.token );
         setUserProfile( result.data.user );
         router.push(redirectPath);
