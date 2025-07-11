@@ -1,38 +1,67 @@
-import { ArrowRight, Award, Bell, Calendar, ChartBarStacked, Clock, File, Shield, Trophy, UserCheck, Users } from 'lucide-react';
+import { cookies } from 'next/headers';
 import Link from 'next/link';
-import React from 'react'
+import { getSuperAdminFootballDashboard } from '@/lib/requests/v2/admin/super-admin/dashboard/requests';
+import { IV2AuditLog } from '@/utils/V2Utils/v2requestData.types';
+import { ArrowRight, Award, Bell, Calendar, ChartBarStacked, Clock, File, Shield, Trophy, UserCheck, Users } from 'lucide-react';
+import { toast } from 'react-toastify';
+import { redirect } from 'next/navigation';
 
-const SuperAdminDashboardPage = () => {
-    const dashboardData = {
-        totalTeams: 24,
-        totalCompetitions: 30,
-        totalPlayers: 400,
-        totalFixtures: 289,
-        totalLiveFixtures: 2,
-        totalUnverifiedPlayers: 12,
-        totalActiveCompetitions: 4,
-        totalAdminCount: 10,
-        auditLogs: [
-            {
-                _id: '11111111111',
-                userId: '546362167216827',
-                message: 'New User Created',
-                createdAt: new Date('23-05-2024T01:21:00')
-            },
-            {
-                _id: '11111111dsfknsd11',
-                userId: '546362167216827',
-                message: 'New User Login',
-                createdAt: new Date('23-05-2024T12:23:54')
-            },
-            {
-                _id: '1111111qw11',
-                userId: '546362167216827',
-                message: 'New Team Created',
-                createdAt: new Date('23-05-2024T23:00:00')
-            },
-        ]
+type DashboardData = {
+    totalTeams: number;
+    totalCompetitions: number;
+    totalPlayers: number;
+    totalFixtures: number;
+    totalLiveFixtures: number;
+    totalUnverifiedPlayers: number;
+    totalActiveCompetitions: number;
+    totalAdminCount: number;
+    auditLogs: IV2AuditLog[];
+}
+const SuperAdminDashboardPage = async () => {
+    const cookieStore = cookies();
+    const authToken = (await cookieStore).get('authToken');
+
+    const request = await getSuperAdminFootballDashboard( authToken?.name );
+    if( request?.code === '99' ) {
+        if( request.message === 'Invalid or Expired Token' || request.message === 'Login Required' ) {
+            redirect('/auth/login')
+        } else if ( request.message === 'Invalid User Permissions' ) {
+            redirect('/sports');
+        } else {
+            redirect('/');
+        }   
     }
+    const dashboardData = request?.data as DashboardData
+    // const dashboardData = {
+    //     totalTeams: 24,
+    //     totalCompetitions: 30,
+    //     totalPlayers: 400,
+    //     totalFixtures: 289,
+    //     totalLiveFixtures: 2,
+    //     totalUnverifiedPlayers: 12,
+    //     totalActiveCompetitions: 4,
+    //     totalAdminCount: 10,
+    //     auditLogs: [
+    //         {
+    //             _id: '11111111111',
+    //             userId: '546362167216827',
+    //             message: 'New User Created',
+    //             createdAt: new Date('23-05-2024T01:21:00')
+    //         },
+    //         {
+    //             _id: '11111111dsfknsd11',
+    //             userId: '546362167216827',
+    //             message: 'New User Login',
+    //             createdAt: new Date('23-05-2024T12:23:54')
+    //         },
+    //         {
+    //             _id: '1111111qw11',
+    //             userId: '546362167216827',
+    //             message: 'New Team Created',
+    //             createdAt: new Date('23-05-2024T23:00:00')
+    //         },
+    //     ]
+    // }
   return (
     <div className='space-y-6 md:space-y-4'>
         {/* Header */}

@@ -1,5 +1,21 @@
-import { CoachRoles, CompetitionSponsors, CompetitionStatus, CompetitionTeamForm, CompetitionTypes, FixtureStatus, TeamTypes } from "./v2requestData.enums";
+import { CoachRoles, CompetitionSponsors, CompetitionStatus, CompetitionTeamForm, CompetitionTypes, FixtureStatus, LogAction, TeamTypes } from "./v2requestData.enums";
 import { FixtureCheerMeter, FixtureCommentary, FixtureLineup, FixtureOdds, FixturePlayerOfTheMatch, FixturePlayerRatings, FixtureResult, FixtureStat, FixtureStreamLinks, FixtureSubstitutions, FixtureTimeline, ShortPopulatedCompetition, ShortPopulatedPlayer, ShortPopulatedTeam } from "./v2requestSubData.types";
+
+export interface IV2AuditLog extends Document {
+    _id: string;
+    userId: string;
+    action: LogAction;
+    entity: string;
+    entityId: string;
+    details: Object;
+    previousValues: Object;
+    newValues: Object;
+    ipAddress: string;
+    userAgent: string;
+    message: string;
+    createdAt: Date;
+    updatedAt: Date;
+}
 
 export interface IV2FootballLiveFixture {
     _id: string;
