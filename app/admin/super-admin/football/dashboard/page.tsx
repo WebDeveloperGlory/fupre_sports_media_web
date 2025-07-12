@@ -21,7 +21,7 @@ const SuperAdminDashboardPage = async () => {
     const cookieStore = cookies();
     const authToken = (await cookieStore).get('authToken');
 
-    const request = await getSuperAdminFootballDashboard( authToken?.name );
+    const request = await getSuperAdminFootballDashboard( authToken?.value );
     if( request?.code === '99' ) {
         if( request.message === 'Invalid or Expired Token' || request.message === 'Login Required' ) {
             redirect('/auth/login')
@@ -32,36 +32,7 @@ const SuperAdminDashboardPage = async () => {
         }   
     }
     const dashboardData = request?.data as DashboardData
-    // const dashboardData = {
-    //     totalTeams: 24,
-    //     totalCompetitions: 30,
-    //     totalPlayers: 400,
-    //     totalFixtures: 289,
-    //     totalLiveFixtures: 2,
-    //     totalUnverifiedPlayers: 12,
-    //     totalActiveCompetitions: 4,
-    //     totalAdminCount: 10,
-    //     auditLogs: [
-    //         {
-    //             _id: '11111111111',
-    //             userId: '546362167216827',
-    //             message: 'New User Created',
-    //             createdAt: new Date('23-05-2024T01:21:00')
-    //         },
-    //         {
-    //             _id: '11111111dsfknsd11',
-    //             userId: '546362167216827',
-    //             message: 'New User Login',
-    //             createdAt: new Date('23-05-2024T12:23:54')
-    //         },
-    //         {
-    //             _id: '1111111qw11',
-    //             userId: '546362167216827',
-    //             message: 'New Team Created',
-    //             createdAt: new Date('23-05-2024T23:00:00')
-    //         },
-    //     ]
-    // }
+
   return (
     <div className='space-y-6 md:space-y-4'>
         {/* Header */}
@@ -217,7 +188,7 @@ const SuperAdminDashboardPage = async () => {
                 <AdminModule 
                     title='Department and Faculty' 
                     content='Create, edit and manage all deartments and faculties' 
-                    link='faculty'
+                    link='/admin/super-admin/department-faculty'
                     statLabel=''
                     bg='bg-blue-500'
                     stat={ 'faculty' } 

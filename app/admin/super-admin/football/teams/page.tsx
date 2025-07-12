@@ -1,204 +1,33 @@
 'use client'
 
 import PopUpModal from '@/components/modal/PopUpModal'
-import { Input } from '@/components/ui/input'
 import { Loader } from '@/components/ui/loader'
+import { createTeam, deleteTeam, getAllDepartments, getAllFaculties, getAllTeams } from '@/lib/requests/v2/admin/super-admin/team/requests'
+import { checkSuperAdminStatus } from '@/lib/requests/v2/authentication/requests'
 import { CoachRoles, TeamTypes } from '@/utils/V2Utils/v2requestData.enums'
 import { IV2FootballTeam } from '@/utils/V2Utils/v2requestData.types'
-import { CalendarCheck, ChevronDown, ChevronUp, Plus, Search, Trash, Trophy, Users, X } from 'lucide-react'
+import { CalendarCheck, ChevronDown, ChevronUp, Plus, Save, Search, Trash, Trophy, Users, X } from 'lucide-react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
+import { toast } from 'react-toastify'
 
-const sampleTeamsArr: IV2FootballTeam[] = [
-    {
-    _id: 'team1',
-    name: 'Computer Science 100L',
-    shorthand: 'CS100L',
-    type: TeamTypes.DEPARTMENT_LEVEL,
-    academicYear: '2024/2025',
-    department: { _id: 'dept1', name: 'Computer Science' },
-    coaches: [
-      { name: 'Coach Ayo', role: CoachRoles.HEAD },
-      { name: 'Coach Lara', role: CoachRoles.FITNESS },
-    ],
-    players: ['player1', 'player2', 'player3'],
-    friendlyRequests: [],
-    competitionPerformance: [],
-    stats: {
-      matchesPlayed: 10,
-      wins: 6,
-      draws: 2,
-      losses: 2,
-      goalsFor: 18,
-      goalsAgainst: 10,
-      cleanSheets: 3,
-    },
-    logo: 'https://example.com/logos/cs100l.png',
-    colors: { primary: '#1E3A8A', secondary: '#3B82F6' },
-    admin: { _id: 'admin1', name: 'John Doe', email: 'john@example.com' },
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    _id: 'team2',
-    name: 'Engineering Faculty',
-    shorthand: 'ENG',
-    type: TeamTypes.FACULTY_GENERAL,
-    academicYear: '2024/2025',
-    faculty: { _id: 'faculty1', name: 'Engineering' },
-    coaches: [
-      { name: 'Coach Emeka', role: CoachRoles.HEAD },
-    ],
-    players: ['player4', 'player5'],
-    friendlyRequests: [
-      {
-        requestId: 'fr1',
-        team: 'team1',
-        status: 'pending',
-        proposedDate: new Date('2025-07-01'),
-        message: 'Let’s play a friendly match.',
-        type: 'recieved',
-        createdAt: new Date(),
-      },
-    ],
-    competitionPerformance: [],
-    stats: {
-      matchesPlayed: 5,
-      wins: 2,
-      draws: 1,
-      losses: 2,
-      goalsFor: 7,
-      goalsAgainst: 9,
-      cleanSheets: 1,
-    },
-    logo: 'https://example.com/logos/eng.png',
-    colors: { primary: '#047857', secondary: '#10B981' },
-    admin: { _id: 'admin2', name: 'Chinedu Okafor', email: 'chinedu@school.edu' },
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    _id: 'team3',
-    name: 'University FC',
-    shorthand: 'UFC',
-    type: TeamTypes.SCHOOL_GENERAL,
-    academicYear: '2024/2025',
-    coaches: [
-      { name: 'Coach Tina', role: CoachRoles.HEAD },
-      { name: 'Coach Mike', role: CoachRoles.ASSISTANT },
-    ],
-    players: ['player6', 'player7', 'player8', 'player9'],
-    friendlyRequests: [],
-    competitionPerformance: [
-      {
-        competition: 'Inter-University League',
-        season: '2024',
-        stats: {
-          played: 12,
-          wins: 8,
-          draws: 2,
-          losses: 2,
-          goalsFor: 22,
-          goalsAgainst: 11,
-          cleanSheets: 5,
-        },
-        achievements: ['Semi-Finalist'],
-      },
-    ],
-    stats: {
-      matchesPlayed: 12,
-      wins: 8,
-      draws: 2,
-      losses: 2,
-      goalsFor: 22,
-      goalsAgainst: 11,
-      cleanSheets: 5,
-    },
-    logo: 'https://example.com/logos/ufc.png',
-    colors: { primary: '#DC2626', secondary: '#F87171' },
-    admin: { _id: 'admin3', name: 'Ngozi Bello', email: 'ngozi@uni.edu' },
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    _id: 'team4',
-    name: 'Science Club FC',
-    shorthand: 'SCFC',
-    type: TeamTypes.CLUB,
-    academicYear: '2024/2025',
-    department: { _id: 'dept2', name: 'Biochemistry' },
-    coaches: [{ name: 'Coach Salisu', role: CoachRoles.GOALKEEPING }],
-    players: ['player10', 'player11'],
-    friendlyRequests: [],
-    competitionPerformance: [],
-    stats: {
-      matchesPlayed: 0,
-      wins: 0,
-      draws: 0,
-      losses: 0,
-      goalsFor: 0,
-      goalsAgainst: 0,
-      cleanSheets: 0,
-    },
-    logo: 'https://example.com/logos/scfc.png',
-    colors: { primary: '#4B5563', secondary: '#9CA3AF' },
-    admin: { _id: 'admin4', name: 'Fatima Yusuf', email: 'fatima@school.edu' },
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    _id: 'team5',
-    name: 'CS Department',
-    shorthand: 'CSDept',
-    type: TeamTypes.DEPARTMENT_GENERAL,
-    academicYear: '2024/2025',
-    department: { _id: 'dept1', name: 'Computer Science' },
-    coaches: [
-      { name: 'Coach Kelvin', role: CoachRoles.HEAD },
-    ],
-    players: ['player12', 'player13', 'player14'],
-    friendlyRequests: [],
-    competitionPerformance: [
-      {
-        competition: 'Faculty Cup',
-        season: '2024',
-        stats: {
-          played: 6,
-          wins: 4,
-          draws: 1,
-          losses: 1,
-          goalsFor: 13,
-          goalsAgainst: 5,
-          cleanSheets: 3,
-        },
-        achievements: ['Finalist'],
-      },
-    ],
-    stats: {
-      matchesPlayed: 6,
-      wins: 4,
-      draws: 1,
-      losses: 1,
-      goalsFor: 13,
-      goalsAgainst: 5,
-      cleanSheets: 3,
-    },
-    logo: 'https://example.com/logos/csdept.png',
-    colors: { primary: '#6D28D9', secondary: '#A78BFA' },
-    admin: { _id: 'admin5', name: 'Aliyu Musa', email: 'aliyu@school.edu' },
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  }
-]
-const sampleDepartments = [
-    { _id: 'comp1223', name: 'Computer Science' },
-    { _id: 'elec1323', name: 'Electrical/Electronics Engineering' },
-    { _id: 'comp1323', name: 'Computer Engineering' },
-]
-const sampleFaculties = [
-    { _id: 'comp13', name: 'College of Computing' },
-    { _id: 'elec12', name: 'College of Engineering' },
-]
+type Faculty = {
+    _id: string;
+    name: string;
+    createdAt: Date;
+    updatedAt: Date;
+}
+type Department = {
+    _id: string;
+    name: string;
+    faculty: {
+        _id: string;
+        name: string;
+    }
+    createdAt: Date;
+    updatedAt: Date;
+}
 
 type NewTeamFormData = {
     name: string;
@@ -210,12 +39,14 @@ type NewTeamFormData = {
 }
 
 const SuperAdminTeamPage = () => {
+    const router = useRouter();
+    
     const [loading, setLoading] = useState<boolean>( true );
     const [query, setQuery] = useState<string>("");
     const [filter, setFilter] = useState<string>("all-types");
-    const [teams, setTeams] = useState<IV2FootballTeam[]>( sampleTeamsArr );
-    const [faculties, setFaculties] = useState<{_id: string, name: string}[]>([]);
-    const [departments, setDepartments] = useState<{_id: string, name: string}[]>([]);
+    const [teams, setTeams] = useState<IV2FootballTeam[]>([]);
+    const [faculties, setFaculties] = useState<Faculty[]>([]);
+    const [departments, setDepartments] = useState<Department[]>([]);
     const [filterOpen, setFilterOpen] = useState<boolean>( false );
     const [modalOpen, setModalOpen] = useState<boolean>( false );
     const [newTeamFormData, setNewTeamFormData] = useState<NewTeamFormData>({
@@ -230,23 +61,38 @@ const SuperAdminTeamPage = () => {
     // On Load //
     useEffect( () => {
         const fetchData = async () => {
-            setTimeout(() => {
-                setTeams( sampleTeamsArr );
-                setFaculties( sampleFaculties );
-                setDepartments( sampleDepartments );
+            const request = await checkSuperAdminStatus();
+            if( request?.code === '99' ) {
+                if( request.message === 'Invalid or Expired Token' || request.message === 'Login Required' ) {
+                toast.error('Please Login First')
+                router.push('/auth/login')
+                } else if ( request.message === 'Invalid User Permissions' ) {
+                toast.error('Unauthorized')
+                router.push('/sports');
+                } else {
+                toast.error('Unknown')
+                router.push('/');
+                }   
+            }
 
-                setLoading( false );
-            }, 2000);
+            const teamData = await getAllTeams()
+            const facultyData = await getAllFaculties();
+            const departmentData = await getAllDepartments();
+
+            if( teamData && teamData.data ) {
+                setTeams( teamData.data );
+            }
+            if( facultyData && facultyData.data ) {
+                setFaculties( facultyData.data );
+            }
+            if( departmentData && departmentData.data ) {
+                setDepartments( departmentData.data );
+            }
+            
+            setLoading( false );
         }
 
         if( loading ) fetchData();
-
-        // if( !jwt ) {
-        //     toast.error('Please Login First');
-        //     setTimeout(() => router.push( '/admin' ), 1000);
-        // } else {
-        //     if( loading ) fetchData();
-        // }
     }, [ loading ]);
     
     if( loading ) {
@@ -267,8 +113,43 @@ const SuperAdminTeamPage = () => {
     const handleTeamCreateButtonClick = () => {
         setModalOpen( true );
     }
-    const handleTeamDelete = () => {
-
+    const handleTeamCreate = async () => {
+        const response = await createTeam( newTeamFormData );
+        if( response?.code === '99' ) {
+            toast.error(response.message)
+        } else if( response?.code === '00' ) {
+            toast.success(response.message);
+            setTeams([ ...teams, response.data ])
+        } else {
+            toast.error('Error Creating Faculty')
+        }
+        setModalOpen(false);
+        setNewTeamFormData({
+            name: '',
+            shorthand: '',
+            type: TeamTypes.DEPARTMENT_LEVEL,
+            academicYear: '',
+            department: '',
+            faculty: '',
+        })
+    }
+    const handleTeamDelete = async ( teamId: string ) => {
+        const confirmed = window.confirm('Are you sure you want to delete this faculty?');
+        
+        if( confirmed ) {
+            const response = await deleteTeam( teamId );
+            if( response?.code === '99' ) {
+                toast.error(response.message)
+            } else if( response?.code === '00' ) {
+                const filteredTeams = [...teams].filter(team => team._id !== teamId);
+                toast.success(response.message);
+                setTeams(filteredTeams);
+            } else {
+                toast.error('Error Deleting Faculty')
+            }
+        } else {
+            toast.error('Action Cancelled');
+        }
     }
     const handleFilterClick = ( type: string ) => {
         setFilter( type );
@@ -283,6 +164,7 @@ const SuperAdminTeamPage = () => {
             return team.type === filter
         }
     })
+    const disabledButton = newTeamFormData.name === '' || newTeamFormData.shorthand === '' || newTeamFormData.academicYear === '' || ( ( newTeamFormData.type === TeamTypes.FACULTY_GENERAL || newTeamFormData.type.includes('department') ) && newTeamFormData.faculty === '' ) || ( newTeamFormData.type.includes('department')   && newTeamFormData.department === '')
   return (
     <div className='space-y-6 md:space-y-4'>
         {/* Header */}
@@ -414,7 +296,7 @@ const SuperAdminTeamPage = () => {
                                         <Link href={`/teams/${ team._id }`} className='w-full py-2 border hover:border-muted-foreground text-center rounded-lg col-span-5'>View Team</Link>
                                         <Link href={`teams/${ team._id }`} className='w-full py-2 bg-emerald-500 hover:bg-emerald-500/50 text-center rounded-lg col-span-5'>Manage</Link>
                                         <button
-                                            onClick={ handleTeamDelete }
+                                            onClick={ () => handleTeamDelete( team._id ) }
                                             className='flex items-center justify-center py-2 col-span-2 border border-muted-foreground hover:border-muted rounded-lg'
                                         >
                                             <Trash className='w-5 h-5 text-red-500' />
@@ -511,28 +393,6 @@ const SuperAdminTeamPage = () => {
                         </select>
                     </div>
                     { 
-                        departments && newTeamFormData.type.includes('department') && (
-                            <div>
-                                <label className="block font-semibold mb-1.5">Department</label>
-                                <select 
-                                    className="w-full p-2 border rounded cursor-pointer bg-input"
-                                    value={ newTeamFormData.department }
-                                    onChange={ (e) => setNewTeamFormData({ 
-                                        ...newTeamFormData, 
-                                        department: e.target.value
-                                    }) }
-                                >
-                                    <option value={''}>Select a department</option>
-                                    {
-                                        departments.map( dept => (
-                                            <option key={ dept._id } value={ dept._id }>{ dept.name }</option>
-                                        ))
-                                    }
-                                </select>
-                            </div>
-                        ) 
-                    }
-                    { 
                         faculties && ( newTeamFormData.type === TeamTypes.FACULTY_GENERAL || newTeamFormData.type.includes('department') ) && (
                             <div>
                                 <label className="block font-semibold mb-1.5">Faculty</label>
@@ -554,6 +414,36 @@ const SuperAdminTeamPage = () => {
                             </div>
                         ) 
                     }
+                    { 
+                        departments && newTeamFormData.type.includes('department') && (
+                            <div>
+                                <label className="block font-semibold mb-1.5">Department</label>
+                                <select 
+                                    className="w-full p-2 border rounded cursor-pointer bg-input"
+                                    value={ newTeamFormData.department }
+                                    onChange={ (e) => setNewTeamFormData({ 
+                                        ...newTeamFormData, 
+                                        department: e.target.value
+                                    }) }
+                                >
+                                    <option value={''}>Select a department</option>
+                                    {
+                                        departments.filter(dept => dept.faculty._id === newTeamFormData.faculty).map( dept => (
+                                            <option key={ dept._id } value={ dept._id }>{ dept.name }</option>
+                                        ))
+                                    }
+                                </select>
+                            </div>
+                        ) 
+                    }
+                    <button 
+                        onClick={handleTeamCreate}
+                        className='py-2 rounded-lg flex justify-center items-center gap-2 bg-emerald-500 hover:bg-emerald-500/50 text-white w-full disabled:opacity-50 disabled:line-through'
+                        disabled={ disabledButton }
+                    >
+                        <Save className='w-5 h-5' />
+                        Create Team
+                    </button>
                 </div>
             </PopUpModal>
         </div>

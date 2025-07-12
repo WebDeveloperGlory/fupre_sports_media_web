@@ -1,138 +1,15 @@
 'use client'
 
 import { Loader } from '@/components/ui/loader';
-import { CoachRoles, CompetitionType, TeamTypes, FavoriteFoot, PlayerRole } from '@/utils/V2Utils/v2requestData.enums';
+import { getAllDepartments, getTeamById, getTeamPlayers } from '@/lib/requests/v2/admin/super-admin/team/requests';
+import { checkSuperAdminStatus } from '@/lib/requests/v2/authentication/requests';
+import { CoachRoles, FavoriteFoot, PlayerRole } from '@/utils/V2Utils/v2requestData.enums';
 import { IV2FootballTeam, TeamPlayerDetails } from '@/utils/V2Utils/v2requestData.types';
 import { MessageSquare, Plus, Star, Trash2, UserCog, UserPlus, Users } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import React, { use, useEffect, useState } from 'react'
+import { toast } from 'react-toastify';
 
-const sampleTeam = {
-  _id: 'team1',
-  name: 'Computer Science 100L',
-  shorthand: 'CS100L',
-  type: TeamTypes.DEPARTMENT_LEVEL,
-  academicYear: '2024/2025',
-  department: { _id: 'dept1', name: 'Computer Science' },
-  coaches: [
-    { name: 'Coach Ayo', role: CoachRoles.HEAD },
-    { name: 'Coach Lara', role: CoachRoles.FITNESS },
-  ],
-  players: ['player1', 'player2', 'player3'],
-  friendlyRequests: [],
-  competitionPerformance: [],
-  stats: {
-    matchesPlayed: 10,
-    wins: 6,
-    draws: 2,
-    losses: 2,
-    goalsFor: 18,
-    goalsAgainst: 10,
-    cleanSheets: 3,
-  },
-  logo: 'https://example.com/logos/cs100l.png',
-  colors: { primary: '#1E3A8A', secondary: '#3B82F6' },
-  admin: { _id: 'admin1', name: 'John Doe', email: 'john@example.com' },
-  createdAt: new Date(),
-  updatedAt: new Date(),
-};
-const samplePlayers: TeamPlayerDetails[] = [
-  {
-    _id: 'player1',
-    name: "John Doe",
-    admissionYear: "2021",
-    department: "Computer Science",
-    clubStatus: "registered",
-    marketValue: 50000,
-    preferredFoot: "right",
-    height: "6ft",
-    weight: "75kg",
-    verificationStatus: "verified",
-    role: "captain",
-    position: "Midfielder",
-    jerseyNumber: 8,
-    joinedAt: new Date("2021-11-01"),
-    seasonalStats: {
-      academicYear: "2024/2025",
-      team: "CS Falcons",
-      stats: {
-        appearances: 12,
-        goals: 4,
-        assists: 7,
-        cleanSheets: 0,
-        yellowCards: 2,
-        redCards: 0,
-        motmAwards: 3
-      }
-    },
-    competitionStats: {
-      competition: {
-        _id: "comp123",
-        name: "Inter-Faculty Cup",
-        type: CompetitionType.KNOCKOUT,
-      },
-      season: "2024/2025",
-      team: "CS Falcons",
-      appearances: 5,
-      goals: 1,
-      assists: 3,
-      yellowCards: 1,
-      redCards: 0,
-      minutesPlayed: 430
-    }
-  },
-  {
-    _id: 'player2',
-    name: "Mary Ann",
-    admissionYear: "2022",
-    department: "Mechanical Engineering",
-    clubStatus: "on-loan",
-    loanDetails: {
-      fromClub: "Mech Lions",
-      toTeam: "Physics Titans",
-      startDate: new Date("2025-01-01"),
-      endDate: new Date("2025-06-30"),
-      terms: "Loaned for half-season with no option to buy"
-    },
-    marketValue: 35000,
-    preferredFoot: "left",
-    height: "5ft 7in",
-    weight: "60kg",
-    verificationStatus: "pending",
-    role: "player",
-    position: "Defender",
-    jerseyNumber: 3,
-    joinedAt: new Date("2023-08-10")
-  },
-  {
-    _id: 'player3',
-    name: "David Smith",
-    admissionYear: "2020",
-    department: "Electrical Engineering",
-    clubStatus: "transferred-out",
-    marketValue: 0,
-    preferredFoot: "both",
-    height: "6ft 2in",
-    weight: "80kg",
-    verificationStatus: "rejected",
-    role: "vice-captain",
-    position: "Goalkeeper",
-    jerseyNumber: 1,
-    joinedAt: new Date("2020-10-05"),
-    seasonalStats: {
-      academicYear: "2023/2024",
-      team: "EE Stormers",
-      stats: {
-        appearances: 10,
-        goals: 0,
-        assists: 0,
-        cleanSheets: 6,
-        yellowCards: 1,
-        redCards: 1,
-        motmAwards: 2
-      }
-    }
-  }
-];
 const samplePossiblePlayers: PossiblePlayers[] = [
   {
     _id: 'player1',
@@ -153,12 +30,17 @@ const samplePossiblePlayers: PossiblePlayers[] = [
     department: { _id: 'ele', name: 'Computer Engineering' }
   },
 ];
-const sampleDepartments = [
-    { _id: 'comp1223', name: 'Computer Science' },
-    { _id: 'elec1323', name: 'Electrical/Electronics Engineering' },
-    { _id: 'comp1323', name: 'Computer Engineering' },
-]
 
+type Department = {
+    _id: string;
+    name: string;
+    faculty: {
+      _id: string;
+      name: string;
+    }
+    createdAt: Date;
+    updatedAt: Date;
+}
 type PossiblePlayers = { 
   _id: string, 
   name: string, 
@@ -170,37 +52,53 @@ const IndividualSuperAdminTeamPage = (
   { params: Promise<{ id: string }> }
 ) => {
     const resolvedParams = use( params );
+    const router = useRouter();
 
     // States //
     const [loading, setLoading] = useState<boolean>( true );
     const [team, setTeam] = useState<IV2FootballTeam | null>( null );
     const [players, setPlayers] = useState<TeamPlayerDetails[]>([]);
     const [possiblePlayers, setPossiblePlayers] = useState<PossiblePlayers[]>([]);
-    const [departments, setDepartments] = useState<{_id: string, name: string}[]>([]);
+    const [departments, setDepartments] = useState<Department[]>([]);
     const [activeTab, setActiveTab] = useState<'overview' | 'players' | 'coaches' | 'settings'>('overview');
     // End of States //
 
     // On Load //
     useEffect( () => {
       const fetchData = async () => {
-        setTimeout(() => {
-          setTeam( sampleTeam );
-          setPlayers( samplePlayers );
-          setPossiblePlayers( samplePossiblePlayers );
-          setDepartments( sampleDepartments );
+        const request = await checkSuperAdminStatus();
+        if( request?.code === '99' ) {
+          if( request.message === 'Invalid or Expired Token' || request.message === 'Login Required' ) {
+            toast.error('Please Login First')
+            router.push('/auth/login')
+          } else if ( request.message === 'Invalid User Permissions' ) {
+            toast.error('Unauthorized')
+            router.push('/sports');
+          } else {
+            toast.error('Unknown')
+            router.push('/');
+          }   
+        }
 
-          setLoading( false );
-        }, 2000);
+        const teamData = await getTeamById( resolvedParams.id );
+        const departmentData = await getAllDepartments();
+        const teamPlayerData = await getTeamPlayers( resolvedParams.id );
+
+        if( teamData && teamData.data ) {
+          setTeam( teamData.data );
+        }
+        if( departmentData && departmentData.data ) {
+          setDepartments( departmentData.data );
+        }
+        if( teamPlayerData && teamPlayerData.data ) {
+          setPlayers( teamPlayerData.data );
+        }
+        setPossiblePlayers( samplePossiblePlayers );          
+
+        setLoading( false );
       }
 
       if( loading ) fetchData();
-
-      // if( !jwt ) {
-      //     toast.error('Please Login First');
-      //     setTimeout(() => router.push( '/admin' ), 1000);
-      // } else {
-      //     if( loading ) fetchData();
-      // }
     }, [ loading ]);
     
     if( loading ) {
