@@ -336,7 +336,7 @@ const DepartmentFacultyPage = () => {
                                 className="border-b border-border hover:bg-accent/50 transition-colors"
                             >
                                 <td className="text-left py-4 px-3 text-sm">{ department.name }</td>
-                                <td className="text-left py-4 px-3 text-sm">{ department.faculty.name }</td>
+                                <td className="text-left py-4 px-3 text-sm">{ department.faculty ? department.faculty.name : 'unknown' }</td>
                                 <td className="text-left py-4 px-3 text-sm">{ department.createdAt.toLocaleString() }</td>
                                 <td className="text-center py-4 px-3 text-sm">
                                     <div className='flex items-center justify-center gap-4'>

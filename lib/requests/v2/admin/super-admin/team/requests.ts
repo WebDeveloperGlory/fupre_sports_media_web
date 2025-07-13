@@ -310,7 +310,7 @@ export const createTeam = async ( formData: NewTeamFormData ) => {
 
 export const getTeamById = async ( teamId: string ) => {
     try {
-        const response = await axiosInstance.post( `${ API_URL }/teams/${ teamId }` );
+        const response = await axiosInstance.get( `${ API_URL }/teams/${ teamId }` );
         const { data }: { data: SuccessRequest } = response;
 
         if( data.code === '99' ) {
@@ -332,7 +332,7 @@ export const getTeamById = async ( teamId: string ) => {
 
 export const getTeamPlayers = async ( teamId: string ) => {
     try {
-        const response = await axiosInstance.post( `${ API_URL }/teams/${ teamId }/players` );
+        const response = await axiosInstance.get( `${ API_URL }/teams/${ teamId }/players` );
         const { data }: { data: SuccessRequest } = response;
 
         if( data.code === '99' ) {
@@ -354,7 +354,7 @@ export const getTeamPlayers = async ( teamId: string ) => {
 
 export const getTeamStats = async ( teamId: string ) => {
     try {
-        const response = await axiosInstance.post( `${ API_URL }/teams/${ teamId }/stats` );
+        const response = await axiosInstance.get( `${ API_URL }/teams/${ teamId }/stats` );
         const { data }: { data: SuccessRequest } = response;
 
         if( data.code === '99' ) {
@@ -376,7 +376,7 @@ export const getTeamStats = async ( teamId: string ) => {
 
 export const getTeamCompsAndPerformance = async ( teamId: string, season: string ) => {
     try {
-        const response = await axiosInstance.post( `${ API_URL }/teams/${ teamId }/competition?season=${ season }` );
+        const response = await axiosInstance.get( `${ API_URL }/teams/${ teamId }/competition?season=${ season }` );
         const { data }: { data: SuccessRequest } = response;
 
         if( data.code === '99' ) {

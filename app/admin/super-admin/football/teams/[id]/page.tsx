@@ -1,7 +1,7 @@
 'use client'
 
 import { Loader } from '@/components/ui/loader';
-import { getAllDepartments, getTeamById, getTeamPlayers } from '@/lib/requests/v2/admin/super-admin/team/requests';
+import { getAllDepartments, getTeamById, getTeamPlayers, updateTeamCoaches } from '@/lib/requests/v2/admin/super-admin/team/requests';
 import { checkSuperAdminStatus } from '@/lib/requests/v2/authentication/requests';
 import { CoachRoles, FavoriteFoot, PlayerRole } from '@/utils/V2Utils/v2requestData.enums';
 import { IV2FootballTeam, TeamPlayerDetails } from '@/utils/V2Utils/v2requestData.types';
@@ -91,7 +91,7 @@ const IndividualSuperAdminTeamPage = (
           setDepartments( departmentData.data );
         }
         if( teamPlayerData && teamPlayerData.data ) {
-          setPlayers( teamPlayerData.data );
+          setPlayers( teamPlayerData.data.players );
         }
         setPossiblePlayers( samplePossiblePlayers );          
 
@@ -108,6 +108,17 @@ const IndividualSuperAdminTeamPage = (
       return <div className='flex justify-center items-center'>Uh Oh! Team Does Not Exists</div>
     }
     // End of On Load //
+
+    // Updates //
+    const updateCoachList = ( coach: { name: string, role: CoachRoles } ) => {
+      if( team ) {
+        setTeam({
+          ...team, 
+          coaches: [...team.coaches, coach]
+        });
+      }
+    }
+    // End of Updates //
   return (
     <div>
       <div className='space-y-6 md:space-y-4'>
@@ -168,8 +179,10 @@ const IndividualSuperAdminTeamPage = (
           /> 
         }
         { activeTab === 'coaches' && 
-          <Coaches 
+          <Coaches
+            teamId={ team!._id }
             coaches={ team?.coaches || [] }
+            updateCoach={ updateCoachList }
           /> 
         }
         { activeTab === 'settings' && 
@@ -200,19 +213,19 @@ const Overview = (
             <h2 className='text-xl font-bold mb-4 md:mb-2'>Team Statistics</h2>
             <div className='grid grid-cols-2 md:grid-cols-4 gap-4'>
               <div className='text-center border border-blue-500 py-6 rounded-lg'>
-                <span className='font-bold text-lg'>{ stats?.matchesPlayed || '999' }</span>
+                <span className='font-bold text-lg'>{ stats?.matchesPlayed || '0' }</span>
                 <p>Fixtures</p>
               </div>
               <div className='text-center border border-emerald-500 py-6 rounded-lg'>
-                <span className='font-bold text-lg'>{ stats?.wins || '999' }</span>
+                <span className='font-bold text-lg'>{ stats?.wins || '0' }</span>
                 <p>Wins</p>
               </div>
               <div className='text-center border border-muted-foreground py-6 rounded-lg'>
-                <span className='font-bold text-lg'>{ stats?.draws || '999' }</span>
+                <span className='font-bold text-lg'>{ stats?.draws || '0' }</span>
                 <p>Draws</p>
               </div>
               <div className='text-center border border-red-500 py-6 rounded-lg'>
-                <span className='font-bold text-lg'>{ stats?.losses || '999' }</span>
+                <span className='font-bold text-lg'>{ stats?.losses || '0' }</span>
                 <p>Losses</p>
               </div>
             </div>
@@ -583,14 +596,35 @@ const Players = (
   )
 }
 
+type Coach = {
+  name: string;
+  role: CoachRoles;
+}
 const Coaches = (
-  { coaches }: 
-  { coaches: { name: string, role: CoachRoles }[] }
+  { teamId, coaches, updateCoach }: 
+  {
+    teamId: string, 
+    coaches: { name: string, role: CoachRoles }[],
+    updateCoach: ( coach: Coach ) => void,
+  }
 ) => {
   const [formData, setFormData] = useState<{ name: string, role: string }>({
     name: '',
     role: ''
-  })
+  });
+
+  const handleAddCoach = async () => {
+    const response = await updateTeamCoaches( teamId, formData.name, formData.role );
+    if( response?.code === '00' ) {
+      toast.success(response.data);
+      updateCoach({ name: formData.name, role: formData.role as CoachRoles });
+    } else {
+      toast.error(response?.message || 'Error Adding Coach');
+    }
+  }
+  const handleDeleteCoach = async ( name: string ) => {
+    toast.error('Unimplemented')
+  }
   return (
     <>
       <div className='grid grid-cols-2 gap-4'>
@@ -633,8 +667,9 @@ const Coaches = (
               </select>
             </div>
             <button
-              onClick={() => {}}
-              className='w-full text-center py-2 bg-emerald-500 hover:bg-emerald-500/50 flex gap-2 items-center justify-center'
+              onClick={handleAddCoach}
+              className='w-full text-center py-2 bg-emerald-500 hover:bg-emerald-500/50 flex gap-2 items-center justify-center disabled:opacity-50'
+              disabled={formData.name === '' || formData.role === ''}
             >
               <Plus className='w-4 h-4' />
               <p>Add Coach</p>
@@ -658,7 +693,7 @@ const Coaches = (
                       </div>
                     </div>
                     <button
-                      onClick={() => {}}
+                      onClick={() => handleDeleteCoach( coach.name )}
                       className='text-red-500 bg-secondary/50 p-2 rounded-lg'
                     >
                       <Trash2 className='w-5 h-5' />

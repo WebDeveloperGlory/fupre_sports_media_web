@@ -271,7 +271,7 @@ const SuperAdminTeamPage = () => {
                                             </div>
                                             <p>...</p>
                                         </div>
-                                        <p className='mt-2'>Admin: { team.admin.name }</p>
+                                        <p className='mt-2'>Admin: { team.admin?.name || 'Not Set Yet' }</p>
                                     </div>
                                     <div className='pt-4'>
                                         <div className='grid grid-cols-3 gap-4'>
