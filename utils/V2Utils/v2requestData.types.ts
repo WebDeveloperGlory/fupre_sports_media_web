@@ -1,7 +1,30 @@
-import { CoachRoles, CompetitionSponsors, CompetitionStatus, CompetitionTeamForm, CompetitionTypes, FixtureStatus, LogAction, TeamTypes } from "./v2requestData.enums";
+import { CoachRoles, CompetitionSponsors, CompetitionStatus, CompetitionTeamForm, CompetitionTypes, FixtureStatus, LogAction, SportType, TeamTypes, UserRole, UserStatus } from "./v2requestData.enums";
 import { FixtureCheerMeter, FixtureCommentary, FixtureLineup, FixtureOdds, FixturePlayerOfTheMatch, FixturePlayerRatings, FixtureResult, FixtureStat, FixtureStreamLinks, FixtureSubstitutions, FixtureTimeline, ShortPopulatedCompetition, ShortPopulatedPlayer, ShortPopulatedTeam } from "./v2requestSubData.types";
 
-export interface IV2AuditLog extends Document {
+export type UserPreference = {
+    notifications: {
+        inApp: boolean;
+        email: boolean;
+    }
+}
+export interface IV2User {
+    _id: string;
+    name: string;
+    password: string;
+    email: string;
+    role: UserRole;
+    sport: SportType;
+    status: UserStatus;
+    otp: string | null;
+    otpExpiresAt: Date | null;
+    lastLogin: Date | null;
+    passwordChangedAt: Date | null;
+    preferences: UserPreference;
+    comparePassword: ( password: string ) => Promise<boolean>;
+    createdAt: Date;
+    updatedAt: Date;
+}
+export interface IV2AuditLog {
     _id: string;
     userId: string;
     action: LogAction;

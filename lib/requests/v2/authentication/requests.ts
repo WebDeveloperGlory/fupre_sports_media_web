@@ -1,4 +1,5 @@
 import axiosInstance from "@/lib/config/axiosInstance";
+import { UserRole } from "@/utils/V2Utils/v2requestData.enums";
 
 interface CustomError {
     status?: number;
@@ -25,6 +26,32 @@ export const registerUser = async ( name: string, email: string, password: strin
         const response = await axiosInstance.post(
             `${ API_URL }/auth/signup/user`, 
             { name, email, password },
+            { withCredentials: true }
+        );
+        const { data }: { data: SuccessRequest } = response;
+
+        if( data.code === '99' ) {
+            throw data
+        }
+        return data;
+    } catch( err: any ) {
+        const { response } = err as CustomError;
+
+        if( err?.status && err?.message ) {
+            console.error( `Error ${ err.status }: `, response?.data.message )
+            return response?.data || null;
+        } else {
+            console.error('Signup Error: ', err );
+            return null;
+        }
+    }
+}
+
+export const registerAdmin = async ( name: string, email: string, password: string, role: UserRole ) => {
+    try {
+        const response = await axiosInstance.post(
+            `${ API_URL }/auth/signup/admin`, 
+            { name, email, password, role },
             { withCredentials: true }
         );
         const { data }: { data: SuccessRequest } = response;

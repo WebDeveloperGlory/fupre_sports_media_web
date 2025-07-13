@@ -2,96 +2,14 @@
 
 import PopUpModal from '@/components/modal/PopUpModal';
 import { Loader } from '@/components/ui/loader';
+import { getAllTodayFixtures, getLiveFixtureAdmins } from '@/lib/requests/v2/admin/super-admin/live-management/requests';
+import { checkSuperAdminStatus } from '@/lib/requests/v2/authentication/requests';
 import { AllTodayFix } from '@/utils/V2Utils/getRequests';
 import { CompetitionType, FixtureStatus } from '@/utils/V2Utils/v2requestData.enums';
-import { Activity, Calendar, ChevronDown, ChevronUp, Clock, MapPin, PlayIcon, Search, X } from 'lucide-react';
+import { Activity, Calendar, ChevronDown, ChevronUp, Clock, MapPin, PlayIcon, Save, Search, Settings, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react'
-
-const sampleFixtures: AllTodayFix[] = [
-  {
-    _id: '123wkndkz',
-    homeTeam: {
-      _id: '64fc1234567890abcdef1234',
-      name: 'Eagle FC',
-      shorthand: 'EAG',
-      logo: 'https://example.com/logos/eagle.png'
-    },
-    awayTeam: {
-      _id: '64fc1234567890abcdef5678',
-      name: 'Lion Stars',
-      shorthand: 'LNS',
-      logo: 'https://example.com/logos/lionstars.png'
-    },
-    competition: {
-      _id: '64fc1234567890abcdef9999',
-      name: 'University Super League',
-      shorthand: 'USL',
-      type: CompetitionType.LEAGUE,
-    },
-    scheduledDate: new Date('2025-07-04T14:00:00Z'),
-    rescheduledDate: null,
-    status: FixtureStatus.SCHEDULED,
-    stadium: 'Stade et Fupre'
-  },
-  {
-    _id: 'asjnadkmsa',
-    homeTeam: {
-      _id: '64fcabcdef1234567890abcd1',
-      name: 'Sharks United',
-      shorthand: 'SHU',
-      logo: 'https://example.com/logos/sharks.png'
-    },
-    awayTeam: {
-      _id: '64fcabcdef1234567890abcd2',
-      name: 'Falcons FC',
-      shorthand: 'FFC',
-      logo: 'https://example.com/logos/falcons.png'
-    },
-    competition: {
-      _id: '64fcabcdef1234567890abcd9',
-      name: 'Campus Champions Cup',
-      shorthand: 'CCC',
-      type: CompetitionType.KNOCKOUT,
-    },
-    scheduledDate: new Date('2025-07-04T16:30:00Z'),
-    rescheduledDate: null,
-    status: FixtureStatus.LIVE,
-    stadium: 'Stade et Fupre'
-  },
-  {
-    _id: 'njansmaa',
-    homeTeam: {
-      _id: '64fcabcdef1234567890abce1',
-      name: 'Panther FC',
-      shorthand: 'PFC',
-      logo: 'https://example.com/logos/panther.png'
-    },
-    awayTeam: {
-      _id: '64fcabcdef1234567890abce2',
-      name: 'Tigers Academy',
-      shorthand: 'TGA',
-      logo: 'https://example.com/logos/tigers.png'
-    },
-    competition: {
-      _id: '64fcabcdef1234567890abce9',
-      name: 'Student Premier League',
-      shorthand: 'SPL',
-      type: CompetitionType.LEAGUE,
-    },
-    scheduledDate: new Date('2025-06-30T15:00:00Z'), // original
-    rescheduledDate: new Date('2025-07-04T18:00:00Z'), // today
-    status: FixtureStatus.POSTPONED,
-    stadium: 'Stade et Fupre'
-  }
-];
-
-const sampleLiveAdmins = [
-  { _id: '123455', name: 'Live Admin 1', email: 'libeadmin1@gmail.com' },
-  { _id: '123456', name: 'Live Admin 3', email: 'libeadmin1@gmail.com' },
-  { _id: '123457', name: 'Live Admin 5', email: 'libeadmin5@gmail.com' },
-  { _id: '123458', name: 'Sports Account', email: 'sportsadmin5@fupre.edu.ng' },
-]
+import { toast } from 'react-toastify';
 
 type Admin = {
   _id: string;
@@ -105,30 +23,51 @@ const LiveFixturesPage = () => {
     const [loading, setLoading] = useState<boolean>( true );
     const [fixtures, setFixtures] = useState<AllTodayFix[]>([]);
     const [admins, setAdmins] = useState<Admin[]>([]);
-    const [selectedFixture, setSelectedFixture] = useState<AllTodayFix | null>( null )
+    const [selectedFixture, setSelectedFixture] = useState<AllTodayFix | null>( null );
+    const [selectedAdmin, setSelectedAdmin] = useState<{ id: string }>({
+      id: ''
+    });
+    const [postponeData, setPostponeData] = useState({
+      postponedReason: '',
+      postponedDate: ''
+    });
     const [query, setQuery] = useState<string>("");
     const [filter, setFilter] = useState<string>("all-status");
     const [filterOpen, setFilterOpen] = useState<boolean>( false );
     const [modalOpen, setModalOpen] = useState<boolean>( false );
+    const [postponeModalOpen, setPostponeModalOpen] = useState<boolean>( false );
 
     // On Load //
     useEffect( () => {
       const fetchData = async () => {
-        setTimeout(() => {
-          setFixtures( sampleFixtures as AllTodayFix[] );
-          setAdmins( sampleLiveAdmins );
-          setLoading( false );
-        }, 2000);
+        const request = await checkSuperAdminStatus();
+        if( request?.code === '99' ) {
+          if( request.message === 'Invalid or Expired Token' || request.message === 'Login Required' ) {
+            toast.error('Please Login First')
+            router.push('/auth/login')
+          } else if ( request.message === 'Invalid User Permissions' ) {
+            toast.error('Unauthorized')
+            router.push('/sports');
+          } else {
+            toast.error('Unknown')
+            router.push('/');
+          }   
+        }
+        
+        const liveAdminData = await getLiveFixtureAdmins()
+        const todayFixtureData = await getAllTodayFixtures();
+
+        if( liveAdminData && liveAdminData.data ) {
+          setAdmins( liveAdminData.data );
+        }
+        if( todayFixtureData && todayFixtureData.data ) {
+          setFixtures( todayFixtureData.data );
+        }
+        
+        setLoading( false );
       }
 
       if( loading ) fetchData();
-
-      // if( !jwt ) {
-      //     toast.error('Please Login First');
-      //     setTimeout(() => router.push( '/admin' ), 1000);
-      // } else {
-      //     if( loading ) fetchData();
-      // }
     }, [ loading ]);
     
     if( loading ) {
@@ -147,6 +86,16 @@ const LiveFixturesPage = () => {
     const handleFilterClick = ( type: string ) => {
       setFilter( type );
       setFilterOpen( false );
+    }
+    const handlePostponeModalOpen = ( fixture: AllTodayFix ) => {
+      setSelectedFixture(fixture);
+      setPostponeModalOpen(true);
+    }
+    const handleAdminSelect = () => {
+
+    }
+    const handlePostponeMatch = () => {
+
     }
     // End Of Search Bar And Filters Handlers //
 
@@ -282,8 +231,8 @@ const LiveFixturesPage = () => {
                   <p className='text-sm text-muted-foreground'>vs</p>
                 </div>
                 <div className='col-span-5 text-right'>
-                  <p>{ fixture.homeTeam.name }</p>
-                  <p className='uppercase text-sm text-muted-foreground'>{ fixture.homeTeam.shorthand }</p>
+                  <p>{ fixture.awayTeam.name }</p>
+                  <p className='uppercase text-sm text-muted-foreground'>{ fixture.awayTeam.shorthand }</p>
                 </div>
               </div>
               {/* Info */}
@@ -291,7 +240,7 @@ const LiveFixturesPage = () => {
                 <div className='flex justify-between items-center'>
                   <p className='flex gap-1 items-center'>
                     <Calendar className='w-3 h-3' />
-                    { fixture.status === 'postponed' ? fixture.rescheduledDate!.toLocaleTimeString() : fixture.scheduledDate.toLocaleTimeString() }
+                    { fixture.status === 'postponed' ? fixture.rescheduledDate!.toLocaleString() : fixture.scheduledDate.toLocaleString() }
                   </p>
                   <p className='flex gap-1 items-center'>
                     <Clock className='w-3 h-3' />
@@ -304,33 +253,150 @@ const LiveFixturesPage = () => {
                     { fixture.stadium || 'Unknown' }
                   </p>
                   <p className='flex gap-1 items-center'>
-                    { fixture.competition.name }
+                    { fixture.competition ? fixture.competition.name : 'Friendly' }
                   </p>
                 </div>
               </div>
-              {/* Button */}
-              <button
-                onClick={() => handleFixtureButtonClick( fixture )}
-                className={`
-                  text-center w-full py-2 text-white font-bold flex gap-2 items-center justify-center capitalize rounded-lg transition-colors ${
-                    fixture.status === 'live'
-                      ? 'bg-emerald-500 hover:bg-emerald-500/50'
-                      : 'bg-blue-500 hover:bg-blue-500/50'
-                  }
-                `}
-              >
-                { fixture.status === 'live' ? <Activity className='w-4 h-4' /> : <PlayIcon className='w-4 h-4' /> }
-                { fixture.status === 'live' ? 'manage live' : 'initiate live' }
-              </button>
+              {/* Buttons */}
+              <div className='flex gap-2'>
+                {/* Main Button */}
+                <button
+                  onClick={() => handleFixtureButtonClick( fixture )}
+                  className={`
+                    flex-1 text-center py-2 text-white font-bold flex gap-2 items-center justify-center capitalize rounded-lg transition-colors ${
+                      fixture.status === 'live'
+                        ? 'bg-emerald-500 hover:bg-emerald-500/50'
+                        : 'bg-blue-500 hover:bg-blue-500/50'
+                    }
+                  `}
+                >
+                  { fixture.status === 'live' ? <Activity className='w-4 h-4' /> : <PlayIcon className='w-4 h-4' /> }
+                  { fixture.status === 'live' ? 'Set Lineup' : 'Initiate Live' }
+                </button>
+                
+                {/* Settings/Postpone Button - Only for non-live fixtures */}
+                {fixture.status !== 'live' && (
+                  <button
+                    onClick={() => handlePostponeModalOpen(fixture)}
+                    className='px-3 py-2 bg-gray-500 hover:bg-gray-500/50 text-white rounded-lg transition-colors'
+                    title='Settings/Postpone Match'
+                  >
+                    <Settings className='w-4 h-4' />
+                  </button>
+                )}
+              </div>
             </div>
           ))
         }
       </div>
 
       {/* Pop Up Modal */}
-      <PopUpModal open={ modalOpen } onClose={ () => setModalOpen( false ) }>
+      <PopUpModal 
+        open={ modalOpen } 
+        onClose={ 
+          () => {
+            setModalOpen( false )
+            setSelectedAdmin({id: ''});  
+          } 
+        }
+      >
         <>
-          <h2 className='text-left text-emerald-500 font-bold text-lg'>Initiate Live Coverage</h2>
+          <h2 className='text-left text-emerald-500 font-bold text-lg mb-6'>Initiate Live Coverage</h2>
+          <div className='space-y-4 text-left'>
+            <div>
+              <label className="block font-semibold mb-1.5">Select Admin</label>
+              <select 
+                  className="w-full p-2 border rounded cursor-pointer bg-input"
+                  value={ selectedAdmin.id }
+                  onChange={ (e) => setSelectedAdmin({ 
+                      ...selectedAdmin,
+                      id: e.target.value
+                  }) }
+              >
+                <option value=''>Select An Admin</option>
+                {
+                  admins.map( admin => (
+                    <option key={ admin._id } value={ admin._id }>{ admin.email }</option>
+                  ))
+                }
+              </select>
+            </div>
+            <button 
+              onClick={handleAdminSelect}
+              className='py-2 rounded-lg flex justify-center items-center gap-2 bg-emerald-500 hover:bg-emerald-500/50 text-white w-full disabled:opacity-50 disabled:line-through'
+              disabled={ selectedAdmin.id === '' }
+            >
+              <Save className='w-5 h-5' />
+              Initialize
+            </button>
+          </div>
+        </>
+      </PopUpModal>
+
+      {/* Postpone Match Modal */}
+      <PopUpModal 
+        open={ postponeModalOpen } 
+        onClose={ 
+          () => {
+            setPostponeModalOpen( false )
+            setSelectedFixture(null);
+            setPostponeData({
+              postponedReason: '',
+              postponedDate: ''
+            });
+          } 
+        }
+      >
+        <>
+          <h2 className='text-left text-orange-500 font-bold text-lg mb-6'>Postpone Match</h2>
+          <div className='space-y-4 text-left'>
+            {selectedFixture && (
+              <div className='bg-card border border-muted-foreground p-3 rounded-lg mb-4'>
+                <p className='font-semibold'>
+                  {selectedFixture.homeTeam.name} vs {selectedFixture.awayTeam.name}
+                </p>
+                <p className='text-sm text-muted-foreground'>
+                  {selectedFixture.scheduledDate.toLocaleString()}
+                </p>
+              </div>
+            )}
+            
+            <div>
+              <label className="block font-semibold mb-1.5">Reason for Postponement</label>
+              <textarea 
+                className="w-full p-2 border rounded bg-input resize-none"
+                placeholder="Enter reason for postponement..."
+                rows={3}
+                value={postponeData.postponedReason}
+                onChange={(e) => setPostponeData({
+                  ...postponeData,
+                  postponedReason: e.target.value
+                })}
+              />
+            </div>
+            
+            <div>
+              <label className="block font-semibold mb-1.5">New Date & Time</label>
+              <input 
+                type="datetime-local"
+                className="w-full p-2 border rounded bg-input"
+                value={postponeData.postponedDate}
+                onChange={(e) => setPostponeData({
+                  ...postponeData,
+                  postponedDate: e.target.value
+                })}
+              />
+            </div>
+            
+            <button 
+              onClick={handlePostponeMatch}
+              className='py-2 rounded-lg flex justify-center items-center gap-2 bg-orange-500 hover:bg-orange-500/50 text-white w-full disabled:opacity-50 disabled:cursor-not-allowed'
+              disabled={!postponeData.postponedReason.trim() || !postponeData.postponedDate}
+            >
+              <Clock className='w-5 h-5' />
+              Postpone Match
+            </button>
+          </div>
         </>
       </PopUpModal>
     </div>

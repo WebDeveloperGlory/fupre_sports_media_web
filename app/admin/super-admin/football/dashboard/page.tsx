@@ -128,7 +128,7 @@ const SuperAdminDashboardPage = async () => {
                     link='fixtures'
                     statLabel='fixtures'
                     bg='bg-red-500'
-                    stat={ dashboardData.totalTeams.toString() } 
+                    stat={ dashboardData.totalFixtures.toString() } 
                     Icon={ <Calendar className='w-8 h-8' /> }
                 />
                 <AdminModule 
@@ -193,6 +193,15 @@ const SuperAdminDashboardPage = async () => {
                     bg='bg-blue-500'
                     stat={ 'faculty' } 
                     Icon={ <ChartBarStacked className='w-8 h-8' /> }
+                />
+                <AdminModule 
+                    title='Admin Management' 
+                    content='Create and manage system administrators' 
+                    link='/admin/super-admin/admin-management'
+                    statLabel='admins'
+                    bg='bg-green-500'
+                    stat={ 'all' } 
+                    Icon={ <Shield className='w-8 h-8' /> }
                 />
             </div>
         </div>
