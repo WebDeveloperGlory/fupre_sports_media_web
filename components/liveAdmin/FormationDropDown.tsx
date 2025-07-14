@@ -11,7 +11,7 @@ const formations = [
 
 const FormationDropdown = (
     { team, value, isOpen, setIsOpen, handleFormationChange }: 
-    { team: 'homeTeam' | 'awayTeam', value: string, isOpen: boolean, setIsOpen: ( team: 'homeTeam' | 'awayTeam' ) => void, handleFormationChange: ( team: "homeTeam" | "awayTeam", formationValue: string ) => void }
+    { team: 'homePlayers' | 'awayPlayers', value: string, isOpen: boolean, setIsOpen: ( team: 'homeTeam' | 'awayTeam' ) => void, handleFormationChange: ( team: "homeTeam" | "awayTeam", formationValue: string ) => void }
   ) => {
     const currentFormation = formations.find(f => f.value === value)?.name || "Select Formation";
     
@@ -19,7 +19,7 @@ const FormationDropdown = (
       <div className="relative">
         <button
           className="flex items-center justify-between w-full px-3 py-2 text-sm bg-card rounded-md border border-border"
-          onClick={ () => setIsOpen( team ) }
+          onClick={ () => setIsOpen( team === 'homePlayers' ? 'homeTeam' : 'awayTeam' ) }
         >
           <span>{ currentFormation }</span>
           <ChevronDown size={ 16 } className={ `transition-transform ${ isOpen ? 'rotate-180' : '' }` } />
@@ -32,7 +32,12 @@ const FormationDropdown = (
                 <li 
                   key={formation.value}
                   className="px-3 py-2 text-sm hover:bg-emerald-500 hover:text-white cursor-pointer transition-colors"
-                  onClick={() => handleFormationChange( team, formation.value )}
+                  onClick={
+                    () => handleFormationChange( 
+                      team === 'homePlayers' ? 'homeTeam' : 'awayTeam',
+                      formation.value
+                    )
+                  }
                 >
                   {formation.name}
                 </li>

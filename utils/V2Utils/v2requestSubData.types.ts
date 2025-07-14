@@ -51,6 +51,13 @@ export type FixtureLineup = {
     coach: string,
 }
 
+export type FixtureLineupUnPop = {
+    startingXI: StartingXIUnPop[],
+    substitutes: SubstituteUnPop[],
+    formation: string,
+    coach: string,
+}
+
 export type FixtureSubstitutions = {
     id: string,
     team: TeamType,
@@ -148,6 +155,20 @@ type StartingXI = {
 
 type Substitute = {
     player: ShortPopulatedPlayer,
+    position: string,
+    shirtNumber: number,
+    isCaptain?: boolean,
+}
+
+type StartingXIUnPop = {
+    player: string,
+    position: string,
+    shirtNumber: number,
+    isCaptain: boolean,
+}
+
+type SubstituteUnPop = {
+    player: string,
     position: string,
     shirtNumber: number,
     isCaptain?: boolean,

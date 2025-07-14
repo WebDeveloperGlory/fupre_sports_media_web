@@ -1,5 +1,5 @@
 import { CompetitionSponsors, CompetitionStatus, CompetitionTypes, FixtureStatus, FixtureTimelineCardType, FixtureTimelineGoalType, FixtureTimelineType, LiveStatus, TeamType } from "./v2requestData.enums"
-import { FixtureLineup, FixtureStat, FixtureStreamLinks } from "./v2requestSubData.types";
+import { FixtureLineup, FixtureLineupUnPop, FixtureStat, FixtureStreamLinks } from "./v2requestSubData.types";
 
 export type FixtureTimeline = {
     id: string,
@@ -127,7 +127,7 @@ export type LiveFixStatusForm = { status: LiveStatus };
 // Update stats
 export type LiveFixStatForm = { stats: { home: FixtureStat, away: FixtureStat } };
 // Update lineups
-export type LiveFixLineupForm = { lineups: { home: FixtureLineup, away: FixtureLineup } };
+export type LiveFixLineupForm = { lineups: { home: FixtureLineupUnPop, away: FixtureLineupUnPop } };
 // Create timeline event
 export type LiveFixTimelineCreate = { event: FixtureTimeline }
 // Edit timeline event

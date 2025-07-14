@@ -1,23 +1,54 @@
 import { FixtureTeamPlayers } from "@/utils/requestDataTypes";
-import { Players } from "@/utils/stateTypes";
 import { UserPlus2 } from "lucide-react";
 import TeamSquad from "./TeamSquad";
 import FormationDropdown from "./FormationDropDown";
+import { FixtureLineupUnPop } from "@/utils/V2Utils/v2requestSubData.types";
+import { PlayerRole } from "@/utils/V2Utils/v2requestData.enums";
 
-type Formation = {
-    formation: string,
-    startingXI: string[],
-    subs: string[]
+interface LiveFixTeamPlayers {
+  homePlayers: {
+    _id: string;
+    name: string;
+    admissionYear: string;
+    role: PlayerRole;
+    position: string;
+    jerseyNumber: number;
+  }[];
+  awayPlayers: {
+    _id: string;
+    name: string;
+    admissionYear: string;
+    role: PlayerRole;
+    position: string;
+    jerseyNumber: number;
+  }[];
 }
-type PlayerMoveFunc = ( player: Players, team: 'homeTeam' | 'awayTeam', destinationSquad: 'starting' | 'substitutes' | 'available' ) => void;
+type PlayerMoveFunc = ( 
+  player: {
+    player: string,
+    position: string,
+    shirtNumber: number,
+    isCaptain: boolean,
+  }, 
+  team: 'homePlayers' | 'awayPlayers', 
+  destinationSquad: 'starting' | 'substitutes' | 'available' 
+) => void;
 
 const TeamSection = (
     { team, availablePlayers, title, onPlayerMove, side, handleFormationChange, handleDropDownToggle, dropdownOpen }:
-    { team: Formation, availablePlayers: FixtureTeamPlayers | null, title: string, onPlayerMove: PlayerMoveFunc, side: keyof FixtureTeamPlayers, handleFormationChange: ( team: "homeTeam" | "awayTeam", formationValue: string ) => void, handleDropDownToggle: ( team: 'homeTeam' | 'awayTeam' ) => void, dropdownOpen: boolean }
+    { 
+      team: FixtureLineupUnPop, 
+      availablePlayers: LiveFixTeamPlayers | null, 
+      title: string, 
+      onPlayerMove: PlayerMoveFunc, 
+      side: keyof LiveFixTeamPlayers, 
+      handleFormationChange: ( team: "homeTeam" | "awayTeam", formationValue: string ) => void, 
+      handleDropDownToggle: ( team: 'homeTeam' | 'awayTeam' ) => void, dropdownOpen: boolean 
+    }
   ) => {
     const isPlayerInSquad = ( playerId: string ) => {
-      return team.startingXI.some( p => p === playerId ) ||
-             team.subs.some( p => p === playerId );
+      return team.startingXI.some( p => p.player === playerId ) ||
+             team.substitutes.some( p => p.player === playerId );
     };
   
     return (
@@ -42,15 +73,33 @@ const TeamSection = (
             <TeamSquad
               players={ team.startingXI }
               title="Starting XI"
-              onRemove={( player ) => onPlayerMove( player, side, 'available' ) }
+              onRemove={
+                ( player ) => onPlayerMove( 
+                  {
+                    ...player,
+                    isCaptain: player.isCaptain ? player.isCaptain : false
+                  }, 
+                  side, 
+                  'available' 
+                ) 
+              }
               maxPlayers={ 11 }
               team={ side }
               teamPlayers={ availablePlayers }
             />
             <TeamSquad
-              players={ team.subs }
+              players={ team.substitutes }
               title="Substitutes"
-              onRemove={( player ) => onPlayerMove( player, side, 'available' ) }
+              onRemove={
+                ( player ) => onPlayerMove( 
+                  {
+                    ...player,
+                    isCaptain: player.isCaptain ? player.isCaptain : false
+                  }, 
+                  side, 
+                  'available' 
+                )
+              }
               maxPlayers={ 7 }
               team={ side }
               teamPlayers={ availablePlayers }
@@ -62,7 +111,7 @@ const TeamSection = (
               <h3 className="font-medium text-sm">Available Players</h3>
               <div className="space-y-2">
                 {
-                  availablePlayers && availablePlayers[ side ].players.filter(player => !isPlayerInSquad(player._id)).map(( player, index ) => (
+                  availablePlayers && availablePlayers[ side ].filter(player => !isPlayerInSquad(player._id)).map(( player, index ) => (
                   <div
                     key={player._id}
                     className="flex items-center justify-between p-2 bg-card hover:bg-card/80 rounded-lg border border-border transition-colors"
@@ -76,7 +125,18 @@ const TeamSection = (
                     </div>
                     <div className="flex space-x-2">
                       <button
-                        onClick={() => onPlayerMove(player, side, 'starting')}
+                        onClick={
+                          () => onPlayerMove(
+                            {
+                              player: player._id,
+                              position: player.position,
+                              shirtNumber: player.jerseyNumber,
+                              isCaptain: player.role === PlayerRole.CAPTAIN ? true : false
+                            }, 
+                            side, 
+                            'starting'
+                          )
+                        }
                         disabled={team.startingXI.length >= 11}
                         className="flex items-center space-x-1 px-2 py-1 text-sm rounded-md hover:bg-emerald-500 hover:text-white disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-inherit transition-colors"
                         title="Add to Starting XI"
@@ -85,8 +145,19 @@ const TeamSection = (
                         <UserPlus2 size={16} />
                       </button>
                       <button
-                        onClick={ () => onPlayerMove( player, side, 'substitutes' ) }
-                        disabled={ team.subs.length >= 7 }
+                      onClick={
+                          () => onPlayerMove(
+                            {
+                              player: player._id,
+                              position: player.position,
+                              shirtNumber: player.jerseyNumber,
+                              isCaptain: player.role === PlayerRole.CAPTAIN ? true : false
+                            }, 
+                            side, 
+                            'substitutes'
+                          )
+                        }
+                        disabled={ team.substitutes.length >= 10 }
                         className="flex items-center space-x-1 px-2 py-1 text-sm rounded-md hover:bg-emerald-500 hover:text-white disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-inherit transition-colors"
                         title="Add to Substitutes"
                       >

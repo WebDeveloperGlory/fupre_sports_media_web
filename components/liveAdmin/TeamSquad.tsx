@@ -1,11 +1,43 @@
 import { FixtureTeamPlayers } from '@/utils/requestDataTypes';
 import { Players } from '@/utils/stateTypes';
+import { PlayerRole } from '@/utils/V2Utils/v2requestData.enums';
 import { UserMinus2 } from 'lucide-react';
 import React from 'react'
 
+interface LiveFixTeamPlayers {
+  homePlayers: {
+    _id: string;
+    name: string;
+    admissionYear: string;
+    role: PlayerRole;
+    position: string;
+    jerseyNumber: number;
+  }[];
+  awayPlayers: {
+    _id: string;
+    name: string;
+    admissionYear: string;
+    role: PlayerRole;
+    position: string;
+    jerseyNumber: number;
+  }[];
+}
+type Player = {
+  player: string;
+  position: string;
+  shirtNumber: number;
+  isCaptain?: boolean;
+}
+
 const TeamSquad = (
     { players, title, onRemove, maxPlayers, team, teamPlayers }:
-    { players: string[] | [], title: string, onRemove: ( player: Players ) => void, maxPlayers: number, team: keyof FixtureTeamPlayers, teamPlayers: FixtureTeamPlayers | null }
+    { 
+      players: Player[], 
+      title: string, 
+      onRemove: ( player: Player ) => void, 
+      maxPlayers: number, team: keyof LiveFixTeamPlayers, 
+      teamPlayers: LiveFixTeamPlayers | null 
+    }
   ) => {
     return (
       <div className="space-y-2">
@@ -18,7 +50,7 @@ const TeamSquad = (
         <div className="space-y-2">
           {
             players.map(( p, index ) => {
-              const player = teamPlayers![ team ].players.find( pl => pl._id === p );
+              const player = teamPlayers![ team ].find( pl => pl._id === p.player );
               return (
                 <div
                   key={ player ? player._id : index }
@@ -32,7 +64,16 @@ const TeamSquad = (
                     <span className="text-sm text-muted-foreground">{ player ? player.position : '' }</span>
                   </div>
                   <button
-                    onClick={ () => onRemove( player! ) }
+                    onClick={ 
+                      () => onRemove(
+                        {
+                          player: player!._id,
+                          position: player!.position,
+                          shirtNumber: player!.jerseyNumber,
+                          isCaptain: player!.role === PlayerRole.CAPTAIN ? true : false
+                        }
+                      ) 
+                    }
                     className="p-1 hover:text-red-500 transition-colors"
                     title="Remove player"
                   >

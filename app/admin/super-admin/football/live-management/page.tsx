@@ -2,11 +2,11 @@
 
 import PopUpModal from '@/components/modal/PopUpModal';
 import { Loader } from '@/components/ui/loader';
-import { getAllTodayFixtures, getLiveFixtureAdmins } from '@/lib/requests/v2/admin/super-admin/live-management/requests';
+import { getAllTodayFixtures, getLiveFixtureAdmins, initiateLiveFixture, rescheduleFixture } from '@/lib/requests/v2/admin/super-admin/live-management/requests';
 import { checkSuperAdminStatus } from '@/lib/requests/v2/authentication/requests';
 import { AllTodayFix } from '@/utils/V2Utils/getRequests';
 import { CompetitionType, FixtureStatus } from '@/utils/V2Utils/v2requestData.enums';
-import { Activity, Calendar, ChevronDown, ChevronUp, Clock, MapPin, PlayIcon, Save, Search, Settings, X } from 'lucide-react';
+import { Activity, Calendar, ChevronDown, ChevronUp, Clock, MapPin, PlayIcon, Save, Search, Settings, Users, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react'
 import { toast } from 'react-toastify';
@@ -91,11 +91,44 @@ const LiveFixturesPage = () => {
       setSelectedFixture(fixture);
       setPostponeModalOpen(true);
     }
-    const handleAdminSelect = () => {
-
+    const handleAdminSelect = async () => {
+      if(selectedFixture) {
+        const response = await initiateLiveFixture( selectedFixture._id, selectedAdmin.id );
+        if(response?.code === '00') {
+          toast.success( response.message );
+          setSelectedAdmin({id: ''});
+          setSelectedFixture(null);
+          setModalOpen(false);
+          setLoading(true);
+        } else {
+          toast.error(response?.message || 'An Error Occurred');
+          setSelectedAdmin({id: ''});
+          setSelectedFixture(null);
+          setModalOpen(false);
+        }
+      }
     }
-    const handlePostponeMatch = () => {
-
+    const handlePostponeMatch = async () => {
+      if( selectedFixture ) {
+        const response = await rescheduleFixture( selectedFixture._id, postponeData.postponedReason, postponeData.postponedDate );
+        if( response?.code === '00' ) {
+          toast.success(response.message);
+          setPostponeData({
+            postponedDate: '',
+            postponedReason: ''
+          });
+          setPostponeModalOpen(false);
+          setLoading(true);
+        } else {
+          toast.error(response?.message || 'An Error Occurred');
+          setSelectedFixture(null);
+          setPostponeData({
+            postponedDate: '',
+            postponedReason: ''
+          });
+          setPostponeModalOpen(false);
+        }
+      }
     }
     // End Of Search Bar And Filters Handlers //
 
@@ -107,6 +140,9 @@ const LiveFixturesPage = () => {
         setModalOpen( true );
       }
       setSelectedFixture( fixture );
+    }
+    const handleFormationButtonClick = ( fixtureId: string ) => {
+      router.push(`live-management/${fixtureId}/formation`)
     }
     // End of Other Button Handlers //
 
@@ -271,7 +307,7 @@ const LiveFixturesPage = () => {
                   `}
                 >
                   { fixture.status === 'live' ? <Activity className='w-4 h-4' /> : <PlayIcon className='w-4 h-4' /> }
-                  { fixture.status === 'live' ? 'Set Lineup' : 'Initiate Live' }
+                  { fixture.status === 'live' ? 'Manage Fixture' : 'Initiate Live' }
                 </button>
                 
                 {/* Settings/Postpone Button - Only for non-live fixtures */}
@@ -282,6 +318,16 @@ const LiveFixturesPage = () => {
                     title='Settings/Postpone Match'
                   >
                     <Settings className='w-4 h-4' />
+                  </button>
+                )}
+                {/* Formation Button - Only for live fixtures */}
+                {fixture.status === 'live' && (
+                  <button
+                    onClick={() => handleFormationButtonClick(fixture._id)}
+                    className='px-3 py-2 bg-gray-500 hover:bg-gray-500/50 text-white rounded-lg transition-colors flex gap-2 items-center justify-center'
+                  >
+                    <Users className='w-4 h-4' />
+                    Set Formattion
                   </button>
                 )}
               </div>
