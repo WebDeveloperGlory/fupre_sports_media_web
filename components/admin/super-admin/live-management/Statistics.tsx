@@ -2,10 +2,13 @@ import { Home, Plane, Save } from 'lucide-react'
 import React, { useState } from 'react'
 import PossessionTracker from '../../PossessionTracker'
 import { FixtureStat } from '@/utils/V2Utils/v2requestSubData.types'
+import { updateLiveFixtureStatistics } from '@/lib/requests/v2/admin/super-admin/live-management/requests'
+import { toast } from 'react-toastify'
 
 const Statistics = (
-  { homeName, awayName, homeStats, awayStats, saveStats }:
-  { 
+  { liveId, homeName, awayName, homeStats, awayStats, saveStats }:
+  {
+    liveId: string,
     homeName: string, awayName: string, 
     homeStats: FixtureStat, awayStats: FixtureStat, 
     saveStats: ( homeStats: FixtureStat, awayStats: FixtureStat ) => void 
@@ -16,9 +19,14 @@ const Statistics = (
     away: awayStats
   })
 
-  const updateStats = () => {
-    // Update the local stats
-    saveStats( stats.home, stats.away );
+  const updateStats = async () => {
+    const response = await updateLiveFixtureStatistics( liveId, { stats } );
+    if(response?.code === '00') {
+        toast.success(response.message);
+        saveStats( stats.home, stats.away );
+    } else {
+        toast.error(response?.message || 'An Error Occurred');
+    }
   }
   return (
     <>

@@ -1,8 +1,8 @@
-import { CompetitionSponsors, CompetitionStatus, CompetitionTypes, FixtureStatus, FixtureTimelineCardType, FixtureTimelineGoalType, FixtureTimelineType, LiveStatus, TeamType } from "./v2requestData.enums"
+import { CompetitionSponsors, CompetitionStatus, CompetitionTypes, FavoriteFoot, FixtureStatus, FixtureTimelineCardType, FixtureTimelineGoalType, FixtureTimelineType, LiveStatus, PlayerClubStatus, PlayerRole, TeamType } from "./v2requestData.enums"
 import { FixtureLineup, FixtureLineupUnPop, FixtureStat, FixtureStreamLinks } from "./v2requestSubData.types";
 
 export type FixtureTimeline = {
-    id: string,
+    _id?: string,
     type: FixtureTimelineType,
     team: TeamType,
     player: string,
@@ -194,6 +194,52 @@ export type LivFixGeneralUpdates = {
     stream?: FixtureStreamLinks
 }
 // Perform time updates
-export type LivFixTimeUpdates = { time: number }
+export type LivFixTimeUpdates = { regularTime: number, injuryTime?: number }
+// Submit user player rating
+export type UserPlayerRating = {
+    playerId: string;
+    isHomePlayer: boolean;
+    rating: number; // 1-10
+}
+// Submit team cheer
+export type Cheer = { team: TeamType, isOfficial: boolean }
 
 // End of Live Fixtures Admin //
+
+// Team Admin //
+
+// Register player(super-admin)
+export type PlayerCreateFormDetails = {
+    name: string;
+    department: string;
+    admissionYear: string;
+    preferredFoot?: FavoriteFoot;
+    height?: string;
+    weight?: string;
+}
+// Register player(team-admin)
+export type UnverifiedPlayerReg = { name: string; department: string; admissionYear: string };
+// Update player details
+export type PlayerUpdateDetails = {
+    name?: string;
+    admissionYear?: string;
+    preferredFoot?: FavoriteFoot;
+    height?: string;
+    weight?: string;
+    clubStatus?: PlayerClubStatus;
+    marketValue?: number;
+}
+// Assign player to team
+export type TeamAssignmentDetails = {
+    teamId: string;
+    role?: PlayerRole;
+    position?: string;
+    jerseyNumber?: number;
+}
+// Verify player
+export type PlayerVerificationDetails = {
+    status: 'verified' | 'rejected';
+    reason?: string;
+}
+
+// End of Team Admin //

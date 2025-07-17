@@ -1,10 +1,13 @@
+import { generalUpdates } from '@/lib/requests/v2/admin/super-admin/live-management/requests'
 import { LivFixGeneralUpdates } from '@/utils/V2Utils/formData'
 import { Cog, Plus, Save, Signal } from 'lucide-react'
 import React, { useState } from 'react'
+import { toast } from 'react-toastify'
 
 const General = (
-    { referee, attendance, kickoff, weather }:
-    { 
+    { liveId, referee, attendance, kickoff, weather }:
+    {
+        liveId: string,
         referee: string, 
         attendance: number, 
         kickoff: Date,
@@ -17,9 +20,9 @@ const General = (
             temperature: weather.temperature,
             humidity: weather.humidity
         },
-        attendance,
-        referee,
-        kickoff,
+        attendance: attendance ? attendance : 0,
+        referee: referee ? referee : '',
+        kickoff: kickoff ? kickoff : '',
     });
     const [streamData, setStreamData] = useState({
         platform: '',
@@ -27,6 +30,23 @@ const General = (
         requiresSubscription: false,
         isOfficial: false
     })
+
+    const handleInfoUpdate = async () => {
+        const response = await generalUpdates( liveId, generalData );
+        if(response?.code === '00') {
+            toast.success(response.message);
+        } else {
+            toast.error(response?.message || 'An Error Occurred');
+        }
+    }
+    const handleStreamLinkUpdate = async () => {
+        const response = await generalUpdates( liveId, { stream: streamData } );
+        if(response?.code === '00') {
+            toast.success(response.message);
+        } else {
+            toast.error(response?.message || 'An Error Occurred');
+        }
+    }
   return (
     <>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
@@ -62,7 +82,7 @@ const General = (
                         <label className="block font-semibold mb-1.5">Attendance</label>
                         <input
                             type='number'
-                            placeholder='Attendance Name'
+                            placeholder='Attendance Number'
                             min={0}
                             value={ generalData.attendance }
                             onChange={
@@ -158,7 +178,7 @@ const General = (
                     </div>
 
                     <button 
-                        onClick={() => {}}
+                        onClick={handleInfoUpdate}
                         className='py-2 rounded-lg flex justify-center items-center gap-2 bg-emerald-500 hover:bg-emerald-500/50 text-white w-full'
                     >
                         <Save className='w-5 h-5' />
@@ -256,7 +276,7 @@ const General = (
                     </div>
 
                     <button 
-                        onClick={() => {}}
+                        onClick={handleStreamLinkUpdate}
                         className='py-2 rounded-lg flex justify-center items-center gap-2 bg-emerald-500 hover:bg-emerald-500/50 text-white w-full'
                     >
                         <Plus className='w-5 h-5' />

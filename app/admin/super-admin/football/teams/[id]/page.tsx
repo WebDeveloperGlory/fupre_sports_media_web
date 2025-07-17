@@ -1,6 +1,7 @@
 'use client'
 
 import { Loader } from '@/components/ui/loader';
+import { addPlayerToTeam, createPlayer, getTeamSuggestedPlayers } from '@/lib/requests/v2/admin/super-admin/player-management/requests';
 import { getAllDepartments, getTeamById, getTeamPlayers, updateTeamCoaches } from '@/lib/requests/v2/admin/super-admin/team/requests';
 import { checkSuperAdminStatus } from '@/lib/requests/v2/authentication/requests';
 import { CoachRoles, FavoriteFoot, PlayerRole } from '@/utils/V2Utils/v2requestData.enums';
@@ -9,27 +10,6 @@ import { MessageSquare, Plus, Star, Trash2, UserCog, UserPlus, Users } from 'luc
 import { useRouter } from 'next/navigation';
 import React, { use, useEffect, useState } from 'react'
 import { toast } from 'react-toastify';
-
-const samplePossiblePlayers: PossiblePlayers[] = [
-  {
-    _id: 'player1',
-    name: 'Possibly Mine',
-    academicYear: '2024/2025',
-    department: { _id: 'ele', name: 'Electrical/Electronics Engineering' }
-  },
-  {
-    _id: 'player2',
-    name: 'Possibly Yours',
-    academicYear: '2023/2024',
-    department: { _id: 'ele', name: 'Electrical/Electronics Engineering' }
-  },
-  {
-    _id: 'player3',
-    name: 'Possibly Ours',
-    academicYear: '2025/2026',
-    department: { _id: 'ele', name: 'Computer Engineering' }
-  },
-];
 
 type Department = {
     _id: string;
@@ -83,6 +63,7 @@ const IndividualSuperAdminTeamPage = (
         const teamData = await getTeamById( resolvedParams.id );
         const departmentData = await getAllDepartments();
         const teamPlayerData = await getTeamPlayers( resolvedParams.id );
+        const possiblePlayersData = await getTeamSuggestedPlayers( resolvedParams.id );
 
         if( teamData && teamData.data ) {
           setTeam( teamData.data );
@@ -93,7 +74,9 @@ const IndividualSuperAdminTeamPage = (
         if( teamPlayerData && teamPlayerData.data ) {
           setPlayers( teamPlayerData.data.players );
         }
-        setPossiblePlayers( samplePossiblePlayers );          
+        if( possiblePlayersData && possiblePlayersData.data ) {
+          setPossiblePlayers( possiblePlayersData.data.suggestedPlayers );
+        }
 
         setLoading( false );
       }
@@ -176,6 +159,8 @@ const IndividualSuperAdminTeamPage = (
             teamPlayers={ players }
             possiblePlayers={ possiblePlayers }
             departments={ departments }
+            teamId={resolvedParams.id}
+            setLoading={setLoading}
           /> 
         }
         { activeTab === 'coaches' && 
@@ -326,11 +311,13 @@ type NewPlayerForm = {
   height?: string;
 }
 const Players = (
-  { teamPlayers, possiblePlayers, departments }:
+  { teamPlayers, possiblePlayers, departments, teamId, setLoading }:
   { 
     teamPlayers: TeamPlayerDetails[], 
     possiblePlayers: PossiblePlayers[],
     departments: { _id: string, name: string }[],
+    teamId: string,
+    setLoading: (value: boolean) => void
   }
 ) => {
   const [formData, setFormData] = useState<PlayerRegistrationForm>({
@@ -346,7 +333,39 @@ const Players = (
     preferredFoot: FavoriteFoot.RIGHT,
     weight: '',
     height: ''
-  })
+  });
+
+  const handleCreatePlayer = async () => {
+    const response = await createPlayer( createFormData );
+    if(response?.code === '00') {
+      toast.success(response.message);
+      setCreateFormData({
+        name: '', department: '', admissionYear: '', preferredFoot: FavoriteFoot.RIGHT,
+        weight: '', height: ''
+      });
+    } else {
+      toast.error(response?.message || 'An Error Occurred');
+    }
+  }
+  const handleAddPlayerToTeam = async () => {
+    const response = await addPlayerToTeam( 
+      formData.playerId, 
+      {
+        ...formData,
+        teamId
+      } 
+    );
+    if(response?.code === '00') {
+      toast.success(response.message);
+      setCreateFormData({
+        name: '', department: '', admissionYear: '', preferredFoot: FavoriteFoot.RIGHT,
+        weight: '', height: ''
+      });
+    } else {
+      toast.error(response?.message || 'An Error Occurred');
+    }
+    setLoading(true);
+  }
   return (
     <>
       <div className='grid grid-cols-2 gap-4'>
@@ -389,7 +408,7 @@ const Players = (
                 >
                     <option value={''}>Select a Position</option>
                     {
-                        ['GK', 'CB', 'LB', 'RB', 'WB', 'ST', 'LW'].map( pos => (
+                        ['GK', 'CB', 'LB', 'RB', 'WB', 'DMF', 'AMF', 'CMF', 'ST', 'LW'].map( pos => (
                             <option key={ pos } value={ pos } className='flex flex-col'>
                               { pos }
                             </option>
@@ -435,7 +454,7 @@ const Players = (
               </select>
             </div>
             <button
-              onClick={() => {}}
+              onClick={handleAddPlayerToTeam}
               className='w-full text-center py-2 bg-emerald-500 hover:bg-emerald-500/50 flex gap-2 items-center justify-center'
             >
               <UserPlus className='w-4 h-4' />
@@ -551,7 +570,7 @@ const Players = (
               </div>
             </div>
             <button
-              onClick={() => {}}
+              onClick={handleCreatePlayer}
               className='w-full text-center py-2 bg-emerald-500 hover:bg-emerald-500/50 flex gap-2 items-center justify-center'
             >
               <Plus className='w-4 h-4' />

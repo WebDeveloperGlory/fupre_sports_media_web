@@ -99,7 +99,7 @@ const FormationPage = (
     const data = await updateLiveFixtureLineup( resolvedParams.id, formData );
     if( data && data.code === '00' ) {
       toast.success( data.message )
-      setTimeout( () => router.push(`live-management`), 1000 )
+      setTimeout( () => router.push(`/`), 1000 )
     } else {
       toast.error( data?.message || 'An Error Occurred' );
     }
@@ -133,19 +133,19 @@ const FormationPage = (
       setTeam( ( prev ) => ({
         ...prev,
         startingXI: [ ...newStarting, player ],
-        subs: newSubstitutes
+        substitutes: newSubstitutes
       }));
     } else if (destinationSquad === 'substitutes' && newSubstitutes.length < 7) {
       setTeam(( prev ) => ({
         ...prev,
         startingXI: newStarting,
-        subs: [ ...newSubstitutes, player ]
+        substitutes: [ ...newSubstitutes, player ]
       }));
     } else if (destinationSquad === 'available') {
       setTeam( ( prev ) => ({
         ...prev,
         startingXI: newStarting,
-        subs: newSubstitutes
+        substitutes: newSubstitutes
       }));
     }
   };

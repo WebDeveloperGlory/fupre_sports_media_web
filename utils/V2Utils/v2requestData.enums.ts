@@ -153,3 +153,9 @@ export enum UserStatus {
     INACTIVE = 'inactive',
     SUSPENDED = 'suspended'
 }
+
+export enum PlayerClubStatus {
+    REGISTERED = 'registered', 
+    ON_LOAN = 'on-loan',
+    TRANSFERRED_OUT = 'transferred-out'
+}

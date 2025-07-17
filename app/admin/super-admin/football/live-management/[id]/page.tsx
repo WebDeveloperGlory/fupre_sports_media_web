@@ -7,67 +7,17 @@ import Overview from '@/components/admin/super-admin/live-management/Overview';
 import Statistics from '@/components/admin/super-admin/live-management/Statistics';
 import { Loader } from '@/components/ui/loader';
 import { liveMatchSample } from '@/constants';
+import { getLiveFixtureTeamPlayerList } from '@/lib/requests/liveAdminPage/requests';
+import { getLiveFixtureById, getLiveFixtureTeamPlayers } from '@/lib/requests/v2/admin/super-admin/live-management/requests';
+import { checkSuperAdminStatus } from '@/lib/requests/v2/authentication/requests';
 import { LiveFixSubCreate } from '@/utils/V2Utils/formData';
 import { LiveFixData, LiveFixPlayerData } from '@/utils/V2Utils/getRequests';
 import { LiveStatus } from '@/utils/V2Utils/v2requestData.enums';
 import { FixtureStat } from '@/utils/V2Utils/v2requestSubData.types';
 import { Timer } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { use, useEffect, useState } from 'react'
-
-const sampleTeamPlayers = {
-  homePlayers: [
-    {
-      _id: '1',
-      name: "John Okoro",
-      admissionYear: "2021",
-      role: "starter",
-      position: "Forward",
-      jerseyNumber: 9
-    },
-    {
-      _id: '2',
-      name: "Michael Ade",
-      admissionYear: "2020",
-      role: "captain",
-      position: "Midfielder",
-      jerseyNumber: 8
-    },
-    {
-      _id: '3',
-      name: "Tunde Balogun",
-      admissionYear: "2022",
-      role: "substitute",
-      position: "Defender",
-      jerseyNumber: 15
-    }
-  ],
-  awayPlayers: [
-    {
-      _id: '4',
-      name: "Emeka Uche",
-      admissionYear: "2021",
-      role: "starter",
-      position: "Goalkeeper",
-      jerseyNumber: 1
-    },
-    {
-      _id: '5',
-      name: "Chinedu Nwankwo",
-      admissionYear: "2019",
-      role: "starter",
-      position: "Forward",
-      jerseyNumber: 11
-    },
-    {
-      _id: '6',
-      name: "Ifeanyi Ojo",
-      admissionYear: "2020",
-      role: "substitute",
-      position: "Defender",
-      jerseyNumber: 16
-    }
-  ]
-};
+import { toast } from 'react-toastify';
 
 enum TabsEnum {
   OVERVIEW = 'overview',
@@ -83,6 +33,7 @@ const SuperAdminLivePage = ({ params }:
     { params: Promise<{ id: string }> }
 ) => {
     const resolvedParams = use( params );
+    const router = useRouter();
 
     // States //
     const [loading, setLoading] = useState( true );
@@ -105,22 +56,34 @@ const SuperAdminLivePage = ({ params }:
     // On Load //
     useEffect( () => {
       const fetchData = async () => {
-        setTimeout(() => {
-          setFixture( liveMatchSample as LiveFixData );
-          setTeamPlayers( sampleTeamPlayers as LiveFixPlayerData );
+        const request = await checkSuperAdminStatus();
+        if( request?.code === '99' ) {
+          if( request.message === 'Invalid or Expired Token' || request.message === 'Login Required' ) {
+            toast.error('Please Login First')
+            router.push('/auth/login')
+          } else if ( request.message === 'Invalid User Permissions' ) {
+            toast.error('Unauthorized')
+            router.push('/sports');
+          } else {
+            toast.error('Unknown')
+            router.push('/');
+          }   
+        }
 
-          setLoading( false );
-        }, 2000);
+        const fixtureData = await getLiveFixtureById( resolvedParams.id );
+        const playerData = await getLiveFixtureTeamPlayers( resolvedParams.id );
+
+        if( fixtureData && fixtureData.data ) {
+          setFixture( fixtureData.data )
+        }
+        if( playerData && playerData.data ) {
+          setTeamPlayers( playerData.data )
+        }
+
+        setLoading( false );
       }
 
       if( loading ) fetchData();
-
-      // if( !jwt ) {
-      //     toast.error('Please Login First');
-      //     setTimeout(() => router.push( '/admin' ), 1000);
-      // } else {
-      //     if( loading ) fetchData();
-      // }
     }, [ loading ]);
     
     if( loading ) {
@@ -152,7 +115,7 @@ const SuperAdminLivePage = ({ params }:
         })
       }
     }
-    const saveGeneralData = ( status: LiveStatus, currentMinute: number, injuryTime: number ) => {
+    const saveGeneralData = ( status: LiveStatus, currentMinute: number ) => {
       if( fixture ) {
         setFixture(prev => {
           if(prev === null) return prev;
@@ -160,8 +123,7 @@ const SuperAdminLivePage = ({ params }:
           return {
             ...prev,
             status,
-            currentMinute,
-            injuryTime
+            currentMinute
           }
         });
       }
@@ -268,6 +230,7 @@ const SuperAdminLivePage = ({ params }:
       {/* Overview Section */}
       {
         activeTab === TabsEnum.OVERVIEW && <Overview
+          liveId={ fixture!._id }
           homeName={ fixture!.homeTeam.name || 'Unknown' }
           awayName={ fixture!.awayTeam.name || 'Unknown' }
           status={ fixture!.status as LiveStatus }
@@ -284,6 +247,7 @@ const SuperAdminLivePage = ({ params }:
       {/* Events Section */}
       {
         activeTab === TabsEnum.EVENTS && <Events
+          liveId={ fixture!._id }
           events={ fixture!.timeline }
           currentTime={ currentTime }
           currentMinute={ fixture!.currentMinute }
@@ -293,6 +257,7 @@ const SuperAdminLivePage = ({ params }:
       {/* Statistics Section */}
       {
         activeTab === TabsEnum.STATISTICS && <Statistics
+          liveId={ fixture!._id }
           homeName={ fixture!.homeTeam.name }
           awayName={ fixture!.awayTeam.name }
           homeStats={ fixture!.statistics.home }
@@ -303,6 +268,7 @@ const SuperAdminLivePage = ({ params }:
       {/* Lineup Section */}
       {
         activeTab === TabsEnum.LINEUPS && <Lineups
+          liveId={ fixture!._id }
           homeName={ fixture!.homeTeam.name }
           awayName={ fixture!.awayTeam.name }
           homeLineup={ fixture!.lineups.home }
@@ -315,6 +281,7 @@ const SuperAdminLivePage = ({ params }:
       {/* General Section */}
       {
         activeTab === TabsEnum.GENERAL && <General
+          liveId={ fixture!._id }
           referee={ fixture!.referee }
           weather={ fixture!.weather }
           attendance={ fixture!.attendance }

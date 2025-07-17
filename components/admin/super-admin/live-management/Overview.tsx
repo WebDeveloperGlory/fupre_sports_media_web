@@ -1,7 +1,9 @@
+import { updateFixtureScore, updateLiveFixtureStatus, updateTime } from '@/lib/requests/v2/admin/super-admin/live-management/requests';
 import { LiveFixScore } from '@/utils/V2Utils/formData';
 import { LiveStatus } from '@/utils/V2Utils/v2requestData.enums';
 import { BarChart, Clock, RefreshCcw, Save } from 'lucide-react';
 import React, { useState } from 'react'
+import { toast } from 'react-toastify';
 
 type SaveScoreLine = { homeScore: number, awayScore: number, homePenalty?: number, awayPenalty?: number };
 type StatusAndTime = {
@@ -11,15 +13,16 @@ type StatusAndTime = {
 }
 
 const Overview = (
-  { status, currentMin, injuryTime, homeName, homeScore, awayName, awayScore, homePenalty, awayPenalty, saveScore }:
-  { 
+  { liveId, status, currentMin, injuryTime, homeName, homeScore, awayName, awayScore, homePenalty, awayPenalty, saveScore, saveData }:
+  {
+    liveId: string, 
     status: LiveStatus, 
     currentMin: number, injuryTime: number | null, 
     homeName: string, awayName: string,
     homeScore: number, awayScore: number, 
     homePenalty: number | null, awayPenalty: number | null,
     saveScore: ( payload: SaveScoreLine ) => void,
-    saveData: ( status: LiveStatus, currentMinute: number, injuryTime: number ) => void,
+    saveData: ( status: LiveStatus, currentMinute: number ) => void,
   }
 ) => {
   const [statusAndTimeData, setStatusAndTimeData] = useState<StatusAndTime>({
@@ -34,6 +37,39 @@ const Overview = (
     awayPenalty
   });
   const [isPenaltyShootout, setIsPenaltyShootout] = useState<boolean>( false );
+
+  const handleStatusNTimeUpdate = async () => {
+    const statusResponse = await updateLiveFixtureStatus( liveId, statusAndTimeData );
+    const timeResponse = await updateTime( 
+      liveId, 
+      { 
+        regularTime: statusAndTimeData.regularTime,
+        injuryTime: statusAndTimeData.injuryTime ? statusAndTimeData.injuryTime : undefined
+      } 
+    );
+
+    if( statusResponse?.code === '00' ) {
+      toast.success(statusResponse.message);
+      saveData( statusAndTimeData.status, currentMin );
+    } else {
+      toast.error(statusResponse?.message || 'An Error Occurred');
+    }
+    if( timeResponse?.code === '00' ) {
+      toast.success(timeResponse.message);
+      saveData( status, statusAndTimeData.regularTime );
+    } else {
+      toast.error(timeResponse?.message || 'An Error Occurred');
+    }
+  }
+  const handleScoreUpdate = async () => {
+    const response = await updateFixtureScore( liveId, scoreData );
+    if(response?.code === '00') {
+      toast.success(response.message);
+      saveScore(response.data);
+    } else {
+      toast.error(response?.message || 'An Error Occurred');
+    }
+  }
   return (
     <>
       <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
@@ -111,7 +147,7 @@ const Overview = (
                 Refresh Time
               </button>
               <button 
-                onClick={() => {}}
+                onClick={handleStatusNTimeUpdate}
                 className='py-2 rounded-lg flex justify-center items-center gap-2 bg-emerald-500 hover:bg-emerald-500/50 text-white'
               >
                 <Save className='w-5 h-5' />
@@ -226,7 +262,7 @@ const Overview = (
             {/* Button */}
             <div className='w-full' >
               <button 
-                onClick={() => {}}
+                onClick={handleScoreUpdate}
                 className='py-2 rounded-lg flex justify-center items-center gap-2 bg-emerald-500 hover:bg-emerald-500/50 text-white w-full'
               >
                 <Save className='w-5 h-5' />

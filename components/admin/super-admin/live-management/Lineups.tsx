@@ -3,10 +3,13 @@ import { LiveFixSubCreate } from '@/utils/V2Utils/formData'
 import { TeamType } from '@/utils/V2Utils/v2requestData.enums'
 import { FixtureLineup, FixtureSubstitutions } from '@/utils/V2Utils/v2requestSubData.types';
 import { ArrowDown, ArrowUp, ArrowUpCircle, ArrowUpDown, LayoutGrid, Plus, Trash2, Users } from 'lucide-react'
+import { addSubstitution } from '@/lib/requests/v2/admin/super-admin/live-management/requests';
+import { toast } from 'react-toastify';
 
 const Lineups = (
-    { homeName, awayName, homeLineup, awayLineup, currentMinute, substitutions, saveSubs }:
-    { 
+    { liveId, homeName, awayName, homeLineup, awayLineup, currentMinute, substitutions, saveSubs }:
+    {
+        liveId: string,
         homeName: string, awayName: string, 
         homeLineup: FixtureLineup, awayLineup: FixtureLineup , 
         currentMinute: number, 
@@ -22,7 +25,13 @@ const Lineups = (
         injury: false,
     });
 
-    const handleSub = () => {
+    const handleSub = async () => {
+        const response = await addSubstitution( liveId, subData );
+        if(response?.code === '00') {
+            toast.success(response.message)
+        } else {
+            toast.error(response?.message || 'An Error Occurred');
+        }
         saveSubs( subData );
     }
     const isSubOut = ( playerId: string ) => substitutions.some( sub => sub.playerOut._id === playerId );

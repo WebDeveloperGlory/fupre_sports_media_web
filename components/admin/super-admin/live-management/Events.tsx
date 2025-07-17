@@ -3,10 +3,13 @@ import { LiveFixTimelineCreate } from '@/utils/V2Utils/formData';
 import { FixtureLineup, FixtureTimeline } from '@/utils/V2Utils/v2requestSubData.types';
 import { FixtureTimelineCardType, FixtureTimelineGoalType, FixtureTimelineType, TeamType } from '@/utils/V2Utils/v2requestData.enums';
 import { Edit, List, Plus, Trash2 } from 'lucide-react';
+import { createTimeLineEvent } from '@/lib/requests/v2/admin/super-admin/live-management/requests';
+import { toast } from 'react-toastify';
 
 const Events = (
-  { events, currentTime, currentMinute, lineups }:
-  { 
+  { liveId, events, currentTime, currentMinute, lineups }:
+  {
+    liveId: string,
     events: FixtureTimeline[], 
     currentTime: Date, currentMinute: number, 
     lineups: { home: FixtureLineup, away: FixtureLineup } 
@@ -15,9 +18,8 @@ const Events = (
   const [currentEvents, setCurrentEvents] = useState<FixtureTimeline[]>( events );
   const [eventData, setEventData] = useState<LiveFixTimelineCreate>({
     event: {
-      id: '',
-      type: '' as FixtureTimelineType,
-      team: '' as TeamType,
+      type: FixtureTimelineType.GOAL,
+      team: TeamType.HOME,
       player: '',
       minute: currentMinute,
       description: '',
@@ -30,17 +32,24 @@ const Events = (
   })
   const [isInjuryTime, setIsInjuryTime] = useState<boolean>( false );
 
-  const handleDeleteEvent = ( id: string ) => {
+  const handleDeleteEvent = async ( id: string ) => {
 
   }
-  const handleEditEvent = ( id: string ) => {
+  const handleEditEvent = async ( id: string ) => {
 
   }
-  const handleSubmitEvent = () => {
-
+  const handleSubmitEvent = async () => {
+    console.log(eventData)
+    const response = await createTimeLineEvent( liveId, eventData );
+    if(response?.code === '00') {
+      toast.success(response.message);
+      setCurrentEvents(response.data);
+    } else {
+      toast.error(response?.message || 'An Error Occurred');
+    }
   }
 
-  const sortedEvents = events.sort((a,b) => b.minute - a.minute);
+  const sortedEvents = currentEvents.sort((a,b) => b.minute - a.minute);
   return (
     <>
       <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
@@ -155,6 +164,15 @@ const Events = (
               <label className="block font-semibold mb-1.5">Description</label>
               <textarea 
                 name="description" 
+                value={eventData.event.description}
+                onChange={
+                  ( e ) => setEventData({
+                    event: {
+                      ...eventData.event,
+                      description: e.target.value
+                    }
+                  })
+                }
                 placeholder='Enter event description'
                 rows={4}
                 className='w-full p-2 border rounded bg-input'
@@ -187,7 +205,7 @@ const Events = (
             {
               sortedEvents.map( event => (
                 <div
-                  key={event.id}
+                  key={event._id}
                   className='space-y-2 px-4 py-4 rounded-lg bg-card border border-muted-foreground'
                 >
                   {/* Top Section */}
@@ -199,11 +217,11 @@ const Events = (
                     </div>
                     <div className='flex items-center gap-4'>
                       <Edit
-                        onClick={() => handleEditEvent( event.id )} 
+                        onClick={() => handleEditEvent( event._id )} 
                         className='w-4 h-4 cursor-pointer text-blue-500'
                       />
                       <Trash2
-                        onClick={() => handleDeleteEvent( event.id )} 
+                        onClick={() => handleDeleteEvent( event._id )} 
                         className='w-4 h-4 cursor-pointer text-red-500'
                       />
                     </div>
