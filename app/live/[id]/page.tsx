@@ -1,14 +1,14 @@
 'use client';
 
 import { use, useEffect, useState } from 'react';
+import useFixtureSocket from '@/lib/socket/useFixtureSocket';
 import Image from 'next/image';
 import { BlurFade } from '@/components/ui/blur-fade';
 import { BackButton } from '@/components/ui/back-button';
 import { motion } from 'framer-motion';
-import { Trophy, Clock, Activity, Target, Flag, Users, PieChart, Goal, CloudRain, User, MapPin, Clock12, ThumbsUp, Star } from 'lucide-react';
-import { getLiveFixtureDetails } from '@/lib/requests/liveAdminPage/requests';
+import { Trophy, Clock, Goal, CloudRain, User, MapPin, Clock12, ThumbsUp, Star } from 'lucide-react';
 import { LiveFixture } from '@/utils/requestDataTypes';
-import { liveMatchSample, teamLogos } from '@/constants';
+import { teamLogos } from '@/constants';
 import { IV2FootballLiveFixture } from '@/utils/V2Utils/v2requestData.types';
 import Overview from '@/components/newLive/Overview';
 import PopUpModal from '@/components/modal/PopUpModal';
@@ -16,6 +16,43 @@ import Timeline from '@/components/newLive/Timeline';
 import Statistics from '@/components/newLive/Statistics';
 import Commentary from '@/components/newLive/Commentary';
 import Lineups from '@/components/newLive/Lineups';
+import { getLiveFixtureById, submitUnofficialCheer } from '@/lib/requests/v2/admin/super-admin/live-management/requests';
+import { TeamType } from '@/utils/V2Utils/v2requestData.enums';
+import { toast } from 'react-toastify';
+
+const templateStats = {
+  home: {
+      shotsOnTarget: 1,
+      shotsOffTarget: 1,
+      fouls: 1,
+      yellowCards: 1,
+      redCards: 1,
+      offsides: 1,
+      corners: 1,
+      possessionTime: 1
+  },
+  away: {
+    shotsOnTarget: 1,
+    shotsOffTarget: 1,
+    fouls: 1,
+    yellowCards: 1,
+    redCards: 1,
+    offsides: 1,
+    corners: 1,
+    possessionTime: 1
+  }
+}
+const templateCheerMeter = {
+  official: {
+    home: 1,
+    away: 1
+  },
+  unofficial: {
+    home: 1,
+    away: 1
+  },
+  userVotes: []
+};
 
 enum Tabs {
   OVERVIEW = 'overview',
@@ -32,6 +69,21 @@ export default function LiveMatchPage({
 }) {
   const resolvedParams = use(params);
 
+  const { 
+    isConnected,
+    minute,
+    score,
+    timeline,
+    statistics,
+    status,
+    generalInfo,
+    cheerMeter,
+    playerOfTheMatch,
+    liveWatchers,
+    substitution,
+    goalScorers,
+  } = useFixtureSocket(resolvedParams.id)
+
   const [ loading, setLoading ] = useState<boolean>( true );
   const [ liveFixture, setLiveFixture ] = useState<IV2FootballLiveFixture | null>( null );
   const [ activeTab, setActiveTab ] = useState<Tabs>( Tabs.OVERVIEW );
@@ -39,23 +91,18 @@ export default function LiveMatchPage({
   const [modalType, setModalType] = useState<'rate' | 'vote' | null>( null );
   const [activeModalTab, setActiveModalTab] = useState<string | null>( null );
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>( null );
-  const [ratingValue, setRatingValue] = useState<number>(5.0)
+  const [ratingValue, setRatingValue] = useState<number>(5.0);
 
   useEffect( () => {
     const fetchData = async () => {
-      // const data = await getLiveFixtureDetails( resolvedParams.id );
-      // if( data && data.code === '00' ) {
-      //   setLiveFixture( data.data );
-      //   console.log( data );
-      // };
-      // setLoading( false );
-      const timer = setTimeout(() => {
-        setLiveFixture( liveMatchSample as IV2FootballLiveFixture );
-        setActiveModalTab( liveMatchSample.homeTeam.name )
-        setLoading( false )
-      }, 2000)
+      const fixtureData = await getLiveFixtureById( resolvedParams.id );
 
-      return () => clearTimeout( timer )
+      if( fixtureData && fixtureData.data ) {
+        setLiveFixture( fixtureData.data );
+        setActiveModalTab( fixtureData.data.homeTeam.name )
+      }
+
+      setLoading( false );
     }
     
     if( loading ) fetchData();
@@ -77,10 +124,27 @@ export default function LiveMatchPage({
     return foundPlayer ? foundPlayer.fanRatings.average : 0;
   }
 
+  // Derived States //
+  const currentMinute = minute?.minute ?? liveFixture?.currentMinute ?? 0;
+  const injuryTime = minute?.injuryTime ?? liveFixture?.injuryTime ?? 0;
+  const currentStatus = status ?? liveFixture?.status ?? 'SCHEDULED';
+  const currentCheerMeter = cheerMeter ?? liveFixture?.cheerMeter ?? templateCheerMeter;
+
+  const homeScore = score?.homeScore ?? liveFixture?.result.homeScore ?? 0;
+  const awayScore = score?.awayScore ?? liveFixture?.result.awayScore ?? 0;
+  // const timelineEvents = timeline.length > 0 ? timeline : liveFixture?.timeline ?? [];
+  const stats = statistics ?? liveFixture?.statistics ?? templateStats;
+  // const streamLinks = streamUpdate?.streams ?? liveFixture?.streamLinks ?? [];
+  const referee = generalInfo?.referee ?? liveFixture?.referee;
+  const kickoffTime = generalInfo?.kickoffTime ?? liveFixture?.kickoffTime ?? '';
+  const weather = generalInfo?.weather ?? liveFixture?.weather ?? {condition: '', temperature: -10, humidity: -10};
+  // End of Derived States //
+
   // Calculate total elapsed game time
-  const totalElapsedGameTime = liveFixture ? liveFixture.statistics.home.possessionTime + liveFixture.statistics.away.possessionTime : 0;
+  const totalElapsedGameTime = liveFixture ? stats.home.possessionTime + stats.away.possessionTime : 0;
   const homePossession = totalElapsedGameTime > 0 ? ( liveFixture!.statistics.home.possessionTime / totalElapsedGameTime ) * 100 : 50;
   const awayPossession = 100 - homePossession; // Ensures total is always 100%
+
 
   return (
     <main className="min-h-screen">
@@ -92,6 +156,7 @@ export default function LiveMatchPage({
       <div className="pt-12 pb-4 px-3 md:pt-0 md:pb-6 md:px-6">
         <BlurFade>
           <div className="max-w-4xl mx-auto space-y-4 md:space-y-6">
+            <h1 className='text-center'>Live Viewers: {liveWatchers}</h1>
             {
               liveFixture && (
                 <>
@@ -131,16 +196,16 @@ export default function LiveMatchPage({
                         {/* Score */}
                         <div className="flex flex-col items-center justify-center">
                           <div className="bg-card shadow-xl rounded-lg md:rounded-xl p-2 md:p-3 border border-border min-w-[90px] md:min-w-[120px] text-center">
-                            <h2 className='text-sm'>{ liveFixture.status }</h2>
+                            <h2 className='text-sm'>{ currentStatus }</h2>
                             <div className="text-2xl md:text-4xl font-bold tracking-tighter">
-                              <span className="text-emerald-500">{ liveFixture.result.homeScore }</span>
+                              <span className="text-emerald-500">{ homeScore }</span>
                               <span className="mx-2 md:mx-3 text-muted-foreground">-</span>
-                              <span className="text-emerald-500">{ liveFixture.result.awayScore }</span>
+                              <span className="text-emerald-500">{ awayScore }</span>
                             </div>
                             <div className="flex items-center justify-center space-x-2 text-sm text-green-500">
                               <Clock className="h-4 w-4" />
-                              <span>{liveFixture.currentMinute}'</span>
-                              {liveFixture.injuryTime > 0 && <span>+{liveFixture.injuryTime}</span>}
+                              <span>{ currentMinute }'</span>
+                              {injuryTime > 0 && <span>+{injuryTime}</span>}
                             </div>
                             {
                               !possibleFirstHalfStatuses.includes( liveFixture.status ) ? (
@@ -182,20 +247,20 @@ export default function LiveMatchPage({
                         <div className="w-1 h-1 bg-gray-600 rounded-full"></div>
                         <div className="flex items-center text-sm">
                           <User className="h-4 w-4 mr-1 text-gray-400" />
-                          <span>Ref: {liveFixture.referee || 'Unknown'}</span>
+                          <span>Ref: {referee || 'Unknown'}</span>
                         </div>
                         <div className="w-1 h-1 bg-gray-600 rounded-full"></div>
                         <div className="flex items-center text-sm">
                           <CloudRain className="h-4 w-4 mr-1 text-gray-400" />
                           <span>
-                            {liveFixture.weather.condition || 'Unknown'}, {liveFixture.weather.temperature || 'Unknown'}°C
+                            {weather.condition || 'Unknown'}, {weather.temperature || 'Unknown'}°C
                           </span>
                         </div>
                         <div className="w-1 h-1 bg-gray-600 rounded-full"></div>
                         <div className="flex items-center text-sm">
                           <Clock12 className="h-4 w-4 mr-1 text-gray-400" />
                           <span>
-                            {liveFixture.kickoffTime.toLocaleTimeString()}
+                            {kickoffTime.toLocaleString()}
                           </span>
                         </div>
                       </div>
@@ -215,8 +280,8 @@ export default function LiveMatchPage({
                   >
                     <div className="col-span-3 md:col-span-1">
                       <StatBar
-                        home={ liveFixture.statistics.home.shotsOffTarget + liveFixture.statistics.home.shotsOnTarget }
-                        away={ liveFixture.statistics.away.shotsOffTarget + liveFixture.statistics.away.shotsOnTarget }
+                        home={ stats.home.shotsOffTarget + stats.home.shotsOnTarget }
+                        away={ stats.away.shotsOffTarget + stats.away.shotsOnTarget }
                         label='Total Shots'
                         className='bg-black/80 backdrop-blur-sm rounded-xl p-4 border border-border/20 h-full'
                       />
@@ -231,12 +296,12 @@ export default function LiveMatchPage({
                     <div className="col-span-3 md:col-span-1">
                       <CardsBar 
                         home={{ 
-                          yellow: liveFixture.statistics.home.yellowCards, 
-                          red: liveFixture.statistics.home.redCards 
+                          yellow: stats.home.yellowCards, 
+                          red: stats.home.redCards 
                         }} 
                         away={{ 
-                          yellow: liveFixture.statistics.away.yellowCards, 
-                          red: liveFixture.statistics.away.redCards 
+                          yellow: stats.away.yellowCards, 
+                          red: stats.away.redCards 
                         }} 
                       />
                     </div>
@@ -245,12 +310,13 @@ export default function LiveMatchPage({
                   {/* Fan Support */}
                   <div>
                     <CheerBar
-                      home={ liveFixture.cheerMeter.unofficial.home }
-                      away={ liveFixture.cheerMeter.unofficial.away }
+                      home={ currentCheerMeter.unofficial.home }
+                      away={ currentCheerMeter.unofficial.away }
                       homeShorthand={ liveFixture.homeTeam.shorthand || 'HOM' }
                       awayShorthand={ liveFixture.awayTeam.shorthand || 'AWA' }
                       homeTeam={ liveFixture.homeTeam.name }
                       awayTeam={ liveFixture.awayTeam.name }
+                      liveId={ liveFixture._id }
                     />
                   </div>
 
@@ -301,8 +367,8 @@ export default function LiveMatchPage({
                     {/* Statistics Section */}
                     { activeTab === Tabs.STATS &&
                       <Statistics
-                        homeStat={ liveFixture.statistics.home }
-                        awayStat={ liveFixture.statistics.away }
+                        homeStat={ stats.home }
+                        awayStat={ stats.away }
                         ratings={ liveFixture.playerRatings }
                         home={ liveFixture.homeTeam.name }
                         away={ liveFixture.awayTeam.name }
@@ -621,12 +687,21 @@ function CardsBar({ home, away }: { home: { yellow: number; red: number }; away:
 }
 
 function CheerBar(
-  { home, away, homeTeam, awayTeam, homeShorthand, awayShorthand }: 
-  { home: number, away: number, homeTeam: string, awayTeam: string, homeShorthand: string, awayShorthand: string }
+  { home, away, homeTeam, awayTeam, homeShorthand, awayShorthand, liveId }: 
+  { home: number, away: number, homeTeam: string, awayTeam: string, homeShorthand: string, awayShorthand: string, liveId: string }
 ) {
   const total = home + away;
   const homePercent = total === 0 ? 50 : (home / total) * 100;
   const awayPercent = total === 0 ? 50 : (away / total) * 100;
+
+  const handleCheer = async ( team: TeamType ) => {
+    const response = await submitUnofficialCheer(liveId, {team, isOfficial: false});
+    if(response?.code === '00') {
+      toast.success(response.message);
+    } else {
+      toast.error(response?.message || 'An Error Occurred');
+    }
+  }
 
   return (
     <motion.div 
@@ -663,18 +738,19 @@ function CheerBar(
         <span className="text-sm font-medium w-16 pl-2">{ awayShorthand }</span>
       </div>
       {/* Buttons */}
-      <div className='flex justify-center items-center gap-4'>
+      <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
         <button
-          onClick={() => {}}
-          className='px-4 py-2 rounded-xl flex gap-2 items-center hover:scale-105 transition border border-foreground'
+          onClick={() => handleCheer(TeamType.HOME)}
+          className='px-4 py-2 rounded-xl flex gap-2 items-center hover:scale-105 transition border border-foreground disabled:opacity-50'
+          // disabled
         >
           <ThumbsUp className='w-5 h-5 text-emerald-500' />
           Support <span className='md:hidden'>{ homeShorthand }</span><span className='hidden md:block'>{ homeTeam }</span>
         </button>
         <button
-          onClick={() => {}}
+          onClick={() => handleCheer(TeamType.AWAY)}
           className='px-4 py-2 rounded-xl flex gap-2 items-center hover:scale-105 transition border border-foreground disabled:opacity-50'
-          disabled
+          // disabled
         >
           <ThumbsUp className='w-5 h-5 text-emerald-500/50' />
           Support <span className='md:hidden'>{ awayShorthand }</span><span className='hidden md:block'>{ awayTeam }</span>

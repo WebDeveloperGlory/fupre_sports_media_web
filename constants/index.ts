@@ -1,6 +1,7 @@
 import { Statistics } from "@/utils/requestDataTypes";
 import { EventTypes } from "@/utils/stateTypes";
-import { CompetitionType } from "@/utils/V2Utils/v2requestData.enums";
+import { CompetitionType, FixtureTimelineType, TeamType } from "@/utils/V2Utils/v2requestData.enums";
+import { IV2FootballLiveFixture } from "@/utils/V2Utils/v2requestData.types";
 
 export const getCurrentDate = (): string => {
 	const today = new Date();
@@ -318,7 +319,7 @@ export const mockInterLevelCompetition = {
 };
 
 // Sample live football match data object
-export const liveMatchSample = {
+export const liveMatchSample: IV2FootballLiveFixture = {
     _id: "507f1f77bcf86cd799439011",
     fixture: "507f1f77bcf86cd799439012",
     competition: {
@@ -679,7 +680,7 @@ export const liveMatchSample = {
     substitutions: [
         {
             id: '1234jnsmfsjcscscs',
-            team: "away",
+            team: TeamType.AWAY,
             playerOut: {
                 name: "Phil Foden",
                 position: "RW",
@@ -695,7 +696,7 @@ export const liveMatchSample = {
         },
         {
             id: '1234jnsmfsjcscs34',
-            team: "home",
+            team: TeamType.HOME,
             playerOut: {
                 name: "William Saliba",
                 position: "CB",
@@ -712,9 +713,9 @@ export const liveMatchSample = {
     ],
     timeline: [
         {
-            id: 'abshadkjnajnas5',
-            type: "goal",
-            team: 'home',
+            _id: 'abshadkjnajnas5',
+            type: FixtureTimelineType.GOAL,
+            team: TeamType.HOME,
             player: {
                 name: "Kai Havertz",
                 position: "ST",
@@ -732,13 +733,9 @@ export const liveMatchSample = {
             cardType: null
         },
         {
-            id: 'abshadkjnajnas4',
-            type: "yellow-card",
-            team: {
-                name: "Manchester City",
-                shorthand: "MCI",
-                _id: "507f1f77bcf86cd799439015"
-            },
+            _id: 'abshadkjnajnas4',
+            type: FixtureTimelineType.YELLOWCARD,
+            team: TeamType.AWAY,
             player: {
                 name: "Bernardo Silva",
                 position: "CM",
@@ -752,9 +749,9 @@ export const liveMatchSample = {
             cardType: "first-yellow"
         },
         {
-            id: 'abshadkjnajnas3',
-            type: "goal",
-            team: 'away',
+            _id: 'abshadkjnajnas3',
+            type: FixtureTimelineType.GOAL,
+            team: TeamType.AWAY,
             player: {
                 name: "Erling Haaland",
                 position: "ST",
@@ -772,13 +769,9 @@ export const liveMatchSample = {
             cardType: null
         },
         {
-            id: 'abshadkjnajnas2',
-            type: "goal",
-            team: {
-                name: "Arsenal",
-                shorthand: "ARS",
-                _id: "507f1f77bcf86cd799439014"
-            },
+            _id: 'abshadkjnajnas2',
+            type: FixtureTimelineType.GOAL,
+            team: TeamType.HOME,
             player: {
                 name: "Bukayo Saka",
                 position: "RW",
@@ -792,13 +785,9 @@ export const liveMatchSample = {
             cardType: null
         },
         {
-            id: 'abshadkjnajnas1',
-            type: "red-card",
-            team: {
-                name: "Manchester City",
-                shorthand: "MCI",
-                _id: "507f1f77bcf86cd799439015"
-            },
+            _id: 'abshadkjnajnas1',
+            type: FixtureTimelineType.REDCARD,
+            team: TeamType.AWAY,
             player: {
                 name: "John Stones",
                 position: "CB",
@@ -864,13 +853,13 @@ export const liveMatchSample = {
         userVotes: [
             {
                 userId: "507f1f77bcf86cd799439070",
-                team: "home",
+                team: TeamType.HOME,
                 isOfficial: false,
                 timestamp: new Date("2025-06-13T20:05:00Z")
             },
             {
                 userId: "507f1f77bcf86cd799439071",
-                team: "away",
+                team: TeamType.AWAY,
                 isOfficial: false,
                 timestamp: new Date("2025-06-13T20:06:00Z")
             }
@@ -919,7 +908,7 @@ export const liveMatchSample = {
                 position: "ST",
                 _id: "507f1f77bcf86cd799439028"
             },
-            team: "home",
+            team: TeamType.HOME,
             official: {
                 rating: 7.5,
                 ratedBy: 'admin123'
@@ -949,7 +938,7 @@ export const liveMatchSample = {
                 position: "RW",
                 _id: "507f1f77bcf86cd799439028"
             },
-            team: "home",
+            team: TeamType.HOME,
             official: {
                 rating: 7.5,
                 ratedBy: 'admin123'
