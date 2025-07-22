@@ -587,7 +587,7 @@ export const updateOfficialPlayerRatings = async ( fixtureId: string, formData: 
     try {
         const response = await axiosInstance.put(
             `${ API_URL }/live/${fixtureId}/admin/player-rating/submit`, 
-            formData,
+            { ratings: [ formData ] },
             { withCredentials: true }
         );
         const { data }: { data: SuccessRequest } = response;

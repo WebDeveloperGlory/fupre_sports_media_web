@@ -1,4 +1,4 @@
-import { CoachRoles, CompetitionSponsors, CompetitionStatus, CompetitionTeamForm, CompetitionTypes, FixtureStatus, LogAction, SportType, TeamTypes, UserRole, UserStatus } from "./v2requestData.enums";
+import { BlogCategories, CoachRoles, CompetitionSponsors, CompetitionStatus, CompetitionTeamForm, CompetitionTypes, FixtureStatus, LogAction, SportType, TeamTypes, UserRole, UserStatus } from "./v2requestData.enums";
 import { FixtureCheerMeter, FixtureCommentary, FixtureLineup, FixtureOdds, FixturePlayerOfTheMatch, FixturePlayerRatings, FixtureResult, FixtureStat, FixtureStreamLinks, FixtureSubstitutions, FixtureTimeline, ShortPopulatedCompetition, ShortPopulatedPlayer, ShortPopulatedTeam } from "./v2requestSubData.types";
 
 export type UserPreference = {
@@ -312,6 +312,67 @@ export interface IV2FootballFixture {
     };
     highlights: FixtureStreamLinks[];
     isDerby: Boolean;
+
+    createdAt: Date;
+    updatedAt: Date;
+}
+
+export interface PopIV2FootballFixture {
+    _id: string;
+    competition: ShortPopulatedCompetition;
+    homeTeam: ShortPopulatedTeam; // hometeamID
+    awayTeam: ShortPopulatedTeam; // awayTeamID
+    matchType: string;
+    stadium: string;
+    
+    scheduledDate: Date;
+    status: FixtureStatus;
+    postponedReason: string;
+    rescheduledDate: Date;
+
+    result: FixtureResult;
+    goalScorers: { player: string, team: string, time: number }[];
+    statistics: {
+        home: FixtureStat,
+        away: FixtureStat
+    };
+
+    lineups: {
+            home: FixtureLineup,
+            away: FixtureLineup
+        };
+    substitutions: FixtureSubstitutions[];
+    
+    timeline: FixtureTimeline[];
+    commentary: FixtureCommentary[];
+
+    playerOfTheMatch: FixturePlayerOfTheMatch;
+    playerRatings: FixturePlayerRatings[];
+
+    referee: string;
+    attendance: number;
+    weather: {
+        condition: string,
+        temperature: number
+    };
+    highlights: FixtureStreamLinks[];
+    isDerby: Boolean;
+
+    createdAt: Date;
+    updatedAt: Date;
+}
+
+export interface IV2Blog {
+    _id: string;
+
+    author: { _id: string; name: string; email: string; role: UserRole };
+    category: BlogCategories;
+    title: string;
+    content: string;
+    coverImage?: string;
+    isReviewed: boolean;
+    isPublished: boolean;
+    views: number;
 
     createdAt: Date;
     updatedAt: Date;

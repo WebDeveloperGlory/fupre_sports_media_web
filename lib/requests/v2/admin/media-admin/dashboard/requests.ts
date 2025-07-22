@@ -20,9 +20,16 @@ interface SuccessRequest {
 const PART_API_URL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_PROD_API_URL : process.env.NEXT_PUBLIC_DEV_PARTIAL_API_URL;
 const API_URL = process.env.NEXT_PUBLIC_DEV_MODE === 'partial' ? PART_API_URL : `${PART_API_URL}/v2`;
 
-export const getAllAdmins = async () => {
+export const getHeadMediaAdminDashboard = async ( authToken: string | undefined ) => {
     try {
-        const response = await axiosInstance.get(`${API_URL}/admin/all`);
+        const response = await axiosInstance.get(
+            `${API_URL}/views/media-admin/dashboard`,
+            {
+                headers: {
+                    Authorization: `Bearer ${ authToken }`
+                }
+            }
+        );
         const { data }: { data: SuccessRequest } = response;
 
         if (data.code === '99') {
@@ -38,15 +45,22 @@ export const getAllAdmins = async () => {
             console.error( `Error ${ err.status }: `, response?.data.message )
             return response?.data || null;
         } else {
-            console.error('Error fetching live admin list: ', err );
+            console.error('Error fetching super admin football dashboard: ', err );
             return null;
         }
     }
 };
 
-export const getMediaAdmins = async () => {
+export const getHeadMediaAdminFixturesForRating = async ( authToken: string | undefined ) => {
     try {
-        const response = await axiosInstance.get(`${API_URL}/admin/media`);
+        const response = await axiosInstance.get(
+            `${API_URL}/views/media-admin/potm-fixtures`,
+            {
+                headers: {
+                    Authorization: `Bearer ${ authToken }`
+                }
+            }
+        );
         const { data }: { data: SuccessRequest } = response;
 
         if (data.code === '99') {
@@ -62,7 +76,7 @@ export const getMediaAdmins = async () => {
             console.error( `Error ${ err.status }: `, response?.data.message )
             return response?.data || null;
         } else {
-            console.error('Error fetching live admin list: ', err );
+            console.error('Error fetching super admin football dashboard: ', err );
             return null;
         }
     }

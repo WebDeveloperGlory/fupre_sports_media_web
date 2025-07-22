@@ -237,3 +237,29 @@ export const checkSuperAdminStatus = async () => {
         }
     }
 }
+
+export const checkHeadMediaAdminStatus = async () => {
+    try {
+        const response = await axiosInstance.get(
+            `${ API_URL }/auth/check/head-media-admin`, 
+            { withCredentials: true }
+        );
+        const { data }: { data: SuccessRequest } = response;
+
+        if( data.code === '99' ) {
+            throw data
+        }
+        return data;
+    } catch( err: any ) {
+        const { response } = err as CustomError;
+        console.log( err, response );
+
+        if( err?.status && err?.message ) {
+            console.error( `Error ${ err.status }: `, response?.data.message )
+            return response?.data || null;
+        } else {
+            console.error('Error generating otp: ', err );
+            return null;
+        }
+    }
+}

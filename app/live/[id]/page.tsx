@@ -16,7 +16,7 @@ import Timeline from '@/components/newLive/Timeline';
 import Statistics from '@/components/newLive/Statistics';
 import Commentary from '@/components/newLive/Commentary';
 import Lineups from '@/components/newLive/Lineups';
-import { getLiveFixtureById, submitUnofficialCheer } from '@/lib/requests/v2/admin/super-admin/live-management/requests';
+import { getLiveFixtureById, submitUnofficialCheer, submitUserPlayerRating } from '@/lib/requests/v2/admin/super-admin/live-management/requests';
 import { TeamType } from '@/utils/V2Utils/v2requestData.enums';
 import { toast } from 'react-toastify';
 
@@ -113,6 +113,27 @@ export default function LiveMatchPage({
     setOpen( false );
     setModalType( null );
     setRatingValue( 5.0 );
+  }
+  const handleSubmitVote = async () => {
+
+  }
+  const handleRatePlayer = async () => {
+    if(liveFixture && selectedPlayer) {
+      const response = await submitUserPlayerRating( 
+        liveFixture._id, 
+        { 
+          playerId: selectedPlayer,
+          rating: ratingValue,
+          isHomePlayer: activeModalTab === liveFixture.homeTeam.name
+        } 
+      );
+      if(response?.code === '00') {
+        toast.success(response.message || 'Rating Submitted');
+        onModalClose();
+      } else {
+        toast.error(response?.message || 'Error Submitting Rating');
+      }
+    }
   }
 
   // Define possible first half statuses
@@ -459,7 +480,7 @@ export default function LiveMatchPage({
                   <div className='space-y-2'>
                     {
                       activeModalTab === liveFixture.homeTeam.name && (
-                        [ ...liveFixture.lineups.home.startingXI ].map( (player, i) => (
+                        [ ...liveFixture.lineups.home.startingXI, ...liveFixture.lineups.home.substitutes ].map( (player, i) => (
                           <div 
                             key={ i }
                             onClick={ () => setSelectedPlayer( player.player._id ) } 
@@ -489,7 +510,7 @@ export default function LiveMatchPage({
                     }
                     {
                       activeModalTab === liveFixture.awayTeam.name && (
-                        [ ...liveFixture.lineups.away.startingXI ].map( (player, i) => (
+                        [ ...liveFixture.lineups.away.startingXI, ...liveFixture.lineups.away.substitutes ].map( (player, i) => (
                           <div 
                             key={ i }
                             onClick={ () => setSelectedPlayer( player.player._id ) } 
@@ -550,7 +571,7 @@ export default function LiveMatchPage({
 
                   {/* Vote Button */}
                   <button
-                    onClick={ () => {} }
+                    onClick={ modalType === 'vote' ? handleSubmitVote : handleRatePlayer }
                     className='bg-emerald-500 py-2 px-4 rounded-lg w-full disabled:opacity-50'
                     disabled={ selectedPlayer === null }
                   >

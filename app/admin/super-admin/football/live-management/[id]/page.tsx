@@ -6,8 +6,6 @@ import Lineups from '@/components/admin/super-admin/live-management/Lineups';
 import Overview from '@/components/admin/super-admin/live-management/Overview';
 import Statistics from '@/components/admin/super-admin/live-management/Statistics';
 import { Loader } from '@/components/ui/loader';
-import { liveMatchSample } from '@/constants';
-import { getLiveFixtureTeamPlayerList } from '@/lib/requests/liveAdminPage/requests';
 import { getLiveFixtureById, getLiveFixtureTeamPlayers } from '@/lib/requests/v2/admin/super-admin/live-management/requests';
 import { checkSuperAdminStatus } from '@/lib/requests/v2/authentication/requests';
 import { LiveFixSubCreate } from '@/utils/V2Utils/formData';

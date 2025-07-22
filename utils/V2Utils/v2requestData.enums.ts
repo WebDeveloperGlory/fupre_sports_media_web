@@ -159,3 +159,12 @@ export enum PlayerClubStatus {
     ON_LOAN = 'on-loan',
     TRANSFERRED_OUT = 'transferred-out'
 }
+
+export enum BlogCategories {
+    FOOTBALL = 'football',
+    BASKETBALL = 'basketball',
+    CHESSS = 'chesss',
+    VOLLEYBALL = 'volleyball',
+    ATHLETICS = 'athletics',
+    GENERAL = 'general',
+}

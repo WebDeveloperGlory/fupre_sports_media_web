@@ -38,7 +38,7 @@ const Overview = ({ stream, playerRatings, playerOfTheMatch, homeLineup, awayLin
         position: string, 
         stats: { goals: number, assists: number, shots: number, passes: number, tackles: number, saves: number } 
     ) => {
-        if( position.toLowerCase() === 'gk' ) {
+        if( position && position.toLowerCase() === 'gk' ) {
             return `Goals: ${ stats.goals }, Assists: ${ stats.assists }, Saves: ${ stats.saves }`
         } else {
             return `Goals: ${ stats.goals }, Assists: ${ stats.assists }, Shots: ${ stats.shots }`
@@ -119,6 +119,38 @@ const Overview = ({ stream, playerRatings, playerOfTheMatch, homeLineup, awayLin
             <div className='flex gap-2 items-center font-bold'>
                 <Trophy className='text-emerald-500 w-6 h-6' />
                 <h2>Player Of The Match</h2>
+            </div>
+
+            {/* Voting List */}
+            <div className='space-y-2'>
+                <p>Total Fan Votes: {playerOfTheMatch.fanVotes.length || 0}</p>
+                {
+                    playerOfTheMatch.fanVotes.map((player, i) => (
+                        <div 
+                            key={ player.player._id }
+                            className='border border-muted-foreground bg-card p-4 rounded-lg space-y-4'
+                        >
+                            <div className='flex justify-between items-center'>
+                                {/* Player Details */}
+                                <div className='flex items-center gap-3'>
+                                    <div className='flex items-center justify-center w-8 h-8 rounded-full border border-muted-foreground bg-card'>{ i+1 }</div>
+                                    <div>
+                                        <p>{ player.player.name }</p>
+                                        <span className='text-muted-foreground text-sm'>Unknown</span>
+                                    </div>
+                                </div>
+                                {/* Fan Votes */}
+                                <div>
+                                    <p>{ player.votes } votes</p>
+                                    <span className='text-sm text-muted-foreground'>{(player.votes / playerOfTheMatch.fanVotes.length * 100 ).toFixed(2)}%</span>
+                                </div>
+                            </div>
+                            <div className='text-sm'>
+                                <p>Fan Rating</p>
+                            </div>
+                        </div>
+                    ))
+                }
             </div>
             <div className='space-y-2'>
                 {

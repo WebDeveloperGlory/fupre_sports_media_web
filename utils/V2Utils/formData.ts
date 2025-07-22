@@ -1,4 +1,4 @@
-import { CompetitionSponsors, CompetitionStatus, CompetitionTypes, FavoriteFoot, FixtureStatus, FixtureTimelineCardType, FixtureTimelineGoalType, FixtureTimelineType, LiveStatus, PlayerClubStatus, PlayerRole, TeamType } from "./v2requestData.enums"
+import { BlogCategories, CompetitionSponsors, CompetitionStatus, CompetitionTypes, FavoriteFoot, FixtureStatus, FixtureTimelineCardType, FixtureTimelineGoalType, FixtureTimelineType, LiveStatus, PlayerClubStatus, PlayerRole, TeamType } from "./v2requestData.enums"
 import { FixtureLineup, FixtureLineupUnPop, FixtureStat, FixtureStreamLinks } from "./v2requestSubData.types";
 
 export type FixtureTimeline = {
@@ -184,6 +184,19 @@ export type LivFixPlayerRatingOfficial = {
         tackles?: number;
         saves?: number;
     };
+};
+export type LivFixPlayerRatingOfficialArr = {
+    playerId: string;
+    isHomePlayer: boolean;
+    rating: number; // 0-10
+    stats?: {
+        goals?: number;
+        assists?: number;
+        shots?: number;
+        passes?: number;
+        tackles?: number;
+        saves?: number;
+    };
 }[];
 // Perform genera updates
 export type LivFixGeneralUpdates = { 
@@ -243,3 +256,10 @@ export type PlayerVerificationDetails = {
 }
 
 // End of Team Admin //
+
+// Media Admin //
+
+// Create blog
+export type CreateBlogForm = { title: string; content: string; coverImage: string; category: BlogCategories }
+
+// End of Media Admin //
