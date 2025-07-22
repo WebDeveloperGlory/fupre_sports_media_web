@@ -27,7 +27,8 @@ export const getHeadMediaAdminDashboard = async ( authToken: string | undefined 
             {
                 headers: {
                     Authorization: `Bearer ${ authToken }`
-                }
+                },
+                withCredentials: true,
             }
         );
         const { data }: { data: SuccessRequest } = response;
