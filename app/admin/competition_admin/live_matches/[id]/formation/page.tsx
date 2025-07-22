@@ -136,7 +136,7 @@ const FormationPage = (
 
       {/* Team Section */}
       <div className="grid lg:grid-cols-2 gap-6">
-        <TeamSection
+        {/* <TeamSection
           team={ homeLineup }
           availablePlayers={ teamPlayers }
           title={`${ teamPlayers?.homeTeam.name }( Home )`}
@@ -155,7 +155,7 @@ const FormationPage = (
           handleFormationChange={ handleFormationChange }
           dropdownOpen={ awayDropdownOpen }
           handleDropDownToggle={ handleDropDownToggle }
-        />
+        /> */}
       </div>
     </div>
   )

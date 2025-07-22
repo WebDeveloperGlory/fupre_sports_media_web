@@ -8,7 +8,7 @@ import { BackButton } from '@/components/ui/back-button';
 import { motion } from 'framer-motion';
 import { Trophy, Clock, Goal, CloudRain, User, MapPin, Clock12, ThumbsUp, Star } from 'lucide-react';
 import { LiveFixture } from '@/utils/requestDataTypes';
-import { teamLogos } from '@/constants';
+import { liveMatchSample, teamLogos } from '@/constants';
 import { IV2FootballLiveFixture } from '@/utils/V2Utils/v2requestData.types';
 import Overview from '@/components/newLive/Overview';
 import PopUpModal from '@/components/modal/PopUpModal';
@@ -16,9 +16,10 @@ import Timeline from '@/components/newLive/Timeline';
 import Statistics from '@/components/newLive/Statistics';
 import Commentary from '@/components/newLive/Commentary';
 import Lineups from '@/components/newLive/Lineups';
-import { getLiveFixtureById, submitUnofficialCheer, submitUserPlayerRating } from '@/lib/requests/v2/admin/super-admin/live-management/requests';
+import { getLiveFixtureById, submitUnofficialCheer, submitUserPlayerRating, submitUserPOTMVote } from '@/lib/requests/v2/admin/super-admin/live-management/requests';
 import { TeamType } from '@/utils/V2Utils/v2requestData.enums';
 import { toast } from 'react-toastify';
+import { getProfile } from '@/lib/requests/v2/user/requests';
 
 const templateStats = {
   home: {
@@ -85,6 +86,7 @@ export default function LiveMatchPage({
   } = useFixtureSocket(resolvedParams.id)
 
   const [ loading, setLoading ] = useState<boolean>( true );
+  const [ isLoggedIn, setIsLoggedIn ] = useState<boolean>( false );
   const [ liveFixture, setLiveFixture ] = useState<IV2FootballLiveFixture | null>( null );
   const [ activeTab, setActiveTab ] = useState<Tabs>( Tabs.OVERVIEW );
   const [open, setOpen] = useState<boolean>( false );
@@ -95,6 +97,15 @@ export default function LiveMatchPage({
 
   useEffect( () => {
     const fetchData = async () => {
+      const request = await getProfile();
+      if( request?.code === '99' ) {
+        if( request.message === 'Invalid or Expired Token' || request.message === 'Login Required' ) {
+          setIsLoggedIn(false);
+        }
+      } else {
+        setIsLoggedIn(true);
+      }
+
       const fixtureData = await getLiveFixtureById( resolvedParams.id );
 
       if( fixtureData && fixtureData.data ) {
@@ -115,26 +126,76 @@ export default function LiveMatchPage({
     setRatingValue( 5.0 );
   }
   const handleSubmitVote = async () => {
-
+    if(liveFixture && selectedPlayer) {
+      const response = await submitUserPOTMVote( 
+        liveFixture._id, 
+        { playerId: selectedPlayer } 
+      );
+      if(response?.code === '00') {
+        toast.success(response.message || 'POTM Candidate Submitted');
+        onModalClose();
+      } else {
+        toast.error(response?.message || 'Error Submitting POTM Candidate');
+      }
+    }
   }
   const handleRatePlayer = async () => {
-    if(liveFixture && selectedPlayer) {
-      const response = await submitUserPlayerRating( 
-        liveFixture._id, 
-        { 
+    if (!liveFixture || !selectedPlayer) return;
+
+    const storageKey = `rated_players_${liveFixture._id}`;
+    const twoHours = 2 * 60 * 60 * 1000;
+
+    // Check if already rated
+    try {
+      const stored = localStorage.getItem(storageKey);
+      if (stored) {
+        const data = JSON.parse(stored);
+        const isExpired = Date.now() - data.timestamp > twoHours;
+        
+        if (!isExpired && data.players[selectedPlayer]) {
+          toast.error('You have already rated this player!');
+          return;
+        }
+        
+        // Clean up if expired
+        if (isExpired) localStorage.removeItem(storageKey);
+      }
+    } catch (error) {
+      // Ignore localStorage errors
+    }
+
+    try {
+      const response = await submitUserPlayerRating(
+        liveFixture._id,
+        {
           playerId: selectedPlayer,
           rating: ratingValue,
           isHomePlayer: activeModalTab === liveFixture.homeTeam.name
-        } 
+        }
       );
-      if(response?.code === '00') {
+
+      if (response?.code === '00') {
+        // Store rated player
+        try {
+          const existing = JSON.parse(localStorage.getItem(storageKey) || '{"players":{}}');
+          const updated = {
+            players: { ...existing.players, [selectedPlayer]: Date.now() },
+            timestamp: Date.now()
+          };
+          localStorage.setItem(storageKey, JSON.stringify(updated));
+        } catch (error) {
+          // Ignore localStorage errors
+        }
+
         toast.success(response.message || 'Rating Submitted');
         onModalClose();
       } else {
         toast.error(response?.message || 'Error Submitting Rating');
       }
+    } catch (error) {
+      toast.error('Network error occurred');
     }
-  }
+  };
 
   // Define possible first half statuses
   const possibleFirstHalfStatuses = ['pre-match', '1st-half', 'postponed'];
@@ -153,6 +214,7 @@ export default function LiveMatchPage({
 
   const homeScore = score?.homeScore ?? liveFixture?.result.homeScore ?? 0;
   const awayScore = score?.awayScore ?? liveFixture?.result.awayScore ?? 0;
+  const POTM = playerOfTheMatch ?? liveFixture?.playerOfTheMatch ?? liveMatchSample.playerOfTheMatch;
   // const timelineEvents = timeline.length > 0 ? timeline : liveFixture?.timeline ?? [];
   const stats = statistics ?? liveFixture?.statistics ?? templateStats;
   // const streamLinks = streamUpdate?.streams ?? liveFixture?.streamLinks ?? [];
@@ -373,9 +435,11 @@ export default function LiveMatchPage({
                         home={ liveFixture.homeTeam.name }
                         away={ liveFixture.awayTeam.name }
                         odds={ liveFixture.odds }
-                        playerOfTheMatch={ liveFixture.playerOfTheMatch }
+                        playerOfTheMatch={ POTM }
                         setOpen={ setOpen }
                         setModalType={ setModalType }
+                        isLoggedIn={ isLoggedIn }
+                        minute={ currentMinute }
                       /> 
                     }
 
@@ -711,18 +775,41 @@ function CheerBar(
   { home, away, homeTeam, awayTeam, homeShorthand, awayShorthand, liveId }: 
   { home: number, away: number, homeTeam: string, awayTeam: string, homeShorthand: string, awayShorthand: string, liveId: string }
 ) {
+  // Store the last cheer timestamp
+  const [lastCheerTime, setLastCheerTime] = useState<number>(0);
+  const cooldownPeriod = 10 * 1000; // 10 seconds in milliseconds
+
   const total = home + away;
   const homePercent = total === 0 ? 50 : (home / total) * 100;
   const awayPercent = total === 0 ? 50 : (away / total) * 100;
 
-  const handleCheer = async ( team: TeamType ) => {
-    const response = await submitUnofficialCheer(liveId, {team, isOfficial: false});
-    if(response?.code === '00') {
-      toast.success(response.message);
-    } else {
-      toast.error(response?.message || 'An Error Occurred');
+  const handleCheer = async (team: TeamType) => {
+    const now = Date.now();
+    const timeSinceLastCheer = now - lastCheerTime;
+
+    // Check if still in cooldown period
+    if (timeSinceLastCheer < cooldownPeriod) {
+      const remainingCooldown = cooldownPeriod - timeSinceLastCheer;
+      const secondsLeft = Math.ceil(remainingCooldown / 1000);
+      
+      toast.error(`Please wait ${secondsLeft} seconds before cheering again!`);
+      return;
     }
-  }
+
+    try {
+      const response = await submitUnofficialCheer(liveId, { team, isOfficial: false });
+      
+      if (response?.code === '00') {
+        // Update last cheer time only on successful cheer
+        setLastCheerTime(now);
+        toast.success(response.message);
+      } else {
+        toast.error(response?.message || 'An Error Occurred');
+      }
+    } catch (error) {
+      toast.error('Network error occurred');
+    }
+  };
 
   return (
     <motion.div 

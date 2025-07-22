@@ -100,17 +100,12 @@ export const loginUser = async ( email: string, password: string ) => {
     }
 }
 
-export const logoutUser = async ( token: string ) => {
+export const logoutUser = async () => {
     try {
         const response = await axiosInstance.post(
             `${ API_URL }/auth/logout`,
             {},
-            {
-                headers: {
-                    Authorization: `Bearer ${ token }`
-                },
-                withCredentials: true
-            }
+            { withCredentials: true }
         );
         const { data }: { data: SuccessRequest } = response;
 
@@ -125,7 +120,7 @@ export const logoutUser = async ( token: string ) => {
             console.error( `Error ${ err.status }: `, response?.data.message )
             return response?.data || null;
         } else {
-            console.error('Error fetching competitions: ', err );
+            console.error('Error logging out: ', err );
             return null;
         }
     }

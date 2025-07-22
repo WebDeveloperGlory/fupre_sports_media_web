@@ -2,6 +2,54 @@ import { Statistics } from "@/utils/requestDataTypes";
 import { EventTypes } from "@/utils/stateTypes";
 import { CompetitionType, FixtureTimelineType, TeamType } from "@/utils/V2Utils/v2requestData.enums";
 import { IV2FootballLiveFixture } from "@/utils/V2Utils/v2requestData.types";
+import { FixturePlayerOfTheMatch } from "@/utils/V2Utils/v2requestSubData.types";
+
+type VoteMapPlayers = {
+    name: string;
+    department: string;
+    admissionYear: string;
+    _id: string;
+    totalVotes: number;
+}
+export function countPOTMVotes(userVotes: FixturePlayerOfTheMatch['userVotes']) {
+    // Handle empty or invalid input
+    if (!userVotes || !Array.isArray(userVotes) || userVotes.length === 0) {
+        return {
+            totalVotes: 0,
+            players: []
+        };
+    }
+
+    // Create a map to count votes per player
+    const voteMap = new Map();
+
+    // Process each vote
+    userVotes.forEach(vote => {
+        const playerId = vote.playerId._id;
+        
+        if (voteMap.has(playerId)) {
+            // Player already exists, increment vote count
+            voteMap.get(playerId).totalVotes += 1;
+        } else {
+            // New player, add to map
+            voteMap.set(playerId, {
+                name: vote.playerId.name,
+                department: vote.playerId.department,
+                admissionYear: vote.playerId.admissionYear,
+                _id: vote.playerId._id,
+                totalVotes: 1
+            });
+        }
+    });
+
+    // Convert map to array and sort by vote count (highest first)
+    const players: VoteMapPlayers[] = Array.from(voteMap.values()).sort((a, b) => b.totalVotes - a.totalVotes);
+
+    return {
+        totalVotes: userVotes.length,
+        players: players
+    };
+}
 
 export const getCurrentDate = (): string => {
 	const today = new Date();
@@ -895,7 +943,9 @@ export const liveMatchSample: IV2FootballLiveFixture = {
                 playerId: {
                     name: "Bukayo Saka",
                     position: "RW",
-                    _id: "507f1f77bcf86cd799439028"
+                    _id: "507f1f77bcf86cd799439028",
+                    department: "jnsjdakmamsdap",
+                    admissionYear: '2024/2025'
                 },
                 timestamp: new Date("2025-06-13T20:07:00Z")
             }

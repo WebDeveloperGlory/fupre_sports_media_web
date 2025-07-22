@@ -204,7 +204,13 @@ type UserCheerVote = {
 
 type UserPOTMVote = {
     userId: string,
-    playerId: ShortPopulatedPlayer,
+    playerId: {
+        _id: string;
+        name: string;
+        position: string;
+        department: string;
+        admissionYear: string;
+    },
     timestamp: Date
 }
 

@@ -17,16 +17,14 @@ interface SuccessRequest {
     data?: any
 }
 
-const API_URL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_PROD_API_URL : process.env.NEXT_PUBLIC_DEV_API_URL;
+const PART_API_URL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_PROD_API_URL : process.env.NEXT_PUBLIC_DEV_PARTIAL_API_URL;
+const API_URL = process.env.NEXT_PUBLIC_DEV_MODE === 'partial' ? PART_API_URL : `${PART_API_URL}/v2`;
 
-export const getProfile = async ( token: string ) => {
+export const getProfile = async () => {
     try {
         const response = await axiosInstance.get(
-            `${ API_URL }/v2/user/me`, 
+            `${ API_URL }/user/me`, 
             {
-                headers: {
-                    Authorization: `Bearer ${ token }`
-                },
                 withCredentials: true
             }
         );

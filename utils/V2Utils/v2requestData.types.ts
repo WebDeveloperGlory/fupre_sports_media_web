@@ -9,6 +9,7 @@ export type UserPreference = {
 }
 export interface IV2User {
     _id: string;
+    profileImage?: string;
     name: string;
     password: string;
     email: string;

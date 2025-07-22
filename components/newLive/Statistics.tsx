@@ -27,7 +27,7 @@ const Statistics = ({ homeStat, awayStat, ratings, home, away }: IStatistics ) =
         position: string, 
         stats: { goals: number, assists: number, shots: number, passes: number, tackles: number, saves: number } 
     ) => {
-        if( position.toLowerCase() === 'gk' ) {
+        if( position && position.toLowerCase() === 'gk' ) {
             return `Goals: ${ stats.goals }, Assists: ${ stats.assists }, Saves: ${ stats.saves }`
         } else {
             return `Goals: ${ stats.goals }, Assists: ${ stats.assists }, Shots: ${ stats.shots }`

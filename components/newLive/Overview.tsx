@@ -5,6 +5,8 @@ import { Star, Trophy, Video } from 'lucide-react'
 import Link from 'next/link'
 import React, { useState } from 'react'
 import PopUpModal from '../modal/PopUpModal'
+import { countPOTMVotes } from '@/constants'
+import { TeamType } from '@/utils/V2Utils/v2requestData.enums'
 
 interface IOverview {
     stream: FixtureStreamLinks[] | null;
@@ -17,9 +19,11 @@ interface IOverview {
     odds: FixtureOdds;
     setOpen: ( value: boolean ) => void;
     setModalType: ( value: 'vote' | 'rate' | null ) => void;
+    isLoggedIn: boolean;
+    minute: number;
 }
 
-const Overview = ({ stream, playerRatings, playerOfTheMatch, homeLineup, awayLineup, home, away, odds, setOpen, setModalType }: IOverview) => {
+const Overview = ({ stream, playerRatings, playerOfTheMatch, homeLineup, awayLineup, home, away, odds, setOpen, setModalType, isLoggedIn, minute }: IOverview) => {
     // Button Click Functions
     const onVoteClick = () => {
         setOpen( true );
@@ -44,6 +48,8 @@ const Overview = ({ stream, playerRatings, playerOfTheMatch, homeLineup, awayLin
             return `Goals: ${ stats.goals }, Assists: ${ stats.assists }, Shots: ${ stats.shots }`
         }
     }
+    const POTMVotes = countPOTMVotes( playerOfTheMatch.userVotes );
+    const playerInRatings = (playerId: string) => playerRatings.find(player => player.player._id === playerId);
 
   return (
     <div className='space-y-4'>
@@ -77,7 +83,7 @@ const Overview = ({ stream, playerRatings, playerOfTheMatch, homeLineup, awayLin
         <div className='bg-card/40 backdrop-blur-sm rounded-xl p-4 border border-border hover:bg-accent/50  transition-all duration-300 space-y-4'>
             <div className='flex gap-2 items-center font-bold'>
                 <Star className='text-emerald-500 w-6 h-6' />
-                <h2>Player Ratings</h2>
+                <h2>Fan Player Ratings</h2>
             </div>
             <div className='space-y-2'>
                 {
@@ -115,64 +121,86 @@ const Overview = ({ stream, playerRatings, playerOfTheMatch, homeLineup, awayLin
         </div>
 
         {/* POTM Voting */}
-        <div className='bg-card/40 backdrop-blur-sm rounded-xl p-4 border border-border hover:bg-accent/50  transition-all duration-300 space-y-4'>
+        <div className='bg-card/40 backdrop-blur-sm rounded-xl p-4 border border-border hover:bg-accent/50 transition-all duration-300 space-y-4'>
             <div className='flex gap-2 items-center font-bold'>
                 <Trophy className='text-emerald-500 w-6 h-6' />
                 <h2>Player Of The Match</h2>
             </div>
 
-            {/* Voting List */}
-            <div className='space-y-2'>
-                <p>Total Fan Votes: {playerOfTheMatch.fanVotes.length || 0}</p>
-                {
-                    playerOfTheMatch.fanVotes.map((player, i) => (
-                        <div 
-                            key={ player.player._id }
-                            className='border border-muted-foreground bg-card p-4 rounded-lg space-y-4'
-                        >
-                            <div className='flex justify-between items-center'>
-                                {/* Player Details */}
-                                <div className='flex items-center gap-3'>
-                                    <div className='flex items-center justify-center w-8 h-8 rounded-full border border-muted-foreground bg-card'>{ i+1 }</div>
-                                    <div>
-                                        <p>{ player.player.name }</p>
-                                        <span className='text-muted-foreground text-sm'>Unknown</span>
+            {/* Check if match has progressed enough */}
+            {minute < 70 ? (
+                <div className='text-center py-8 space-y-2'>
+                    <div className='w-12 h-12 rounded-full bg-muted flex items-center justify-center mx-auto mb-3'>
+                        <Trophy className='w-6 h-6 text-muted-foreground' />
+                    </div>
+                    <p className='text-muted-foreground'>POTM voting will be available after 70 minutes</p>
+                    <p className='text-sm text-muted-foreground'>Current time: {minute} minutes</p>
+                </div>
+            ) : (
+                <>
+                    {/* Official Vote */}
+                    {
+                        playerOfTheMatch.official && (
+                            <div className='p-4 border border-yellow-400 bg-yellow-200/20 rounded-lg text-yellow-500 mt-4 flex items-center gap-4'>
+                                <Trophy className='w-5 h-5' />
+                                <div>
+                                    <p className='font-bold text-lg'>{playerOfTheMatch.official.name}</p>
+                                    <span className='text-muted-foreground text-sm'>
+                                        { 
+                                            playerInRatings(playerOfTheMatch.official._id)?.team === TeamType.HOME ? home : away }</span>
+                                    <p className='text-yellow-500'>Official Rating: {playerInRatings(playerOfTheMatch.official._id)?.official.rating || 'Not Rated Yet'}</p>
+                                </div>
+                            </div>
+                        )
+                    }
+                    {/* Voting List */}
+                    <div className='space-y-2'>
+                        <p>Total Fan Votes: {POTMVotes.totalVotes || 0}</p>
+                        {
+                            POTMVotes.players.map((player, i) => (
+                                <div 
+                                    key={player._id}
+                                    className='border border-muted-foreground bg-card p-4 rounded-lg space-y-4'
+                                >
+                                    <div className='flex justify-between items-center'>
+                                        {/* Player Details */}
+                                        <div className='flex items-center gap-3'>
+                                            <div className='flex items-center justify-center w-8 h-8 rounded-full border border-muted-foreground bg-card'>{i+1}</div>
+                                            <div>
+                                                <p>{player.name}</p>
+                                                <span className='text-muted-foreground text-sm'>Unknown</span>
+                                            </div>
+                                        </div>
+                                        {/* Fan Votes */}
+                                        <div>
+                                            <p>{player.totalVotes} votes</p>
+                                            <span className='text-sm text-muted-foreground'>{(player.totalVotes / POTMVotes.totalVotes * 100).toFixed(2)}%</span>
+                                        </div>
+                                    </div>
+                                    <div className='text-sm'>
+                                        <p>Fan Rating</p>
                                     </div>
                                 </div>
-                                {/* Fan Votes */}
-                                <div>
-                                    <p>{ player.votes } votes</p>
-                                    <span className='text-sm text-muted-foreground'>{(player.votes / playerOfTheMatch.fanVotes.length * 100 ).toFixed(2)}%</span>
-                                </div>
-                            </div>
-                            <div className='text-sm'>
-                                <p>Fan Rating</p>
-                            </div>
+                            ))
+                        }
+                    </div>
+                    
+                    {/* Voting Button or Login Prompt */}
+                    {isLoggedIn ? (
+                        <button
+                            onClick={onVoteClick}
+                            className='w-full bg-emerald-500/20 text-sm hover:bg-emerald-500/40 text-emerald-500 border border-emerald-500 py-2 rounded-lg transition-colors duration-200'
+                        >
+                            Vote for Player Of The Match
+                        </button>
+                    ) : (
+                        <div className='w-full border border-dashed border-muted-foreground/50 py-3 rounded-lg bg-muted/20 text-center space-y-1'>
+                            <p className='text-sm text-muted-foreground'>Login required to vote</p>
+                            <p className='text-xs text-muted-foreground'>Sign in to participate in POTM voting</p>
                         </div>
-                    ))
-                }
-            </div>
-            <div className='space-y-2'>
-                {
-                    sortedPOTMVotes.slice(0,5).map( ( player, i ) => (
-                        <div key={ i } className='gap-2 items-center flex justify-between'>
-                            <div className='basis-11/12 flex gap-4 items-center'>
-                                <div className='w-10 h-10 rounded-full bg-muted flex items-center justify-center'>{ i + 1 }</div>
-                                <div className=''>
-                                    <h3 className=''>{ player.player.name }</h3>
-                                    <span className='text-sm text-muted-foreground'>{ player.votes } votes</span>
-                                </div>
-                            </div>
-                        </div>
-                    ) )
-                }
-            </div>
-            <button
-                onClick={ onVoteClick }
-                className='w-full bg-emerald-500/20 text-sm hover:bg-emerald-500/40 text-emerald-500 border border-emerald-500 py-2 rounded-lg'
-            >
-                Vote for Player Of The Match
-            </button>
+                    )}
+                </>
+            )}
         </div>
 
         {/* Odds */}

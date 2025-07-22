@@ -8,12 +8,12 @@ import { BackButton } from '@/components/ui/back-button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { motion } from 'framer-motion';
-import useAuthStore from '@/stores/authStore';
 import { useRouter } from 'next/navigation';
 import { logoutUser } from '@/lib/requests/v2/authentication/requests';
 import { getProfile, markNotificationAsRead } from '@/lib/requests/v2/user/requests';
+import { IV2User } from '@/utils/V2Utils/v2requestData.types';
+import { UserRole } from '@/utils/V2Utils/v2requestData.enums';
 
 interface UserProfile {
   name: string;
@@ -34,45 +34,42 @@ interface Notification {
 export default function ProfilePage() {
   const router = useRouter();
 
-  const { jwt, userProfile, setUserProfile, clearUserData } = useAuthStore();
-
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [activeTab, setActiveTab] = useState('profile');
-  const [profile, setProfile] = useState<UserProfile>( userProfile! );
+  const [profile, setProfile] = useState<IV2User | null>();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState<number | null>(null);
 
   useEffect(() => {
     // Fetch user profile data
     const fetchProfile = async () => {
-      const data = await getProfile( jwt! );
-      if( data && data.code === '00' ) {
-        setNotifications( data.data.notifications );
-        setUnreadCount( data.data.unreadNotifications );
-        setUserProfile( data.data.user );
-        console.log( data );
-      };
+      const request = await getProfile();
+      if( request?.code === '99' ) {
+        if( request.message === 'Invalid or Expired Token' || request.message === 'Login Required' ) {
+          toast.error('Please Login First')
+          router.push('/auth/login')
+        } else if ( request.message === 'Invalid User Permissions' ) {
+          toast.error('Unauthorized')
+          router.push('/sports');
+        } else {
+          toast.error('Unknown')
+          router.push('/');
+        }   
+      }
+      
+      const response = await getProfile();
+      if( response?.code === '00' ) {
+        setProfile( response.data );
+      } else {
+        toast.error(response?.message || 'An Error Occurred');
+      }
       setLoading( false );
     };
 
-    if( !jwt ) {
-        toast.error('Please Login First');
-        setTimeout(() => router.push( '/auth/login' ), 1000);
-    } else {
-        if( loading ) fetchProfile();
-    }
+    if( loading ) fetchProfile();
   }, [ loading ]);
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    setProfile({
-      ...profile,
-      [e.target.name]: e.target.value
-    });
-  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -90,29 +87,28 @@ export default function ProfilePage() {
     }
   };
 
-  const markAsRead = async (id: string) => {
-    const result = await markNotificationAsRead( jwt!, id );
-    if( result?.code === '00' ) {
-      toast.success('Notification marked as read!');
-      setNotifications((prev) =>
-        prev.map((notification) =>
-          notification._id === id ? { ...notification, read: true } : notification
-        )
-      );
-      setUnreadCount((prev) => (prev !== null ? prev - 1 : null));
-    }
-  };
+  // const markAsRead = async (id: string) => {
+  //   const result = await markNotificationAsRead( jwt!, id );
+  //   if( result?.code === '00' ) {
+  //     toast.success('Notification marked as read!');
+  //     setNotifications((prev) =>
+  //       prev.map((notification) =>
+  //         notification._id === id ? { ...notification, read: true } : notification
+  //       )
+  //     );
+  //     setUnreadCount((prev) => (prev !== null ? prev - 1 : null));
+  //   }
+  // };
 
   const handleLogout = async () => {
-    const result = await logoutUser( jwt! );
+    const result = await logoutUser();
     if( result?.code === '00' ) {
       toast.success('Logout successful!');
-      clearUserData();
+      setProfile(null);
       router.push('/');
     } else {
       toast.error( result?.message || 'Logout failed! Please try again.');
     }
-    console.log(result);
   };
 
   if (loading) {
@@ -147,132 +143,173 @@ export default function ProfilePage() {
             </div>
 
             <TabsContent value="profile" className="mt-0">
-              <div className="bg-card rounded-xl shadow-md border border-border p-6 md:p-8">
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  {/* Avatar Upload */}
-                  <div className="flex justify-center">
-                    <div className="relative">
-                      <div className="w-24 h-24 rounded-full bg-muted flex items-center justify-center overflow-hidden border-2 border-emerald-500">
-                        {profile.avatar ? (
-                          <img
-                            src={profile.avatar}
-                            alt="Profile"
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-full h-full bg-emerald-100 flex items-center justify-center text-emerald-800 text-2xl font-bold">
-                            {profile.name.charAt(0)}
+              {
+                profile ? (
+                  <div className="bg-card rounded-xl shadow-md border border-border p-6 md:p-8">
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                      {/* Avatar Upload */}
+                      <div className="flex justify-center">
+                        <div className="relative">
+                          <div className="w-24 h-24 rounded-full bg-muted flex items-center justify-center overflow-hidden border-2 border-emerald-500">
+                            {profile.profileImage ? (
+                              <img
+                                src={profile.profileImage}
+                                alt="Profile"
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full bg-emerald-100 flex items-center justify-center text-emerald-800 text-2xl font-bold">
+                                {profile.name.charAt(0)}
+                              </div>
+                            )}
                           </div>
-                        )}
+                          <label
+                            htmlFor="avatar"
+                            className="absolute bottom-0 right-0 bg-emerald-500 text-white p-2 rounded-full cursor-pointer hover:bg-emerald-600 transition-colors"
+                          >
+                            <Camera className="w-4 h-4" />
+                          </label>
+                          <input
+                            type="file"
+                            id="avatar"
+                            className="hidden"
+                            accept="image/*"
+                          />
+                        </div>
                       </div>
-                      <label
-                        htmlFor="avatar"
-                        className="absolute bottom-0 right-0 bg-emerald-500 text-white p-2 rounded-full cursor-pointer hover:bg-emerald-600 transition-colors"
-                      >
-                        <Camera className="w-4 h-4" />
-                      </label>
-                      <input
-                        type="file"
-                        id="avatar"
-                        className="hidden"
-                        accept="image/*"
-                      />
-                    </div>
-                  </div>
 
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium mb-2">
-                        Full Name
-                      </label>
-                      <Input
-                        type="text"
-                        name="name"
-                        value={profile.name}
-                        onChange={handleChange}
-                        className="focus:ring-emerald-500 focus:border-emerald-500"
-                        disabled={!isEditing}
-                      />
-                    </div>
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium mb-2">
+                            Full Name
+                          </label>
+                          <Input
+                            type="text"
+                            name="name"
+                            value={profile.name}
+                            onChange={
+                              (e) => {
+                                setProfile({
+                                  ...profile,
+                                  name: e.target.value
+                                })
+                              }
+                            }
+                            className="focus:ring-emerald-500 focus:border-emerald-500"
+                            disabled={!isEditing}
+                          />
+                        </div>
 
-                    <div>
-                      <label className="block text-sm font-medium mb-2">
-                        Email
-                      </label>
-                      <Input
-                        type="email"
-                        name="email"
-                        value={profile.email}
-                        onChange={handleChange}
-                        className="bg-muted"
-                        disabled
-                      />
-                    </div>
+                        <div>
+                          <label className="block text-sm font-medium mb-2">
+                            Email
+                          </label>
+                          <Input
+                            type="email"
+                            name="email"
+                            value={profile.email}
+                            onChange={
+                              (e) => {
+                                setProfile({
+                                  ...profile,
+                                  email: e.target.value
+                                })
+                              }
+                            }
+                            className="bg-muted"
+                            disabled
+                          />
+                        </div>
+                        
+                        <div>
+                          <label className="block text-sm font-medium mb-2">
+                            Role
+                          </label>
+                          <Input
+                            type="role"
+                            name="role"
+                            value={profile.role}
+                            onChange={
+                              (e) => {
+                                setProfile({
+                                  ...profile,
+                                  role: e.target.value as UserRole
+                                })
+                              }
+                            }
+                            className="bg-muted"
+                            disabled
+                          />
+                        </div>
 
-                    <div>
-                      <label className="block text-sm font-medium mb-2">
-                        Favorite Team
-                      </label>
-                      {/* <Input
-                        type="text"
-                        name="favoriteTeam"
-                        value={profile.favoriteTeam}
-                        onChange={handleChange}
-                        className="focus:ring-emerald-500 focus:border-emerald-500"
-                        disabled={!isEditing}
-                      /> */}
-                      <Input
-                        type="text"
-                        name="favoriteTeam"
-                        value="Not Implemented Yet"
-                        onChange={() => {}}
-                        className="focus:ring-emerald-500 focus:border-emerald-500"
-                        disabled={ true }
-                      />
-                    </div>
-                  </div>
+                        <div>
+                          <label className="block text-sm font-medium mb-2">
+                            Favorite Team
+                          </label>
+                          {/* <Input
+                            type="text"
+                            name="favoriteTeam"
+                            value={profile.favoriteTeam}
+                            onChange={handleChange}
+                            className="focus:ring-emerald-500 focus:border-emerald-500"
+                            disabled={!isEditing}
+                          /> */}
+                          <Input
+                            type="text"
+                            name="favoriteTeam"
+                            value="Not Implemented Yet"
+                            onChange={() => {}}
+                            className="focus:ring-emerald-500 focus:border-emerald-500"
+                            disabled={ true }
+                          />
+                        </div>
+                      </div>
 
-                  <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                    {isEditing ? (
-                      <Button
-                        type="submit"
-                        disabled={saving}
-                        className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white"
-                      >
-                        {saving ? (
-                          <>
-                            <Loader2 className="w-5 h-5 animate-spin mr-2" />
-                            Saving...
-                          </>
+                      <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                        {isEditing ? (
+                          <Button
+                            type="submit"
+                            disabled={saving}
+                            className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white"
+                          >
+                            {saving ? (
+                              <>
+                                <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                                Saving...
+                              </>
+                            ) : (
+                              'Save Changes'
+                            )}
+                          </Button>
                         ) : (
-                          'Save Changes'
+                          <Button
+                            type="button" 
+                            onClick={(e) => {
+                              e.preventDefault(); // Prevent form submission
+                              setIsEditing(true);
+                            }}
+                            className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white"
+                          >
+                            Edit Profile
+                          </Button>
                         )}
-                      </Button>
-                    ) : (
-                      <Button
-                        type="button" 
-                        onClick={(e) => {
-                          e.preventDefault(); // Prevent form submission
-                          setIsEditing(true);
-                        }}
-                        className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white"
-                      >
-                        Edit Profile
-                      </Button>
-                    )}
-                    
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="flex-1 border-red-500 text-red-500 hover:bg-red-50 hover:text-red-600"
-                      onClick={handleLogout}
-                    >
-                      <LogOut className="w-4 h-4 mr-2" />
-                      Logout
-                    </Button>
+                        
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="flex-1 border-red-500 text-red-500 hover:bg-red-50 hover:text-red-600"
+                          onClick={handleLogout}
+                        >
+                          <LogOut className="w-4 h-4 mr-2" />
+                          Logout
+                        </Button>
+                      </div>
+                    </form>
                   </div>
-                </form>
-              </div>
+                ) : (
+                  <div>How Odd! No Profile Data</div>
+                )
+              }
             </TabsContent>
 
             <TabsContent value="notifications" className="mt-0">
@@ -330,7 +367,8 @@ export default function ProfilePage() {
                             variant="link"
                             size="sm"
                             className="mt-2 p-0 h-auto text-emerald-600 dark:text-emerald-400"
-                            onClick={() => markAsRead(notification._id)}
+                            // onClick={() => markAsRead(notification._id)}
+                            onClick={() => {}}
                           >
                             Mark as read
                           </Button>

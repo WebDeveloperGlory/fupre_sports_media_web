@@ -11,6 +11,7 @@ import { BarChart3, Check, Star, Timer, Trophy, Users, X } from 'lucide-react';
 import { LivFixPlayerRatingOfficial, LivFixPOTMOfficial } from '@/utils/V2Utils/formData';
 import { set } from 'lodash';
 import { TeamType } from '@/utils/V2Utils/v2requestData.enums';
+import { countPOTMVotes } from '@/constants';
 
 const POTMMangementPage = (
     { params }:
@@ -130,6 +131,7 @@ const POTMMangementPage = (
 
     // Others //
     const playerInRatings = fixture?.playerRatings.find(player => player.player._id === potmFormData.playerId);
+    const POTMVotes = countPOTMVotes( fixture?.playerOfTheMatch.userVotes || [] );
     // End of Others //
 
   return (
@@ -471,7 +473,7 @@ const POTMMangementPage = (
                                             {/* Official Rating */}
                                             <div className='bg-muted px-2 py-1 flex gap-1 items-center text-sm font-bold rounded-lg'>
                                                 <Star className='w-4 h-4 text-emerald-500' />
-                                                { player.official.rating }
+                                                { player.official ? player.official.rating : 'Not Rated Yet'  }
                                             </div>
                                         </div>
                                         {
@@ -572,7 +574,7 @@ const POTMMangementPage = (
                                         <div>
                                             <p className='font-bold text-lg'>{playerInRatings.player.name}</p>
                                             <span className='text-muted-foreground text-sm'>{ playerInRatings.team === TeamType.HOME ? fixture.homeTeam.name : fixture.awayTeam.name }</span>
-                                            <p className='text-yellow-500'>Official Rating: {playerInRatings.official.rating}</p>
+                                            <p className='text-yellow-500'>Official Rating: {playerInRatings.official ? playerInRatings.official.rating : 'Not Rated Yet'}</p>
                                         </div>
                                     </div>
                                 )
@@ -601,26 +603,26 @@ const POTMMangementPage = (
 
                         {/* Voting List */}
                         <div className='space-y-4 mt-4'>
-                            <p>Total Fan Votes: {fixture?.playerOfTheMatch.fanVotes.length || 0}</p>
+                            <p>Total Fan Votes: {POTMVotes.totalVotes || 0}</p>
                             {
-                                fixture && fixture.playerOfTheMatch.fanVotes.map((player, i) => (
+                                POTMVotes.players.map((player, i) => (
                                     <div 
-                                        key={ player.player._id }
+                                        key={player._id}
                                         className='border border-muted-foreground bg-card p-4 rounded-lg space-y-4'
                                     >
                                         <div className='flex justify-between items-center'>
                                             {/* Player Details */}
                                             <div className='flex items-center gap-3'>
-                                                <div className='flex items-center justify-center w-8 h-8 rounded-full border border-muted-foreground bg-card'>{ i+1 }</div>
+                                                <div className='flex items-center justify-center w-8 h-8 rounded-full border border-muted-foreground bg-card'>{i+1}</div>
                                                 <div>
-                                                    <p>{ player.player.name }</p>
+                                                    <p>{player.name}</p>
                                                     <span className='text-muted-foreground text-sm'>Unknown</span>
                                                 </div>
                                             </div>
                                             {/* Fan Votes */}
                                             <div>
-                                                <p>{ player.votes } votes</p>
-                                                <span className='text-sm text-muted-foreground'>{(player.votes / fixture.playerOfTheMatch.fanVotes.length * 100 ).toFixed(2)}%</span>
+                                                <p>{player.totalVotes} votes</p>
+                                                <span className='text-sm text-muted-foreground'>{(player.totalVotes / POTMVotes.totalVotes * 100).toFixed(2)}%</span>
                                             </div>
                                         </div>
                                         <div className='text-sm'>
