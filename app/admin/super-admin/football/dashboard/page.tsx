@@ -1,9 +1,13 @@
-import { cookies } from 'next/headers';
+'use client'
+
 import Link from 'next/link';
 import { getSuperAdminFootballDashboard } from '@/lib/requests/v2/admin/super-admin/dashboard/requests';
 import { IV2AuditLog } from '@/utils/V2Utils/v2requestData.types';
 import { ArrowRight, Award, Bell, Calendar, ChartBarStacked, Clock, File, Shield, Trophy, UserCheck, Users } from 'lucide-react';
-import { redirect } from 'next/navigation';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { toast } from 'react-toastify';
+import { Loader } from '@/components/ui/loader';
 
 type DashboardData = {
     totalTeams: number;
@@ -17,20 +21,39 @@ type DashboardData = {
     auditLogs: IV2AuditLog[];
 }
 const SuperAdminDashboardPage = async () => {
-    const cookieStore = cookies();
-    const authToken = (await cookieStore).get('authToken');
+    const router = useRouter();
+    
+    const [loading, setLoading] = useState<boolean>(true);
+    const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
+    
+    // On Load //
+    useEffect( () => {
+        const fetchData = async () => {
+            const request = await  getSuperAdminFootballDashboard();
+            if( request?.code === '99' ) {
+                if( request.message === 'Invalid or Expired Token' || request.message === 'Login Required' ) {
+                    toast.error('Please Login First')
+                    router.push('/auth/login')
+                } else if ( request.message === 'Invalid User Permissions' ) {
+                    toast.error('Unauthorized')
+                    router.push('/sports');
+                } else {
+                    toast.error('Unknown')
+                    router.push('/');
+                }   
+            }
+        
+            setDashboardData(request?.data);
+            setLoading( false );
+        }
 
-    const request = await getSuperAdminFootballDashboard( authToken?.value );
-    if( request?.code === '99' ) {
-        if( request.message === 'Invalid or Expired Token' || request.message === 'Login Required' ) {
-            redirect('/auth/login')
-        } else if ( request.message === 'Invalid User Permissions' ) {
-            redirect('/sports');
-        } else {
-            redirect('/');
-        }   
-    }
-    const dashboardData = request?.data as DashboardData
+        if( loading ) fetchData();
+    }, [ loading ]);
+    
+    if( loading ) {
+        return <Loader />
+    };
+    // End of On Load //
 
   return (
     <div className='space-y-6 md:space-y-4'>
@@ -50,49 +73,49 @@ const SuperAdminDashboardPage = async () => {
                 <div className='px-4 py-2 md:py-4 flex justify-between items-center border border-emerald-500 rounded-lg'>
                     <div>
                         <p className='text-muted-foreground'>Total Teams</p>
-                        <span className='text-lg font-bold'>{ dashboardData.totalTeams }</span>
+                        <span className='text-lg font-bold'>{ dashboardData?.totalTeams || '0' }</span>
                     </div>
                     <Users className='w-5 h-5 text-emerald-500' />
                 </div>
                 <div className='px-4 py-2 md:py-4 flex justify-between items-center border border-emerald-500 rounded-lg'>
                     <div>
                         <p className='text-muted-foreground'>Total Competitions</p>
-                        <span className='text-lg font-bold'>{ dashboardData.totalCompetitions }</span>
+                        <span className='text-lg font-bold'>{ dashboardData?.totalCompetitions || '0' }</span>
                     </div>
                     <Trophy className='w-5 h-5 text-emerald-500' />
                 </div>
                 <div className='px-4 py-2 md:py-4 flex justify-between items-center border border-emerald-500 rounded-lg'>
                     <div>
                         <p className='text-muted-foreground'>Total Fixtures</p>
-                        <span className='text-lg font-bold'>{ dashboardData.totalFixtures }</span>
+                        <span className='text-lg font-bold'>{ dashboardData?.totalFixtures || '0' }</span>
                     </div>
                     <Calendar className='w-5 h-5 text-emerald-500' />
                 </div>
                 <div className='px-4 py-2 md:py-4 flex justify-between items-center border border-emerald-500 rounded-lg'>
                     <div>
                         <p className='text-muted-foreground'>Total Players</p>
-                        <span className='text-lg font-bold'>{ dashboardData.totalPlayers }</span>
+                        <span className='text-lg font-bold'>{ dashboardData?.totalPlayers || '0' }</span>
                     </div>
                     <UserCheck className='w-5 h-5 text-emerald-500' />
                 </div>
                 <div className='px-4 py-2 md:py-4 flex justify-between items-center border border-red-500 rounded-lg'>
                     <div>
                         <p className='text-muted-foreground'>Pending Player Approvals</p>
-                        <span className='text-lg font-bold'>{ dashboardData.totalUnverifiedPlayers }</span>
+                        <span className='text-lg font-bold'>{ dashboardData?.totalUnverifiedPlayers || '0' }</span>
                     </div>
                     <Clock className='w-5 h-5 text-red-500' />
                 </div>
                 <div className='px-4 py-2 md:py-4 flex justify-between items-center border border-red-500 rounded-lg'>
                     <div>
                         <p className='text-muted-foreground'>Live Fixtures</p>
-                        <span className='text-lg font-bold'>{ dashboardData.totalLiveFixtures }</span>
+                        <span className='text-lg font-bold'>{ dashboardData?.totalLiveFixtures || '0' }</span>
                     </div>
                     <Clock className='w-5 h-5 text-red-500' />
                 </div>
                 <div className='px-4 py-2 md:py-4 flex justify-between items-center border border-red-500 rounded-lg'>
                     <div>
                         <p className='text-muted-foreground'>Admin Count</p>
-                        <span className='text-lg font-bold'>{ dashboardData.totalAdminCount }</span>
+                        <span className='text-lg font-bold'>{ dashboardData?.totalAdminCount || '0' }</span>
                     </div>
                     <Clock className='w-5 h-5 text-red-500' />
                 </div>
@@ -109,7 +132,7 @@ const SuperAdminDashboardPage = async () => {
                     link='teams'
                     statLabel='teams'
                     bg='bg-green-500'
-                    stat={ dashboardData.totalTeams.toString() } 
+                    stat={ dashboardData?.totalTeams.toString() || '0' } 
                     Icon={ <Users className='w-8 h-8' /> }
                 />
                 <AdminModule 
@@ -118,7 +141,7 @@ const SuperAdminDashboardPage = async () => {
                     link='live-management'
                     statLabel='live'
                     bg='bg-orange-500'
-                    stat={ dashboardData.totalLiveFixtures.toString() } 
+                    stat={ dashboardData?.totalLiveFixtures.toString() || '0' } 
                     Icon={ <Trophy className='w-8 h-8' /> }
                 />
                 <AdminModule 
@@ -127,7 +150,7 @@ const SuperAdminDashboardPage = async () => {
                     link='fixtures'
                     statLabel='fixtures'
                     bg='bg-red-500'
-                    stat={ dashboardData.totalFixtures.toString() } 
+                    stat={ dashboardData?.totalFixtures.toString() || '0' } 
                     Icon={ <Calendar className='w-8 h-8' /> }
                 />
                 <AdminModule 
@@ -136,7 +159,7 @@ const SuperAdminDashboardPage = async () => {
                     link='teams'
                     statLabel='teams'
                     bg='bg-blue-500'
-                    stat={ dashboardData.totalCompetitions.toString() } 
+                    stat={ dashboardData?.totalCompetitions.toString() || '0' } 
                     Icon={ <Award className='w-8 h-8' /> }
                 />
                 <AdminModule 
@@ -145,7 +168,7 @@ const SuperAdminDashboardPage = async () => {
                     link='players'
                     statLabel='players'
                     bg='bg-orange-500'
-                    stat={ dashboardData.totalPlayers.toString() } 
+                    stat={ dashboardData?.totalPlayers.toString() || '0' } 
                     Icon={ <UserCheck className='w-8 h-8' /> }
                 />
                 <AdminModule 
@@ -210,7 +233,7 @@ const SuperAdminDashboardPage = async () => {
             <h2 className='text-xl font-bold mb-4 md:mb-2'>System Activities</h2>
             <div className='space-y-2'>
                 {
-                    dashboardData.auditLogs.map( (log,i) => (
+                    dashboardData && dashboardData.auditLogs.map( (log,i) => (
                         <div
                             key={ log._id }
                             className='px-4 py-2 bg-muted rounded-md border flex gap-4 items-center'

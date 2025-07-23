@@ -20,14 +20,12 @@ interface SuccessRequest {
 const PART_API_URL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_PROD_API_URL : process.env.NEXT_PUBLIC_DEV_PARTIAL_API_URL;
 const API_URL = process.env.NEXT_PUBLIC_DEV_MODE === 'partial' ? PART_API_URL : `${PART_API_URL}/v2`;
 
-export const getSuperAdminFootballDashboard = async ( authToken: string | undefined ) => {
+export const getSuperAdminFootballDashboard = async () => {
     try {
         const response = await axiosInstance.get(
             `${API_URL}/views/super-admin/dashboard/football`,
             {
-                headers: {
-                    Authorization: `Bearer ${ authToken }`
-                }
+                withCredentials: true,
             }
         );
         const { data }: { data: SuccessRequest } = response;

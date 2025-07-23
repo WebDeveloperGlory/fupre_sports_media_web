@@ -49,14 +49,12 @@ export const getHeadMediaAdminDashboard = async () => {
     }
 };
 
-export const getHeadMediaAdminFixturesForRating = async ( authToken: string | undefined ) => {
+export const getHeadMediaAdminFixturesForRating = async () => {
     try {
         const response = await axiosInstance.get(
             `${API_URL}/views/media-admin/potm-fixtures`,
             {
-                headers: {
-                    Authorization: `Bearer ${ authToken }`
-                }
+                withCredentials: true,
             }
         );
         const { data }: { data: SuccessRequest } = response;

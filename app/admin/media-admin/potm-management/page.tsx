@@ -1,9 +1,12 @@
 import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
+import { redirect, useRouter } from 'next/navigation';
 import { getHeadMediaAdminFixturesForRating } from '@/lib/requests/v2/admin/media-admin/dashboard/requests';
 import { IV2FootballLiveFixture, PopIV2FootballFixture } from '@/utils/V2Utils/v2requestData.types';
 import { AlertCircle, Calendar, Clock, HeartPulse, MapPin, Users } from 'lucide-react';
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import { toast } from 'react-toastify';
+import { Loader } from '@/components/ui/loader';
 
 type DashboardData = {
     pendingLivePOTM: IV2FootballLiveFixture[];
@@ -11,20 +14,39 @@ type DashboardData = {
 }
 
 const POTMManagementPage = async () => {
-    const cookieStore = cookies();
-    const authToken = (await cookieStore).get('authToken');
+    const router = useRouter();
+    
+    const [loading, setLoading] = useState<boolean>(true);
+    const [POTMData, setPOTMData] = useState<DashboardData | null>(null);
 
-    const request = await getHeadMediaAdminFixturesForRating( authToken?.value );
-    if( request?.code === '99' ) {
-        if( request.message === 'Invalid or Expired Token' || request.message === 'Login Required' ) {
-            redirect('/auth/login')
-        } else if ( request.message === 'Invalid User Permissions' ) {
-            redirect('/sports');
-        } else {
-            redirect('/');
-        }   
+    // On Load //
+    useEffect( () => {
+        const fetchData = async () => {
+            const request = await  getHeadMediaAdminFixturesForRating();
+            if( request?.code === '99' ) {
+                if( request.message === 'Invalid or Expired Token' || request.message === 'Login Required' ) {
+                    toast.error('Please Login First')
+                    router.push('/auth/login')
+                } else if ( request.message === 'Invalid User Permissions' ) {
+                    toast.error('Unauthorized')
+                    router.push('/sports');
+                } else {
+                    toast.error('Unknown')
+                    router.push('/');
+                }   
+            }
+        
+            setPOTMData(request?.data);
+            setLoading( false );
+        }
+
+        if( loading ) fetchData();
+    }, [ loading ]);
+    
+    if( loading ) {
+        return <Loader />
     };
-    const POTMData = request?.data as DashboardData;
+    // End of On Load //
 
   return (
     <div className='space-y-6 md:space-y-4'>
@@ -42,14 +64,14 @@ const POTMManagementPage = async () => {
                 <div className='px-4 py-2 md:py-4 flex justify-between items-center border border-emerald-500 rounded-lg'>
                     <div>
                         <p className='text-muted-foreground'>Total Live Pending POTM</p>
-                        <span className='text-lg font-bold'>{ POTMData.pendingLivePOTM.length }</span>
+                        <span className='text-lg font-bold'>{ POTMData?.pendingLivePOTM.length || '0' }</span>
                     </div>
                     <HeartPulse className='w-5 h-5 text-emerald-500' />
                 </div>
                 <div className='px-4 py-2 md:py-4 flex justify-between items-center border border-emerald-500 rounded-lg'>
                     <div>
                         <p className='text-muted-foreground'>Last 7 Days Pending POTM</p>
-                        <span className='text-lg font-bold'>{ POTMData.pendingFixturePOTM.length }</span>
+                        <span className='text-lg font-bold'>{ POTMData?.pendingFixturePOTM.length || '0' }</span>
                     </div>
                     <Users className='w-5 h-5 text-emerald-500' />
                 </div>
@@ -60,7 +82,7 @@ const POTMManagementPage = async () => {
         <div className='space-y-4'>
             <h2>Pending Live POTM</h2>
             {
-                POTMData.pendingLivePOTM && POTMData.pendingLivePOTM.length > 0 && (
+                POTMData && POTMData.pendingLivePOTM && POTMData.pendingLivePOTM.length > 0 && (
                     <div className='grid grid-cols-1 md:grid-cols-2'>
                         {
                             POTMData.pendingLivePOTM.map(fixture => (
@@ -121,7 +143,7 @@ const POTMManagementPage = async () => {
                 )
             }
             {
-                !POTMData.pendingLivePOTM || POTMData.pendingLivePOTM.length === 0 && (
+                !POTMData || !POTMData.pendingLivePOTM || POTMData.pendingLivePOTM.length === 0 && (
                     <div className='flex justify-center items-center flex-col gap-4 border border-emerald-500 p-8 rounded-lg'>No Pending Live POTM</div>
                 )
             }
@@ -131,7 +153,7 @@ const POTMManagementPage = async () => {
         <div className='space-y-4'>
             <h2>Pending Last 7 Days POTM</h2>
             {
-                POTMData.pendingFixturePOTM && POTMData.pendingFixturePOTM.length > 0 && (
+                POTMData && POTMData.pendingFixturePOTM && POTMData.pendingFixturePOTM.length > 0 && (
                     <div className='grid grid-cols-1 md:grid-cols-2'>
                         {
                             POTMData.pendingFixturePOTM.map(fixture => (
@@ -186,7 +208,7 @@ const POTMManagementPage = async () => {
                 )
             }
             {
-                !POTMData.pendingFixturePOTM || POTMData.pendingFixturePOTM.length === 0 && (
+                !POTMData || !POTMData.pendingFixturePOTM || POTMData.pendingFixturePOTM.length === 0 && (
                     <div className='flex justify-center items-center flex-col gap-4 border border-emerald-500 p-8 rounded-lg'>No Pending Last 7 Days POTM</div>
                 )
             }
