@@ -1,8 +1,12 @@
-import { cookies } from 'next/headers';
+'use client'
+
 import Link from 'next/link';
-import { redirect } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { getHeadMediaAdminDashboard } from '@/lib/requests/v2/admin/media-admin/dashboard/requests';
 import { ArrowRight, CheckCircle, Clock, Crown, Newspaper, ShieldAlert, Users, Video } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Loader } from '@/components/ui/loader';
+import { toast } from 'react-toastify';
 
 type DashboardData = {
     totalBlogs: number;
@@ -13,21 +17,40 @@ type DashboardData = {
     totalPendingPOTM: number;
 }
 
-const MediaAdminDashboardPage = async () => {
-    const cookieStore = cookies();
-    const authToken = (await cookieStore).get('authToken');
+const MediaAdminDashboardPage = () => {
+    const router = useRouter();
 
-    const request = await getHeadMediaAdminDashboard( authToken?.value );
-    if( request?.code === '99' ) {
-        if( request.message === 'Invalid or Expired Token' || request.message === 'Login Required' ) {
-            redirect('/auth/login')
-        } else if ( request.message === 'Invalid User Permissions' ) {
-            redirect('/sports');
-        } else {
-            redirect('/');
-        }   
+    const [loading, setLoading] = useState<boolean>(true);
+    const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
+    
+    // On Load //
+    useEffect( () => {
+        const fetchData = async () => {
+            const request = await  getHeadMediaAdminDashboard();
+            if( request?.code === '99' ) {
+                if( request.message === 'Invalid or Expired Token' || request.message === 'Login Required' ) {
+                    toast.error('Please Login First')
+                    router.push('/auth/login')
+                } else if ( request.message === 'Invalid User Permissions' ) {
+                    toast.error('Unauthorized')
+                    router.push('/sports');
+                } else {
+                    toast.error('Unknown')
+                    router.push('/');
+                }   
+            }
+        
+            setDashboardData(request?.data);
+            setLoading( false );
+        }
+
+        if( loading ) fetchData();
+    }, [ loading ]);
+    
+    if( loading ) {
+        return <Loader />
     };
-    const dashboardData = request?.data as DashboardData
+    // End of On Load //
     
   return (
     <div className='space-y-6 md:space-y-4'>
@@ -47,42 +70,42 @@ const MediaAdminDashboardPage = async () => {
                 <div className='px-4 py-2 md:py-4 flex justify-between items-center border border-emerald-500 rounded-lg'>
                     <div>
                         <p className='text-muted-foreground'>Total Articles</p>
-                        <span className='text-lg font-bold'>{ dashboardData.totalBlogs }</span>
+                        <span className='text-lg font-bold'>{ dashboardData?.totalBlogs || '0' }</span>
                     </div>
                     <Newspaper className='w-5 h-5 text-emerald-500' />
                 </div>
                 <div className='px-4 py-2 md:py-4 flex justify-between items-center border border-emerald-500 rounded-lg'>
                     <div>
                         <p className='text-muted-foreground'>Pending Review</p>
-                        <span className='text-lg font-bold'>{ dashboardData.totalUnverifiedBlogs }</span>
+                        <span className='text-lg font-bold'>{ dashboardData?.totalUnverifiedBlogs || '0' }</span>
                     </div>
                     <Clock className='w-5 h-5 text-emerald-500' />
                 </div>
                 <div className='px-4 py-2 md:py-4 flex justify-between items-center border border-emerald-500 rounded-lg'>
                     <div>
                         <p className='text-muted-foreground'>Published</p>
-                        <span className='text-lg font-bold'>{ dashboardData.totalPublishedBlogs }</span>
+                        <span className='text-lg font-bold'>{ dashboardData?.totalPublishedBlogs || '0' }</span>
                     </div>
                     <CheckCircle className='w-5 h-5 text-emerald-500' />
                 </div>
                 <div className='px-4 py-2 md:py-4 flex justify-between items-center border border-emerald-500 rounded-lg'>
                     <div>
                         <p className='text-muted-foreground'>Pending POTM</p>
-                        <span className='text-lg font-bold'>{ dashboardData.totalPendingPOTM }</span>
+                        <span className='text-lg font-bold'>{ dashboardData?.totalPendingPOTM || '0' }</span>
                     </div>
                     <ShieldAlert className='w-5 h-5 text-emerald-500' />
                 </div>
                 <div className='px-4 py-2 md:py-4 flex justify-between items-center border border-red-500 rounded-lg'>
                     <div>
                         <p className='text-muted-foreground'>Head Admins</p>
-                        <span className='text-lg font-bold'>{ dashboardData.totalHeadMediaAdmins }</span>
+                        <span className='text-lg font-bold'>{ dashboardData?.totalHeadMediaAdmins || '0' }</span>
                     </div>
                     <Crown className='w-5 h-5 text-red-500' />
                 </div>
                 <div className='px-4 py-2 md:py-4 flex justify-between items-center border border-red-500 rounded-lg'>
                     <div>
                         <p className='text-muted-foreground'>Media Admins</p>
-                        <span className='text-lg font-bold'>{ dashboardData.totalMediaAdmins }</span>
+                        <span className='text-lg font-bold'>{ dashboardData?.totalMediaAdmins || '0' }</span>
                     </div>
                     <Users className='w-5 h-5 text-red-500' />
                 </div>
@@ -99,7 +122,7 @@ const MediaAdminDashboardPage = async () => {
                     link='news-management'
                     statLabel='articles'
                     bg='bg-green-500'
-                    stat={ dashboardData.totalBlogs.toString() } 
+                    stat={ dashboardData?.totalBlogs.toString() || '0' } 
                     Icon={ <Newspaper className='w-8 h-8' /> }
                 />
                 <ContentModule
@@ -108,7 +131,7 @@ const MediaAdminDashboardPage = async () => {
                     link='admin-management'
                     statLabel='admins'
                     bg='bg-orange-500'
-                    stat={ (dashboardData.totalHeadMediaAdmins+dashboardData.totalMediaAdmins).toString() } 
+                    stat={ dashboardData ? (dashboardData.totalHeadMediaAdmins+dashboardData.totalMediaAdmins).toString() : '0' } 
                     Icon={ <Users className='w-8 h-8' /> }
                 />
                 <ContentModule
@@ -126,7 +149,7 @@ const MediaAdminDashboardPage = async () => {
                     link='potm-management'
                     statLabel='pending'
                     bg='bg-purple-500'
-                    stat={ dashboardData.totalPendingPOTM.toString() } 
+                    stat={ dashboardData?.totalPendingPOTM.toString() || '0' } 
                     Icon={ <ShieldAlert className='w-8 h-8' /> }
                 />
             </div>
