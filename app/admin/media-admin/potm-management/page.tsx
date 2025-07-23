@@ -1,5 +1,6 @@
-import { cookies } from 'next/headers';
-import { redirect, useRouter } from 'next/navigation';
+'use client'
+
+import { useRouter } from 'next/navigation';
 import { getHeadMediaAdminFixturesForRating } from '@/lib/requests/v2/admin/media-admin/dashboard/requests';
 import { IV2FootballLiveFixture, PopIV2FootballFixture } from '@/utils/V2Utils/v2requestData.types';
 import { AlertCircle, Calendar, Clock, HeartPulse, MapPin, Users } from 'lucide-react';
