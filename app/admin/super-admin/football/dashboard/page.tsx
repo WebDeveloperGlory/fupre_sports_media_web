@@ -20,7 +20,7 @@ type DashboardData = {
     totalAdminCount: number;
     auditLogs: IV2AuditLog[];
 }
-const SuperAdminDashboardPage = async () => {
+const SuperAdminDashboardPage = () => {
     const router = useRouter();
     
     const [loading, setLoading] = useState<boolean>(true);

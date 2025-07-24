@@ -14,7 +14,7 @@ type DashboardData = {
     pendingFixturePOTM: PopIV2FootballFixture[];
 }
 
-const POTMManagementPage = async () => {
+const POTMManagementPage = () => {
     const router = useRouter();
     
     const [loading, setLoading] = useState<boolean>(true);
@@ -35,9 +35,10 @@ const POTMManagementPage = async () => {
                     toast.error('Unknown')
                     router.push('/');
                 }   
+            } else {
+                setPOTMData(request?.data);
             }
         
-            setPOTMData(request?.data);
             setLoading( false );
         }
 

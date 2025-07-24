@@ -17,8 +17,12 @@ interface SuccessRequest {
     data?: any
 }
 
-const PART_API_URL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_PROD_API_URL : process.env.NEXT_PUBLIC_DEV_PARTIAL_API_URL;
-const API_URL = process.env.NEXT_PUBLIC_DEV_MODE === 'partial' ? PART_API_URL : `${PART_API_URL}/v2`;
+const PART_API_URL = process.env.NODE_ENV === 'production' 
+    ? process.env.NEXT_PUBLIC_PROD_API_URL 
+    : process.env.NEXT_PUBLIC_DEV_PARTIAL_API_URL;
+const API_URL = process.env.NEXT_PUBLIC_DEV_MODE === 'partial' 
+    ? PART_API_URL 
+    : `${PART_API_URL}/v2`;
 
 export const getHeadMediaAdminDashboard = async () => {
     try {

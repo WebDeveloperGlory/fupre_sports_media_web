@@ -7,10 +7,38 @@ import Footer from "@/components/Footer";
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { getHomepageData } from "@/lib/requests/v2/homepage/requests";
+import { IV2Blog, IV2FootballFixture } from "@/utils/V2Utils/v2requestData.types";
+import { toast } from "react-toastify";
 
 // Register GSAP plugins
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
+}
+
+interface DashboardFixture extends IV2FootballFixture {
+  sport: string;
+}
+type DashboardData = {
+  football: {
+    totalCompetitions: number;
+    totalTeams: number;
+    totalUpcomingFixtures: number;
+  };
+  basketball: {};
+  general: {
+    totalCompetitions: number;
+    totalTeams: number;
+    totalPlayedFixtures: number;
+    totalActiveCompetitions: number;
+  };
+  fixtures: {
+    latest: DashboardFixture
+  };
+  blogs: {
+    total: number;
+    latest: IV2Blog;
+  };
 }
 
 export default function SportsOverviewPage() {
@@ -22,6 +50,7 @@ export default function SportsOverviewPage() {
   const [newsData, setNewsData] = useState<any[]>([]);
   const [newsLoading, setNewsLoading] = useState(true);
   const [newsError, setNewsError] = useState<string | null>(null);
+  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
 
   // Platform statistics
   const platformStats = [
@@ -33,6 +62,14 @@ export default function SportsOverviewPage() {
 
   // Fetch news data
   useEffect(() => {
+    const fetchData = async () => {
+      const response = await getHomepageData();
+      if(response?.code === '00') {
+        setDashboardData(response.data)
+      } else {
+        toast.error(response?.message || 'Error Getting Analytics')
+      }
+    }
     const fetchNews = async () => {
       try {
         setNewsLoading(true);
