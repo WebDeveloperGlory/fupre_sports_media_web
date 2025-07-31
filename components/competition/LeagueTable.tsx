@@ -24,6 +24,7 @@ const LeagueTable = ({ table }: { table: ExtendedLeagueTableEntry[] }) => {
             <th className="text-center py-4 px-3 text-sm font-medium text-muted-foreground">GF</th>
             <th className="text-center py-4 px-3 text-sm font-medium text-muted-foreground">GA</th>
             <th className="text-center py-4 px-3 text-sm font-medium text-muted-foreground">GD</th>
+            <th className="text-center py-4 px-3 text-sm font-medium text-muted-foreground">DP</th>
             <th className="text-center py-4 px-3 text-sm font-medium text-muted-foreground">Pts</th>
             <th className="text-center py-4 px-3 text-sm font-medium text-muted-foreground">Form</th>
             </tr>
@@ -58,6 +59,7 @@ const LeagueTable = ({ table }: { table: ExtendedLeagueTableEntry[] }) => {
                         <td className="text-center py-4 px-3 text-sm">{ entry.goalsFor }</td>
                         <td className="text-center py-4 px-3 text-sm">{ entry.goalsAgainst }</td>
                         <td className="text-center py-4 px-3 text-sm">{ entry.goalDifference }</td>
+                        <td className="text-center py-4 px-3 text-sm">{ entry.disciplinaryPoints || 0 }</td>
                         <td className="text-center py-4 px-3 text-sm font-semibold">{ entry.points }</td>
                         <td className="text-center py-4 px-3">
                             <div className="flex items-center justify-center gap-1">

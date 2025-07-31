@@ -136,18 +136,18 @@ export interface IV2FootballCompetition {
         averageAttendance: Number,
         cleanSheets: Number,
         topScorers: {
-            player: string,
-            team: string,
+            player: ShortPopulatedPlayer,
+            team: ShortPopulatedTeam,
             goals: Number,
             penalties: Number
         }[],
         topAssists: {
-            player: string,
-            team: string,
+            player: ShortPopulatedTeam,
+            team: ShortPopulatedPlayer,
             assists: Number
         }[],
         bestDefenses: {
-            team: string,
+            team: ShortPopulatedPlayer,
             cleanSheets: Number,
             goalsConceded: Number
         }[]
@@ -430,7 +430,7 @@ export interface TeamPlayerDetails {
 export interface ILeagueStandings {
     _id: string;
 
-    team: string;
+    team: ShortPopulatedTeam;
     played: number;
     points: number;
     disciplinaryPoints: number;
@@ -449,6 +449,24 @@ export interface IKnockoutRounds {
 
     name: string,
     fixtures: string[],
+    completed: boolean,
+}
+
+export interface IPopKnockoutRounds {
+    _id: string;
+
+    name: string,
+    fixtures: {
+        _id: string;
+        homeTeam: ShortPopulatedTeam;
+        awayTeam: ShortPopulatedTeam;
+        stadium: string;
+        scheduledDate: Date;
+        status: FixtureStatus;
+        result: FixtureResult | null;
+        rescheduledDate?: Date | null;
+        postponedReason?: string | null;
+    }[],
     completed: boolean,
 }
 

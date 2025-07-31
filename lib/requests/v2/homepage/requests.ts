@@ -73,3 +73,27 @@ export const getCompetitionpageData = async () => {
         }
     }
 }
+
+export const getFootballCompetitionPageData = async () => {
+    try {
+        const response = await axiosInstance.get(
+            `${API_URL}/views/pages/competition/football`,
+        );
+        const { data }: { data: SuccessRequest } = response;
+
+        if( data.code === '99' ) {
+            throw data
+        }
+        return data;
+    } catch( err: any ) {
+        const { response } = err as CustomError;
+
+        if( err?.status && err?.message ) {
+            console.error( `Error ${ err.status }: `, response?.data.message )
+            return response?.data || null;
+        } else {
+            console.error('Error fetching fixtures: ', err );
+            return null;
+        }
+    }
+}

@@ -62,6 +62,7 @@ export type ExtendedLeagueTableEntry = {
     goalsFor: number,
     goalsAgainst: number,
     goalDifference: number,
+    disciplinaryPoints?: number,
     points: number,
     _id: string,
     form: string[] | [],

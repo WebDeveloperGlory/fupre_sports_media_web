@@ -10,15 +10,13 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { getHomepageData } from "@/lib/requests/v2/homepage/requests";
 import { IV2Blog, IV2FootballFixture } from "@/utils/V2Utils/v2requestData.types";
 import { toast } from "react-toastify";
+import { ShortPopulatedCompetition, ShortPopulatedTeam } from "@/utils/V2Utils/v2requestSubData.types";
 
 // Register GSAP plugins
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
 }
 
-interface DashboardFixture extends IV2FootballFixture {
-  sport: string;
-}
 type DashboardData = {
   football: {
     totalCompetitions: number;
@@ -33,11 +31,18 @@ type DashboardData = {
     totalActiveCompetitions: number;
   };
   fixtures: {
-    latest: DashboardFixture
+    latest: {
+      scheduledDate: Date;
+      homeTeam: ShortPopulatedTeam;
+      awayTeam: ShortPopulatedTeam;
+      sport: string;
+      stadium: string;
+      competition: ShortPopulatedCompetition;
+    }[];
   };
   blogs: {
     total: number;
-    latest: IV2Blog;
+    latest: IV2Blog[];
   };
 }
 
@@ -47,9 +52,7 @@ export default function SportsOverviewPage() {
   const sportsRef = useRef<HTMLDivElement>(null);
   const featuredRef = useRef<HTMLDivElement>(null);
 
-  const [newsData, setNewsData] = useState<any[]>([]);
-  const [newsLoading, setNewsLoading] = useState(true);
-  const [newsError, setNewsError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
 
   // Platform statistics
@@ -70,50 +73,9 @@ export default function SportsOverviewPage() {
         toast.error(response?.message || 'Error Getting Analytics')
       }
     }
-    const fetchNews = async () => {
-      try {
-        setNewsLoading(true);
-        // Replace with actual news API endpoint when available
-        // For now, using mock data with better structure
-        const mockNews = [
-          {
-            title: "FUPRE Football Championship Finals Set for Next Week",
-            excerpt: "The most anticipated match of the season approaches as two top teams prepare for the ultimate showdown.",
-            category: "Football",
-            readTime: "3 min read",
-            href: "/news/1"
-          },
-          {
-            title: "Basketball Season Kicks Off with Record Participation",
-            excerpt: "More teams than ever before have registered for this year's basketball tournament.",
-            category: "Basketball",
-            readTime: "2 min read",
-            href: "/news/2"
-          },
-          {
-            title: "New Sports Complex Opens at FUPRE",
-            excerpt: "State-of-the-art facilities now available for all university sports activities.",
-            category: "General",
-            readTime: "4 min read",
-            href: "/news/3"
-          }
-        ];
 
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 500));
-        setNewsData(mockNews);
-        setNewsError(null);
-      } catch (error) {
-        console.error('Error fetching news:', error);
-        setNewsError('Failed to load news articles');
-        setNewsData([]);
-      } finally {
-        setNewsLoading(false);
-      }
-    };
-
-    fetchNews();
-  }, []);
+    if(loading) fetchData();
+  }, [loading]);
 
   // GSAP Animations
   useEffect(() => {
@@ -206,25 +168,6 @@ export default function SportsOverviewPage() {
     return () => ctx.revert();
   }, []);
 
-  const upcomingMatches = [
-    {
-      sport: "Football",
-      homeTeam: "Engineering FC",
-      awayTeam: "Science United",
-      date: "Tomorrow",
-      time: "4:00 PM",
-      venue: "Main Stadium"
-    },
-    {
-      sport: "Basketball",
-      homeTeam: "Tech Giants",
-      awayTeam: "Court Kings",
-      date: "Friday",
-      time: "6:00 PM",
-      venue: "Sports Complex"
-    }
-  ];
-
   const sports = [
     {
       name: "Football",
@@ -234,9 +177,9 @@ export default function SportsOverviewPage() {
       color: "emerald" as const,
       gradient: "from-emerald-500/20 to-emerald-600/10",
       stats: {
-        activeCompetitions: "3",
-        teams: "16",
-        upcomingMatches: "8"
+        activeCompetitions: dashboardData?.football.totalCompetitions || "0",
+        teams: dashboardData?.football.totalTeams || "0",
+        upcomingMatches: dashboardData?.football.totalUpcomingFixtures || "0"
       },
       features: ["Live Matches", "Team Rankings", "TOTS Voting", "Match Statistics"],
       image: "/images/football-hero.jpg" // Add actual image path
@@ -249,9 +192,9 @@ export default function SportsOverviewPage() {
       color: "orange" as const,
       gradient: "from-orange-500/20 to-orange-600/10",
       stats: {
-        activeCompetitions: "2",
-        teams: "12",
-        upcomingMatches: "4"
+        activeCompetitions: "0",
+        teams: "0",
+        upcomingMatches: "0"
       },
       features: ["Tournament Brackets", "Player Stats", "Game Highlights", "Team Profiles"],
       image: "/images/basketball-hero.jpg" // Add actual image path
@@ -337,23 +280,50 @@ export default function SportsOverviewPage() {
               </div>
 
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 max-w-4xl mx-auto">
-                {platformStats.map((stat, index) => {
-                  const Icon = stat.icon;
-                  return (
-                    <div
-                      key={index}
-                      className="stats-card bg-card/40 backdrop-blur-sm rounded-xl p-6 border border-border text-center hover:scale-105 transition-all duration-300 hover:shadow-lg"
-                    >
-                      <div className="flex justify-center mb-4">
-                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-background/50">
-                          <Icon className={`h-6 w-6 ${stat.color}`} />
-                        </div>
-                      </div>
-                      <div className="text-2xl sm:text-3xl font-bold mb-2">{stat.value}</div>
-                      <div className="text-sm text-muted-foreground">{stat.label}</div>
+                <div
+                  className="stats-card bg-card/40 backdrop-blur-sm rounded-xl p-6 border border-border text-center hover:scale-105 transition-all duration-300 hover:shadow-lg"
+                >
+                  <div className="flex justify-center mb-4">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-background/50">
+                      <Users className={`h-6 w-6 text-blue-500`} />
                     </div>
-                  );
-                })}
+                  </div>
+                  <div className="text-2xl sm:text-3xl font-bold mb-2">{dashboardData?.general.totalTeams || 'Unknown'}</div>
+                  <div className="text-sm text-muted-foreground">Total Teams</div>
+                </div>
+                <div
+                  className="stats-card bg-card/40 backdrop-blur-sm rounded-xl p-6 border border-border text-center hover:scale-105 transition-all duration-300 hover:shadow-lg"
+                >
+                  <div className="flex justify-center mb-4">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-background/50">
+                      <Trophy className={`h-6 w-6 text-emerald-500`} />
+                    </div>
+                  </div>
+                  <div className="text-2xl sm:text-3xl font-bold mb-2">{dashboardData?.general.totalActiveCompetitions || 'Unknown'}</div>
+                  <div className="text-sm text-muted-foreground">Active Competitions</div>
+                </div>
+                <div
+                  className="stats-card bg-card/40 backdrop-blur-sm rounded-xl p-6 border border-border text-center hover:scale-105 transition-all duration-300 hover:shadow-lg"
+                >
+                  <div className="flex justify-center mb-4">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-background/50">
+                      <Play className={`h-6 w-6 text-purple-500`} />
+                    </div>
+                  </div>
+                  <div className="text-2xl sm:text-3xl font-bold mb-2">{dashboardData?.general.totalPlayedFixtures || 'Unknown'}</div>
+                  <div className="text-sm text-muted-foreground">Matches Played</div>
+                </div>
+                <div
+                  className="stats-card bg-card/40 backdrop-blur-sm rounded-xl p-6 border border-border text-center hover:scale-105 transition-all duration-300 hover:shadow-lg"
+                >
+                  <div className="flex justify-center mb-4">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-background/50">
+                      <Newspaper className={`h-6 w-6 text-orange-500`} />
+                    </div>
+                  </div>
+                  <div className="text-2xl sm:text-3xl font-bold mb-2">{dashboardData?.blogs.total || 'Unknown'}</div>
+                  <div className="text-sm text-muted-foreground">News Articles</div>
+                </div>
               </div>
             </BlurFade>
           </div>
@@ -479,39 +449,50 @@ export default function SportsOverviewPage() {
                   </div>
 
                   <div className="space-y-6">
-                    {upcomingMatches.map((match, index) => (
+                    {dashboardData && dashboardData.fixtures.latest.length > 0 && dashboardData.fixtures.latest.map((fixture, index) => (
                       <div
                         key={index}
                         className="bg-card/40 backdrop-blur-sm rounded-xl p-6 border border-border hover:border-orange-500/30 transition-all duration-300"
                       >
                         <div className="flex items-center justify-between mb-4">
                           <span className="inline-block px-3 py-1 rounded-full bg-orange-500/10 text-orange-500 text-xs font-medium">
-                            {match.sport}
+                            {fixture.sport}
                           </span>
                           <div className="text-right">
-                            <div className="text-sm font-medium">{match.date}</div>
-                            <div className="text-xs text-muted-foreground">{match.time}</div>
+                            <div className="text-sm font-medium">{fixture.scheduledDate.toLocaleString().split('T')[0]}</div>
+                            <div className="text-xs text-muted-foreground">{fixture.scheduledDate.toLocaleString().split('T')[1]}</div>
                           </div>
                         </div>
 
                         <div className="flex items-center justify-between mb-4">
                           <div className="text-center flex-1">
-                            <div className="font-semibold text-sm">{match.homeTeam}</div>
+                            <div className="font-semibold text-sm">{fixture.homeTeam.name}</div>
                           </div>
                           <div className="px-4">
                             <div className="text-lg font-bold text-muted-foreground">VS</div>
                           </div>
                           <div className="text-center flex-1">
-                            <div className="font-semibold text-sm">{match.awayTeam}</div>
+                            <div className="font-semibold text-sm">{fixture.awayTeam.name}</div>
                           </div>
                         </div>
 
                         <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
                           <Calendar className="h-3 w-3" />
-                          <span>{match.venue}</span>
+                          <span>{fixture.stadium}</span>
                         </div>
                       </div>
                     ))}
+                    {
+                      ( !dashboardData || dashboardData.fixtures.latest.length === 0 ) && (
+                        <div className="flex flex-col justify-center items-center gap-6 p-8 border border-muted-foreground bg-card rounded-lg">
+                          <Calendar className="w-8 h-8" />
+                          <div className="text-center">
+                            <p>Uh Oh! No Upcoming Fixtures</p>
+                            <span className="text-sm">Contach FSM to add your friendly or something</span>
+                          </div>
+                        </div>
+                      )
+                    }
                   </div>
 
                   <div className="mt-8">
@@ -534,50 +515,45 @@ export default function SportsOverviewPage() {
                     <h2 className="text-2xl sm:text-3xl font-bold">Latest News</h2>
                   </div>
 
-                  {newsLoading ? (
-                    <div className="space-y-6">
-                      {[1, 2, 3].map((i) => (
-                        <div key={i} className="bg-card/40 backdrop-blur-sm rounded-xl p-6 border border-border animate-pulse">
-                          <div className="h-4 bg-muted rounded w-1/4 mb-3"></div>
-                          <div className="h-5 bg-muted rounded w-3/4 mb-2"></div>
-                          <div className="h-4 bg-muted rounded w-full"></div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : newsError ? (
-                    <div className="bg-card/40 backdrop-blur-sm rounded-xl p-6 border border-border text-center">
-                      <p className="text-muted-foreground">{newsError}</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-6">
-                      {newsData.map((article, index) => (
-                        <Link
-                          key={index}
-                          href={article.href}
-                          className="block group"
-                        >
-                          <div className="bg-card/40 backdrop-blur-sm rounded-xl p-6 border border-border hover:border-emerald-500/30 transition-all duration-300 hover:scale-[1.02]">
-                            <div className="flex items-start justify-between gap-4 mb-3">
-                              <span className="inline-block px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-500 text-xs font-medium">
-                                {article.category}
-                              </span>
-                              <span className="text-xs text-muted-foreground">{article.readTime}</span>
-                            </div>
-                            <h3 className="font-semibold text-foreground mb-2 group-hover:text-emerald-500 transition-colors">
-                              {article.title}
-                            </h3>
-                            <p className="text-sm text-muted-foreground leading-relaxed">
-                              {article.excerpt}
-                            </p>
-                            <div className="flex items-center gap-2 mt-4 text-emerald-500 text-sm font-medium">
-                              Read more
-                              <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                            </div>
+                  <div className="space-y-6">
+                    {dashboardData && dashboardData.blogs.latest.length > 0 && dashboardData.blogs.latest.map((article, index) => (
+                      <Link
+                        key={index}
+                        href={`/news/${article._id}`}
+                        className="block group"
+                      >
+                        <div className="bg-card/40 backdrop-blur-sm rounded-xl p-6 border border-border hover:border-emerald-500/30 transition-all duration-300 hover:scale-[1.02]">
+                          <div className="flex items-start justify-between gap-4 mb-3">
+                            <span className="inline-block px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-500 text-xs font-medium">
+                              {article.category}
+                            </span>
+                            <span className="text-xs text-muted-foreground">{'2mins'}</span>
                           </div>
-                        </Link>
-                      ))}
-                    </div>
-                  )}
+                          <h3 className="font-semibold text-foreground mb-2 group-hover:text-emerald-500 transition-colors">
+                            {article.title}
+                          </h3>
+                          <p className="text-sm text-muted-foreground leading-relaxed">
+                            {article.content.slice(0, 125)}...
+                          </p>
+                          <div className="flex items-center gap-2 mt-4 text-emerald-500 text-sm font-medium">
+                            Read more
+                            <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                          </div>
+                        </div>
+                      </Link>
+                    ))}
+                    {
+                      ( !dashboardData || dashboardData.blogs.latest.length === 0 ) && (
+                        <div className="flex flex-col justify-center items-center gap-6 p-8 border border-muted-foreground bg-card rounded-lg">
+                          <Newspaper className="w-8 h-8" />
+                          <div className="text-center">
+                            <p>Huh? No Blogs???</p>
+                            <span className="text-sm">Thats not right. Contact FSM to report the issue</span>
+                          </div>
+                        </div>
+                      )
+                    }
+                  </div>
 
                   <div className="mt-8">
                     <Link
