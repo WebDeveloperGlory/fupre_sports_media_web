@@ -21,6 +21,81 @@ interface SuccessRequest {
 const PART_API_URL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_PROD_API_URL : process.env.NEXT_PUBLIC_DEV_PARTIAL_API_URL;
 const API_URL = process.env.NEXT_PUBLIC_DEV_MODE === 'partial' ? PART_API_URL : `${PART_API_URL}/v2`;
 
+export const getAllPlayers = async () => {
+    try {
+        const response = await axiosInstance.get(`${API_URL}/player?limit=100`);
+        const { data }: { data: SuccessRequest } = response;
+
+        if (data.code === '99') {
+            throw data;
+        }
+
+        return data;
+    } catch( err: any ) {
+        const { response } = err as CustomError;
+        console.log( err, response );
+
+        if( err?.status && err?.message ) {
+            console.error( `Error ${ err.status }: `, response?.data.message )
+            return response?.data || null;
+        } else {
+            console.error('Error fetching all players: ', err );
+            return null;
+        }
+    }
+};
+
+export const getUnverifiedPlayers = async () => {
+    try {
+        const response = await axiosInstance.get(`${API_URL}/player/unverified?limit=100`);
+        const { data }: { data: SuccessRequest } = response;
+
+        if (data.code === '99') {
+            throw data;
+        }
+
+        return data;
+    } catch( err: any ) {
+        const { response } = err as CustomError;
+        console.log( err, response );
+
+        if( err?.status && err?.message ) {
+            console.error( `Error ${ err.status }: `, response?.data.message )
+            return response?.data || null;
+        } else {
+            console.error('Error fetching unverified players: ', err );
+            return null;
+        }
+    }
+};
+
+export const deletePlayer = async ( playerId: string ) => {
+    try {
+        const response = await axiosInstance.delete(
+            `${API_URL}/player/${playerId}`,
+            { withCredentials: true }
+        );
+        const { data }: { data: SuccessRequest } = response;
+
+        if (data.code === '99') {
+            throw data;
+        }
+
+        return data;
+    } catch( err: any ) {
+        const { response } = err as CustomError;
+        console.log( err, response );
+
+        if( err?.status && err?.message ) {
+            console.error( `Error ${ err.status }: `, response?.data.message )
+            return response?.data || null;
+        } else {
+            console.error('Error deleting player: ', err );
+            return null;
+        }
+    }
+};
+
 export const getTeamSuggestedPlayers = async ( teamId: string ) => {
     try {
         const response = await axiosInstance.get(`${API_URL}/player/suggested?teamId=${teamId}`);

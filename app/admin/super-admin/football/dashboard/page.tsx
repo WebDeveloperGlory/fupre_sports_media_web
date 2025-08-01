@@ -162,13 +162,13 @@ const SuperAdminDashboardPage = () => {
                     stat={ dashboardData?.totalCompetitions.toString() || '0' } 
                     Icon={ <Award className='w-8 h-8' /> }
                 />
-                <AdminModule 
-                    title='Player Management' 
-                    content='Verify and manage all players' 
+                <AdminModule
+                    title='Player Management'
+                    content='Verify and manage all players'
                     link='players'
                     statLabel='players'
                     bg='bg-orange-500'
-                    stat={ dashboardData?.totalPlayers.toString() || '0' } 
+                    stat={ dashboardData?.totalPlayers.toString() || '0' }
                     Icon={ <UserCheck className='w-8 h-8' /> }
                 />
                 <AdminModule 
