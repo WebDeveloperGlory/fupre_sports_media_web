@@ -2,7 +2,7 @@
 
 import { Loader } from '@/components/ui/loader';
 import { IGroupTable, IKnockoutRounds, ILeagueStandings, IPopKnockoutRounds, IV2FootballCompetition } from '@/utils/V2Utils/v2requestData.types';
-import { Calendar, Crown, Trophy, Users } from 'lucide-react';
+import { Award, Calendar, Crown, Info, Shield, Star, Target, Trophy, Users } from 'lucide-react';
 import React, { use, useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion';
 import LeagueTable from '@/components/competition/LeagueTable';
@@ -72,7 +72,7 @@ const mockCompetitions: IV2FootballCompetition[] = [
     currentStage: "League Stage",
     teams: [
         {
-            "team": "team1",
+            "team": {_id: 'team1', name: "team1", shorthand: 'T1'},
             "squad": [
                 { "player": "team1-p1", "jerseyNumber": 7, "isCaptain": true, "position": "forward" },
                 { "player": "team1-p2", "jerseyNumber": 10, "isCaptain": false, "position": "midfielder" },
@@ -80,7 +80,7 @@ const mockCompetitions: IV2FootballCompetition[] = [
             ]
         },
         {
-            "team": "team2",
+            "team": {_id: 'team2', name: "team2", shorthand: 'T2'},
             "squad": [
                 { "player": "team2-p1", "jerseyNumber": 7, "isCaptain": true, "position": "forward" },
                 { "player": "team2-p2", "jerseyNumber": 10, "isCaptain": false, "position": "midfielder" },
@@ -88,7 +88,7 @@ const mockCompetitions: IV2FootballCompetition[] = [
             ]
         },
         {
-            "team": "team3",
+            "team": {_id: 'team3', name: "team3", shorthand: 'T3'},
             "squad": [
                 { "player": "team3-p1", "jerseyNumber": 7, "isCaptain": true, "position": "forward" },
                 { "player": "team3-p2", "jerseyNumber": 10, "isCaptain": false, "position": "midfielder" },
@@ -96,7 +96,7 @@ const mockCompetitions: IV2FootballCompetition[] = [
             ]
         },
         {
-            "team": "team6",
+            "team": {_id: 'team6', name: "team6", shorthand: 'T6'},
             "squad": [
                 { "player": "team6-p1", "jerseyNumber": 7, "isCaptain": true, "position": "forward" },
                 { "player": "team6-p2", "jerseyNumber": 10, "isCaptain": false, "position": "midfielder" },
@@ -153,7 +153,7 @@ const mockCompetitions: IV2FootballCompetition[] = [
     registrationDeadline: new Date("2024-08-01"),
     teams: [
         {
-            "team": "team1",
+            "team": {_id: 'team1', name: "team1", shorthand: 'T1'},
             "squad": [
                 { "player": "team1-p1", "jerseyNumber": 7, "isCaptain": true, "position": "forward" },
                 { "player": "team1-p2", "jerseyNumber": 10, "isCaptain": false, "position": "midfielder" },
@@ -161,7 +161,7 @@ const mockCompetitions: IV2FootballCompetition[] = [
             ]
         },
         {
-            "team": "team2",
+            "team": {_id: 'team2', name: "team2", shorthand: 'T2'},
             "squad": [
                 { "player": "team2-p1", "jerseyNumber": 7, "isCaptain": true, "position": "forward" },
                 { "player": "team2-p2", "jerseyNumber": 10, "isCaptain": false, "position": "midfielder" },
@@ -169,7 +169,7 @@ const mockCompetitions: IV2FootballCompetition[] = [
             ]
         },
         {
-            "team": "team3",
+            "team": {_id: 'team3', name: "team3", shorthand: 'T3'},
             "squad": [
                 { "player": "team3-p1", "jerseyNumber": 7, "isCaptain": true, "position": "forward" },
                 { "player": "team3-p2", "jerseyNumber": 10, "isCaptain": false, "position": "midfielder" },
@@ -177,7 +177,7 @@ const mockCompetitions: IV2FootballCompetition[] = [
             ]
         },
         {
-            "team": "team6",
+            "team": {_id: 'team6', name: "team6", shorthand: 'T6'},
             "squad": [
                 { "player": "team6-p1", "jerseyNumber": 7, "isCaptain": true, "position": "forward" },
                 { "player": "team6-p2", "jerseyNumber": 10, "isCaptain": false, "position": "midfielder" },
@@ -525,11 +525,12 @@ const SingleCompetitionPage = (
     const resolvedParams = use( params );
 
     // States //
-    const [loading, setLoading] = useState<boolean>( true );
-    const [competition, setCompetition] = useState<IV2FootballCompetition | null>( null );
+    const [loading, setLoading] = useState<boolean>(true);
+    const [competition, setCompetition] = useState<IV2FootballCompetition | null>(null);
     const [leagueTable, setLeagueTable] = useState<ILeagueStandings[]>([]);
     const [knockoutRounds, setKnockoutRounds] = useState<IPopKnockoutRounds[]>([]);
     const [groupStages, setGroupStages] = useState<IGroupTable[]>([]);
+    const [statistics, setStatistics] = useState(null);
     const [activeTab, setActiveTab] = useState<LeagueTabs | KnockoutTabs | HybridTabs >(LeagueTabs.INFO);
     // End of States //
 
@@ -543,16 +544,16 @@ const SingleCompetitionPage = (
             // }
             const rand = Math.floor(Math.random()*3)
             // setCompetition(mockCompetitions[rand]);
-            setCompetition(mockCompetitions[2]);
-            if(mockCompetitions[2].type === CompetitionTypes.LEAGUE) {
+            setCompetition(mockCompetitions[rand]);
+            if(mockCompetitions[rand].type === CompetitionTypes.LEAGUE) {
                 setLeagueTable(mockLeagueTable);
                 setActiveTab(LeagueTabs.TABLES);
             }
-            if(mockCompetitions[2].type === CompetitionTypes.KNOCKOUT) {
+            if(mockCompetitions[rand].type === CompetitionTypes.KNOCKOUT) {
                 setKnockoutRounds(mockKnockoutRounds);
                 setActiveTab(KnockoutTabs.KNOCKOUT);
             }
-            if(mockCompetitions[2].type === CompetitionTypes.HYBRID) {
+            if(mockCompetitions[rand].type === CompetitionTypes.HYBRID) {
                 setGroupStages(mockGroupStages);
                 setKnockoutRounds(mockKnockoutRounds);
                 setActiveTab(HybridTabs.GROUPS);
@@ -846,7 +847,7 @@ const SingleCompetitionPage = (
                                 className='p-4 rounded-lg bg-primary-foreground border md:p-6 overflow-x-auto'
                             >
                                 {/* Title */}
-                                <h2 className='text-emerald-500 flex gap-2 text-lg font-bold'>
+                                <h2 className='text-emerald-500 flex gap-2 items-center text-lg font-bold'>
                                     <Trophy className='w-5 h-5' />
                                     {group.name}
                                 </h2>
@@ -951,6 +952,283 @@ const SingleCompetitionPage = (
                             </div>
                         ))
                     }
+                </div>
+            )
+        }
+
+        {/* Statistics */}
+        {
+            (activeTab === LeagueTabs.STATISTICS || activeTab === KnockoutTabs.STATISTICS || activeTab === HybridTabs.STATISTICS) && (
+                <div className='space-y-4'>
+                    {/* Basic Stats */}
+                    <div className='grid grid-cols-2 md:grid-cols-3 gap-4'>
+                        <div className='py-6 border bg-primary-foreground rounded-lg text-center'>
+                            <p className='text-emerald-500 font-bold text-xl'>{competition?.stats.averageGoalsPerMatch.toFixed(2) || '0'}</p>
+                            <span className='text-muted-foreground'>Goals Per Game</span>
+                        </div>
+                        <div className='py-6 border bg-primary-foreground rounded-lg text-center'>
+                            <p className='text-blue-500 font-bold text-xl'>{competition?.stats.averageAttendance.toFixed(2) || '0'}</p>
+                            <span className='text-muted-foreground'>Average Attendance</span>
+                        </div>
+                        <div className='py-6 border bg-primary-foreground rounded-lg text-center'>
+                            <p className='text-orange-500 font-bold text-xl'>{competition?.stats.cleanSheets || '0'}</p>
+                            <span className='text-muted-foreground'>Clean Sheets</span>
+                        </div>
+                    </div>
+
+                    {/* Goal And Assist Leaders */}
+                    <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                        {/* Top Scorers */}
+                        <div className='p-4 border bg-primary-foreground rounded-lg'>
+                            {/* Title */}
+                            <h2 className='text-lg font-bold flex items-center gap-2 mb-4'>
+                                <Target className='w-5 h-5' />
+                                Top Scorers
+                            </h2>
+
+                            {/* Cards */}
+                            <div className='space-y-2'>
+                                {
+                                    (
+                                        <div className='p-2 border bg-secondary flex justify-between items-center rounded-md'>
+                                            <div className='flex items-center gap-2'>
+                                                <div className='font-bold flex items-center justify-center rounded-full bg-emerald-500 w-8 h-8'>{1}</div>
+                                                <div className=''>
+                                                    <p>{'Test Name'}</p>
+                                                    <span className='text-muted-foreground text-sm'>{'Matadors FC'}</span>
+                                                </div>
+                                            </div>
+                                            <p className='text-emerald-500 text-lg font-bold'>{10}</p>
+                                        </div>
+                                    )
+                                }
+                            </div>
+                        </div>
+                        
+                        {/* Top Assists */}
+                        <div className='p-4 border bg-primary-foreground rounded-lg'>
+                            {/* Title */}
+                            <h2 className='text-lg font-bold flex items-center gap-2 mb-4'>
+                                <Star className='w-5 h-5' />
+                                Top Assists
+                            </h2>
+
+                            {/* Cards */}
+                            <div className='space-y-2'>
+                                {
+                                    (
+                                        <div className='p-2 border bg-secondary flex justify-between items-center rounded-md'>
+                                            <div className='flex items-center gap-2'>
+                                                <div className='font-bold flex items-center justify-center rounded-full bg-blue-500 w-8 h-8'>{1}</div>
+                                                <div className=''>
+                                                    <p>{'Test Name'}</p>
+                                                    <span className='text-muted-foreground text-sm'>{'Matadors FC'}</span>
+                                                </div>
+                                            </div>
+                                            <p className='text-blue-500 text-lg font-bold'>{10}</p>
+                                        </div>
+                                    )
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Best Defense */}
+                    <div className='p-4 border bg-primary-foreground rounded-lg'>
+                        {/* Title */}
+                        <h2 className='text-lg font-bold flex items-center gap-2 mb-4'>
+                            <Shield className='w-5 h-5' />
+                            Best Defenses
+                        </h2>
+
+                        {/* Cards */}
+                        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
+                            {
+                                (
+                                    <div className='bg-secondary rounded-lg py-4 border flex items-center justify-center flex-col gap-4 text-center'>
+                                        <span className='text-lg font-bold'>{1}</span>
+                                        <div className='space-y-1'>
+                                            <p className='font-bold'>{'Matadors FC'}</p>
+                                            <span className='text-sm text-muted-foreground'>{5} clean sheets</span>
+                                            <p className='text-lg font-bold text-orange-500'>{1} goal conceeded</p>
+                                        </div>
+                                    </div>
+                                )
+                            }
+                        </div>
+                    </div>
+                </div>
+            )
+        }
+
+        {/* Statistics */}
+        {
+            (activeTab === LeagueTabs.TEAMS || activeTab === KnockoutTabs.TEAMS || activeTab === HybridTabs.TEAMS) && (
+                <div className='p-4 bg-primary-foreground rounded-lg border'>
+                    {/* Title */}
+                    <h2 className='text-lg font-bold flex items-center gap-2 mb-4'>
+                        <Users className='w-5 h-5' />
+                        Participating Teams
+                    </h2>
+
+                    {/* Cards */}
+                    <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3'>
+                        {
+                            competition && competition.teams.length > 0 && competition.teams.map(team => (
+                                <div className='p-4 border bg-secondary rounded-md hover:bg-accent/50 transition-colors'>
+                                    <Link
+                                        key={ team.team._id }
+                                        href={`/sports/football/teams/${ team.team._id}`}
+                                        className="flex items-center gap-3"
+                                    >
+                                        <div className="relative w-10 h-10">
+                                            <Image
+                                                src={ teamLogos[ team.team.name ] || '/images/team_logos/default.jpg' }
+                                                alt={ team.team.name }
+                                                fill
+                                                className="object-contain"
+                                            />
+                                        </div>
+                                        <div>
+                                            <h3 className="font-medium">{team.team.name}</h3>
+                                            <p>{team.team.shorthand || ''}</p>
+                                        </div>
+                                    </Link>
+                                </div>
+                            ))
+                        }
+                        {
+                            competition && competition.teams.length === 0 && (
+                                <div className='md:col-span-2 lg:col-span-3 flex justify-center items-center gap-4 flex-col'>
+                                    <Users className='w-12 h-12' />
+                                    <div className='text-center'>
+                                        <p>No Registered Teams Yet</p>
+                                        <span className='text-sm text-muted-foreground'>Come back later to see all registered teams</span>
+                                    </div>
+                                </div>
+                            )
+                        }
+                    </div>
+                </div>
+            )
+        }
+            
+        {/* AWARDS */}
+        {
+            (activeTab === LeagueTabs.AWARDS || activeTab === KnockoutTabs.AWARDS || activeTab === HybridTabs.AWARDS) && (
+                <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                    {/* Player Awards */}
+                    <div className='p-4 bg-primary-foreground rounded-lg border space-y-4'>
+                        {/* Title */}
+                        <h2 className='text-lg font-bold flex items-center gap-2'>
+                            <Award className='w-5 h-5' />
+                            Player Awards
+                        </h2>
+                    </div>
+                    
+                    {/* Team Awards */}
+                    <div className='p-4 bg-primary-foreground rounded-lg border space-y-4'>
+                        {/* Title */}
+                        <h2 className='text-lg font-bold flex items-center gap-2'>
+                            <Trophy className='w-5 h-5' />
+                            Team Awards
+                        </h2>
+                    </div>
+                </div>
+            )
+        }
+            
+        {/* Info */}
+        {
+            (activeTab === LeagueTabs.INFO || activeTab === KnockoutTabs.INFO || activeTab === HybridTabs.INFO) && (
+                <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                    {/* Rules */}
+                    <div className='p-4 bg-primary-foreground rounded-lg border space-y-4'>
+                        {/* Title */}
+                        <h2 className='text-lg font-bold flex items-center gap-2'>
+                            <Info className='w-5 h-5' />
+                            Competition Rules
+                        </h2>
+
+                        {/* Match Related Info */}
+                        <div>
+                            <div className="grid grid-cols-2 gap-2">
+                                <div>
+                                    <span className='text-sm text-muted-foreground'>Match Duration:</span>
+                                    <p>{competition?.rules.matchDuration.normal || 80} mins</p>
+                                </div>
+                                <div>
+                                    <span className='text-sm text-muted-foreground'>Substitutions:</span>
+                                    <p>{competition?.rules.substitutions.maximum || 5} allowed</p>
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-2">
+                                <div>
+                                    <span className='text-sm text-muted-foreground'>Sqaud Size:</span>
+                                    <p>{competition?.rules.squadSize.min || 15} - {competition?.rules.squadSize.max || 20} players</p>
+                                </div>
+                                <div>
+                                    <span className='text-sm text-muted-foreground'>Extra Time:</span>
+                                    <p>{competition?.rules.extraTime ? 'Yes' : 'No'}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Points System */}
+                        <div>
+                            <h2 className='font-bold mb-2'>Points System</h2>
+                            <div>
+                                <p>Win: 3 points</p>
+                                <p>Draw: 1 point</p>
+                                <p>Loss: 0 points</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Sponsors */}
+                    <div className='p-4 bg-primary-foreground rounded-lg border space-y-4'>
+                        {/* Title */}
+                        <h2 className='text-lg font-bold flex items-center gap-2'>
+                            <Info className='w-5 h-5' />
+                            Sponsors & Prizes
+                        </h2>
+
+                        {/* Official Sponsors */}
+                        <div>
+                            <p className='font-bold'>Official Sponsors</p>
+                            <div className='space-y-2'>
+                                {
+                                    competition && competition.sponsors.map(sponsor => (
+                                        <div
+                                            key={sponsor.name}
+                                            className='p-2 border bg-secondary flex justify-between items-center rounded-md'
+                                        >
+                                            <div className='flex gap-2 items-center'>
+                                                <div className='w-5 h-5 rounded-md bg-card'></div>
+                                                <p>{sponsor.name}</p>
+                                            </div>
+                                            <span className='px-2 py-1 text-xs'>{sponsor.tier}</span>
+                                        </div>
+                                    ))
+                                }
+                            </div>
+                        </div>
+                        
+                        {/* Prize Money */}
+                        <div>
+                            <p className='font-bold'>Prize Money</p>
+                            <div>
+                                <div className='flex items-center justify-between'>
+                                    <p>Champions:</p>
+                                    <span className='text-yellow-500'>#{competition?.prizeMoney?.champion || 'unknown'}</span>
+                                </div>
+                                <div className='flex items-center justify-between'>
+                                    <p>Runner-up:</p>
+                                    <span className=''>#{competition?.prizeMoney?.runnerUp || 'unknown'}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             )
         }

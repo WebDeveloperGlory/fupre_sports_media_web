@@ -121,7 +121,7 @@ export interface IV2FootballCompetition {
     currentStage?: string;
 
     teams: {
-        team: string,
+        team: ShortPopulatedTeam,
         squad: {
             player: string,
             jerseyNumber: number,
@@ -132,24 +132,24 @@ export interface IV2FootballCompetition {
 
     // Statistics (Aggregated)
     stats: {
-        averageGoalsPerMatch: Number,
-        averageAttendance: Number,
-        cleanSheets: Number,
+        averageGoalsPerMatch: number,
+        averageAttendance: number,
+        cleanSheets: number,
         topScorers: {
             player: ShortPopulatedPlayer,
             team: ShortPopulatedTeam,
-            goals: Number,
-            penalties: Number
+            goals: number,
+            penalties: number
         }[],
         topAssists: {
             player: ShortPopulatedTeam,
             team: ShortPopulatedPlayer,
-            assists: Number
+            assists: number
         }[],
         bestDefenses: {
             team: ShortPopulatedPlayer,
-            cleanSheets: Number,
-            goalsConceded: Number
+            cleanSheets: number,
+            goalsConceded: number
         }[]
     },
 
