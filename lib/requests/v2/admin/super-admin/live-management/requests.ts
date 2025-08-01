@@ -317,6 +317,111 @@ export const deleteFixture = async ( fixtureId: string ) => {
     }
 };
 
+// COMPETITION MANAGEMENT FUNCTIONS //
+
+export const createCompetition = async ( competitionData: {
+    name: string;
+    shorthand: string;
+    type: string;
+    season: string;
+    startDate: string;
+    endDate: string;
+    registrationDeadline?: string;
+    description: string;
+} ) => {
+    try {
+        const response = await axiosInstance.post(
+            `${API_URL}/competition`,
+            competitionData,
+            { withCredentials: true }
+        );
+        const { data }: { data: SuccessRequest } = response;
+
+        if (data.code === '99') {
+            throw data;
+        }
+
+        return data;
+    } catch( err: any ) {
+        const { response } = err as CustomError;
+        console.log( err, response );
+
+        if( err?.status && err?.message ) {
+            console.error( `Error ${ err.status }: `, response?.data.message )
+            return response?.data || null;
+        } else {
+            console.error('Error creating competition: ', err );
+            return null;
+        }
+    }
+};
+
+export const updateCompetition = async ( competitionId: string, competitionData: {
+    name?: string;
+    shorthand?: string;
+    season?: string;
+    startDate?: string;
+    endDate?: string;
+    registrationDeadline?: string;
+    description?: string;
+    status?: string;
+} ) => {
+    try {
+        const response = await axiosInstance.put(
+            `${API_URL}/competition/${competitionId}`,
+            competitionData,
+            { withCredentials: true }
+        );
+        const { data }: { data: SuccessRequest } = response;
+
+        if (data.code === '99') {
+            throw data;
+        }
+
+        return data;
+    } catch( err: any ) {
+        const { response } = err as CustomError;
+        console.log( err, response );
+
+        if( err?.status && err?.message ) {
+            console.error( `Error ${ err.status }: `, response?.data.message )
+            return response?.data || null;
+        } else {
+            console.error('Error updating competition: ', err );
+            return null;
+        }
+    }
+};
+
+export const deleteCompetition = async ( competitionId: string ) => {
+    try {
+        const response = await axiosInstance.delete(
+            `${API_URL}/competition/${competitionId}`,
+            { withCredentials: true }
+        );
+        const { data }: { data: SuccessRequest } = response;
+
+        if (data.code === '99') {
+            throw data;
+        }
+
+        return data;
+    } catch( err: any ) {
+        const { response } = err as CustomError;
+        console.log( err, response );
+
+        if( err?.status && err?.message ) {
+            console.error( `Error ${ err.status }: `, response?.data.message )
+            return response?.data || null;
+        } else {
+            console.error('Error deleting competition: ', err );
+            return null;
+        }
+    }
+};
+
+// END OF COMPETITION MANAGEMENT FUNCTIONS //
+
 // END OF FIXTURE MANAGEMENT FUNCTIONS //
 
 export const initiateLiveFixture = async ( fixtureId: string, adminId: string ) => {

@@ -153,13 +153,13 @@ const SuperAdminDashboardPage = () => {
                     stat={ dashboardData?.totalFixtures.toString() || '0' }
                     Icon={ <Calendar className='w-8 h-8' /> }
                 />
-                <AdminModule 
-                    title='Competition Management' 
-                    content='Create and manage competitions' 
-                    link='teams'
-                    statLabel='teams'
+                <AdminModule
+                    title='Competition Management'
+                    content='Create and manage competitions'
+                    link='competitions'
+                    statLabel='competitions'
                     bg='bg-blue-500'
-                    stat={ dashboardData?.totalCompetitions.toString() || '0' } 
+                    stat={ dashboardData?.totalCompetitions.toString() || '0' }
                     Icon={ <Award className='w-8 h-8' /> }
                 />
                 <AdminModule

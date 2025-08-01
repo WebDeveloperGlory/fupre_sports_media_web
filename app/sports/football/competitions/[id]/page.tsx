@@ -360,7 +360,7 @@ const mockLeagueTable: ILeagueStandings[] = [
   }
 ]
 
-export const mockKnockoutRounds: IPopKnockoutRounds[] = [
+const mockKnockoutRounds: IPopKnockoutRounds[] = [
   {
     _id: "k1",
     name: "Quarter Finals",
@@ -393,7 +393,7 @@ export const mockKnockoutRounds: IPopKnockoutRounds[] = [
             },
             rescheduledDate: null,
             postponedReason: null
-        }, 
+        },
         {
             "_id": "kf4",
             "homeTeam": { "_id": "team1", "name": "Engineering Eagles", "shorthand": "ENG" },
@@ -437,7 +437,8 @@ export const mockKnockoutRounds: IPopKnockoutRounds[] = [
     completed: false
   }
 ];
-export const mockGroupStages: IGroupTable[] = [
+
+const mockGroupStages: IGroupTable[] = [
     {
         _id: "g1",
         name: "Group A",
@@ -518,6 +519,8 @@ export const mockGroupStages: IGroupTable[] = [
 
 
 
+
+
 const SingleCompetitionPage = (
     { params }:
     { params: Promise<{ id: string }> }
@@ -564,7 +567,7 @@ const SingleCompetitionPage = (
 
         if( loading ) fetchData();
     }, [ loading ]);
-    
+
     if( loading ) {
         return <Loader />
     };
@@ -589,7 +592,7 @@ const SingleCompetitionPage = (
     }
     const checkTableFate = (pos: number, qualificationRules: QualificationRules[]) => {
         let textColor = 'border-l-gray-500';
-        
+
         if(competition) {
             qualificationRules.forEach(rule => {
                 if(pos === rule.position) {
@@ -601,7 +604,7 @@ const SingleCompetitionPage = (
                 }
             });
         }
-        
+
         return textColor;
     }
     // End of Helper Functions //
@@ -650,7 +653,7 @@ const SingleCompetitionPage = (
         </div>
 
         {/* Accordition Tabs */}
-        <div 
+        <div
             className={`
                 w-full overflow-x-scroll scrollbar-hide border rounded-lg flex items-center gap-2 bg-primary-foreground text-center ${
                     competition?.type === CompetitionTypes.LEAGUE
@@ -671,7 +674,7 @@ const SingleCompetitionPage = (
                 ).map( tab => (
                     <div
                         key={ tab }
-                        onClick={ () => { 
+                        onClick={ () => {
                             setActiveTab( tab as typeof activeTab );
                         } }
                         className={`
@@ -679,7 +682,7 @@ const SingleCompetitionPage = (
                                 activeTab === tab
                                     ? 'text-emerald-500 border border-emerald-500 rounded-sm'
                                     : ''
-                            }  
+                            }
                         `}
                     >
                         <p>{ tab }</p>
@@ -779,7 +782,7 @@ const SingleCompetitionPage = (
                                 {
                                     knockoutRounds.map(round => (
                                         <div
-                                            key={round._id} 
+                                            key={round._id}
                                             className='space-y-2'
                                         >
                                             <p className='font-bold text-center'>{round.name}</p>
@@ -795,8 +798,8 @@ const SingleCompetitionPage = (
                                                                 <div className={`
                                                                     rounded-md p-2 border flex items-center justify-between font-bold gap-2 ${
                                                                         fixture.status === FixtureStatus.COMPLETED
-                                                                            ? checkFixtureWinner(fixture.result!) === "home" 
-                                                                                ? 'border-emerald-500 bg-emerald-500/20 text-emerald-400'  
+                                                                            ? checkFixtureWinner(fixture.result!) === "home"
+                                                                                ? 'border-emerald-500 bg-emerald-500/20 text-emerald-400'
                                                                                 : 'border-muted-foreground'
                                                                             : 'border-muted-foreground'
                                                                     }
@@ -808,7 +811,7 @@ const SingleCompetitionPage = (
                                                                     rounded-md p-2 border flex items-center justify-between font-bold gap-2 ${
                                                                         fixture.status === FixtureStatus.COMPLETED
                                                                             ? checkFixtureWinner(fixture.result!) === "away"
-                                                                                ? 'border-emerald-500 bg-emerald-500/20 text-emerald-400' 
+                                                                                ? 'border-emerald-500 bg-emerald-500/20 text-emerald-400'
                                                                                 : 'border-muted-foreground'
                                                                             : 'border-muted-foreground'
                                                                     }
@@ -874,8 +877,8 @@ const SingleCompetitionPage = (
                                         <tbody>
                                             {
                                                 group.standings.map(( entry, index ) => (
-                                                    <tr 
-                                                        key={ entry.team._id } 
+                                                    <tr
+                                                        key={ entry.team._id }
                                                         className="border-b border-border hover:bg-accent/50 transition-colors"
                                                     >
                                                         <td className={`py-4 px-3 text-sm border-l-4 ${checkTableFate(index+1, group.qualificationRules)}`}>{ index + 1 }</td>
@@ -905,13 +908,13 @@ const SingleCompetitionPage = (
                                                         <td className="text-center py-4 px-3 text-sm font-semibold">{ entry.points }</td>
                                                         <td className="text-center py-4 px-3">
                                                             <div className="flex items-center justify-center gap-1">
-                                                                { 
+                                                                {
                                                                     [ ...entry.form ].reverse().map((result, i) => (
                                                                         <span
                                                                             key={i}
                                                                             className={`w-6 h-6 flex items-center justify-center rounded-full text-xs font-medium ${
-                                                                            result === 'W' 
-                                                                                ? 'bg-emerald-500/10 text-emerald-500' 
+                                                                            result === 'W'
+                                                                                ? 'bg-emerald-500/10 text-emerald-500'
                                                                                 : result === 'D'
                                                                                 ? 'bg-orange-500/10 text-orange-500'
                                                                                 : 'bg-red-500/10 text-red-500'
@@ -1004,7 +1007,7 @@ const SingleCompetitionPage = (
                                 }
                             </div>
                         </div>
-                        
+
                         {/* Top Assists */}
                         <div className='p-4 border bg-primary-foreground rounded-lg'>
                             {/* Title */}
@@ -1112,7 +1115,7 @@ const SingleCompetitionPage = (
                 </div>
             )
         }
-            
+
         {/* AWARDS */}
         {
             (activeTab === LeagueTabs.AWARDS || activeTab === KnockoutTabs.AWARDS || activeTab === HybridTabs.AWARDS) && (
@@ -1125,7 +1128,7 @@ const SingleCompetitionPage = (
                             Player Awards
                         </h2>
                     </div>
-                    
+
                     {/* Team Awards */}
                     <div className='p-4 bg-primary-foreground rounded-lg border space-y-4'>
                         {/* Title */}
@@ -1137,7 +1140,7 @@ const SingleCompetitionPage = (
                 </div>
             )
         }
-            
+
         {/* Info */}
         {
             (activeTab === LeagueTabs.INFO || activeTab === KnockoutTabs.INFO || activeTab === HybridTabs.INFO) && (
@@ -1213,7 +1216,7 @@ const SingleCompetitionPage = (
                                 }
                             </div>
                         </div>
-                        
+
                         {/* Prize Money */}
                         <div>
                             <p className='font-bold'>Prize Money</p>
