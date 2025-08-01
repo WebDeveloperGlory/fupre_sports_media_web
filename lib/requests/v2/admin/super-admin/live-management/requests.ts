@@ -167,10 +167,162 @@ export const rescheduleFixture = async ( fixtureId: string, postponedReason: str
     }
 };
 
+// FIXTURE MANAGEMENT FUNCTIONS //
+
+export const getAllFixtures = async () => {
+    try {
+        const response = await axiosInstance.get(`${API_URL}/fixture?limit=100`);
+        const { data }: { data: SuccessRequest } = response;
+
+        if (data.code === '99') {
+            throw data;
+        }
+
+        return data;
+    } catch( err: any ) {
+        const { response } = err as CustomError;
+        console.log( err, response );
+
+        if( err?.status && err?.message ) {
+            console.error( `Error ${ err.status }: `, response?.data.message )
+            return response?.data || null;
+        } else {
+            console.error('Error fetching fixtures: ', err );
+            return null;
+        }
+    }
+};
+
+export const getAllCompetitions = async () => {
+    try {
+        const response = await axiosInstance.get(`${API_URL}/competition?limit=100`);
+        const { data }: { data: SuccessRequest } = response;
+
+        if (data.code === '99') {
+            throw data;
+        }
+
+        return data;
+    } catch( err: any ) {
+        const { response } = err as CustomError;
+        console.log( err, response );
+
+        if( err?.status && err?.message ) {
+            console.error( `Error ${ err.status }: `, response?.data.message )
+            return response?.data || null;
+        } else {
+            console.error('Error fetching competitions: ', err );
+            return null;
+        }
+    }
+};
+
+export const createFixture = async ( fixtureData: {
+    competition: string;
+    homeTeam: string;
+    awayTeam: string;
+    matchType: string;
+    stadium: string;
+    scheduledDate: string;
+    referee: string;
+} ) => {
+    try {
+        const response = await axiosInstance.post(
+            `${API_URL}/fixture`,
+            fixtureData,
+            { withCredentials: true }
+        );
+        const { data }: { data: SuccessRequest } = response;
+
+        if (data.code === '99') {
+            throw data;
+        }
+
+        return data;
+    } catch( err: any ) {
+        const { response } = err as CustomError;
+        console.log( err, response );
+
+        if( err?.status && err?.message ) {
+            console.error( `Error ${ err.status }: `, response?.data.message )
+            return response?.data || null;
+        } else {
+            console.error('Error creating fixture: ', err );
+            return null;
+        }
+    }
+};
+
+export const updateFixture = async ( fixtureId: string, fixtureData: {
+    competition?: string;
+    homeTeam?: string;
+    awayTeam?: string;
+    matchType?: string;
+    stadium?: string;
+    scheduledDate?: string;
+    referee?: string;
+    status?: string;
+} ) => {
+    try {
+        const response = await axiosInstance.put(
+            `${API_URL}/fixture/${fixtureId}`,
+            fixtureData,
+            { withCredentials: true }
+        );
+        const { data }: { data: SuccessRequest } = response;
+
+        if (data.code === '99') {
+            throw data;
+        }
+
+        return data;
+    } catch( err: any ) {
+        const { response } = err as CustomError;
+        console.log( err, response );
+
+        if( err?.status && err?.message ) {
+            console.error( `Error ${ err.status }: `, response?.data.message )
+            return response?.data || null;
+        } else {
+            console.error('Error updating fixture: ', err );
+            return null;
+        }
+    }
+};
+
+export const deleteFixture = async ( fixtureId: string ) => {
+    try {
+        const response = await axiosInstance.delete(
+            `${API_URL}/fixture/${fixtureId}`,
+            { withCredentials: true }
+        );
+        const { data }: { data: SuccessRequest } = response;
+
+        if (data.code === '99') {
+            throw data;
+        }
+
+        return data;
+    } catch( err: any ) {
+        const { response } = err as CustomError;
+        console.log( err, response );
+
+        if( err?.status && err?.message ) {
+            console.error( `Error ${ err.status }: `, response?.data.message )
+            return response?.data || null;
+        } else {
+            console.error('Error deleting fixture: ', err );
+            return null;
+        }
+    }
+};
+
+// END OF FIXTURE MANAGEMENT FUNCTIONS //
+
 export const initiateLiveFixture = async ( fixtureId: string, adminId: string ) => {
     try {
         const response = await axiosInstance.post(
-            `${ API_URL }/live`, 
+            `${ API_URL }/live`,
             { fixtureId, adminId },
             { withCredentials: true }
         );

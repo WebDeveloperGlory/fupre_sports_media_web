@@ -144,13 +144,13 @@ const SuperAdminDashboardPage = () => {
                     stat={ dashboardData?.totalLiveFixtures.toString() || '0' } 
                     Icon={ <Trophy className='w-8 h-8' /> }
                 />
-                <AdminModule 
-                    title='Fixture Management' 
-                    content='Schedule and manage all fixtures' 
+                <AdminModule
+                    title='Fixture Management'
+                    content='Schedule and manage all fixtures'
                     link='fixtures'
                     statLabel='fixtures'
                     bg='bg-red-500'
-                    stat={ dashboardData?.totalFixtures.toString() || '0' } 
+                    stat={ dashboardData?.totalFixtures.toString() || '0' }
                     Icon={ <Calendar className='w-8 h-8' /> }
                 />
                 <AdminModule 
