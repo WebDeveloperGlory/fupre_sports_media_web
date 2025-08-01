@@ -236,10 +236,13 @@ export default function LiveMatchPage({
         <BackButton />
       </div>
 
-      <div className="pt-12 pb-4 px-3 md:pt-0 md:pb-6 md:px-6">
+      <div className="pt-12 pb-4 px-4 md:pt-0 md:pb-6 md:px-6 lg:px-8">
         <BlurFade>
-          <div className="max-w-4xl mx-auto space-y-4 md:space-y-6">
-            <h1 className='text-center'>Live Viewers: {liveWatchers}</h1>
+          <div className="max-w-6xl mx-auto space-y-4 md:space-y-6">
+            <div className='text-center bg-card/40 backdrop-blur-sm rounded-lg p-2 border border-border'>
+              <span className='text-sm font-medium text-muted-foreground'>Live Viewers: </span>
+              <span className='text-sm font-bold text-emerald-500'>{liveWatchers || 0}</span>
+            </div>
             {
               liveFixture && (
                 <>
@@ -256,11 +259,11 @@ export default function LiveMatchPage({
                         </div>
                       </div>
 
-                      <div className="flex items-center justify-between gap-2 md:gap-8">
+                      <div className="flex items-center justify-between gap-3 md:gap-8">
                         {/* Home Team */}
-                        <div className="flex flex-col items-center gap-2 md:gap-3 w-1/3">
-                          <motion.div 
-                            className="relative w-12 h-12 md:w-20 md:h-20"
+                        <div className="flex flex-col items-center gap-2 md:gap-3 flex-1 min-w-0">
+                          <motion.div
+                            className="relative w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 lg:w-24 lg:h-24"
                             whileHover={{ scale: 1.05 }}
                             transition={{ type: "spring", stiffness: 300 }}
                           >
@@ -271,28 +274,28 @@ export default function LiveMatchPage({
                               className="object-contain rounded-full"
                             />
                           </motion.div>
-                          <span className="text-xs md:text-base font-medium text-center">
+                          <span className="text-xs sm:text-sm md:text-base lg:text-lg font-medium text-center truncate w-full px-1">
                             { liveFixture.homeTeam.name }
                           </span>
                         </div>
 
                         {/* Score */}
-                        <div className="flex flex-col items-center justify-center">
-                          <div className="bg-card shadow-xl rounded-lg md:rounded-xl p-2 md:p-3 border border-border min-w-[90px] md:min-w-[120px] text-center">
-                            <h2 className='text-sm'>{ currentStatus }</h2>
-                            <div className="text-2xl md:text-4xl font-bold tracking-tighter">
+                        <div className="flex flex-col items-center justify-center flex-shrink-0">
+                          <div className="bg-card shadow-xl rounded-lg md:rounded-xl p-3 md:p-4 border border-border min-w-[100px] sm:min-w-[120px] md:min-w-[140px] text-center">
+                            <h2 className='text-xs sm:text-sm font-medium text-muted-foreground mb-1'>{ currentStatus }</h2>
+                            <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tighter">
                               <span className="text-emerald-500">{ homeScore }</span>
                               <span className="mx-2 md:mx-3 text-muted-foreground">-</span>
                               <span className="text-emerald-500">{ awayScore }</span>
                             </div>
-                            <div className="flex items-center justify-center space-x-2 text-sm text-green-500">
-                              <Clock className="h-4 w-4" />
+                            <div className="flex items-center justify-center space-x-1 text-xs sm:text-sm text-green-500 mt-1">
+                              <Clock className="h-3 w-3 sm:h-4 sm:w-4" />
                               <span>{ currentMinute }'</span>
                               {injuryTime > 0 && <span>+{injuryTime}</span>}
                             </div>
                             {
                               !possibleFirstHalfStatuses.includes( liveFixture.status ) ? (
-                                <div className="mt-2 text-xs text-gray-400">
+                                <div className="mt-2 text-xs text-muted-foreground">
                                   HT: {liveFixture.result.halftimeHomeScore} - {liveFixture.result.halftimeAwayScore}
                                 </div>
                               ) : (
@@ -303,9 +306,9 @@ export default function LiveMatchPage({
                         </div>
 
                         {/* Away Team */}
-                        <div className="flex flex-col items-center gap-2 md:gap-3 w-1/3">
-                          <motion.div 
-                            className="relative w-12 h-12 md:w-20 md:h-20"
+                        <div className="flex flex-col items-center gap-2 md:gap-3 flex-1 min-w-0">
+                          <motion.div
+                            className="relative w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 lg:w-24 lg:h-24"
                             whileHover={{ scale: 1.05 }}
                             transition={{ type: "spring", stiffness: 300 }}
                           >
@@ -316,35 +319,38 @@ export default function LiveMatchPage({
                               className="object-contain rounded-full"
                             />
                           </motion.div>
-                          <span className="text-xs md:text-base font-medium text-center">
+                          <span className="text-xs sm:text-sm md:text-base lg:text-lg font-medium text-center truncate w-full px-1">
                             { liveFixture.awayTeam.name }
                           </span>
                         </div>
                       </div>
-                      {/* Minor Details */}
-                      <div className="flex items-center justify-center gap-4 mt-4 flex-wrap">
-                        <div className="flex items-center text-sm">
-                          <MapPin className="h-4 w-4 mr-1 text-gray-400" />
-                          <span>{liveFixture.stadium}</span>
-                        </div>
-                        <div className="w-1 h-1 bg-gray-600 rounded-full"></div>
-                        <div className="flex items-center text-sm">
-                          <User className="h-4 w-4 mr-1 text-gray-400" />
-                          <span>Ref: {referee || 'Unknown'}</span>
-                        </div>
-                        <div className="w-1 h-1 bg-gray-600 rounded-full"></div>
-                        <div className="flex items-center text-sm">
-                          <CloudRain className="h-4 w-4 mr-1 text-gray-400" />
-                          <span>
-                            {weather.condition || 'Unknown'}, {weather.temperature || 'Unknown'}°C
-                          </span>
-                        </div>
-                        <div className="w-1 h-1 bg-gray-600 rounded-full"></div>
-                        <div className="flex items-center text-sm">
-                          <Clock12 className="h-4 w-4 mr-1 text-gray-400" />
-                          <span>
-                            {kickoffTime.toLocaleString()}
-                          </span>
+                      {/* Match Details */}
+                      <div className="mt-4 space-y-2">
+                        {/* Mobile: Stack vertically, Desktop: Horizontal with separators */}
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-center gap-2 sm:gap-4 text-xs sm:text-sm">
+                          <div className="flex items-center justify-center sm:justify-start">
+                            <MapPin className="h-3 w-3 sm:h-4 sm:w-4 mr-1 text-muted-foreground flex-shrink-0" />
+                            <span className="truncate">{liveFixture.stadium}</span>
+                          </div>
+                          <div className="hidden sm:block w-1 h-1 bg-muted-foreground rounded-full"></div>
+                          <div className="flex items-center justify-center sm:justify-start">
+                            <User className="h-3 w-3 sm:h-4 sm:w-4 mr-1 text-muted-foreground flex-shrink-0" />
+                            <span className="truncate">Ref: {referee || 'Unknown'}</span>
+                          </div>
+                          <div className="hidden sm:block w-1 h-1 bg-muted-foreground rounded-full"></div>
+                          <div className="flex items-center justify-center sm:justify-start">
+                            <CloudRain className="h-3 w-3 sm:h-4 sm:w-4 mr-1 text-muted-foreground flex-shrink-0" />
+                            <span className="truncate">
+                              {weather.condition || 'Unknown'}, {weather.temperature || 'Unknown'}°C
+                            </span>
+                          </div>
+                          <div className="hidden sm:block w-1 h-1 bg-muted-foreground rounded-full"></div>
+                          <div className="flex items-center justify-center sm:justify-start">
+                            <Clock12 className="h-3 w-3 sm:h-4 sm:w-4 mr-1 text-muted-foreground flex-shrink-0" />
+                            <span className="truncate">
+                              {kickoffTime.toLocaleString()}
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -356,37 +362,39 @@ export default function LiveMatchPage({
                   </div>
 
                   {/* Quick Stats */}
-                  <motion.div 
+                  <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="bg-card/40 backdrop-blur-sm rounded-xl p-4 border border-border hover:bg-accent/50 transition-all duration-300 grid grid-cols-3 gap-4"
+                    className="bg-card/40 backdrop-blur-sm rounded-xl p-3 sm:p-4 border border-border hover:bg-accent/50 transition-all duration-300"
                   >
-                    <div className="col-span-3 md:col-span-1">
-                      <StatBar
-                        home={ stats.home.shotsOffTarget + stats.home.shotsOnTarget }
-                        away={ stats.away.shotsOffTarget + stats.away.shotsOnTarget }
-                        label='Total Shots'
-                        className='bg-black/80 backdrop-blur-sm rounded-xl p-4 border border-border/20 h-full'
-                      />
-                    </div>
-                    <div className="col-span-3 md:col-span-1">
-                      <PossessionBar
-                        home={ Number( homePossession.toFixed( 2 ) ) }
-                        away={ Number( awayPossession.toFixed( 2 ) ) }
-                        name='Possession'
-                      />
-                    </div>
-                    <div className="col-span-3 md:col-span-1">
-                      <CardsBar 
-                        home={{ 
-                          yellow: stats.home.yellowCards, 
-                          red: stats.home.redCards 
-                        }} 
-                        away={{ 
-                          yellow: stats.away.yellowCards, 
-                          red: stats.away.redCards 
-                        }} 
-                      />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                      <div className="order-2 sm:order-1">
+                        <StatBar
+                          home={ stats.home.shotsOffTarget + stats.home.shotsOnTarget }
+                          away={ stats.away.shotsOffTarget + stats.away.shotsOnTarget }
+                          label='Total Shots'
+                          className='bg-black/80 backdrop-blur-sm rounded-lg p-3 sm:p-4 border border-border/20 h-full'
+                        />
+                      </div>
+                      <div className="order-1 sm:order-2 sm:col-span-2 lg:col-span-1">
+                        <PossessionBar
+                          home={ Number( homePossession.toFixed( 2 ) ) }
+                          away={ Number( awayPossession.toFixed( 2 ) ) }
+                          name='Possession'
+                        />
+                      </div>
+                      <div className="order-3 sm:col-span-2 lg:col-span-1">
+                        <CardsBar
+                          home={{
+                            yellow: stats.home.yellowCards,
+                            red: stats.home.redCards
+                          }}
+                          away={{
+                            yellow: stats.away.yellowCards,
+                            red: stats.away.redCards
+                          }}
+                        />
+                      </div>
                     </div>
                   </motion.div>
 
@@ -403,25 +411,28 @@ export default function LiveMatchPage({
                     />
                   </div>
 
-                  {/* Accordition Tabs */}
-                  <div className='w-full overflow-x-scroll scrollbar-hide border rounded-lg flex md:grid md:grid-cols-5 items-center gap-2 bg-primary-foreground text-center'>
+                  {/* Navigation Tabs */}
+                  <div className='w-full bg-card/40 backdrop-blur-sm border border-border rounded-xl p-1'>
+                    {/* Mobile: Horizontal scroll, Desktop: Grid */}
+                    <div className='flex overflow-x-auto scrollbar-hide md:grid md:grid-cols-5 gap-1'>
                       {
                         Object.values( Tabs ).map( tab => (
-                          <div
+                          <button
                             key={ tab }
                             onClick={ () => setActiveTab( tab ) }
                             className={`
-                              cursor-pointer px-6 py-2 capitalize text-sm font-medium ${
-                                activeTab === tab
-                                  ? 'text-emerald-500 border border-emerald-500 rounded-sm'
-                                  : ''
-                              }  
+                              flex-shrink-0 px-4 py-2.5 md:px-3 md:py-2 capitalize text-xs sm:text-sm font-medium rounded-lg transition-all duration-200 whitespace-nowrap
+                              ${activeTab === tab
+                                ? 'bg-emerald-500 text-white shadow-md'
+                                : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
+                              }
                             `}
                           >
-                            <p>{ tab }</p>
-                          </div>
+                            { tab }
+                          </button>
                         ))
                       }
+                    </div>
                   </div>
 
                   <div className='mt-4'>

@@ -59,10 +59,10 @@ const Overview = ({ stream, playerRatings, playerOfTheMatch, homeLineup, awayLin
                 <Video className='text-emerald-500 w-6 h-6' />
                 <h2>Live Stream</h2>
             </div>
-            <div className='flex justify-center items-center bg-black/80 w-full h-[200px] md:h-[400px] my-4 rounded-xl'>
-                <Link 
-                    href={ choosenStream ? choosenStream.url : '' } 
-                    className='px-4 py-2 bg-emerald-500/20 text-emerald-500 border-emerald-500 border'
+            <div className='flex justify-center items-center bg-black/80 w-full h-[180px] sm:h-[240px] md:h-[320px] lg:h-[400px] my-4 rounded-xl'>
+                <Link
+                    href={ choosenStream ? choosenStream.url : '' }
+                    className='px-3 py-2 sm:px-4 sm:py-2.5 bg-emerald-500/20 text-emerald-500 border-emerald-500 border rounded-lg text-sm sm:text-base font-medium hover:bg-emerald-500/30 transition-colors'
                 >
                     { choosenStream ? `Watch On ${ choosenStream.platform }` : 'No Streaming Platform' }
                 </Link>
@@ -85,36 +85,38 @@ const Overview = ({ stream, playerRatings, playerOfTheMatch, homeLineup, awayLin
                 <Star className='text-emerald-500 w-6 h-6' />
                 <h2>Fan Player Ratings</h2>
             </div>
-            <div className='space-y-2'>
+            <div className='space-y-3'>
                 {
                     sortedRatings.slice(0,5).map( ( player, i ) => (
-                        <div key={ i } className='gap-2 items-center flex justify-between'>
-                            <div className='basis-11/12 flex gap-4 items-center'>
-                                <div className='w-12 h-12 rounded-full bg-muted flex items-center justify-center'>{ player.player.name.slice(0,1) }</div>
-                                <div className=''>
-                                    <h3 className=''>{ player.player.name }</h3>
-                                    <p className='uppercase text-sm text-muted-foreground'>{ player.team === 'home' ? home : away }</p>
+                        <div key={ i } className='flex items-center gap-3 p-2 rounded-lg hover:bg-accent/50 transition-colors'>
+                            <div className='flex items-center gap-3 flex-1 min-w-0'>
+                                <div className='w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-muted flex items-center justify-center text-sm sm:text-base font-medium flex-shrink-0'>
+                                    { player.player.name.slice(0,1) }
+                                </div>
+                                <div className='min-w-0 flex-1'>
+                                    <h3 className='font-medium truncate text-sm sm:text-base'>{ player.player.name }</h3>
+                                    <p className='uppercase text-xs sm:text-sm text-muted-foreground'>{ player.team === 'home' ? home : away }</p>
                                     {
                                         player.stats && (
-                                            <span className='text-sm text-muted-foreground hidden md:block'>{ playerStatString( player.player.position, player.stats ) }</span>
+                                            <span className='text-xs text-muted-foreground hidden sm:block'>{ playerStatString( player.player.position, player.stats ) }</span>
                                         )
                                     }
                                 </div>
                             </div>
-                            <div className='basis-1/12'>
-                                <div className='bg-muted rounded-lg px-2 py-1 flex items-center justify-center gap-2'>
-                                    <Star className='w-5 h-5 text-emerald-500' />
-                                    { player.fanRatings.average }
+                            <div className='flex-shrink-0 text-center'>
+                                <div className='bg-muted rounded-lg px-2 py-1 flex items-center justify-center gap-1 sm:gap-2 min-w-[60px] sm:min-w-[70px]'>
+                                    <Star className='w-4 h-4 sm:w-5 sm:h-5 text-emerald-500' />
+                                    <span className='text-sm sm:text-base font-medium'>{ player.fanRatings.average }</span>
                                 </div>
-                                <p className='text-sm text-muted-foreground text-center mt-0.5'>{ player.fanRatings.count } votes</p>
-                            </div>                            
+                                <p className='text-xs text-muted-foreground mt-0.5'>{ player.fanRatings.count } votes</p>
+                            </div>
                         </div>
                     ))
                 }
             </div>
             <button
                 onClick={ onRateClick }
-                className='w-full text-emerald-500 hover:border hover:border-emerald-500 py-2 rounded-lg'
+                className='w-full text-emerald-500 hover:border hover:border-emerald-500 py-2.5 sm:py-3 rounded-lg text-sm sm:text-base font-medium transition-colors hover:bg-emerald-500/10'
             >
                 Rate a player
             </button>
@@ -154,31 +156,35 @@ const Overview = ({ stream, playerRatings, playerOfTheMatch, homeLineup, awayLin
                         )
                     }
                     {/* Voting List */}
-                    <div className='space-y-2'>
-                        <p>Total Fan Votes: {POTMVotes.totalVotes || 0}</p>
+                    <div className='space-y-3'>
+                        <p className='text-sm sm:text-base font-medium'>Total Fan Votes: <span className='text-emerald-500'>{POTMVotes.totalVotes || 0}</span></p>
                         {
                             POTMVotes.players.map((player, i) => (
-                                <div 
+                                <div
                                     key={player._id}
-                                    className='border border-muted-foreground bg-card p-4 rounded-lg space-y-4'
+                                    className='border border-border bg-card/50 p-3 sm:p-4 rounded-lg hover:bg-accent/50 transition-colors'
                                 >
-                                    <div className='flex justify-between items-center'>
+                                    <div className='flex justify-between items-center gap-3'>
                                         {/* Player Details */}
-                                        <div className='flex items-center gap-3'>
-                                            <div className='flex items-center justify-center w-8 h-8 rounded-full border border-muted-foreground bg-card'>{i+1}</div>
-                                            <div>
-                                                <p>{player.name}</p>
-                                                <span className='text-muted-foreground text-sm'>Unknown</span>
+                                        <div className='flex items-center gap-2 sm:gap-3 flex-1 min-w-0'>
+                                            <div className='flex items-center justify-center w-6 h-6 sm:w-8 sm:h-8 rounded-full border border-muted-foreground bg-card text-xs sm:text-sm font-medium flex-shrink-0'>
+                                                {i+1}
+                                            </div>
+                                            <div className='min-w-0 flex-1'>
+                                                <p className='font-medium text-sm sm:text-base truncate'>{player.name}</p>
+                                                <span className='text-muted-foreground text-xs sm:text-sm'>Unknown</span>
                                             </div>
                                         </div>
                                         {/* Fan Votes */}
-                                        <div>
-                                            <p>{player.totalVotes} votes</p>
-                                            <span className='text-sm text-muted-foreground'>{(player.totalVotes / POTMVotes.totalVotes * 100).toFixed(2)}%</span>
+                                        <div className='text-right flex-shrink-0'>
+                                            <p className='font-medium text-sm sm:text-base'>{player.totalVotes} votes</p>
+                                            <span className='text-xs sm:text-sm text-muted-foreground'>
+                                                {(player.totalVotes / POTMVotes.totalVotes * 100).toFixed(1)}%
+                                            </span>
                                         </div>
                                     </div>
-                                    <div className='text-sm'>
-                                        <p>Fan Rating</p>
+                                    <div className='text-xs sm:text-sm mt-2 pt-2 border-t border-border/50'>
+                                        <p className='text-muted-foreground'>Fan Rating</p>
                                     </div>
                                 </div>
                             ))
@@ -189,14 +195,14 @@ const Overview = ({ stream, playerRatings, playerOfTheMatch, homeLineup, awayLin
                     {isLoggedIn ? (
                         <button
                             onClick={onVoteClick}
-                            className='w-full bg-emerald-500/20 text-sm hover:bg-emerald-500/40 text-emerald-500 border border-emerald-500 py-2 rounded-lg transition-colors duration-200'
+                            className='w-full bg-emerald-500/20 text-sm sm:text-base hover:bg-emerald-500/40 text-emerald-500 border border-emerald-500 py-2.5 sm:py-3 rounded-lg transition-colors duration-200 font-medium'
                         >
                             Vote for Player Of The Match
                         </button>
                     ) : (
-                        <div className='w-full border border-dashed border-muted-foreground/50 py-3 rounded-lg bg-muted/20 text-center space-y-1'>
-                            <p className='text-sm text-muted-foreground'>Login required to vote</p>
-                            <p className='text-xs text-muted-foreground'>Sign in to participate in POTM voting</p>
+                        <div className='w-full border border-dashed border-muted-foreground/50 py-3 sm:py-4 rounded-lg bg-muted/20 text-center space-y-1'>
+                            <p className='text-sm sm:text-base text-muted-foreground'>Login required to vote</p>
+                            <p className='text-xs sm:text-sm text-muted-foreground'>Sign in to participate in POTM voting</p>
                         </div>
                     )}
                 </>
