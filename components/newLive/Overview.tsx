@@ -212,22 +212,26 @@ const Overview = ({ stream, playerRatings, playerOfTheMatch, homeLineup, awayLin
         {/* Odds */}
         {
             odds && (
-                <div className='bg-card/40 backdrop-blur-sm rounded-xl p-4 border border-border hover:bg-accent/50  transition-all duration-300 space-y-4'>
+                <div className='bg-card/40 backdrop-blur-sm rounded-xl p-4 border border-border hover:bg-accent/50 transition-all duration-300 space-y-4'>
                     <div className='flex gap-2 items-center font-bold'>
                         <h2>Live Betting Odds</h2>
                     </div>
-                    <div className='grid grid-cols-2 md:grid-cols-3 gap-4 justify-center'>
-                        <div className='bg-muted rounded-lg text-center py-4'>
-                            <h3>{ home } Win</h3>
-                            <p className='text-lg font-bold text-emerald-500'>{ odds.live.homeWin }</p>
+                    <div className='grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4'>
+                        <div className='bg-muted rounded-lg text-center py-3 sm:py-4 px-2 min-w-0'>
+                            <h3 className='text-xs sm:text-sm font-medium mb-1 truncate px-1' title={`${home} Win`}>
+                                { home } Win
+                            </h3>
+                            <p className='text-base sm:text-lg font-bold text-emerald-500'>{ odds.live.homeWin }</p>
                         </div>
-                        <div className='bg-muted rounded-lg text-center py-4'>
-                            <h3>Draw</h3>
-                            <p className='text-lg font-bold text-emerald-500'>{ odds.live.draw }</p>
+                        <div className='bg-muted rounded-lg text-center py-3 sm:py-4 px-2 min-w-0 md:col-span-1 col-span-2'>
+                            <h3 className='text-xs sm:text-sm font-medium mb-1'>Draw</h3>
+                            <p className='text-base sm:text-lg font-bold text-emerald-500'>{ odds.live.draw }</p>
                         </div>
-                        <div className='bg-muted rounded-lg text-center py-4'>
-                            <h3>{ away } Win</h3>
-                            <p className='text-lg font-bold text-emerald-500'>{ odds.live.awayWin }</p>
+                        <div className='bg-muted rounded-lg text-center py-3 sm:py-4 px-2 min-w-0 md:col-span-1 col-span-2'>
+                            <h3 className='text-xs sm:text-sm font-medium mb-1 truncate px-1' title={`${away} Win`}>
+                                { away } Win
+                            </h3>
+                            <p className='text-base sm:text-lg font-bold text-emerald-500'>{ odds.live.awayWin }</p>
                         </div>
                     </div>
                 </div>
