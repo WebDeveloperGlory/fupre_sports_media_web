@@ -299,7 +299,7 @@ export default function SportsOverviewPage() {
                       <Trophy className={`h-6 w-6 text-emerald-500`} />
                     </div>
                   </div>
-                  <div className="text-2xl sm:text-3xl font-bold mb-2">{dashboardData?.general.totalActiveCompetitions || 'Unknown'}</div>
+                  <div className="text-2xl sm:text-3xl font-bold mb-2">{dashboardData?.general.totalActiveCompetitions || '0'}</div>
                   <div className="text-sm text-muted-foreground">Active Competitions</div>
                 </div>
                 <div
@@ -310,7 +310,7 @@ export default function SportsOverviewPage() {
                       <Play className={`h-6 w-6 text-purple-500`} />
                     </div>
                   </div>
-                  <div className="text-2xl sm:text-3xl font-bold mb-2">{dashboardData?.general.totalPlayedFixtures || 'Unknown'}</div>
+                  <div className="text-2xl sm:text-3xl font-bold mb-2">{dashboardData?.general.totalPlayedFixtures || '0'}</div>
                   <div className="text-sm text-muted-foreground">Matches Played</div>
                 </div>
                 <div
