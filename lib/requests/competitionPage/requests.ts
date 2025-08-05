@@ -239,6 +239,28 @@ export const getAllCompetitionFixtures = async ( id: string ) => {
     }
 }
 
+export const getRecentFixtures = async ( limit: number = 5 ) => {
+    try {
+        const response = await axiosInstance.get( `${ API_URL }/fixture?status=completed&limit=${ limit }&sort=-scheduledDate` );
+        const { data }: { data: SuccessRequest } = response;
+
+        if( data.code === '99' ) {
+            throw data
+        }
+        return data;
+    } catch( err: any ) {
+        const { response } = err as CustomError;
+
+        if( err?.status && err?.message ) {
+            console.error( `Error ${ err.status }: `, response?.data.message )
+            return response?.data || null;
+        } else {
+            console.error('Error fetching recent fixtures: ', err );
+            return null;
+        }
+    }
+}
+
 export const getKnockoutRounds = async (id: string) => {
     try {
         const response = await axiosInstance.get(`${API_URL}/competition/${id}/knockout/phases`);

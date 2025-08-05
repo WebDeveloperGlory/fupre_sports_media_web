@@ -1,94 +1,136 @@
-import { Competition, Fixture, KnockoutRoundsEntry } from "@/utils/requestDataTypes";
+import { IPopKnockoutRounds } from "@/utils/V2Utils/v2requestData.types";
+import { FixtureStatus } from "@/utils/V2Utils/v2requestData.enums";
 import { format } from "date-fns";
 import Link from "next/link";
-import { Calendar, Clock } from "lucide-react";
+import { Calendar, Clock, Trophy } from "lucide-react";
 
-interface KnockoutBracketProps {
-  competition: Competition;
-}
-
-export const KnockoutBracket = ({ knockoutRounds }: { knockoutRounds: KnockoutRoundsEntry[] }) => {
+export const KnockoutBracket = ({ knockoutRounds }: { knockoutRounds: IPopKnockoutRounds[] }) => {
   if (!knockoutRounds || knockoutRounds.length === 0) {
     return (
-      <div className="text-center py-8 text-muted-foreground">
-        No knockout rounds available
+      <div className="text-center py-12 text-muted-foreground">
+        <div className="w-16 h-16 mx-auto mb-4 bg-muted flex items-center justify-center">
+          <Trophy className="w-8 h-8 text-muted-foreground" />
+        </div>
+        <p className="text-lg font-medium">No knockout rounds available</p>
+        <p className="text-sm">Tournament bracket will appear here once matches are scheduled</p>
       </div>
     );
   }
 
   return (
-    <div className="p-2 md:p-4 overflow-x-auto">
-      <div className="flex gap-8 md:gap-16 min-w-[800px]">
+    <div className="overflow-x-auto py-6">
+      <div className="flex gap-12 min-w-[1000px]">
         {knockoutRounds.map((round, roundIndex) => (
-          <div 
-            key={round._id} 
-            className="flex-1 space-y-2 md:space-y-4"
+          <div
+            key={round._id}
+            className="flex-1 space-y-6"
             style={{
-              marginTop: `${roundIndex > 0 ? Math.pow(2, roundIndex - 1) * 2 : 0}rem`
+              marginTop: `${roundIndex > 0 ? Math.pow(2, roundIndex - 1) * 1.5 : 0}rem`
             }}
           >
-            <h3 className="text-base md:text-lg font-semibold text-emerald-500 mb-2 md:mb-4">{round.name}</h3>
-            <div className="grid gap-4 md:gap-8">
+            {/* Round Header */}
+            <div className="text-center">
+              <h3 className="text-lg font-bold text-foreground mb-1">{round.name}</h3>
+              <div className="w-full h-px bg-border"></div>
+            </div>
+
+            {/* Fixtures */}
+            <div className="space-y-8">
               {round.fixtures.map((fixture: any, fixtureIndex) => {
-                const formattedDate = fixture.date ? format(fixture.date, "yyyy-MM-dd HH:mm") : null;
+                const formattedDate = fixture.scheduledDate ? format(fixture.scheduledDate, "yyyy-MM-dd HH:mm") : null;
                 const date = formattedDate ? formattedDate.split(" ")[0] : null;
                 const time = formattedDate ? formattedDate.split(" ")[1] : null;
 
                 return (
-                  <div key={fixture._id} className="relative">
+                  <div
+                    key={fixture._id}
+                    className="relative"
+                    style={{
+                      marginTop: `${fixtureIndex > 0 && roundIndex > 0 ? Math.pow(2, roundIndex) * 1.5 : 0}rem`
+                    }}
+                  >
                     {/* Connecting lines */}
-                    {roundIndex < knockoutRounds.length - 1 && (
-                      <div className="absolute left-full top-1/2 -translate-y-1/2 w-8 md:w-16 flex items-center">
-                        <div className="w-full h-[2px] bg-border"></div>
-                      </div>
+                    {roundIndex > 0 && (
+                      <div className="absolute -left-6 top-1/2 w-6 h-px bg-border"></div>
                     )}
-                    {/* Vertical connecting line for pairs */}
-                    {fixtureIndex % 2 === 0 && roundIndex < knockoutRounds.length - 1 && (
-                      <div 
-                        className="absolute left-full top-1/2 w-[2px] bg-border"
-                        style={{
-                          height: `${Math.pow(2, roundIndex + 1) * 2}rem`
-                        }}
-                      ></div>
-                    )}
-                    {/* Match box */}
-                    <div className="p-2 md:p-4 border border-border rounded-lg bg-card hover:bg-accent/50 transition-colors w-48 md:w-64">
-                      <div className="flex items-center justify-between mb-2 md:mb-3">
-                        <div className="flex items-center gap-2 md:gap-3 text-[10px] md:text-xs text-muted-foreground">
-                          <div className="flex items-center gap-1">
+
+                    {/* Match Container */}
+                    <div className="bg-background border-2 border-border hover:border-emerald-500/30 transition-colors w-64">
+                      {/* Match Header */}
+                      <div className="px-4 py-2 bg-muted/30 border-b border-border">
+                        <div className="flex items-center justify-between text-xs text-muted-foreground">
+                          <div className="flex items-center gap-2">
                             <Calendar className="w-3 h-3" />
                             <span>{date || "TBD"}</span>
-                          </div>
-                          <div className="flex items-center gap-1">
                             <Clock className="w-3 h-3" />
                             <span>{time || "TBD"}</span>
                           </div>
+                          {fixture.status === FixtureStatus.COMPLETED && (
+                            <Link
+                              href={`/fixtures/${fixture._id}/stats`}
+                              className="px-2 py-1 bg-emerald-100 text-emerald-800 text-xs font-medium uppercase tracking-wide hover:bg-emerald-200 transition-colors"
+                            >
+                              View Stats
+                            </Link>
+                          )}
                         </div>
-                        {fixture.status === "completed" && (
-                          <Link
-                            href={`/fixtures/${fixture._id}/stats`}
-                            className="px-2 py-0.5 md:py-1 rounded-full text-[10px] md:text-xs font-medium bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20 transition-colors"
-                          >
-                            View Stats
-                          </Link>
-                        )}
                       </div>
-                      <div className="flex flex-col gap-1 md:gap-2">
-                        <div className="flex items-center justify-between text-xs md:text-sm">
-                          <span className="font-medium truncate pr-2">{fixture.homeTeam?.name || "TBD"}</span>
-                          {fixture.status === "completed" && fixture.result && (
-                            <span className="font-bold">{fixture.result.homeScore}</span>
+                      {/* Teams */}
+                      <div className="p-4 space-y-3">
+                        {/* Home Team */}
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2 flex-1 min-w-0">
+                            <span className="font-medium text-foreground truncate">
+                              {fixture.homeTeam?.name || "TBD"}
+                            </span>
+                          </div>
+                          {fixture.status === FixtureStatus.COMPLETED && fixture.result && (
+                            <div className="text-lg font-bold text-foreground ml-2">
+                              {fixture.result.homeScore}
+                            </div>
                           )}
                         </div>
-                        <div className="flex items-center justify-between text-xs md:text-sm">
-                          <span className="font-medium truncate pr-2">{fixture.awayTeam?.name || "TBD"}</span>
-                          {fixture.status === "completed" && fixture.result && (
-                            <span className="font-bold">{fixture.result.awayScore}</span>
+
+                        {/* VS Divider */}
+                        <div className="flex items-center justify-center">
+                          <div className="w-full h-px bg-border"></div>
+                          <span className="px-2 text-xs text-muted-foreground font-medium">VS</span>
+                          <div className="w-full h-px bg-border"></div>
+                        </div>
+
+                        {/* Away Team */}
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2 flex-1 min-w-0">
+                            <span className="font-medium text-foreground truncate">
+                              {fixture.awayTeam?.name || "TBD"}
+                            </span>
+                          </div>
+                          {fixture.status === FixtureStatus.COMPLETED && fixture.result && (
+                            <div className="text-lg font-bold text-foreground ml-2">
+                              {fixture.result.awayScore}
+                            </div>
                           )}
                         </div>
-                        {fixture.result?.homePenalty !== null && fixture.result?.awayPenalty !== null && (
-                          <div className="text-[10px] md:text-xs text-muted-foreground text-center mt-1">
-                            Penalties: {fixture.result.homePenalty} - {fixture.result.awayPenalty}
+
+                        {/* Penalties */}
+                        {fixture.result &&
+                         fixture.result.homePenalty !== null &&
+                         fixture.result.homePenalty !== undefined &&
+                         fixture.result.awayPenalty !== null &&
+                         fixture.result.awayPenalty !== undefined && (
+                          <div className="text-center pt-2 border-t border-border">
+                            <span className="text-xs text-muted-foreground">
+                              Penalties: {fixture.result.homePenalty} - {fixture.result.awayPenalty}
+                            </span>
+                          </div>
+                        )}
+
+                        {/* Match Status */}
+                        {fixture.status !== FixtureStatus.COMPLETED && (
+                          <div className="text-center pt-2 border-t border-border">
+                            <span className="px-2 py-1 bg-orange-100 text-orange-800 text-xs font-medium uppercase tracking-wide">
+                              {fixture.status || "Scheduled"}
+                            </span>
                           </div>
                         )}
                       </div>
