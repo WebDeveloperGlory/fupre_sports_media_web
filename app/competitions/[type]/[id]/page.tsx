@@ -15,6 +15,7 @@ import { format } from "date-fns";
 import { teamLogos } from "@/constants";
 import { KnockoutBracket } from "@/components/competition/KnockoutBracket";
 import LeagueTable from "@/components/competition/LeagueTable";
+import { ILeagueStandings, IPopKnockoutRounds } from "@/utils/V2Utils/v2requestData.types";
 
 const fixtureButtons: ( keyof CompetitionFixtures )[] = [ 'upcomingMatches', 'completedMatches' ];
 
@@ -28,8 +29,8 @@ export default function CompetitionPage({
   const [ competition, setCompetition ] = useState<Competition | null>( null );
   const [ overview, setOverview ] = useState<CompetitionOverview | null>( null );
   const [ fixtures, setFixtures ] = useState<CompetitionFixtures | null>( null );
-  const [ table, setTable ] = useState<ExtendedLeagueTableEntry[]>( [] );
-  const [ knockoutRounds, setKnockoutRounds ] = useState<KnockoutRoundsEntry[]>( [] );
+  const [ table, setTable ] = useState<ILeagueStandings[]>( [] );
+  const [ knockoutRounds, setKnockoutRounds ] = useState<IPopKnockoutRounds[]>( [] );
   const [ isTableOpen, setIsTableOpen ] = useState<boolean>( true );
   const [ isFixturesOpen, setIsFixturesOpen ] = useState<boolean>( true );
   const [ fixtureOpenType, setFixtureOpenType ] = useState<keyof CompetitionFixtures>( 'upcomingMatches' );

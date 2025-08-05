@@ -6,42 +6,10 @@ import Link from 'next/link';
 import { format } from 'date-fns';
 import { Calendar, Clock, Trophy, MapPin } from 'lucide-react';
 import { teamLogos } from '@/constants';
-
-interface Team {
-  _id: string;
-  name: string;
-  shorthand?: string;
-  logo?: string;
-}
-
-interface Competition {
-  _id: string;
-  name: string;
-  type: string;
-}
-
-interface Result {
-  homeScore: number;
-  awayScore: number;
-  halftimeHomeScore?: number;
-  halftimeAwayScore?: number;
-  homePenalty?: number;
-  awayPenalty?: number;
-}
-
-interface RecentFixture {
-  _id: string;
-  homeTeam: Team;
-  awayTeam: Team;
-  competition?: Competition;
-  scheduledDate: Date;
-  stadium: string;
-  status: string;
-  result: Result;
-}
+import { PopIV2FootballFixture } from '@/utils/V2Utils/v2requestData.types';
 
 interface RecentGamesProps {
-  fixtures: RecentFixture[];
+  fixtures: PopIV2FootballFixture[];
   loading?: boolean;
 }
 
@@ -123,6 +91,11 @@ const RecentGames: FC<RecentGamesProps> = ({ fixtures, loading = false }) => {
                   <span className="font-bold text-base">{fixture.result.homeScore}</span>
                   <span className="text-muted-foreground text-sm">-</span>
                   <span className="font-bold text-base">{fixture.result.awayScore}</span>
+                  {fixture.result.homePenalty !== null && fixture.result.awayPenalty !== null && (
+                    <span className="text-xs text-muted-foreground ml-1">
+                      ({fixture.result.homePenalty}-{fixture.result.awayPenalty})
+                    </span>
+                  )}
                 </div>
 
                 <div className="flex items-center gap-2 min-w-0 flex-1 justify-end">

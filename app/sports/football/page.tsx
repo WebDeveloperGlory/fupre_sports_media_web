@@ -7,45 +7,27 @@ import { Trophy, Calendar, AlertCircle, ArrowRight, Activity, Clock } from "luci
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { teamLogos } from "@/constants";
-import { getLiveFixture, getRecentFixtures } from "@/lib/requests/competitionPage/requests";
 import { Loader } from "@/components/ui/loader";
-import { LiveFixture } from "@/utils/requestDataTypes";
 import { format } from "date-fns";
-import { getLiveFixtureDetails } from "@/lib/requests/liveAdminPage/requests";
 import RecentGames from "@/components/football/RecentGames";
-
-interface RecentFixture {
-  _id: string;
-  homeTeam: { _id: string; name: string; shorthand?: string; logo?: string };
-  awayTeam: { _id: string; name: string; shorthand?: string; logo?: string };
-  competition?: { _id: string; name: string; type: string };
-  scheduledDate: Date;
-  stadium: string;
-  status: string;
-  result: {
-    homeScore: number;
-    awayScore: number;
-    halftimeHomeScore?: number;
-    halftimeAwayScore?: number;
-    homePenalty?: number;
-    awayPenalty?: number;
-  };
-}
+import { getAllLiveFixtures, getLiveFixtureById } from "@/lib/requests/v2/admin/super-admin/live-management/requests";
+import { IV2FootballLiveFixture, PopIV2FootballFixture } from "@/utils/V2Utils/v2requestData.types";
+import { getRecentFixtures } from "@/lib/requests/v2/public/requests";
 
 const FootballHomePage: FC = () => {
   const [ loading, setLoading ] = useState<boolean>( true );
-  const [ liveFixture, setLiveFixture ] = useState<LiveFixture | null>( null );
-  const [ recentFixtures, setRecentFixtures ] = useState<RecentFixture[]>( [] );
+  const [ liveFixture, setLiveFixture ] = useState<IV2FootballLiveFixture | null>( null );
+  const [ recentFixtures, setRecentFixtures ] = useState<PopIV2FootballFixture[]>( [] );
   const [ recentLoading, setRecentLoading ] = useState<boolean>( true );
 
   useEffect(() => {
     const fetchData = async() => {
       try {
         // Fetch live fixture
-        const liveData = await getLiveFixture();
+        const liveData = await getAllLiveFixtures();
         if( liveData && liveData.code === '00' && liveData.data && liveData.data.length > 0 ) {
           try {
-            const data = await getLiveFixtureDetails( liveData.data[ 0 ]._id );
+            const data = await getLiveFixtureById( liveData.data[ 0 ].fixture );
             if( data && data.code === '00' ) {
               setLiveFixture( data.data );
             }
@@ -58,7 +40,7 @@ const FootballHomePage: FC = () => {
         }
 
         // Fetch recent fixtures
-        const recentData = await getRecentFixtures(5);
+        const recentData = await getRecentFixtures();
         if( recentData && recentData.code === '00' ) {
           setRecentFixtures( recentData.data || [] );
         }
@@ -84,7 +66,7 @@ const FootballHomePage: FC = () => {
     return `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
   };
 
-  const totalTime = liveFixture ? liveFixture.time : 0;
+  const totalTime = liveFixture ? liveFixture.currentMinute : 0;
   console.log( liveFixture )
 
   if( loading ) {
@@ -124,7 +106,7 @@ const FootballHomePage: FC = () => {
                 </div>
                 {liveFixture && (
                   <Link
-                    href={`/live/${liveFixture.fixtureId}`}
+                    href={`/live/${liveFixture.fixture}`}
                     className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2 w-full sm:w-auto"
                   >
                     Watch Live
@@ -165,7 +147,7 @@ const FootballHomePage: FC = () => {
                       )}
                       <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
                         <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
-                        <span>{formatTime(totalTime)}</span>
+                        <span>{liveFixture.currentMinute}'</span>
                       </div>
                     </div>
 

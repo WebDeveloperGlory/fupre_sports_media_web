@@ -31,14 +31,9 @@ export default function FootballCompetitionsPage() {
       } else {
         toast.error(response?.message || 'Error Getting Analytics');
       }
-<<<<<<< HEAD
 
       setLoading(false);
     }
-=======
-      setLoading(false);
-    };
->>>>>>> adcd7581505090143593a626bfd54578816be270
 
     if(loading) fetchData();
   }, [loading]);
@@ -95,113 +90,6 @@ export default function FootballCompetitionsPage() {
       </div>
 
 
-<<<<<<< HEAD
-        {/* Featured Competitions */}
-        {
-          pageData && pageData.featuredCompetitions.length > 0 && pageData.featuredCompetitions.map((competition) => (
-            <div
-              key={competition._id} 
-              className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4"
-            >
-              <div className="border border-muted-foreground rounded-lg">
-                {/* Top Section */}
-                <div className="px-4 py-4 h-32 relative">
-                  {/* Background decoration */}
-                  <div className={`absolute top-10 right-10 w-24 h-24 text-emerald-500 opacity-5 transform rotate-12 translate-x-8 -translate-y-8 group-hover:scale-110 transition-transform duration-500`}>
-                    <Trophy className="w-full h-full" />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="px-2 py-1 rounded-full border border-muted-foreground bg-card text-sm text-center">{competition.status}</span>
-                    <div className="bg-primary-foreground p-1.5 rounded-full">
-                      { <Trophy className="w-5 h-5 text-yellow-500" /> }
-                    </div>
-                  </div>
-                </div>
-
-                {/* Bottom Section */}
-                <div className="px-4 py-4 relative space-y-4 border-t border-t-muted-foreground">
-                  {/* Name and Description */}
-                  <div className="flex gap-4 items-center">
-                    <div className="w-12 h-12 rounded-lg bg-primary-foreground"></div>
-                    <div>
-                      <p className="text-lg font-bold">{competition.name}</p>
-                      <span className="text-muted-foreground">{competition.description}</span>
-                    </div>
-                  </div>
-
-                  {/* Minor details */}
-                  <div className="grid grid-cols-2">
-                    <div>
-                      <span className="text-sm text-muted-foreground">Current Stage</span>
-                      <p>{competition.currentStage || 'unknown'}</p>
-                    </div>
-                    <div>
-                      <span className="text-sm text-muted-foreground">Teams</span>
-                      <p>{competition.teams.length}</p>
-                    </div>
-                  </div>
-
-                  {/* Top goalscorer */}
-                  {
-                    competition.stats.topScorers.length > 0 && (    
-                      <div className="px-4 py-2 border rounded-md bg-primary-foreground">
-                        <span className="text-muted-foreground text-sm">Top Scorer</span>
-                        <div className="flex justify-between items-center">
-                          <p>{competition.stats.topScorers[0].player.name}</p>
-                          <p className="text-green-500 font-bold">{competition.stats.topScorers[0].goals} goals</p>
-                        </div>
-                        <span className="text-muted-foreground text-sm">{competition.stats.topScorers[0].team.name}</span>
-                      </div>
-                    )
-                  }
-
-                  {/* Bottom section */}
-                  <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground text-sm">{4}/{4} matches played</span>
-                    <Link
-                      href={`competition/${'1234'}`}
-                      className="text-emerald-500"
-                    >
-                      <ArrowRight className="w-5 h-5" />
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))
-        }
-
-        {/* No Featured Competitions */}
-        {
-          pageData && pageData.featuredCompetitions.length === 0 && (
-            <div className="flex flex-col items-center justify-center gap-4 p-8 border border-muted-foreground rounded-lg text-center mt-4">
-              <Star className="w-16 h-16" />
-              <div>
-                <p>No Featured Competitions</p>
-                <span className="text-sm">Now we await the next one.</span>
-              </div>
-            </div>
-          )
-        }
-      </div>
-
-      {/* Accordition Tabs */}
-      <div className='w-full overflow-x-scroll scrollbar-hide border rounded-lg flex md:grid md:grid-cols-4 items-center gap-2 bg-primary-foreground text-center'>
-        {
-          [ 'all competitions', 'league', 'knockout', 'hybrid' ].map( tab => (
-            <div
-                key={ tab }
-                onClick={ () => { 
-                  setActiveTab( tab as typeof activeTab );
-                } }
-                className={`
-                  flex gap-2 items-center justify-center cursor-pointer px-6 py-2 capitalize text-sm font-medium basis-1/2 h-full ${
-                    activeTab === tab
-                    ? 'text-emerald-500 border border-emerald-500 rounded-sm'
-                    : ''
-                }  
-                `}
-=======
 
       {/* Filter Navigation */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -212,7 +100,7 @@ export default function FootballCompetitionsPage() {
           </div>
         </div>
 
-        <div className="flex items-center gap-1 mt-4 overflow-x-auto">
+        <div className="flex items-center gap-1 mt-4 overflow-x-auto scrollbar-hide">
           {['all competitions', 'league', 'knockout', 'hybrid'].map((tab, index) => (
             <button
               key={tab}
@@ -223,7 +111,6 @@ export default function FootballCompetitionsPage() {
                   ? 'text-emerald-600 border-emerald-600'
                   : 'text-muted-foreground border-transparent hover:text-foreground hover:border-border'
               )}
->>>>>>> adcd7581505090143593a626bfd54578816be270
             >
               {tab === 'league' && <Trophy className="w-4 h-4" />}
               {tab === 'knockout' && <Crown className="w-4 h-4" />}
@@ -235,110 +122,6 @@ export default function FootballCompetitionsPage() {
         </div>
       </div>
 
-<<<<<<< HEAD
-      {/* Competition list */}
-      {
-        filteredCompetitions.length > 0 && (  
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-            {
-              filteredCompetitions.map((competition) => (  
-                <div
-                  key={competition._id} 
-                  className="bg-primary-foreground border p-4 rounded-lg space-y-4"
-                >
-                  <div className="flex justify-between">
-                    <div className="w-12 h-12 rounded-lg bg-primary"></div>
-                    <div className="flex items-center gap-2">
-                      <span
-                        className={`
-                          border rounded-full px-2 py-1 capitalize text-xs  
-                        `}
-                      >
-                        {competition.status}
-                      </span>
-                      { activeTab === 'league' && <Trophy className="w-5 h-5  text-emerald-500" />  }
-                      { activeTab === 'knockout' && <Crown className="w-5 h-5 text-purple-500" />  }
-                      { activeTab === 'hybrid' && <Bolt className="w-5 h-5 text-yellow-500" />  }
-                    </div>
-                  </div>
-                  <p className="font-bold">{competition.name}</p>
-                  <span className="text-muted-foreground">{competition.description}</span>
-                  <div className="grid grid-cols-2">
-                    <div>
-                      <span className="text-sm text-muted-foreground">Stage:</span>
-                      <p>{competition.currentStage || 'awards'}</p>
-                    </div>
-                    <div>
-                      <span className="text-sm text-muted-foreground">Teams:</span>
-                      <p>{competition.teams.length || 0}</p>
-                    </div>
-                  </div>
-                  {
-                    competition.stats.topScorers.length > 0 && (
-                      <div className="px-2 py-2 border rounded-md bg-secondary">
-                        <span className="text-muted-foreground text-sm">Top Scorer</span>
-                        <div className="flex justify-between items-center">
-                          <p>{competition.stats.topScorers[0].player.name}</p>
-                          <p className="text-green-500 font-bold">{competition.stats.topScorers[0].goals} goals</p>
-                        </div>
-                        <span className="text-muted-foreground text-sm">{competition.stats.topScorers[0].team.name}</span>
-                      </div>
-                    )
-                  }
-                  {
-                    competition.type === 'league' && competition.leagueTable.length > 0 && (
-                      <div className="px-2 py-2 border rounded-md bg-secondary">
-                        <span className="text-muted-foreground text-sm">Current Leader</span>
-                        <div className="flex justify-between items-center">
-                          <p>{competition.leagueTable[0].team.name}</p>
-                          <p className="text-yellow-500 font-bold">{competition.leagueTable[0].points} pts</p>
-                        </div>
-                      </div>
-                    )
-                  }
-                  {
-                    competition.awards.team.find(
-                      (award) => award.name === 'Champions'
-                    ) && (
-                      <div className="px-2 py-2 border rounded-md border-yellow-500 bg-yellow-500/20">
-                        <span className="text-yellow-500 text-sm">Champion</span>
-                        <div className="flex gap-2 items-center">
-                          <Trophy className="w-5 h-5 text-yellow-500" />
-                          <p className="font-bold">{competition.awards.team.find((award) => award.name === 'Champions')?.winner?.name}</p>
-                        </div>
-                      </div>
-                    )
-                  }
-                  <div className="border-t border-t-muted-foreground pt-2 flex justify-between items-center">
-                    <span className="text-muted-foreground text-sm">{4}/{4} matches played</span>
-                    <Link
-                      href={`competition/${competition._id}`}
-                      className="text-emerald-500"
-                    >
-                      <ArrowRight className="w-5 h-5" />
-                    </Link>
-                  </div>
-                </div>
-              ))
-            }
-          </div>
-        )
-      }
-      {
-        filteredCompetitions.length === 0 && (
-          <div className="flex flex-col items-center justify-center gap-4 p-8 border border-muted-foreground rounded-lg text-center">
-            { activeTab === 'all competitions' && <CalendarClock className="w-16 h-16" /> }
-            { activeTab === 'league' && <Trophy className="w-16 h-16" /> }
-            { activeTab === 'knockout' && <Crown className="w-16 h-16" /> }
-            { activeTab === 'hybrid' && <Bolt className="w-16 h-16" /> }
-            <div>
-              <p>No Valid Competitions</p>
-              <span className="text-sm">Await more competitions or contact FSM to register one of your own</span>
-            </div>
-          </div>
-        )
-      }
-=======
       {/* Competition List */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
         <div className="space-y-px bg-muted/30">
@@ -357,7 +140,7 @@ export default function FootballCompetitionsPage() {
                     </div>
 
                     <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
+                      <div className="flex items-center gap-3 mb-2 flex-wrap">
                         <h3 className="text-xl font-bold text-foreground group-hover:text-emerald-600 transition-colors">
                           FUPRE Super League
                         </h3>
@@ -417,7 +200,7 @@ export default function FootballCompetitionsPage() {
                     </div>
 
                     <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
+                      <div className="flex items-center gap-3 mb-2 flex-wrap">
                         <h3 className="text-xl font-bold text-foreground group-hover:text-purple-600 transition-colors">
                           Unity Cup Championship
                         </h3>
@@ -479,7 +262,7 @@ export default function FootballCompetitionsPage() {
                     </div>
 
                     <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
+                      <div className="flex items-center gap-3 mb-2 flex-wrap">
                         <h3 className="text-xl font-bold text-foreground group-hover:text-orange-600 transition-colors">
                           Inter-Faculty Championship
                         </h3>
@@ -547,7 +330,6 @@ export default function FootballCompetitionsPage() {
           </div>
         </div>
       )}
->>>>>>> adcd7581505090143593a626bfd54578816be270
     </div>
   );
 }
