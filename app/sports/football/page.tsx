@@ -3,32 +3,45 @@
 import { BlurFade } from "@/components/ui/blur-fade";
 import Image from "next/image";
 import { FC, useEffect, useState } from "react";
-import { ChevronDown, ChevronUp, Trophy, Calendar, AlertCircle } from "lucide-react";
+import { Trophy, Calendar, AlertCircle, ArrowRight, Activity, Clock } from "lucide-react";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
-import useTimerStore from "@/stores/timerStore";
-import useLiveStore from "@/stores/liveStore";
-import { liveFixtureInitialStateData, teamLogos } from "@/constants";
-import { getAllCompetitions, getLiveFixture } from "@/lib/requests/competitionPage/requests";
+import { motion } from "framer-motion";
+import { teamLogos } from "@/constants";
+import { getLiveFixture, getRecentFixtures } from "@/lib/requests/competitionPage/requests";
 import { Loader } from "@/components/ui/loader";
-import { Competition, LiveFixture } from "@/utils/requestDataTypes";
+import { LiveFixture } from "@/utils/requestDataTypes";
 import { format } from "date-fns";
 import { getLiveFixtureDetails } from "@/lib/requests/liveAdminPage/requests";
+import RecentGames from "@/components/football/RecentGames";
+
+interface RecentFixture {
+  _id: string;
+  homeTeam: { _id: string; name: string; shorthand?: string; logo?: string };
+  awayTeam: { _id: string; name: string; shorthand?: string; logo?: string };
+  competition?: { _id: string; name: string; type: string };
+  scheduledDate: Date;
+  stadium: string;
+  status: string;
+  result: {
+    homeScore: number;
+    awayScore: number;
+    halftimeHomeScore?: number;
+    halftimeAwayScore?: number;
+    homePenalty?: number;
+    awayPenalty?: number;
+  };
+}
 
 const FootballHomePage: FC = () => {
   const [ loading, setLoading ] = useState<boolean>( true );
-  const [ competitions, setCompetitions ] = useState<Competition[] | null>( null );
   const [ liveFixture, setLiveFixture ] = useState<LiveFixture | null>( null );
-  const [ isCompetitionsOpen, setIsCompetitionsOpen ] = useState<boolean>( false );
+  const [ recentFixtures, setRecentFixtures ] = useState<RecentFixture[]>( [] );
+  const [ recentLoading, setRecentLoading ] = useState<boolean>( true );
 
   useEffect(() => {
     const fetchData = async() => {
       try {
-        const competitionsData = await getAllCompetitions();
-        if( competitionsData && competitionsData.code === '00' ) {
-          setCompetitions( competitionsData.data );
-        }
-
+        // Fetch live fixture
         const liveData = await getLiveFixture();
         if( liveData && liveData.code === '00' && liveData.data && liveData.data.length > 0 ) {
           try {
@@ -43,12 +56,19 @@ const FootballHomePage: FC = () => {
         } else {
           setLiveFixture( null );
         }
+
+        // Fetch recent fixtures
+        const recentData = await getRecentFixtures(5);
+        if( recentData && recentData.code === '00' ) {
+          setRecentFixtures( recentData.data || [] );
+        }
       } catch (error) {
         console.error('Error fetching data:', error);
-        setCompetitions(null);
         setLiveFixture(null);
+        setRecentFixtures([]);
       } finally {
         setLoading( false );
+        setRecentLoading( false );
       }
     };
 
@@ -72,201 +92,166 @@ const FootballHomePage: FC = () => {
   }
 
   return (
-    <main className="min-h-screen">
+    <main className="min-h-screen p-4 sm:p-6 lg:p-8">
       <BlurFade>
-        <div className="space-y-6">
-          {/* TOTS Promotional Banner */}
-          <Link href="/sports/football/tots">
-            <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-800 p-6 shadow-lg hover:shadow-xl transition-all">
-              <div className="absolute -right-12 -top-12 h-36 w-36 rounded-full bg-emerald-500/20 blur-xl"></div>
-              <div className="absolute -bottom-12 -left-12 h-36 w-36 rounded-full bg-emerald-500/20 blur-xl"></div>
+        <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8">
+          {/* Header */}
+          <div className="text-center space-y-2 px-2">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight">
+              <span className="text-emerald-500">Football</span> at FUPRE
+            </h1>
+            <p className="text-muted-foreground text-base sm:text-lg max-w-2xl mx-auto">
+              Stay updated with live matches and recent results
+            </p>
+          </div>
 
-              <div className="relative flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                <div className="flex items-center gap-4">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/10 backdrop-blur-sm">
-                    <Trophy className="h-8 w-8 text-white" />
-                  </div>
-                  <div>
-                    <h2 className="text-2xl font-bold text-white">Team of the Season 2023/24</h2>
-                    <p className="text-sm text-emerald-100 mt-1">Vote for your favorite players and see who makes the cut!</p>
-                  </div>
-                </div>
-                <div className="md:text-right">
-                  <span className="inline-block px-4 py-2 bg-white/10 backdrop-blur-sm text-white rounded-full text-sm font-medium hover:bg-white/20 transition-colors">
-                    Vote Now
-                  </span>
-                </div>
-              </div>
-            </div>
-          </Link>
-
-          {/* Hero - Live Matches */}
-          <div className="relative bg-gradient-to-br from-emerald-500/20 via-background to-background rounded-xl border border-border overflow-hidden">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,_var(--tw-gradient-stops))] from-emerald-500/10 via-background to-background" />
-            <div className="relative p-4 md:p-8">
-              <div className="flex flex-col gap-6">
-                <div className="flex items-center justify-between">
+          {/* Live Match Section */}
+          <div className="relative bg-gradient-to-br from-emerald-500/10 via-background to-background rounded-xl sm:rounded-2xl border border-border/50 overflow-hidden">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-emerald-500/5 via-transparent to-transparent" />
+            <div className="relative p-4 sm:p-6 md:p-8">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+                <div className="flex items-center gap-3">
                   <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                    <h2 className="text-lg font-semibold text-emerald-500">LIVE NOW</h2>
+                    <Activity className="w-5 h-5 text-emerald-500" />
+                    <h2 className="text-lg sm:text-xl font-semibold">Live Match</h2>
                   </div>
-                  {
-                    liveFixture && (
-                      <Link
-                        href={ `/live/${ liveFixture.fixtureId }` }
-                        className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full text-sm font-medium transition-colors"
-                        aria-disabled={true}
-                      >
-                        View Stats
-                      </Link>
-                    )
-                  }
+                  {liveFixture && (
+                    <div className="flex items-center gap-2 px-3 py-1 bg-emerald-500/10 text-emerald-500 rounded-full text-sm font-medium">
+                      <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                      LIVE
+                    </div>
+                  )}
                 </div>
-
-                {
-                  liveFixture && (
-                    <div className="bg-card/40 backdrop-blur-sm rounded-xl p-6 border border-border">
-                      <div className="flex flex-col md:flex-row items-center justify-between gap-8 md:gap-16">
-                        <div className="flex flex-col items-center gap-4 md:w-1/3">
-                          <div className="relative w-16 h-16 md:w-24 md:h-24">
-                            <Image
-                              src={ teamLogos[ liveFixture.homeTeam.name ] || '/images/team_logos/default.jpg' }
-                              alt={ liveFixture.homeTeam.name }
-                              fill
-                              className="object-contain rounded-full"
-                            />
-                          </div>
-                          <span className="text-base md:text-lg font-medium text-center">{ liveFixture.homeTeam.name }</span>
-                        </div>
-
-                        <div className="flex flex-col items-center gap-2 md:w-1/6">
-                          <div className="text-4xl md:text-6xl font-bold tracking-tighter">
-                            <span>{ liveFixture.result.homeScore }</span>
-                            <span className="text-muted-foreground mx-3">-</span>
-                            <span>{ liveFixture.result.awayScore }</span>
-                            { liveFixture.result.homePenalty !== null && liveFixture.result.awayPenalty !== null && (
-                              <div className="text-sm text-muted-foreground text-center mt-1">
-                                ({liveFixture.result.homePenalty} - {liveFixture.result.awayPenalty})
-                              </div>
-                            )}
-                          </div>
-                          <div className="flex flex-col items-center">
-                            <span className="text-sm text-muted-foreground">{formatTime(totalTime)}</span>
-                          </div>
-                        </div>
-
-                        <div className="flex flex-col items-center gap-4 md:w-1/3">
-                          <div className="relative w-16 h-16 md:w-24 md:h-24">
-                            <Image
-                              src={ teamLogos[ liveFixture.awayTeam.name ] || '/images/team_logos/default.jpg' }
-                              alt={ liveFixture.awayTeam.name }
-                              fill
-                              className="object-contain rounded-full"
-                            />
-                          </div>
-                          <span className="text-base md:text-lg font-medium text-center">{ liveFixture.awayTeam.name }</span>
-                        </div>
-                      </div>
-
-                      <div className="mt-6 flex items-center justify-center gap-4 text-sm text-muted-foreground">
-                        <div className="flex items-center gap-1">
-                          <Trophy className="w-4 h-4" />
-                          <span>{ liveFixture.competition?.name || 'Friendly' }</span>
-                        </div>
-                        <span>•</span>
-                        <div className="flex items-center gap-1">
-                          <Calendar className="w-4 h-4" />
-                          <span>Today</span>
-                        </div>
-                      </div>
-                    </div>
-                  )
-                }
-                {
-                  !liveFixture && (
-                    <div className="flex justify-center items-center flex-col gap-2 mb-2">
-                      <AlertCircle className="w-10 h-10" />
-                      <p>No Live Fixtures Now.</p>
-                    </div>
-                  )
-                }
+                {liveFixture && (
+                  <Link
+                    href={`/live/${liveFixture.fixtureId}`}
+                    className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2 w-full sm:w-auto"
+                  >
+                    Watch Live
+                    <ArrowRight className="w-4 h-4" />
+                  </Link>
+                )}
               </div>
+
+              {liveFixture ? (
+                <div className="bg-card/30 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-border/50">
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-6 sm:gap-8">
+                    {/* Home Team */}
+                    <div className="flex flex-col items-center gap-2 sm:gap-3 flex-1">
+                      <div className="relative w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20">
+                        <Image
+                          src={teamLogos[liveFixture.homeTeam.name] || '/images/team_logos/default.jpg'}
+                          alt={liveFixture.homeTeam.name}
+                          fill
+                          className="object-contain rounded-full"
+                        />
+                      </div>
+                      <span className="text-sm sm:text-base md:text-lg font-semibold text-center leading-tight">
+                        {liveFixture.homeTeam.name}
+                      </span>
+                    </div>
+
+                    {/* Score and Time */}
+                    <div className="flex flex-col items-center gap-2 sm:gap-3">
+                      <div className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">
+                        <span>{liveFixture.result.homeScore}</span>
+                        <span className="text-muted-foreground mx-2 sm:mx-4">-</span>
+                        <span>{liveFixture.result.awayScore}</span>
+                      </div>
+                      {liveFixture.result.homePenalty !== null && liveFixture.result.awayPenalty !== null && (
+                        <div className="text-xs sm:text-sm text-muted-foreground">
+                          ({liveFixture.result.homePenalty} - {liveFixture.result.awayPenalty})
+                        </div>
+                      )}
+                      <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
+                        <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
+                        <span>{formatTime(totalTime)}</span>
+                      </div>
+                    </div>
+
+                    {/* Away Team */}
+                    <div className="flex flex-col items-center gap-2 sm:gap-3 flex-1">
+                      <div className="relative w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20">
+                        <Image
+                          src={teamLogos[liveFixture.awayTeam.name] || '/images/team_logos/default.jpg'}
+                          alt={liveFixture.awayTeam.name}
+                          fill
+                          className="object-contain rounded-full"
+                        />
+                      </div>
+                      <span className="text-sm sm:text-base md:text-lg font-semibold text-center leading-tight">
+                        {liveFixture.awayTeam.name}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Match Details */}
+                  <div className="mt-4 sm:mt-6 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 text-xs sm:text-sm text-muted-foreground">
+                    <div className="flex items-center gap-2">
+                      <Trophy className="w-3 h-3 sm:w-4 sm:h-4" />
+                      <span className="truncate max-w-40 sm:max-w-none">{liveFixture.competition?.name || 'Friendly'}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Calendar className="w-3 h-3 sm:w-4 sm:h-4" />
+                      <span>Today</span>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <AlertCircle className="w-12 h-12 text-muted-foreground/50 mb-3" />
+                  <h3 className="text-lg font-medium mb-1">No Live Match</h3>
+                  <p className="text-muted-foreground">Check back later for live coverage</p>
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Competitions Section */}
-          <div className="bg-card rounded-xl border border-border overflow-hidden">
-            <button
-              onClick={() => setIsCompetitionsOpen(!isCompetitionsOpen)}
-              className="w-full px-6 py-4 flex items-center justify-between hover:bg-accent/50 transition-colors"
-            >
+          {/* Recent Games Section */}
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <Trophy className="w-5 h-5 text-emerald-500" />
-                <h2 className="text-xl font-semibold">Current Competitions</h2>
+                <h2 className="text-xl font-semibold">Recent Games</h2>
               </div>
-              {isCompetitionsOpen ? (
-                <ChevronUp className="w-5 h-5 text-muted-foreground" />
-              ) : (
-                <ChevronDown className="w-5 h-5 text-muted-foreground" />
-              )}
-            </button>
+            </div>
 
-            <AnimatePresence>
-              {isCompetitionsOpen && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: "auto", opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                  className="overflow-hidden"
-                >
-                  <div className="p-6 grid gap-4 border-t border-border">
-                    {
-                      competitions && competitions.map((competition) => {
-                        const formattedStartDate = competition.startDate ? format( competition.startDate, "yyyy-MM-dd HH:mm" ) : null;
-                        const formattedEndDate = competition.endDate ? format( competition.endDate, "yyyy-MM-dd HH:mm" ) : null;
-                        const startDate = formattedStartDate ? formattedStartDate.split(' ')[ 0 ] : null;
-                        const endDate = formattedEndDate ? formattedEndDate.split(' ')[ 0 ] : null;
+            <RecentGames fixtures={recentFixtures} loading={recentLoading} />
+          </div>
 
-                        return (
-                          <Link
-                            key={competition._id}
-                            href={`/competitions/${competition.type}/${competition._id}`}
-                            className="block p-4 rounded-lg border border-border hover:bg-accent/50 transition-colors"
-                          >
-                            <div className="flex items-center justify-between">
-                              <div>
-                                <h3 className="font-medium">{competition.name}</h3>
-                                <p className="text-sm text-muted-foreground">
-                                  { startDate || 'Unknown' } - { endDate || 'Unknown' }
-                                </p>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                  competition.status === 'ongoing'
-                                    ? 'bg-emerald-500/10 text-emerald-500'
-                                    : 'bg-orange-500/10 text-orange-500'
-                                }`}>
-                                  { competition.status }
-                                </span>
-                                <span className="px-2 py-1 rounded-full text-xs font-medium bg-secondary text-secondary-foreground">
-                                  { competition.type }
-                                </span>
-                              </div>
-                            </div>
-                          </Link>
-                        )
-                      })
-                    }
-                    {
-                      !competitions && (
-                        <div className="text-center">No competitions available</div>
-                      )
-                    }
+          {/* TOTS Promotional Section */}
+          <div className="pt-4 sm:pt-6">
+            <Link href="/sports/football/tots">
+              <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-emerald-600/90 to-emerald-800/90 p-4 sm:p-6 hover:from-emerald-600 hover:to-emerald-800 transition-all duration-300 group">
+                <div className="absolute -right-6 -top-6 sm:-right-8 sm:-top-8 h-20 w-20 sm:h-24 sm:w-24 rounded-full bg-emerald-500/20 blur-xl group-hover:bg-emerald-500/30 transition-all duration-300"></div>
+                <div className="absolute -bottom-6 -left-6 sm:-bottom-8 sm:-left-8 h-20 w-20 sm:h-24 sm:w-24 rounded-full bg-emerald-500/20 blur-xl group-hover:bg-emerald-500/30 transition-all duration-300"></div>
+
+                <div className="relative flex items-center justify-between">
+                  <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
+                    <div className="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full bg-white/10 backdrop-blur-sm flex-shrink-0">
+                      <Trophy className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="text-base sm:text-lg font-bold text-white truncate">Team of the Season</h3>
+                      <p className="text-xs sm:text-sm text-emerald-100 truncate">Vote for your favorite players</p>
+                    </div>
                   </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+                  <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 text-white group-hover:translate-x-1 transition-transform flex-shrink-0 ml-2" />
+                </div>
+              </div>
+            </Link>
+          </div>
+
+          {/* Competitions Access Button */}
+          <div className="text-center pt-2 sm:pt-4">
+            <Link
+              href="/sports/football/competitions"
+              className="inline-flex items-center justify-center gap-3 px-6 sm:px-8 py-3 sm:py-4 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-medium transition-all duration-200 hover:scale-105 hover:shadow-lg w-full sm:w-auto"
+            >
+              <Trophy className="w-5 h-5" />
+              <span>View All Competitions</span>
+              <ArrowRight className="w-5 h-5" />
+            </Link>
           </div>
         </div>
       </BlurFade>
