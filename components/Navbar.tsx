@@ -67,7 +67,7 @@ const Navbar = () => {
     <>
       {/* Desktop Navbar */}
       <div className="fixed top-0 left-0 right-0 z-50 p-4 md:block hidden">
-        <nav className="mx-auto max-w-2xl rounded-full bg-navbar">
+        <nav className="mx-auto max-w-2xl rounded-full bg-navbar/60 backdrop-blur-md border border-white/30 dark:border-white/10 shadow-lg">
           <div className="relative h-12 flex items-center justify-between px-4">
           {/* Logo */}
             <Link
@@ -157,7 +157,7 @@ const Navbar = () => {
       </div>
 
       {/* Mobile Bottom Navbar */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-navbar border-t border-navbar-muted/10">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-navbar/60 backdrop-blur-md border-t border-white/20 dark:border-white/10 shadow-2xl">
         <nav className="h-16">
           <div className="grid grid-cols-5 h-full">
             {mobileBottomNavLinks.map((link) => {

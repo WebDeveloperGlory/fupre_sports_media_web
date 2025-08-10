@@ -2,12 +2,13 @@
 
 import { Loader } from "@/components/ui/loader";
 import { getFootballCompetitionPageData } from "@/lib/requests/v2/homepage/requests";
-import { IV2FootballCompetition } from "@/utils/V2Utils/v2requestData.types";
-import { ArrowRight, Bolt, CalendarClock, Crown, Star, Trophy, Filter } from "lucide-react";
+import { IV2FootballCompetition, IV2Blog, PopIV2FootballFixture } from "@/utils/V2Utils/v2requestData.types";
+import { ArrowRight, Bolt, CalendarClock, Crown, Trophy } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import CompetitionBadge from "@/components/competitions/CompetitionBadge";
+import { getUpcomingFixtures } from "@/lib/requests/v2/fixtures/requests";
+import { getAllBlogs } from "@/lib/requests/v2/admin/media-admin/news-management/requests";
 import { cn } from "@/utils/cn";
 import { CompetitionTypes } from "@/utils/V2Utils/v2requestData.enums";
 import { format } from "date-fns";
@@ -24,17 +25,39 @@ export default function FootballCompetitionsPage() {
   const [loading, setLoading] = useState<boolean>(true);
   const [pageData, setPageData] = useState<CompetitionPageData | null>(null);
   const [activeTab, setActiveTab] = useState<string>('all competitions');
+  const [upcomingFixtures, setUpcomingFixtures] = useState<PopIV2FootballFixture[]>([]);
+  const [latestBlogs, setLatestBlogs] = useState<IV2Blog[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
-      const response = await getFootballCompetitionPageData();
-      if(response?.code === '00') {
-        setPageData(response.data);
-      } else {
-        toast.error(response?.message || 'Error Getting Analytics');
-      }
+      try {
+        const [compRes, fixturesRes, blogsRes] = await Promise.all([
+          getFootballCompetitionPageData(),
+          getUpcomingFixtures(5),
+          getAllBlogs()
+        ]);
 
-      setLoading(false);
+        if (compRes?.code === '00') {
+          setPageData(compRes.data);
+        } else if (compRes) {
+          toast.error(compRes?.message || 'Error getting competitions');
+        }
+
+        if (fixturesRes?.code === '00') {
+          setUpcomingFixtures(fixturesRes.data?.slice(0, 5) || []);
+        }
+
+        if (blogsRes?.code === '00') {
+          const published = (blogsRes.data as IV2Blog[]).filter(b => b.isPublished);
+          const sorted = published.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+          setLatestBlogs(sorted.slice(0, 5));
+        }
+      } catch (error) {
+        console.error('Error fetching competitions page data:', error);
+        toast.error('Failed to load page data');
+      } finally {
+        setLoading(false);
+      }
     }
 
     if(loading) fetchData();
@@ -93,6 +116,72 @@ export default function FootballCompetitionsPage() {
 
 
 
+      {/* Highlights: Upcoming Matches + News */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Upcoming Matches */}
+          <div className="bg-card/40 backdrop-blur-sm rounded-xl p-6 border border-border">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold">Upcoming Matches</h2>
+              <Link href="/sports/football/fixtures" className="text-sm text-emerald-600 hover:text-emerald-500">View all</Link>
+            </div>
+            <div className="space-y-3">
+              {upcomingFixtures.length > 0 ? (
+                upcomingFixtures.slice(0, 3).map((fx) => (
+                  <Link
+                    key={fx._id}
+                    href={`/fixtures/${fx._id}/stats`}
+                    className="group block rounded-lg border border-transparent hover:border-emerald-500/30 hover:bg-emerald-500/5 transition-colors p-3"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="text-sm text-muted-foreground">
+                        {format(fx.scheduledDate, 'EEE, MMM d • HH:mm')}
+                      </div>
+                      <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-emerald-600 group-hover:translate-x-0.5 transition-all" />
+                    </div>
+                    <div className="mt-1 font-medium text-foreground">
+                      {fx.homeTeam.name} <span className="text-muted-foreground">vs</span> {fx.awayTeam.name}
+                    </div>
+                  </Link>
+                ))
+              ) : (
+                <div className="text-sm text-muted-foreground">No upcoming fixtures.</div>
+              )}
+            </div>
+          </div>
+
+          {/* Latest News */}
+          <div className="bg-card/40 backdrop-blur-sm rounded-xl p-6 border border-border">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold">Latest News</h2>
+              <Link href="/news" className="text-sm text-emerald-600 hover:text-emerald-500">View all</Link>
+            </div>
+            <div className="space-y-3">
+              {latestBlogs.length > 0 ? (
+                latestBlogs.slice(0, 3).map((blog) => (
+                  <Link
+                    key={blog._id}
+                    href={`/news/${blog._id}`}
+                    className="group block rounded-lg border border-transparent hover:border-emerald-500/30 hover:bg-emerald-500/5 transition-colors p-3"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="text-xs text-emerald-600/80 px-2 py-0.5 rounded-full bg-emerald-500/10">
+                        {blog.category}
+                      </div>
+                      <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-emerald-600 group-hover:translate-x-0.5 transition-all" />
+                    </div>
+                    <div className="mt-2 font-medium text-foreground line-clamp-1">{blog.title}</div>
+                    <p className="text-sm text-muted-foreground line-clamp-2">{blog.content.slice(0, 100)}...</p>
+                  </Link>
+                ))
+              ) : (
+                <div className="text-sm text-muted-foreground">No news articles yet.</div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Filter Navigation */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="flex items-center justify-between border-b border-border pb-4">
@@ -103,7 +192,7 @@ export default function FootballCompetitionsPage() {
         </div>
 
         <div className="flex items-center gap-1 mt-4 overflow-x-auto scrollbar-hide">
-          {['all competitions', 'league', 'knockout', 'hybrid'].map((tab, index) => (
+          {['all competitions', 'league', 'knockout', 'hybrid'].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab as typeof activeTab)}
