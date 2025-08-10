@@ -20,6 +20,8 @@ import { getLiveFixtureById, submitUnofficialCheer, submitUserPlayerRating, subm
 import { TeamType } from '@/utils/V2Utils/v2requestData.enums';
 import { toast } from 'react-toastify';
 import { getProfile } from '@/lib/requests/v2/user/requests';
+import { useAuthStore } from '@/stores/v2/authStore';
+import { format } from 'date-fns';
 
 const templateStats = {
   home: {
@@ -68,6 +70,7 @@ export default function LiveMatchPage({
 }: { 
   params: Promise<{ id: string }> 
 }) {
+  const { isLoggedIn } = useAuthStore();
   const resolvedParams = use(params);
 
   const { 
@@ -86,7 +89,6 @@ export default function LiveMatchPage({
   } = useFixtureSocket(resolvedParams.id)
 
   const [ loading, setLoading ] = useState<boolean>( true );
-  const [ isLoggedIn, setIsLoggedIn ] = useState<boolean>( false );
   const [ liveFixture, setLiveFixture ] = useState<IV2FootballLiveFixture | null>( null );
   const [ activeTab, setActiveTab ] = useState<Tabs>( Tabs.OVERVIEW );
   const [open, setOpen] = useState<boolean>( false );
@@ -97,15 +99,6 @@ export default function LiveMatchPage({
 
   useEffect( () => {
     const fetchData = async () => {
-      const request = await getProfile();
-      if( request?.code === '99' ) {
-        if( request.message === 'Invalid or Expired Token' || request.message === 'Login Required' ) {
-          setIsLoggedIn(false);
-        }
-      } else {
-        setIsLoggedIn(true);
-      }
-
       const fixtureData = await getLiveFixtureById( resolvedParams.id );
 
       if( fixtureData && fixtureData.data ) {
@@ -348,7 +341,7 @@ export default function LiveMatchPage({
                           <div className="flex items-center justify-center sm:justify-start">
                             <Clock12 className="h-3 w-3 sm:h-4 sm:w-4 mr-1 text-muted-foreground flex-shrink-0" />
                             <span className="truncate">
-                              {kickoffTime.toLocaleString()}
+                              {format(kickoffTime, 'yyyy-MM-dd HH:mm') || 'Unknown'}
                             </span>
                           </div>
                         </div>
