@@ -121,7 +121,7 @@ export interface IV2FootballCompetition {
     teams: {
         team: ShortPopulatedTeam,
         squad: {
-            player: string,
+            player: ShortPopulatedPlayer,
             jerseyNumber: number,
             isCaptain: boolean,
             position: string
