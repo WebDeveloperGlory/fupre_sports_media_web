@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import useAuthStore from '@/stores/authStore';
+import { useAuthStore } from '@/stores/v2/authStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,7 +14,7 @@ import Link from 'next/link';
 
 export default function SignupPage() {
   const router = useRouter();
-  const { setJwt, setUserProfile } = useAuthStore();
+  const { setUser, setIsLoggedIn } = useAuthStore();
 
   const [formData, setFormData] = useState({
     name: '',
@@ -97,13 +97,18 @@ export default function SignupPage() {
       try {
         const result = await validateOtp( formData.email, otp.join('') );
         if( result?.code === '00' ) {
-            toast.success( result.message || 'Signup successful' );
-            setJwt( result.data.token );
-            setUserProfile( result.data.user );
-            router.push('/');
+          toast.success( result.message || 'Signup successful' );
+          setIsLoggedIn( true );
+          setUser({ 
+            ...result.data.user,
+            _id: result.data.user.id.toString(),
+          });
+          router.push('/');
         } else {
-            toast.error( result?.message || 'Login failed' );
-            setFormData({ ...formData, password: '' });
+          toast.error( result?.message || 'Login failed' );
+          setFormData({ ...formData, password: '' });
+          setIsLoggedIn(false);
+          setUser(null);
         }
       } catch (error) {
           console.error('Login failed:', error);
