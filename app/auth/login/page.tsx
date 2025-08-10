@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import useAuthStore from '@/stores/authStore';
+import { useAuthStore } from '@/stores/v2/authStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,7 +15,7 @@ import Link from 'next/link';
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { setJwt, setUserProfile } = useAuthStore();
+  const { setUser, setIsLoggedIn } = useAuthStore();
 
   const [formData, setFormData] = useState({
     email: '',
@@ -53,12 +53,17 @@ export default function LoginPage() {
       const result = await loginUser( formData.email, formData.password );
       if( result?.code === '00' ) {
         toast.success( result.message || 'Login Successful' );
-        setJwt( result.data.token );
-        setUserProfile( result.data.user );
+        setIsLoggedIn( true );
+        setUser({ 
+          ...result.data.user,
+          _id: result.data.user.id.toString(),
+        });
         router.push(redirectPath);
       } else {
         toast.error( result?.message || 'Login failed' );
         setFormData({ ...formData, password: '' });
+        setIsLoggedIn(false);
+        setUser(null);
       }
     } catch (error) {
       console.error('Login failed:', error);

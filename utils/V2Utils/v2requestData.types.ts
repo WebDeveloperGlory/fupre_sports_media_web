@@ -11,7 +11,6 @@ export interface IV2User {
     _id: string;
     profileImage?: string;
     name: string;
-    password: string;
     email: string;
     role: UserRole;
     sport: SportType;
@@ -21,7 +20,6 @@ export interface IV2User {
     lastLogin: Date | null;
     passwordChangedAt: Date | null;
     preferences: UserPreference;
-    comparePassword: ( password: string ) => Promise<boolean>;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -123,7 +121,7 @@ export interface IV2FootballCompetition {
     teams: {
         team: ShortPopulatedTeam,
         squad: {
-            player: string,
+            player: ShortPopulatedPlayer,
             jerseyNumber: number,
             isCaptain: boolean,
             position: string

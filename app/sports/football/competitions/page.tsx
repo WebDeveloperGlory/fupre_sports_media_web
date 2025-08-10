@@ -448,11 +448,11 @@ export default function FootballCompetitionsPage() {
                                     <div className="text-muted-foreground">Teams</div>
                                   </div>
                                   <div>
-                                    <div className="font-semibold text-foreground">{format(comp.startDate, 'MMMM YYYY')}</div>
+                                    <div className="font-semibold text-foreground">{format(comp.startDate, 'MMMM yyy')}</div>
                                     <div className="text-muted-foreground">Start Date</div>
                                   </div>
                                   <div>
-                                    <div className="font-semibold text-foreground">{format(comp.endDate, 'MMMM YYYY')}</div>
+                                    <div className="font-semibold text-foreground">{format(comp.endDate, 'MMMM yyy')}</div>
                                     <div className="text-muted-foreground">End Date</div>
                                   </div>
                                   <div>

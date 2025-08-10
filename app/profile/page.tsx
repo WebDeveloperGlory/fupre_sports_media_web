@@ -14,6 +14,7 @@ import { logoutUser } from '@/lib/requests/v2/authentication/requests';
 import { getProfile, markNotificationAsRead } from '@/lib/requests/v2/user/requests';
 import { IV2User } from '@/utils/V2Utils/v2requestData.types';
 import { UserRole } from '@/utils/V2Utils/v2requestData.enums';
+import { useAuthStore } from '@/stores/v2/authStore';
 
 interface UserProfile {
   name: string;
@@ -32,6 +33,7 @@ interface Notification {
 }
 
 export default function ProfilePage() {
+  const { setUser, setIsLoggedIn } = useAuthStore();
   const router = useRouter();
 
   const [loading, setLoading] = useState(true);
@@ -105,6 +107,8 @@ export default function ProfilePage() {
     if( result?.code === '00' ) {
       toast.success('Logout successful!');
       setProfile(null);
+      setIsLoggedIn(false);
+      setUser(null);
       router.push('/');
     } else {
       toast.error( result?.message || 'Logout failed! Please try again.');

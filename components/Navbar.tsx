@@ -8,8 +8,9 @@ import { motion } from 'framer-motion';
 import { Home, Trophy, Newspaper, Play, Menu, X, LayoutDashboard, Award } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/utils/cn';
-import useAuthStore from '@/stores/authStore';
+import { useAuthStore } from '@/stores/v2/authStore';
 import { User } from 'lucide-react';
+import { UserRole } from '@/utils/V2Utils/v2requestData.enums';
 
 const menuVariants = {
   hidden: { x: "100%", opacity: 0 },
@@ -20,7 +21,7 @@ const menuVariants = {
 const Navbar = () => {
   const { theme, toggleTheme } = useTheme();
   const pathname = usePathname();
-  const { jwt, userProfile } = useAuthStore();
+  const { loading, user, isLoggedIn } = useAuthStore();
   const [openMobileMenu, setOpenMobileMenu] = useState<boolean>(false);
 
   const isActiveRoute = (path: string) => {
@@ -38,6 +39,12 @@ const Navbar = () => {
     }
     if (path === '/news') {
       return pathname === '/news' || pathname.startsWith('/news/');
+    }
+    if (path === '/admin/super-admin/football/dashboard') {
+      return pathname.startsWith('/admin/super-admin');
+    }
+    if (path === '/admin/media-admin/dashboard') {
+      return pathname.startsWith('/admin/media-admin');
     }
     return pathname === path;
   };
@@ -58,18 +65,46 @@ const Navbar = () => {
     { href: '/highlights', label: 'Highlights', icon: Play },
   ];
 
-  const adminLinks = [
-    { href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard }
-  ]
+  // Admin links based on role
+  const getAdminLinks = () => {
+    if (!user) return [];
+    
+    switch(user.role) {
+      case UserRole.SUPER_ADMIN:
+        return [
+          { href: '/admin/super-admin/football/dashboard', label: 'Super Admin', icon: LayoutDashboard }
+        ];
+      case UserRole.MEDIA_ADMIN:
+      case UserRole.HEAD_MEDIA_ADMIN:
+        return [
+          { href: '/admin/media-admin/dashboard', label: 'Media Admin', icon: LayoutDashboard }
+        ];
+      case UserRole.COMPETITION_ADMIN:
+        return [
+          { href: '/admin/competition-admin/dashboard', label: 'Competition Admin', icon: LayoutDashboard }
+        ];
+      case UserRole.TEAM_ADMIN:
+        return [
+          { href: '/admin/team-admin/dashboard', label: 'Team Admin', icon: LayoutDashboard }
+        ];
+      case UserRole.LIVE_FIXTURE_ADMIN:
+        return [
+          { href: '/admin/live-fixture-admin/dashboard', label: 'Live Fixture Admin', icon: LayoutDashboard }
+        ];
+      default:
+        return [];
+    }
+  };
 
-  // Add these inside the desktop navbar's right section
+  const adminLinks = getAdminLinks();
+
   return (
     <>
       {/* Desktop Navbar */}
       <div className="fixed top-0 left-0 right-0 z-50 p-4 md:block hidden">
         <nav className="mx-auto max-w-2xl rounded-full bg-navbar/60 backdrop-blur-md border border-white/30 dark:border-white/10 shadow-lg">
           <div className="relative h-12 flex items-center justify-between px-4">
-          {/* Logo */}
+            {/* Logo */}
             <Link
               href="/"
               className={cn(
@@ -82,44 +117,42 @@ const Navbar = () => {
               FSM
             </Link>
 
-          {/* Desktop Navigation */}
+            {/* Desktop Navigation */}
             <div className="flex items-center justify-center space-x-8">
-            {navLinks.map((link) => (
-              <Link
-                key={link.label}
-                href={link.href}
+              {navLinks.map((link) => (
+                <Link
+                  key={link.label}
+                  href={link.href}
                   className={cn(
                     "text-[15px] font-medium transition-colors",
                     isActiveRoute(link.href)
                       ? "text-emerald-500"
                       : "text-navbar-muted hover:text-navbar-foreground"
                   )}
-              >
-                {link.label}
-              </Link>
-            ))}
-            {
-              jwt && userProfile && userProfile.role !== 'user' && adminLinks.map((link) => (
-                <Link
-                  key={link.label}
-                  href={link.href}
-                    className={cn(
-                      "text-[15px] font-medium transition-colors",
-                      isActiveRoute(link.href)
-                        ? "text-emerald-500"
-                        : "text-navbar-muted hover:text-navbar-foreground"
-                    )}
                 >
                   {link.label}
                 </Link>
-              ))
-            }
-          </div>
+              ))}
+              {isLoggedIn && adminLinks.map((link) => (
+                <Link
+                  key={link.label}
+                  href={link.href}
+                  className={cn(
+                    "text-[15px] font-medium transition-colors",
+                    isActiveRoute(link.href)
+                      ? "text-emerald-500"
+                      : "text-navbar-muted hover:text-navbar-foreground"
+                  )}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
 
             {/* Modified auth section */}
             <div className="flex items-center gap-4">
               <Link
-                href={jwt ? "/profile" : "/auth/login"}
+                href={isLoggedIn ? "/profile" : "/auth/login"}
                 className="p-2 hover:bg-muted rounded-full transition-colors"
               >
                 <User className="w-5 h-5" />
@@ -216,7 +249,7 @@ const Navbar = () => {
               <div className="flex items-center gap-4">
                 {/* Profile Link */}
                 <Link
-                  href={jwt ? "/profile" : "/auth/login"}
+                  href={isLoggedIn ? "/profile" : "/auth/login"}
                   onClick={() => setOpenMobileMenu(false)}
                   className="p-2 rounded-full bg-secondary text-secondary-foreground hover:bg-muted transition-all"
                 >
@@ -322,48 +355,44 @@ const Navbar = () => {
                 </Link>
               </div>
 
-              {
-                jwt && userProfile && userProfile.role !== 'user' && (
-                  <>
-                    <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mt-4">
-                      Admin Navigation
-                    </h3>
-                    <div className="space-y-2 mt-2">
-                      {
-                        adminLinks.map((link) => {
-                          const Icon = link.icon;
-                          return (
-                            <motion.div
-                              key={link.label}
-                              whileHover={{ scale: 1.05 }}
-                              whileTap={{ scale: 0.95 }}
-                            >
-                              <Link
-                                href={link.href}
-                                onClick={() => setOpenMobileMenu(false)}
-                                className={cn(
-                                  "flex items-center gap-4 px-4 py-3 rounded-lg transition-all",
-                                  isActiveRoute(link.href)
-                                    ? "bg-emerald-500/10 text-emerald-500"
-                                    : "bg-secondary text-secondary-foreground hover:bg-accent hover:text-accent-foreground"
-                                )}
-                              >
-                                <Icon className={cn(
-                                  "w-5 h-5",
-                                  isActiveRoute(link.href)
-                                    ? "text-emerald-500"
-                                    : "text-muted-foreground"
-                                )} />
-                                <h3 className="font-medium">{link.label}</h3>
-                              </Link>
-                            </motion.div>
-                          );
-                        })
-                      }
-                    </div>
-                  </>
-                )
-              }
+              {isLoggedIn && user && adminLinks.length > 0 && (
+                <>
+                  <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mt-4">
+                    Admin Navigation
+                  </h3>
+                  <div className="space-y-2 mt-2">
+                    {adminLinks.map((link) => {
+                      const Icon = link.icon;
+                      return (
+                        <motion.div
+                          key={link.label}
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          <Link
+                            href={link.href}
+                            onClick={() => setOpenMobileMenu(false)}
+                            className={cn(
+                              "flex items-center gap-4 px-4 py-3 rounded-lg transition-all",
+                              isActiveRoute(link.href)
+                                ? "bg-emerald-500/10 text-emerald-500"
+                                : "bg-secondary text-secondary-foreground hover:bg-accent hover:text-accent-foreground"
+                            )}
+                          >
+                            <Icon className={cn(
+                              "w-5 h-5",
+                              isActiveRoute(link.href)
+                                ? "text-emerald-500"
+                                : "text-muted-foreground"
+                            )} />
+                            <h3 className="font-medium">{link.label}</h3>
+                          </Link>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </motion.div>
