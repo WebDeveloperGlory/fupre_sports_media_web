@@ -450,10 +450,12 @@ export default function SportsOverviewPage() {
 
                   <div className="space-y-6">
                     {dashboardData && dashboardData.fixtures.latest.length > 0 && dashboardData.fixtures.latest.map((fixture, index) => (
-                      <div
+                      <Link
                         key={index}
-                        className="bg-card/40 backdrop-blur-sm rounded-xl p-6 border border-border hover:border-orange-500/30 transition-all duration-300"
+                        href={fixture.sport?.toLowerCase() === 'football' ? '/sports/football/fixtures' : fixture.sport?.toLowerCase() === 'basketball' ? '/sports/basketball/fixtures' : '/sports/football/fixtures'}
+                        className="block"
                       >
+                        <div className="bg-card/40 backdrop-blur-sm rounded-xl p-6 border border-border hover:border-orange-500/30 transition-all duration-300">
                         <div className="flex items-center justify-between mb-4">
                           <span className="inline-block px-3 py-1 rounded-full bg-orange-500/10 text-orange-500 text-xs font-medium">
                             {fixture.sport}
@@ -480,7 +482,8 @@ export default function SportsOverviewPage() {
                           <Calendar className="h-3 w-3" />
                           <span>{fixture.stadium}</span>
                         </div>
-                      </div>
+                        </div>
+                      </Link>
                     ))}
                     {
                       ( !dashboardData || dashboardData.fixtures.latest.length === 0 ) && (
@@ -497,7 +500,7 @@ export default function SportsOverviewPage() {
 
                   <div className="mt-8">
                     <Link
-                      href="/fixtures"
+                      href="/sports/football/fixtures"
                       className="inline-flex items-center gap-2 px-6 py-3 rounded-full border border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-white transition-all duration-300"
                     >
                       View All Fixtures

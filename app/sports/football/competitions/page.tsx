@@ -128,7 +128,7 @@ export default function FootballCompetitionsPage() {
           {/* Upcoming Matches */}
           <div className="bg-card/40 backdrop-blur-sm rounded-xl p-6 border border-border">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold">Upcoming Matches</h2>
+              <h2 className="text-lg font-semibold">Fixtures</h2>
               <Link href="/sports/football/fixtures" className="text-sm text-emerald-600 hover:text-emerald-500">View all</Link>
             </div>
             <div className="space-y-3">

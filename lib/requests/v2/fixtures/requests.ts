@@ -26,7 +26,7 @@ export const getFixtures = async (status?: string, limit: number = 50) => {
         if (status) {
             url += `&status=${status}`;
         }
-        
+
         const response = await axiosInstance.get(url);
         const { data }: { data: SuccessRequest } = response;
 
@@ -62,7 +62,7 @@ export const getFixturesByCompetition = async (competitionId: string, status?: s
         if (status) {
             url += `&status=${status}`;
         }
-        
+
         const response = await axiosInstance.get(url);
         const { data }: { data: SuccessRequest } = response;
 
@@ -79,6 +79,30 @@ export const getFixturesByCompetition = async (competitionId: string, status?: s
             return response?.data || null;
         } else {
             console.error('Error fetching fixtures by competition: ', err );
+            return null;
+        }
+    }
+};
+
+
+export const getFixtureById = async (fixtureId: string) => {
+    try {
+        const response = await axiosInstance.get(`${API_URL}/fixture/${fixtureId}`);
+        const { data }: { data: SuccessRequest } = response;
+
+        if (data.code === '99') {
+            throw data;
+        }
+
+        return data;
+    } catch( err: any ) {
+        const { response } = err as CustomError;
+
+        if( err?.status && err?.message ) {
+            console.error( `Error ${ err.status }: `, response?.data.message )
+            return response?.data || null;
+        } else {
+            console.error('Error fetching fixture by id: ', err );
             return null;
         }
     }

@@ -214,32 +214,37 @@ export default function FootballFixturesPage() {
   );
 }
 
+
+// Props for FixtureCard to avoid inline type literal in parameter (parsing compatibility)
+type FixtureCardProps = { fixture: PopIV2FootballFixture };
+
 // Fixture Card Component
-const FixtureCard = ({ fixture }: { fixture: PopIV2FootballFixture }) => {
+const FixtureCard = ({ fixture }: FixtureCardProps) => {
   const dateObj = fixture.scheduledDate ? new Date(fixture.scheduledDate) : null;
   const isValidDate = dateObj instanceof Date && !isNaN(dateObj.getTime());
   const formattedDate = isValidDate ? format(dateObj, 'MMM dd, yyyy') : 'Unknown';
   const formattedTime = isValidDate ? format(dateObj, 'HH:mm') : '--:--';
 
   return (
-    <div className="bg-background border border-border hover:border-emerald-500/30 transition-all duration-300 p-4 sm:p-6 rounded-xl">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-2">
-        <div className="flex items-center gap-2 min-w-0">
-          <Trophy className="w-4 h-4 text-emerald-500 flex-shrink-0" />
-          <span className="text-sm font-medium text-emerald-600 truncate">{fixture.competition.name}</span>
-        </div>
-        <div className="flex items-center gap-3 sm:gap-4 text-xs sm:text-sm text-muted-foreground flex-wrap">
-          <div className="flex items-center gap-1">
-            <Calendar className="w-3 h-3 sm:w-4 sm:h-4" />
-            <span className="whitespace-nowrap">{formattedDate}</span>
+    <Link href={`/sports/football/fixtures/${fixture._id}`} className="block">
+      <div className="bg-background border border-border hover:border-emerald-500/30 transition-all duration-300 p-4 sm:p-6 rounded-xl cursor-pointer">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <Trophy className="w-4 h-4 text-emerald-500 flex-shrink-0" />
+            <span className="text-sm font-medium text-emerald-600 truncate">{fixture.competition.name}</span>
           </div>
-          <div className="flex items-center gap-1">
-            <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
-            <span className="whitespace-nowrap">{formattedTime}</span>
+          <div className="flex items-center gap-3 sm:gap-4 text-xs sm:text-sm text-muted-foreground flex-wrap">
+            <div className="flex items-center gap-1">
+              <Calendar className="w-3 h-3 sm:w-4 sm:h-4" />
+              <span className="whitespace-nowrap">{formattedDate}</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
+              <span className="whitespace-nowrap">{formattedTime}</span>
+            </div>
           </div>
         </div>
-      </div>
 
       {/* Teams */}
       <div className="flex items-center justify-between mb-4 gap-2">
@@ -320,17 +325,20 @@ const FixtureCard = ({ fixture }: { fixture: PopIV2FootballFixture }) => {
              fixture.status === FixtureStatus.LIVE ? 'Live' :
              fixture.status}
           </span>
-          {(fixture.status === FixtureStatus.COMPLETED || fixture.status === FixtureStatus.LIVE) && (
-            <Link
-              href={`/fixtures/${fixture._id}/stats`}
-              className="px-2 sm:px-3 py-1 bg-emerald-500 text-white text-xs font-medium uppercase tracking-wide hover:bg-emerald-600 transition-colors rounded-full"
-            >
-              {fixture.status === FixtureStatus.LIVE ? 'Live Stats' : 'Stats'}
-            </Link>
-          )}
+          <div className="flex items-center gap-2">
+            <span className="px-2 sm:px-3 py-1 bg-emerald-500 text-white text-xs font-medium uppercase tracking-wide rounded-full">
+              View Details
+            </span>
+            {(fixture.status === FixtureStatus.COMPLETED || fixture.status === FixtureStatus.LIVE) && (
+              <span className="px-2 sm:px-3 py-1 bg-emerald-600 text-white text-xs font-medium uppercase tracking-wide rounded-full">
+                {fixture.status === FixtureStatus.LIVE ? 'Live Stats' : 'Stats'}
+              </span>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+      </div>
+    </Link>
   );
 };
 
