@@ -10,6 +10,7 @@ import { PopIV2FootballFixture, IV2FootballCompetition } from '@/utils/V2Utils/v
 import { FixtureStatus } from '@/utils/V2Utils/v2requestData.enums';
 import { getUpcomingFixtures, getCompletedFixtures } from '@/lib/requests/v2/fixtures/requests';
 import { getAllCompetitions } from '@/lib/requests/v2/admin/super-admin/live-management/requests';
+import { BackButton } from '@/components/ui/back-button';
 
 type TabType = 'upcoming' | 'completed';
 
@@ -38,9 +39,12 @@ export default function FootballFixturesPage() {
       }
 
       // Fetch competitions for filter
-      const competitionsResponse = await getAllCompetitions();
+      const competitionsResponse = await getAllCompetitions(500);
       if (competitionsResponse && competitionsResponse.code === '00') {
-        setCompetitions(competitionsResponse.data || []);
+        const list = competitionsResponse.data;
+        setCompetitions(Array.isArray(list) ? list : []);
+      } else {
+        setCompetitions([]);
       }
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -61,6 +65,10 @@ export default function FootballFixturesPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Back Button */}
+      <div className="fixed top-8 md:top-24 left-4 md:left-8 z-40">
+        <BackButton />
+      </div>
       {/* Header Section */}
       <div className="bg-background border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -129,7 +137,7 @@ export default function FootballFixturesPage() {
               className="appearance-none bg-background border border-border text-foreground px-4 py-2 pr-8 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
             >
               <option value="all">All Competitions</option>
-              {competitions.map(comp => (
+              {(Array.isArray(competitions) ? competitions : []).map(comp => (
                 <option key={comp._id} value={comp._id}>{comp.name}</option>
               ))}
             </select>
@@ -162,8 +170,10 @@ export default function FootballFixturesPage() {
 
 // Fixture Card Component
 const FixtureCard = ({ fixture }: { fixture: PopIV2FootballFixture }) => {
-  const formattedDate = format(fixture.scheduledDate, 'MMM dd, yyyy');
-  const formattedTime = format(fixture.scheduledDate, 'HH:mm');
+  const dateObj = fixture.scheduledDate ? new Date(fixture.scheduledDate) : null;
+  const isValidDate = dateObj instanceof Date && !isNaN(dateObj.getTime());
+  const formattedDate = isValidDate ? format(dateObj, 'MMM dd, yyyy') : 'Unknown';
+  const formattedTime = isValidDate ? format(dateObj, 'HH:mm') : '--:--';
 
   return (
     <div className="bg-background border border-border hover:border-emerald-500/30 transition-colors p-6">

@@ -2,7 +2,7 @@
 
 import { Loader } from '@/components/ui/loader';
 import { BackButton } from '@/components/ui/back-button';
-import { IGroupTable, IKnockoutRounds, ILeagueStandings, IPopKnockoutRounds, IV2FootballCompetition, IV2FootballFixture } from '@/utils/V2Utils/v2requestData.types';
+import { IGroupTable, IKnockoutRounds, ILeagueStandings, IPopKnockoutRounds, IV2FootballCompetition, PopIV2FootballFixture } from '@/utils/V2Utils/v2requestData.types';
 import { Award, Calendar, Crown, Info, Shield, Target, Trophy, Users } from 'lucide-react';
 import React, { use, useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion';
@@ -55,7 +55,8 @@ params
     const [leagueTable, setLeagueTable] = useState<ILeagueStandings[]>([]);
     const [knockoutRounds, setKnockoutRounds] = useState<IPopKnockoutRounds[]>([]);
     const [groupStages, setGroupStages] = useState<IGroupTable[]>([]);
-    const [fixtures, setFixtures] = useState<IV2FootballFixture[]>([]);
+    const [fixtures, setFixtures] = useState<PopIV2FootballFixture[]>([]);
+    const [fixturesFilter, setFixturesFilter] = useState<'all' | 'upcoming' | 'live' | 'completed'>('all');
     const [teams, setTeams] = useState<IV2FootballCompetition['teams']>([]);
     const [stats, setStats] = useState<IV2FootballCompetition['stats'] | null>(null);
     const [activeTab, setActiveTab] = useState<LeagueTabs | KnockoutTabs | HybridTabs >(LeagueTabs.INFO);
@@ -428,40 +429,118 @@ params
           <div className="bg-background">
             <div className="mb-6">
               <h2 className="text-2xl font-bold text-foreground mb-2">Fixtures</h2>
-              <p className="text-muted-foreground">All scheduled and completed matches</p>
+              <p className="text-muted-foreground">Browse all fixtures by status. Live matches are highlighted.</p>
             </div>
 
-            {fixtures.length === 0 ? (
+            {/* Filters */}
+            <div className="flex items-center gap-2 mb-4 overflow-x-auto scrollbar-hide">
+              {(() => {
+                const safeFixtures = Array.isArray(fixtures) ? fixtures : [];
+                const counts = safeFixtures.reduce(
+                  (acc, fx) => {
+                    if (fx.status === FixtureStatus.LIVE) acc.live += 1;
+                    if (fx.status === FixtureStatus.COMPLETED) acc.completed += 1;
+                    if (fx.status === FixtureStatus.SCHEDULED) acc.upcoming += 1;
+                    acc.all += 1;
+                    return acc;
+                  },
+                  { all: 0, upcoming: 0, live: 0, completed: 0 }
+                );
+                const items: { key: typeof fixturesFilter; label: string; count: number }[] = [
+                  { key: 'all', label: 'All', count: counts.all },
+                  { key: 'upcoming', label: 'Upcoming', count: counts.upcoming },
+                  { key: 'live', label: 'Live', count: counts.live },
+                  { key: 'completed', label: 'Completed', count: counts.completed },
+                ];
+                return items.map(({ key, label, count }) => (
+                  <button
+                    key={key}
+                    onClick={() => setFixturesFilter(key)}
+                    className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors whitespace-nowrap ${
+                      fixturesFilter === key
+                        ? 'bg-emerald-500 text-white border-emerald-500'
+                        : 'bg-card/40 text-muted-foreground border-border hover:text-foreground'
+                    }`}
+                  >
+                    {label} ({count})
+                  </button>
+                ));
+              })()}
+            </div>
+
+            {/* List */}
+            {(!Array.isArray(fixtures) || fixtures.length === 0) ? (
               <div className="text-sm text-muted-foreground">No fixtures available.</div>
             ) : (
               <div className="space-y-3">
-                {fixtures.map((fx) => (
-                  <div key={fx._id} className="p-4 rounded-lg border border-border bg-card/40 backdrop-blur-sm">
-                    <div className="flex items-center justify-between mb-2 text-sm text-muted-foreground">
-                      <div className="flex items-center gap-3">
-                        <div className="flex items-center gap-1">
-                          <Calendar className="w-4 h-4" />
-                          <span>{fx.scheduledDate ? format(fx.scheduledDate, 'EEE, MMM d') : 'Unknown date'}</span>
+                {(Array.isArray(fixtures) ? fixtures : [])
+                  .filter((fx) => {
+                    if (fixturesFilter === 'all') return true;
+                    if (fixturesFilter === 'upcoming') return fx.status === FixtureStatus.SCHEDULED;
+                    if (fixturesFilter === 'live') return fx.status === FixtureStatus.LIVE;
+                    if (fixturesFilter === 'completed') return fx.status === FixtureStatus.COMPLETED;
+                    return true;
+                  })
+                  .sort((a, b) => {
+                    const aTime = a.scheduledDate ? new Date(a.scheduledDate).getTime() : 0;
+                    const bTime = b.scheduledDate ? new Date(b.scheduledDate).getTime() : 0;
+                    return aTime - bTime;
+                  })
+                  .map((fx) => {
+                    const isLive = fx.status === FixtureStatus.LIVE;
+                    const isCompleted = fx.status === FixtureStatus.COMPLETED;
+                    return (
+                      <div
+                        key={fx._id}
+                        className={`p-4 rounded-xl border backdrop-blur-sm transition-colors ${
+                          isLive
+                            ? 'border-red-300/50 bg-red-50/40 dark:bg-red-900/10'
+                            : 'border-border bg-card/40'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-2 text-xs sm:text-sm text-muted-foreground">
+                          <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-1">
+                              <Calendar className="w-4 h-4" />
+                              <span>{fx.scheduledDate ? format(fx.scheduledDate, 'EEE, MMM d') : 'Unknown date'}</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <span>{fx.scheduledDate ? format(fx.scheduledDate, 'HH:mm') : '--:--'}</span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {isLive && (
+                              <span className="flex items-center gap-1 text-red-600">
+                                <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse"></span>
+                                LIVE
+                              </span>
+                            )}
+                            {isCompleted && (
+                              <span className="text-emerald-600">Completed</span>
+                            )}
+                          </div>
                         </div>
-                        <div className="flex items-center gap-1">
-                          <span>{fx.scheduledDate ? format(fx.scheduledDate, 'HH:mm') : '--:--'}</span>
-                        </div>
-                      </div>
-                      <span className="uppercase">{fx.status}</span>
-                    </div>
 
-                    <div className="flex items-center justify-between">
-                      <div className="font-medium">
-                        <span className="mr-2">{(fx as any)?.homeTeam?.name ?? 'Home'}</span>
-                        <span className="text-muted-foreground">vs</span>
-                        <span className="ml-2">{(fx as any)?.awayTeam?.name ?? 'Away'}</span>
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="font-medium truncate">
+                            <span className="mr-2 truncate">{(fx as any)?.homeTeam?.name ?? 'Home'}</span>
+                            <span className="text-muted-foreground">vs</span>
+                            <span className="ml-2 truncate">{(fx as any)?.awayTeam?.name ?? 'Away'}</span>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            {isCompleted && fx.result && (
+                              <span className="text-sm font-semibold">
+                                {fx.result.homeScore} - {fx.result.awayScore}
+                              </span>
+                            )}
+                            <Link href={`/fixtures/${fx._id}/stats`} className="text-sm text-emerald-600 hover:text-emerald-500">
+                              {isLive ? 'Open live' : 'View details'}
+                            </Link>
+                          </div>
+                        </div>
                       </div>
-                      <Link href={`/fixtures/${fx._id}/stats`} className="text-sm text-emerald-600 hover:text-emerald-500">
-                        View details
-                      </Link>
-                    </div>
-                  </div>
-                ))}
+                    );
+                  })}
               </div>
             )}
           </div>

@@ -193,9 +193,9 @@ export const getAllFixtures = async () => {
     }
 };
 
-export const getAllCompetitions = async () => {
+export const getAllCompetitions = async (limit: number = 100) => {
     try {
-        const response = await axiosInstance.get(`${API_URL}/competition?limit=100`);
+        const response = await axiosInstance.get(`${API_URL}/competition?limit=${limit}`);
         const { data }: { data: SuccessRequest } = response;
 
         if (data.code === '99') {
