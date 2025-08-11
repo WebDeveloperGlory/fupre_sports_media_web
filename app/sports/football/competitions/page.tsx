@@ -135,7 +135,7 @@ export default function FootballCompetitionsPage() {
                   >
                     <div className="flex items-center justify-between">
                       <div className="text-sm text-muted-foreground">
-                        {format(fx.scheduledDate, 'EEE, MMM d • HH:mm') || 'Unknown'}
+                        { fx.scheduledDate ? format(fx.scheduledDate, 'EEE, MMM d • HH:mm') : 'Unknown'}
                       </div>
                       <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-emerald-600 group-hover:translate-x-0.5 transition-all" />
                     </div>
@@ -448,11 +448,11 @@ export default function FootballCompetitionsPage() {
                                     <div className="text-muted-foreground">Teams</div>
                                   </div>
                                   <div>
-                                    <div className="font-semibold text-foreground">{format(comp.startDate, 'MMMM yyy')}</div>
+                                    <div className="font-semibold text-foreground">{comp.startDate ? format(comp.startDate, 'MMMM yyy') : 'Unknown'}</div>
                                     <div className="text-muted-foreground">Start Date</div>
                                   </div>
                                   <div>
-                                    <div className="font-semibold text-foreground">{format(comp.endDate, 'MMMM yyy')}</div>
+                                    <div className="font-semibold text-foreground">{comp.endDate ? format(comp.endDate, 'MMMM yyy') : 'Unknown'}</div>
                                     <div className="text-muted-foreground">End Date</div>
                                   </div>
                                   <div>
