@@ -159,8 +159,8 @@ export interface IV2FootballCompetition {
         player: {
             name: string,
             winner: {
-                player: string,
-                team: string,
+                player: ShortPopulatedPlayer,
+                team: ShortPopulatedTeam,
             } | null
         }[],
         team: {

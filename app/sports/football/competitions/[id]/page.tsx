@@ -669,10 +669,10 @@ params
                         <div key={i} className="text-sm">
                           <div className="flex items-center justify-between">
                             <div className="font-medium">{aw.name}</div>
-                            <div className="text-muted-foreground">{aw.winner ? aw.winner.player : 'TBD'}</div>
+                            <div className="text-muted-foreground">{aw.winner ? aw.winner.player.name : 'TBD'}</div>
                           </div>
                           {aw.winner && (
-                            <div className="text-xs text-muted-foreground">Team: {aw.winner.team}</div>
+                            <div className="text-xs text-muted-foreground">Team: {aw.winner.team.name}</div>
                           )}
                         </div>
                       ))
