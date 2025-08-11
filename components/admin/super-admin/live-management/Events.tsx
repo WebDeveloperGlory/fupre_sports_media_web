@@ -5,17 +5,18 @@ import { FixtureTimelineCardType, FixtureTimelineGoalType, FixtureTimelineType, 
 import { Edit, List, Plus, Trash2 } from 'lucide-react';
 import { createTimeLineEvent } from '@/lib/requests/v2/admin/super-admin/live-management/requests';
 import { toast } from 'react-toastify';
+import { PopulatedFixtureTimeline } from '@/utils/V2Utils/v2requestData.types';
 
 const Events = (
   { liveId, events, currentTime, currentMinute, lineups }:
   {
     liveId: string,
-    events: FixtureTimeline[], 
+    events: PopulatedFixtureTimeline[], 
     currentTime: Date, currentMinute: number, 
     lineups: { home: FixtureLineup, away: FixtureLineup } 
 }
 ) => {
-  const [currentEvents, setCurrentEvents] = useState<FixtureTimeline[]>( events );
+  const [currentEvents, setCurrentEvents] = useState<PopulatedFixtureTimeline[]>( events );
   const [eventData, setEventData] = useState<LiveFixTimelineCreate>({
     event: {
       type: FixtureTimelineType.GOAL,
