@@ -1,6 +1,6 @@
 import { Statistics } from "@/utils/requestDataTypes";
 import { EventTypes } from "@/utils/stateTypes";
-import { CompetitionType, FixtureTimelineType, TeamType } from "@/utils/V2Utils/v2requestData.enums";
+import { CompetitionType, FixtureTimelineCardType, FixtureTimelineGoalType, FixtureTimelineType, TeamType } from "@/utils/V2Utils/v2requestData.enums";
 import { IV2FootballLiveFixture } from "@/utils/V2Utils/v2requestData.types";
 import { FixturePlayerOfTheMatch } from "@/utils/V2Utils/v2requestSubData.types";
 
@@ -766,18 +766,22 @@ export const liveMatchSample: IV2FootballLiveFixture = {
             team: TeamType.HOME,
             player: {
                 name: "Kai Havertz",
+                department: '',
+                admissionYear: '2024',
                 position: "ST",
                 _id: "507f1f77bcf86cd799439030"
             },
             relatedPlayer: {
                 name: "Declan Rice",
+                department: '',
+                admissionYear: '2024',
                 position: "CM",
                 _id: "507f1f77bcf86cd799439027"
             },
             minute: 23,
             injuryTime: false,
             description: "Great finish from close range after a perfect cross",
-            goalType: "regular",
+            goalType: FixtureTimelineGoalType.PENALTY,
             cardType: null
         },
         {
@@ -786,6 +790,8 @@ export const liveMatchSample: IV2FootballLiveFixture = {
             team: TeamType.AWAY,
             player: {
                 name: "Bernardo Silva",
+                department: '',
+                admissionYear: '2024',
                 position: "CM",
                 _id: "507f1f77bcf86cd799439046"
             },
@@ -794,7 +800,7 @@ export const liveMatchSample: IV2FootballLiveFixture = {
             injuryTime: false,
             description: "Cautioned for a late tackle",
             goalType: null,
-            cardType: "first-yellow"
+            cardType: FixtureTimelineCardType.FIRSTYELLOW
         },
         {
             _id: 'abshadkjnajnas3',
@@ -802,18 +808,22 @@ export const liveMatchSample: IV2FootballLiveFixture = {
             team: TeamType.AWAY,
             player: {
                 name: "Erling Haaland",
+                department: '',
+                admissionYear: '2024',
                 position: "ST",
                 _id: "507f1f77bcf86cd799439050"
             },
             relatedPlayer: {
                 name: "Kevin De Bruyne",
+                department: '',
+                admissionYear: '2024',
                 position: "CAM",
                 _id: "507f1f77bcf86cd799439047"
             },
             minute: 52,
             injuryTime: false,
             description: "Penalty conversion after VAR review",
-            goalType: "penalty",
+            goalType: FixtureTimelineGoalType.PENALTY,
             cardType: null
         },
         {
@@ -822,6 +832,8 @@ export const liveMatchSample: IV2FootballLiveFixture = {
             team: TeamType.HOME,
             player: {
                 name: "Bukayo Saka",
+                department: '',
+                admissionYear: '2024',
                 position: "RW",
                 _id: "507f1f77bcf86cd799439028"
             },
@@ -829,7 +841,7 @@ export const liveMatchSample: IV2FootballLiveFixture = {
             minute: 65,
             injuryTime: false,
             description: "Brilliant solo effort from the wing",
-            goalType: "regular",
+            goalType: FixtureTimelineGoalType.PENALTY,
             cardType: null
         },
         {
@@ -838,6 +850,8 @@ export const liveMatchSample: IV2FootballLiveFixture = {
             team: TeamType.AWAY,
             player: {
                 name: "John Stones",
+                department: '',
+                admissionYear: '2024',
                 position: "CB",
                 _id: "507f1f77bcf86cd799439042"
             },
@@ -846,7 +860,7 @@ export const liveMatchSample: IV2FootballLiveFixture = {
             injuryTime: false,
             description: "Second yellow card for dissent",
             goalType: null,
-            cardType: "second-yellow"
+            cardType: FixtureTimelineCardType.FIRSTYELLOW
         }
     ],
     commentary: [
