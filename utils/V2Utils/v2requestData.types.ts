@@ -64,7 +64,7 @@ export interface IV2FootballLiveFixture {
         away: FixtureLineup
     };
     substitutions: FixtureSubstitutions[];
-    timeline: FixtureTimeline[];
+    timeline: PopulatedFixtureTimeline[];
     commentary: FixtureCommentary[];
     streamLinks: FixtureStreamLinks[];
     cheerMeter: FixtureCheerMeter;

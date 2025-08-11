@@ -156,7 +156,7 @@ export const KnockoutBracket = ({ knockoutRounds }: { knockoutRounds: IPopKnocko
                         {/* Actions */}
                         <div className="flex items-center justify-end pt-1">
                           <Link
-                            href={`/fixtures/${fixture._id}/stats`}
+                            href={`/sports/football/fixtures/${fixture._id}/stats`}
                             className="text-xs text-emerald-600 hover:text-emerald-500"
                           >
                             View details

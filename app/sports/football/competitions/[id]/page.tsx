@@ -563,7 +563,7 @@ params
                                   {isExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
                                 </button>
                               )}
-                              <Link href={`/fixtures/${fx._id}/stats`} className="text-sm text-emerald-600 hover:text-emerald-500">
+                              <Link href={`/sports/football/fixtures/${fx._id}/stats`} className="text-sm text-emerald-600 hover:text-emerald-500">
                                 {isLive ? 'Open live' : 'View details'}
                               </Link>
                             </div>
