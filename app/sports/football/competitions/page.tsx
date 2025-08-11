@@ -135,7 +135,7 @@ export default function FootballCompetitionsPage() {
                   >
                     <div className="flex items-center justify-between">
                       <div className="text-sm text-muted-foreground">
-                        {format(fx.scheduledDate, 'EEE, MMM d • HH:mm')}
+                        {format(fx.scheduledDate, 'EEE, MMM d • HH:mm') || 'Unknown'}
                       </div>
                       <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-emerald-600 group-hover:translate-x-0.5 transition-all" />
                     </div>
