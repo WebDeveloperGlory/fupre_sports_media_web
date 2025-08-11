@@ -1,6 +1,7 @@
 'use client'
 
 import { Loader } from '@/components/ui/loader';
+import { BackButton } from '@/components/ui/back-button';
 import { IGroupTable, IKnockoutRounds, ILeagueStandings, IPopKnockoutRounds, IV2FootballCompetition, IV2FootballFixture } from '@/utils/V2Utils/v2requestData.types';
 import { Award, Calendar, Crown, Info, Shield, Target, Trophy, Users } from 'lucide-react';
 import React, { use, useEffect, useState } from 'react'
@@ -9,6 +10,8 @@ import LeagueTable from '@/components/competition/LeagueTable';
 import { KnockoutBracket } from '@/components/competition/KnockoutBracket';
 import { CompetitionStatus, CompetitionTeamForm, CompetitionTypes, FixtureStatus } from '@/utils/V2Utils/v2requestData.enums';
 import { getCompetitionById, getCompetitionFixtures, getCompetitionGroups, getCompetitionKnockout, getCompetitionLeagueTable, getCompetitionStats, getCompetitionTeams } from '@/lib/requests/v2/competition/requests';
+import Link from 'next/link';
+import { format } from 'date-fns';
 
 enum LeagueTabs {
     TABLES = 'tables',
@@ -114,6 +117,10 @@ params
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Back Button */}
+      <div className="fixed top-8 md:top-24 left-4 md:left-8 z-40">
+        <BackButton />
+      </div>
       {/* Header Section */}
       <div className="border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
@@ -282,6 +289,379 @@ params
                 </div>
               ))}
             </div>
+          </div>
+        )}
+
+        {/* Statistics */}
+        {(activeTab === LeagueTabs.STATISTICS || activeTab === KnockoutTabs.STATISTICS || activeTab === HybridTabs.STATISTICS) && (
+          <div className="bg-background">
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold text-foreground mb-2">Competition Statistics</h2>
+              <p className="text-muted-foreground">Key aggregates and leaderboards for this competition</p>
+            </div>
+
+            {!stats ? (
+              <div className="text-sm text-muted-foreground">No statistics available yet.</div>
+            ) : (
+              <div className="space-y-8">
+                {/* Summary Cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="p-4 rounded-lg border border-border bg-card/40 backdrop-blur-sm">
+                    <div className="text-xs text-muted-foreground mb-1 flex items-center gap-2">
+                      <Target className="w-4 h-4 text-emerald-500" />
+                      Average Goals/Match
+                    </div>
+                    <div className="text-2xl font-bold text-foreground">{Number(stats.averageGoalsPerMatch ?? 0)}</div>
+                  </div>
+                  <div className="p-4 rounded-lg border border-border bg-card/40 backdrop-blur-sm">
+                    <div className="text-xs text-muted-foreground mb-1 flex items-center gap-2">
+                      <Users className="w-4 h-4 text-emerald-500" />
+                      Average Attendance
+                    </div>
+                    <div className="text-2xl font-bold text-foreground">{Number(stats.averageAttendance ?? 0)}</div>
+                  </div>
+                  <div className="p-4 rounded-lg border border-border bg-card/40 backdrop-blur-sm">
+                    <div className="text-xs text-muted-foreground mb-1 flex items-center gap-2">
+                      <Shield className="w-4 h-4 text-emerald-500" />
+                      Clean Sheets
+                    </div>
+                    <div className="text-2xl font-bold text-foreground">{Number(stats.cleanSheets ?? 0)}</div>
+                  </div>
+                </div>
+
+                {/* Leaderboards */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  {/* Top Scorers */}
+                  <div className="rounded-lg border border-border bg-card/40 backdrop-blur-sm">
+                    <div className="p-4 border-b border-border flex items-center gap-2">
+                      <Trophy className="w-4 h-4 text-emerald-500" />
+                      <h3 className="text-sm font-semibold">Top Scorers</h3>
+                    </div>
+                    <div className="p-4 space-y-3">
+                      {stats.topScorers && stats.topScorers.length > 0 ? (
+                        stats.topScorers.map((s, i) => (
+                          <div key={i} className="flex items-center justify-between text-sm">
+                            <div className="min-w-0">
+                              <div className="font-medium truncate">{(s.player as any)?.name ?? 'Unknown'}</div>
+                              <div className="text-muted-foreground truncate">{(s.team as any)?.name ?? 'Unknown Team'}</div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="font-bold text-emerald-500">{s.goals}</span>
+                              <span className="text-muted-foreground">goals</span>
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="text-sm text-muted-foreground">No scorers yet.</div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Top Assists */}
+                  <div className="rounded-lg border border-border bg-card/40 backdrop-blur-sm">
+                    <div className="p-4 border-b border-border flex items-center gap-2">
+                      <Award className="w-4 h-4 text-emerald-500" />
+                      <h3 className="text-sm font-semibold">Top Assists</h3>
+                    </div>
+                    <div className="p-4 space-y-3">
+                      {stats.topAssists && stats.topAssists.length > 0 ? (
+                        stats.topAssists.map((a, i) => {
+                          const playerName = (a as any)?.player?.name ?? (a as any)?.team?.name ?? 'Unknown';
+                          const teamName = (a as any)?.team?.name ?? (a as any)?.player?.team?.name ?? 'Unknown Team';
+                          return (
+                            <div key={i} className="flex items-center justify-between text-sm">
+                              <div className="min-w-0">
+                                <div className="font-medium truncate">{playerName}</div>
+                                <div className="text-muted-foreground truncate">{teamName}</div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className="font-bold text-emerald-500">{(a as any)?.assists ?? 0}</span>
+                                <span className="text-muted-foreground">assists</span>
+                              </div>
+                            </div>
+                          );
+                        })
+                      ) : (
+                        <div className="text-sm text-muted-foreground">No assists yet.</div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Best Defenses */}
+                  <div className="rounded-lg border border-border bg-card/40 backdrop-blur-sm">
+                    <div className="p-4 border-b border-border flex items-center gap-2">
+                      <Shield className="w-4 h-4 text-emerald-500" />
+                      <h3 className="text-sm font-semibold">Best Defenses</h3>
+                    </div>
+                    <div className="p-4 space-y-3">
+                      {stats.bestDefenses && stats.bestDefenses.length > 0 ? (
+                        stats.bestDefenses.map((b, i) => {
+                          const teamName = (b as any)?.team?.name ?? 'Unknown Team';
+                          const cleanSheets = (b as any)?.cleanSheets ?? 0;
+                          const conceded = (b as any)?.goalsConceded ?? 0;
+                          return (
+                            <div key={i} className="flex items-center justify-between text-sm">
+                              <div className="min-w-0">
+                                <div className="font-medium truncate">{teamName}</div>
+                                <div className="text-muted-foreground truncate">Conceded: {conceded}</div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className="font-bold text-emerald-500">{cleanSheets}</span>
+                                <span className="text-muted-foreground">CS</span>
+                              </div>
+                            </div>
+                          );
+                        })
+                      ) : (
+                        <div className="text-sm text-muted-foreground">No defensive stats yet.</div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Fixtures */}
+        {((activeTab === LeagueTabs.FIXTURES) || (activeTab === HybridTabs.FIXTURES)) && (
+          <div className="bg-background">
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold text-foreground mb-2">Fixtures</h2>
+              <p className="text-muted-foreground">All scheduled and completed matches</p>
+            </div>
+
+            {fixtures.length === 0 ? (
+              <div className="text-sm text-muted-foreground">No fixtures available.</div>
+            ) : (
+              <div className="space-y-3">
+                {fixtures.map((fx) => (
+                  <div key={fx._id} className="p-4 rounded-lg border border-border bg-card/40 backdrop-blur-sm">
+                    <div className="flex items-center justify-between mb-2 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-1">
+                          <Calendar className="w-4 h-4" />
+                          <span>{fx.scheduledDate ? format(fx.scheduledDate, 'EEE, MMM d') : 'Unknown date'}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <span>{fx.scheduledDate ? format(fx.scheduledDate, 'HH:mm') : '--:--'}</span>
+                        </div>
+                      </div>
+                      <span className="uppercase">{fx.status}</span>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div className="font-medium">
+                        <span className="mr-2">{(fx as any)?.homeTeam?.name ?? 'Home'}</span>
+                        <span className="text-muted-foreground">vs</span>
+                        <span className="ml-2">{(fx as any)?.awayTeam?.name ?? 'Away'}</span>
+                      </div>
+                      <Link href={`/fixtures/${fx._id}/stats`} className="text-sm text-emerald-600 hover:text-emerald-500">
+                        View details
+                      </Link>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Teams */}
+        {(activeTab === LeagueTabs.TEAMS || activeTab === KnockoutTabs.TEAMS || activeTab === HybridTabs.TEAMS) && (
+          <div className="bg-background">
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold text-foreground mb-2">Teams</h2>
+              <p className="text-muted-foreground">All participating teams</p>
+            </div>
+
+            {teams.length === 0 ? (
+              <div className="text-sm text-muted-foreground">No teams registered.</div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {teams.map((entry, idx) => (
+                  <Link key={idx} href={`/teams/${entry.team._id}`} className="p-4 rounded-lg border border-border bg-card/40 backdrop-blur-sm hover:bg-accent/50 transition-colors">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-sm font-semibold">
+                        {(entry.team.name || '?').slice(0, 2).toUpperCase()}
+                      </div>
+                      <div className="min-w-0">
+                        <div className="font-medium truncate">{entry.team.name}</div>
+                        <div className="text-xs text-muted-foreground truncate">{entry.team.shorthand || '—'}</div>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Awards */}
+        {(activeTab === LeagueTabs.AWARDS || activeTab === KnockoutTabs.AWARDS || activeTab === HybridTabs.AWARDS) && (
+          <div className="bg-background">
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold text-foreground mb-2">Awards</h2>
+              <p className="text-muted-foreground">Competition recognitions and winners</p>
+            </div>
+
+            {(!competition?.awards || (competition.awards.player.length === 0 && competition.awards.team.length === 0)) ? (
+              <div className="text-sm text-muted-foreground">No awards available.</div>
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Team Awards */}
+                <div className="rounded-lg border border-border bg-card/40 backdrop-blur-sm">
+                  <div className="p-4 border-b border-border flex items-center gap-2">
+                    <Trophy className="w-4 h-4 text-emerald-500" />
+                    <h3 className="text-sm font-semibold">Team Awards</h3>
+                  </div>
+                  <div className="p-4 space-y-3">
+                    {competition.awards.team.length > 0 ? (
+                      competition.awards.team.map((aw, i) => (
+                        <div key={i} className="flex items-center justify-between text-sm">
+                          <div className="font-medium">{aw.name}</div>
+                          <div className="text-muted-foreground">{aw.winner ? aw.winner.name : 'TBD'}</div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-sm text-muted-foreground">No team awards.</div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Player Awards */}
+                <div className="rounded-lg border border-border bg-card/40 backdrop-blur-sm">
+                  <div className="p-4 border-b border-border flex items-center gap-2">
+                    <Award className="w-4 h-4 text-emerald-500" />
+                    <h3 className="text-sm font-semibold">Player Awards</h3>
+                  </div>
+                  <div className="p-4 space-y-3">
+                    {competition.awards.player.length > 0 ? (
+                      competition.awards.player.map((aw, i) => (
+                        <div key={i} className="text-sm">
+                          <div className="flex items-center justify-between">
+                            <div className="font-medium">{aw.name}</div>
+                            <div className="text-muted-foreground">{aw.winner ? aw.winner.player : 'TBD'}</div>
+                          </div>
+                          {aw.winner && (
+                            <div className="text-xs text-muted-foreground">Team: {aw.winner.team}</div>
+                          )}
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-sm text-muted-foreground">No player awards.</div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Info */}
+        {(activeTab === LeagueTabs.INFO || activeTab === KnockoutTabs.INFO || activeTab === HybridTabs.INFO) && (
+          <div className="bg-background">
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold text-foreground mb-2">Competition Information</h2>
+              <p className="text-muted-foreground">Format, rules and other details</p>
+            </div>
+
+            {competition && (
+              <div className="space-y-6">
+                {/* Basics */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="p-4 rounded-lg border border-border bg-card/40 backdrop-blur-sm">
+                    <div className="text-xs text-muted-foreground mb-1">Type</div>
+                    <div className="font-semibold capitalize">{competition.type}</div>
+                  </div>
+                  <div className="p-4 rounded-lg border border-border bg-card/40 backdrop-blur-sm">
+                    <div className="text-xs text-muted-foreground mb-1">Season</div>
+                    <div className="font-semibold">{competition.season}</div>
+                  </div>
+                  <div className="p-4 rounded-lg border border-border bg-card/40 backdrop-blur-sm">
+                    <div className="text-xs text-muted-foreground mb-1">Stage</div>
+                    <div className="font-semibold">{competition.currentStage || '—'}</div>
+                  </div>
+                </div>
+
+                {/* Dates */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="p-4 rounded-lg border border-border bg-card/40 backdrop-blur-sm">
+                    <div className="text-xs text-muted-foreground mb-1">Start Date</div>
+                    <div className="font-semibold">{competition.startDate ? format(competition.startDate, 'PPP') : 'Unknown'}</div>
+                  </div>
+                  <div className="p-4 rounded-lg border border-border bg-card/40 backdrop-blur-sm">
+                    <div className="text-xs text-muted-foreground mb-1">End Date</div>
+                    <div className="font-semibold">{competition.endDate ? format(competition.endDate, 'PPP') : 'Unknown'}</div>
+                  </div>
+                </div>
+
+                {/* Format Details */}
+                <div className="rounded-lg border border-border bg-card/40 backdrop-blur-sm p-4 space-y-3">
+                  <div className="font-semibold">Format</div>
+                  {competition.format.leagueStage && (
+                    <div className="text-sm text-muted-foreground">
+                      <div>League: {competition.format.leagueStage.matchesPerTeam} matches per team</div>
+                      <div>Points: W {competition.format.leagueStage.pointsSystem.win} / D {competition.format.leagueStage.pointsSystem.draw} / L {competition.format.leagueStage.pointsSystem.loss}</div>
+                    </div>
+                  )}
+                  {competition.format.groupStage && (
+                    <div className="text-sm text-muted-foreground">
+                      <div>Groups: {competition.format.groupStage.numberOfGroups} groups of {competition.format.groupStage.teamsPerGroup}</div>
+                      <div>Advancing per group: {competition.format.groupStage.advancingPerGroup}</div>
+                    </div>
+                  )}
+                  {competition.format.knockoutStage && (
+                    <div className="text-sm text-muted-foreground">
+                      <div>Knockout: {competition.format.knockoutStage.hasTwoLegs ? 'Two-legged ties' : 'Single-leg ties'}</div>
+                      <div>Away goals rule: {competition.format.knockoutStage.awayGoalsRule ? 'Yes' : 'No'}</div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Rules */}
+                <div className="rounded-lg border border-border bg-card/40 backdrop-blur-sm p-4 space-y-3">
+                  <div className="font-semibold">Rules</div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-muted-foreground">
+                    <div>Substitutions: {competition.rules.substitutions.allowed ? `Up to ${competition.rules.substitutions.maximum}` : 'Not allowed'}</div>
+                    <div>Extra time: {competition.rules.extraTime ? 'Yes' : 'No'}</div>
+                    <div>Penalties: {competition.rules.penalties ? 'Yes' : 'No'}</div>
+                    <div>Match duration: {competition.rules.matchDuration.normal}' (+{competition.rules.matchDuration.extraTime}')</div>
+                    <div>Squad size: {competition.rules.squadSize.min} - {competition.rules.squadSize.max}</div>
+                  </div>
+                </div>
+
+                {/* Sponsors & Prize */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="rounded-lg border border-border bg-card/40 backdrop-blur-sm p-4">
+                    <div className="font-semibold mb-2">Sponsors</div>
+                    {competition.sponsors.length > 0 ? (
+                      <div className="space-y-1 text-sm text-muted-foreground">
+                        {competition.sponsors.map((s, i) => (
+                          <div key={i} className="flex items-center justify-between">
+                            <span>{s.name}</span>
+                            <span className="uppercase text-xs">{s.tier}</span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-sm text-muted-foreground">No sponsors listed.</div>
+                    )}
+                  </div>
+                  <div className="rounded-lg border border-border bg-card/40 backdrop-blur-sm p-4">
+                    <div className="font-semibold mb-2">Prize Money</div>
+                    {competition.prizeMoney ? (
+                      <div className="text-sm text-muted-foreground space-y-1">
+                        <div>Champion: ₦{competition.prizeMoney.champion}</div>
+                        <div>Runner-up: ₦{competition.prizeMoney.runnerUp}</div>
+                      </div>
+                    ) : (
+                      <div className="text-sm text-muted-foreground">Not specified.</div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
