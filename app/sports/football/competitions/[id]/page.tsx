@@ -269,10 +269,10 @@ params
               <p className="text-muted-foreground">Group standings and qualification status</p>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 gap-8">
               {groupStages.length > 0 && groupStages.map(group => (
-                <div key={group._id} className="bg-background border-l-4 border-l-emerald-500">
-                  <div className="p-6">
+                <div key={group._id} className="bg-background md:border-l-4 md:border-l-emerald-500">
+                  <div className="md:p-6">
                     <h3 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
                       <Shield className="w-5 h-5 text-emerald-500" />
                       {group.name}
