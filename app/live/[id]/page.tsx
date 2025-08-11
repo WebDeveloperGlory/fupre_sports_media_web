@@ -341,7 +341,7 @@ export default function LiveMatchPage({
                           <div className="flex items-center justify-center sm:justify-start">
                             <Clock12 className="h-3 w-3 sm:h-4 sm:w-4 mr-1 text-muted-foreground flex-shrink-0" />
                             <span className="truncate">
-                              {format(kickoffTime, 'yyyy-MM-dd HH:mm') || 'Unknown'}
+                              {kickoffTime ? format(kickoffTime, 'yyyy-MM-dd HH:mm') : 'Unknown'}
                             </span>
                           </div>
                         </div>
