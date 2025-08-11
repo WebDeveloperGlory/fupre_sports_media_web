@@ -1,6 +1,7 @@
 'use client'
 
 import { Loader } from "@/components/ui/loader";
+import { BackButton } from "@/components/ui/back-button";
 import { getFootballCompetitionPageData } from "@/lib/requests/v2/homepage/requests";
 import { IV2FootballCompetition, IV2Blog, PopIV2FootballFixture } from "@/utils/V2Utils/v2requestData.types";
 import { ArrowRight, Bolt, CalendarClock, Crown, Trophy } from "lucide-react";
@@ -80,6 +81,11 @@ export default function FootballCompetitionsPage() {
       {/* Header Section */}
       <div className="border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+          {/* Back Button */}
+          <div className="mb-6">
+            <BackButton href="/sports/football" />
+          </div>
+          
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
             <div className="space-y-4">
               <div className="flex items-center gap-3">

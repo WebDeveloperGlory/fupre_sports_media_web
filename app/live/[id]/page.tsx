@@ -448,8 +448,12 @@ export default function LiveMatchPage({
                     }
 
                     {/* Timeline Section */}
-                    { activeTab === Tabs.TIMELINE && 
+                    { activeTab === Tabs.TIMELINE &&
                       <Timeline
+                        events={liveFixture?.timeline || []}
+                        homeTeamName={liveFixture?.homeTeam?.name}
+                        awayTeamName={liveFixture?.awayTeam?.name}
+                        isLive={true}
                       />
                     }
 

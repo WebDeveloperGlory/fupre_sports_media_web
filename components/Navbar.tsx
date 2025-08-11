@@ -32,7 +32,11 @@ const Navbar = () => {
         pathname === '/sports/basketball' ||
         pathname.startsWith('/competitions') ||
         pathname.startsWith('/fixtures') ||
-        pathname.startsWith('/live');
+        pathname.startsWith('/live') ||
+        pathname.startsWith('/sports/football/competitions') ||
+        pathname.startsWith('/sports/football/fixtures') ||
+        pathname.startsWith('/sports/football/teams') ||
+        pathname.startsWith('/sports/football/live');
     }
     if (path === '/sports/football/tots') {
       return pathname.startsWith('/sports/football/tots');

@@ -3,7 +3,7 @@
 import { Loader } from '@/components/ui/loader';
 import { BackButton } from '@/components/ui/back-button';
 import { IGroupTable, IKnockoutRounds, ILeagueStandings, IPopKnockoutRounds, IV2FootballCompetition, PopIV2FootballFixture } from '@/utils/V2Utils/v2requestData.types';
-import { Award, Calendar, Crown, Info, Shield, Target, Trophy, Users } from 'lucide-react';
+import { Award, Calendar, Crown, Info, Shield, Target, Trophy, Users, ChevronDown, ChevronUp } from 'lucide-react';
 import React, { use, useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion';
 import LeagueTable from '@/components/competition/LeagueTable';
@@ -12,6 +12,7 @@ import { CompetitionStatus, CompetitionTeamForm, CompetitionTypes, FixtureStatus
 import { getCompetitionById, getCompetitionFixtures, getCompetitionGroups, getCompetitionKnockout, getCompetitionLeagueTable, getCompetitionStats, getCompetitionTeams } from '@/lib/requests/v2/competition/requests';
 import Link from 'next/link';
 import { format } from 'date-fns';
+import Timeline from '@/components/newLive/Timeline';
 
 enum LeagueTabs {
     TABLES = 'tables',
@@ -60,6 +61,7 @@ params
     const [teams, setTeams] = useState<IV2FootballCompetition['teams']>([]);
     const [stats, setStats] = useState<IV2FootballCompetition['stats'] | null>(null);
     const [activeTab, setActiveTab] = useState<LeagueTabs | KnockoutTabs | HybridTabs >(LeagueTabs.INFO);
+    const [expandedLiveMatches, setExpandedLiveMatches] = useState<Set<string>>(new Set());
     // End of States //
 
     // On Load //
@@ -489,55 +491,102 @@ params
                   .map((fx) => {
                     const isLive = fx.status === FixtureStatus.LIVE;
                     const isCompleted = fx.status === FixtureStatus.COMPLETED;
+                    const isExpanded = expandedLiveMatches.has(fx._id);
+                    const hasTimeline = fx.timeline && fx.timeline.length > 0;
+
+                    const toggleExpanded = () => {
+                      const newExpanded = new Set(expandedLiveMatches);
+                      if (isExpanded) {
+                        newExpanded.delete(fx._id);
+                      } else {
+                        newExpanded.add(fx._id);
+                      }
+                      setExpandedLiveMatches(newExpanded);
+                    };
+
                     return (
                       <div
                         key={fx._id}
-                        className={`p-4 rounded-xl border backdrop-blur-sm transition-colors ${
+                        className={`rounded-xl border backdrop-blur-sm transition-colors ${
                           isLive
                             ? 'border-red-300/50 bg-red-50/40 dark:bg-red-900/10'
                             : 'border-border bg-card/40'
                         }`}
                       >
-                        <div className="flex items-center justify-between mb-2 text-xs sm:text-sm text-muted-foreground">
-                          <div className="flex items-center gap-3">
-                            <div className="flex items-center gap-1">
-                              <Calendar className="w-4 h-4" />
-                              <span>{fx.scheduledDate ? format(fx.scheduledDate, 'EEE, MMM d') : 'Unknown date'}</span>
+                        <div className="p-4">
+                          <div className="flex items-center justify-between mb-2 text-xs sm:text-sm text-muted-foreground">
+                            <div className="flex items-center gap-3">
+                              <div className="flex items-center gap-1">
+                                <Calendar className="w-4 h-4" />
+                                <span>{fx.scheduledDate ? format(fx.scheduledDate, 'EEE, MMM d') : 'Unknown date'}</span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <span>{fx.scheduledDate ? format(fx.scheduledDate, 'HH:mm') : '--:--'}</span>
+                              </div>
                             </div>
-                            <div className="flex items-center gap-1">
-                              <span>{fx.scheduledDate ? format(fx.scheduledDate, 'HH:mm') : '--:--'}</span>
+                            <div className="flex items-center gap-2">
+                              {isLive && (
+                                <span className="flex items-center gap-1 text-red-600">
+                                  <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse"></span>
+                                  LIVE
+                                </span>
+                              )}
+                              {isCompleted && (
+                                <span className="text-emerald-600">Completed</span>
+                              )}
                             </div>
                           </div>
-                          <div className="flex items-center gap-2">
-                            {isLive && (
-                              <span className="flex items-center gap-1 text-red-600">
-                                <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse"></span>
-                                LIVE
-                              </span>
-                            )}
-                            {isCompleted && (
-                              <span className="text-emerald-600">Completed</span>
-                            )}
+
+                          <div className="flex items-center justify-between gap-3">
+                            <div className="font-medium truncate">
+                              <span className="mr-2 truncate">{(fx as any)?.homeTeam?.name ?? 'Home'}</span>
+                              <span className="text-muted-foreground">vs</span>
+                              <span className="ml-2 truncate">{(fx as any)?.awayTeam?.name ?? 'Away'}</span>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              {isCompleted && fx.result && (
+                                <span className="text-sm font-semibold">
+                                  {fx.result.homeScore} - {fx.result.awayScore}
+                                </span>
+                              )}
+                              {isLive && fx.result && (
+                                <span className="text-sm font-semibold text-red-600">
+                                  {fx.result.homeScore} - {fx.result.awayScore}
+                                </span>
+                              )}
+                              {isLive && hasTimeline && (
+                                <button
+                                  onClick={toggleExpanded}
+                                  className="text-sm text-emerald-600 hover:text-emerald-500 flex items-center gap-1"
+                                >
+                                  Timeline
+                                  {isExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                                </button>
+                              )}
+                              <Link href={`/fixtures/${fx._id}/stats`} className="text-sm text-emerald-600 hover:text-emerald-500">
+                                {isLive ? 'Open live' : 'View details'}
+                              </Link>
+                            </div>
                           </div>
                         </div>
 
-                        <div className="flex items-center justify-between gap-3">
-                          <div className="font-medium truncate">
-                            <span className="mr-2 truncate">{(fx as any)?.homeTeam?.name ?? 'Home'}</span>
-                            <span className="text-muted-foreground">vs</span>
-                            <span className="ml-2 truncate">{(fx as any)?.awayTeam?.name ?? 'Away'}</span>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            {isCompleted && fx.result && (
-                              <span className="text-sm font-semibold">
-                                {fx.result.homeScore} - {fx.result.awayScore}
-                              </span>
-                            )}
-                            <Link href={`/fixtures/${fx._id}/stats`} className="text-sm text-emerald-600 hover:text-emerald-500">
-                              {isLive ? 'Open live' : 'View details'}
-                            </Link>
-                          </div>
-                        </div>
+                        {/* Timeline Section for Live Matches */}
+                        {isLive && hasTimeline && isExpanded && (
+                          <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            transition={{ duration: 0.3 }}
+                            className="border-t border-border/50 p-4"
+                          >
+                            <Timeline
+                              events={fx.timeline}
+                              homeTeamName={fx.homeTeam.name}
+                              awayTeamName={fx.awayTeam.name}
+                              isLive={true}
+                            />
+                          </motion.div>
+                        )}
                       </div>
                     );
                   })}
