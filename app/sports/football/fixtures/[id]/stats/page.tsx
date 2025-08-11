@@ -62,6 +62,10 @@ export default function MatchStatsPage({
   const formattedDate = format(new Date(fixture.scheduledDate), 'MMM dd, yyyy');
   const formattedTime = format(new Date(fixture.scheduledDate), 'HH:mm');
 
+  const totalElapsedGameTime = fixture ? fixture.statistics.home.possessionTime + fixture.statistics.away.possessionTime : 0;
+  const homePossession = totalElapsedGameTime > 0 ? ( fixture!.statistics.home.possessionTime / totalElapsedGameTime ) * 100 : 50;
+  const awayPossession = 100 - homePossession; // Ensures total is always 100%
+
   return (
     <main className="min-h-screen bg-gradient-to-b from-background to-background/50">
       {/* Back Button */}
@@ -274,8 +278,8 @@ export default function MatchStatsPage({
                               ⚽
                             </div>
                             <div>
-                              <div className="font-medium">{scorer.player}</div>
-                              <div className="text-sm text-muted-foreground">{scorer.team}</div>
+                              <div className="font-medium">{scorer.player ? scorer.player.name : 'Unknown'}</div>
+                              <div className="text-sm text-muted-foreground">{scorer.team ? scorer.team.name : 'Unknown'}</div>
                             </div>
                           </div>
                           <div className="text-sm font-medium text-emerald-500">
@@ -306,9 +310,9 @@ export default function MatchStatsPage({
                         <span className="text-sm font-medium">{fixture.statistics.away.shotsOnTarget}</span>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">{fixture.statistics.home.possessionTime}%</span>
+                        <span className="text-sm font-medium">{homePossession.toFixed(2)}%</span>
                         <span className="text-sm text-muted-foreground">Possession</span>
-                        <span className="text-sm font-medium">{fixture.statistics.away.possessionTime}%</span>
+                        <span className="text-sm font-medium">{awayPossession.toFixed(2)}%</span>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-sm font-medium">{fixture.statistics.home.fouls}</span>
