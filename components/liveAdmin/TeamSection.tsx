@@ -100,7 +100,7 @@ const TeamSection = (
                   'available' 
                 )
               }
-              maxPlayers={ 7 }
+              maxPlayers={ 15 }
               team={ side }
               teamPlayers={ availablePlayers }
             />
@@ -157,7 +157,7 @@ const TeamSection = (
                             'substitutes'
                           )
                         }
-                        disabled={ team.substitutes.length >= 10 }
+                        disabled={ team.substitutes.length >= 16 }
                         className="flex items-center space-x-1 px-2 py-1 text-sm rounded-md hover:bg-emerald-500 hover:text-white disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-inherit transition-colors"
                         title="Add to Substitutes"
                       >
