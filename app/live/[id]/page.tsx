@@ -22,6 +22,7 @@ import { toast } from 'react-toastify';
 import { getProfile } from '@/lib/requests/v2/user/requests';
 import { useAuthStore } from '@/stores/v2/authStore';
 import { format } from 'date-fns';
+import { Loader } from '@/components/ui/loader';
 
 const templateStats = {
   home: {
@@ -110,7 +111,9 @@ export default function LiveMatchPage({
     }
     
     if( loading ) fetchData();
-  }, [ loading, resolvedParams.id ])
+  }, [ loading, resolvedParams.id ]);
+
+  if(loading) return <Loader />
 
   // On Click Functions
   const onModalClose = () => {
@@ -490,7 +493,7 @@ export default function LiveMatchPage({
               )
             }
             {
-              !liveFixture && (
+              !loading && !liveFixture && (
                 <div>Fixture Not Live</div>
               )
             }
