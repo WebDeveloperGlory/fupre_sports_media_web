@@ -96,7 +96,7 @@ params
             setTeams(teamData.data)
           }
           if(fixtureData && fixtureData.data) {
-            setFixtures(fixtureData.data)
+            setFixtures(fixtureData.data.fixtures)
           }
           if(statData && statData.data) {
             setStats(statData.data)
