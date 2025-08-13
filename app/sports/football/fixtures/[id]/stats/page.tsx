@@ -208,7 +208,7 @@ export default function MatchStatsPage({
         <div className="border-t pt-3">
           <div className="text-sm font-semibold mb-2">Goal Scorers</div>
           {fixture.goalScorers.slice(0, 4).map((scorer, index) => (
-            <div key={index} className="text-xs text-muted-foreground mb-1">
+            <div key={index} className={`text-xs text-muted-foreground mb-1 ${scorer.team?.name === fixture.awayTeam.name ? 'text-right' : 'text-left'}`}>
               ⚽ {scorer.player?.name} {scorer.time}'
             </div>
           ))}
