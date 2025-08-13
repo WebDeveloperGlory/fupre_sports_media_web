@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { BlurFade } from '@/components/ui/blur-fade';
 import { BackButton } from '@/components/ui/back-button';
 import { motion } from 'framer-motion';
-import { Trophy, Clock, Goal, CloudRain, User, MapPin, Clock12, ThumbsUp, Star } from 'lucide-react';
+import { Trophy, Clock, Goal, CloudRain, User, MapPin, Clock12, ThumbsUp, Star, Target } from 'lucide-react';
 import { LiveFixture } from '@/utils/requestDataTypes';
 import { liveMatchSample, teamLogos } from '@/constants';
 import { IV2FootballLiveFixture } from '@/utils/V2Utils/v2requestData.types';
@@ -217,6 +217,7 @@ export default function LiveMatchPage({
   const referee = generalInfo?.referee ?? liveFixture?.referee;
   const kickoffTime = generalInfo?.kickoffTime ?? liveFixture?.kickoffTime ?? '';
   const weather = generalInfo?.weather ?? liveFixture?.weather ?? {condition: '', temperature: -10, humidity: -10};
+  const goalScorersList = goalScorers ?? liveFixture?.goalScorers ?? []
   // End of Derived States //
 
   // Calculate total elapsed game time
@@ -353,9 +354,32 @@ export default function LiveMatchPage({
                   </div>
 
                   {/* Goalscorers */}
-                  <div className="col-span-2 md:col-span-4">
-                      {/* <Goalscorers fixtureData={ liveFixture } /> */}
-                  </div>
+                  {goalScorersList && goalScorersList.length > 0 && (
+                    <div className="bg-card/40 backdrop-blur-sm rounded-xl p-6 border border-border">
+                      <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                        <Target className="w-5 h-5 text-emerald-500" />
+                        Goal Scorers
+                      </h2>
+                      <div className="space-y-3">
+                        {goalScorersList.map((scorer, index) => (
+                          <div key={index} className="flex items-center justify-between p-3 bg-secondary rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                                ⚽
+                              </div>
+                              <div>
+                                <div className="font-medium">{scorer.player ? scorer.player.name : 'Unknown'}</div>
+                                <div className="text-sm text-muted-foreground">{scorer.team ? scorer.team.name : 'Unknown'}</div>
+                              </div>
+                            </div>
+                            <div className="text-sm font-medium text-emerald-500">
+                              {scorer.time}'
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                   {/* Quick Stats */}
                   <motion.div

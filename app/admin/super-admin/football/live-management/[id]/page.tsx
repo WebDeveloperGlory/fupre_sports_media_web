@@ -230,7 +230,9 @@ const SuperAdminLivePage = ({ params }:
         activeTab === TabsEnum.OVERVIEW && <Overview
           liveId={ fixture!._id }
           homeName={ fixture!.homeTeam.name || 'Unknown' }
+          homeId={ fixture!.homeTeam._id || 'Unknown' }
           awayName={ fixture!.awayTeam.name || 'Unknown' }
+          awayId={ fixture!.awayTeam._id || 'Unknown' }
           status={ fixture!.status as LiveStatus }
           currentMin={ fixture!.currentMinute }
           injuryTime={ fixture!.injuryTime }
@@ -238,6 +240,9 @@ const SuperAdminLivePage = ({ params }:
           awayScore={ fixture!.result.awayScore }
           homePenalty={ fixture!.result.homePenalty }
           awayPenalty={ fixture!.result.awayPenalty }
+          homePlayers={ [...fixture!.lineups.home.startingXI, ...fixture!.lineups.home.substitutes] }
+          awayPlayers={ [...fixture!.lineups.away.startingXI, ...fixture!.lineups.away.substitutes] }
+          goalScorers={ fixture!.goalScorers }
           saveScore={ saveScoreline }
           saveData={ saveGeneralData }
         />
