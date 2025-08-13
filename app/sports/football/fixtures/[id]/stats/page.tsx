@@ -4,9 +4,9 @@ import { BlurFade } from "@/components/ui/blur-fade";
 import { BackButton } from "@/components/ui/back-button";
 import { Loader } from "@/components/ui/loader";
 import Image from "next/image";
-import { Trophy, Calendar, Clock, Users, History, Swords, Target, AlertCircle, Star, Crown, Award, ThumbsUp } from "lucide-react";
+import { Trophy, Calendar, Clock, Users, History, Swords, Target, AlertCircle, Star, Crown, Award, ThumbsUp, Download, Share2 } from "lucide-react";
 import { notFound } from "next/navigation";
-import { use, useEffect, useState } from "react";
+import { use, useEffect, useState, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { PopIV2FootballFixture } from "@/utils/V2Utils/v2requestData.types";
@@ -14,6 +14,7 @@ import { FixtureStatus } from "@/utils/V2Utils/v2requestData.enums";
 import { getFixtureById } from "@/lib/requests/v2/fixtures/requests";
 import { teamLogos } from "@/constants";
 import { format } from "date-fns";
+import html2canvas from 'html2canvas';
 
 export default function MatchStatsPage({
   params
@@ -25,6 +26,13 @@ export default function MatchStatsPage({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'details' | 'lineups' | 'stats' | 'ratings'>('details');
+  const [showShareCards, setShowShareCards] = useState(false);
+
+  // Refs for share cards
+  const scoreCardRef = useRef<HTMLDivElement>(null);
+  const potmCardRef = useRef<HTMLDivElement>(null);
+  const statsCardRef = useRef<HTMLDivElement>(null);
+  const ratingsCardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchFixture = async () => {
@@ -51,6 +59,46 @@ export default function MatchStatsPage({
     fetchFixture();
   }, [resolvedParams.id]);
 
+  // Function to download card as image
+  const downloadCard = async (cardRef: React.RefObject<HTMLDivElement | null>, filename: string) => {
+    if (!cardRef.current) return;
+    
+    try {
+      const canvas = await html2canvas(cardRef!.current, {
+        backgroundColor: '#ffffff',
+        scale: 2,
+        logging: false,
+        useCORS: true,
+      });
+      
+      const link = document.createElement('a');
+      link.download = `${filename}.png`;
+      link.href = canvas.toDataURL();
+      link.click();
+    } catch (error) {
+      console.error('Error generating image:', error);
+    }
+  };
+
+  // Function to share card
+  const shareCard = async (cardRef: React.RefObject<HTMLDivElement | null>, title: string) => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: title,
+          text: `Check out this match stats from our app!`,
+          url: window.location.href,
+        });
+      } catch (error) {
+        console.error('Error sharing:', error);
+      }
+    } else {
+      // Fallback - copy URL to clipboard
+      navigator.clipboard.writeText(window.location.href);
+      alert('Link copied to clipboard!');
+    }
+  };
+
   if (loading) {
     return <Loader />;
   }
@@ -64,7 +112,7 @@ export default function MatchStatsPage({
 
   const totalElapsedGameTime = fixture ? fixture.statistics.home.possessionTime + fixture.statistics.away.possessionTime : 0;
   const homePossession = totalElapsedGameTime > 0 ? ( fixture!.statistics.home.possessionTime / totalElapsedGameTime ) * 100 : 50;
-  const awayPossession = 100 - homePossession; // Ensures total is always 100%
+  const awayPossession = 100 - homePossession;
 
   // Helper function to get star rating display
   const getStarRating = (rating: number) => {
@@ -100,6 +148,336 @@ export default function MatchStatsPage({
     if (pos?.includes('mid')) return 'bg-green-500/10 text-green-600 border-green-500/20';
     if (pos?.includes('for') || pos?.includes('att') || pos?.includes('wing')) return 'bg-red-500/10 text-red-600 border-red-500/20';
     return 'bg-gray-500/10 text-gray-600 border-gray-500/20';
+  };
+
+  // Shareable Cards Components
+  const ScoreCard = () => (
+    <div ref={scoreCardRef} className="bg-card p-6 rounded-xl shadow-lg max-w-md mx-auto border border-muted-foreground z-10">
+      {/* Header */}
+      <div className="text-center mb-4">
+        <div className="text-emerald-600 font-bold text-lg">{fixture.competition.name}</div>
+        <div className="text-muted-foreground text-sm">{formattedDate}</div>
+      </div>
+
+      {/* Teams and Score */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-col items-center gap-2 w-1/3">
+          <div className="w-16 h-16 relative">
+            <Image
+              src={teamLogos[fixture.homeTeam.name] || '/images/team_logos/default.jpg'}
+              alt={fixture.homeTeam.name}
+              fill
+              className="object-contain rounded-full"
+            />
+          </div>
+          <span className="text-sm font-medium text-center">
+            {fixture.homeTeam.name}
+          </span>
+        </div>
+
+        <div className="flex flex-col items-center">
+          <div className="text-3xl font-bold text-emerald-600">
+            {fixture.result.homeScore} - {fixture.result.awayScore}
+          </div>
+          <div className="text-xs">Full Time</div>
+          {/* Half Time Score if available */}
+          {fixture.result.halftimeHomeScore !== null && fixture.result.halftimeAwayScore !== null && (
+            <div className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+              HT: {fixture.result.halftimeHomeScore} - {fixture.result.halftimeAwayScore}
+            </div>
+          )}
+        </div>
+
+        <div className="flex flex-col items-center gap-2 w-1/3">
+          <div className="w-16 h-16 relative">
+            <Image
+              src={teamLogos[fixture.awayTeam.name] || '/images/team_logos/default.jpg'}
+              alt={fixture.awayTeam.name}
+              fill
+              className="object-contain rounded-full"
+            />
+          </div>
+          <span className="text-sm font-medium text-center">
+            {fixture.awayTeam.name}
+          </span>
+        </div>
+      </div>
+
+      {/* Goal Scorers */}
+      {fixture.goalScorers && fixture.goalScorers.length > 0 && (
+        <div className="border-t pt-3">
+          <div className="text-sm font-semibold mb-2">Goal Scorers</div>
+          {fixture.goalScorers.slice(0, 4).map((scorer, index) => (
+            <div key={index} className="text-xs text-muted-foreground mb-1">
+              ⚽ {scorer.player?.name} {scorer.time}'
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Call to Action */}
+      <div className="border-t pt-3 mt-3 text-center">
+        <div className="text-xs text-muted-foreground">Get live match updates on</div>
+        <div className="text-sm font-semibold text-emerald-600">Fupre Sports Media</div>
+      </div>
+    </div>
+  );
+
+  const POTMCard = () => (
+    <div ref={potmCardRef} className="bg-card p-6 rounded-xl shadow-lg max-w-md mx-auto border border-muted-foreground">
+      {/* Header */}
+      <div className="text-center mb-4">
+        <div className="flex items-center justify-center gap-2 mb-2">
+          <Crown className="w-5 h-5 text-yellow-500" />
+          <span className="text-lg font-bold">Player of the Match</span>
+        </div>
+        <div className="text-sm">{fixture.homeTeam.name} vs {fixture.awayTeam.name}</div>
+      </div>
+
+      {/* POTM */}
+      {fixture.playerOfTheMatch?.official && (
+        <div className="bg-primary-foreground rounded-lg p-4 mb-4 border border-muted-foreground">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-12 h-12 bg-yellow-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
+              👑
+            </div>
+            <div>
+              <div className="font-bold text-lg">{fixture.playerOfTheMatch.official.name}</div>
+              <div className="text-sm text-muted-foreground">{fixture.playerOfTheMatch.official.department}</div>
+              <div className="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full inline-block mt-1">
+                {fixture.playerOfTheMatch.official.position}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Top 5 Ratings */}
+      {fixture.playerRatings && fixture.playerRatings.length > 0 && (
+        <div>
+          <div className="text-sm font-semibold text-muted-foreground mb-3">Top Rated Players</div>
+          <div className="space-y-2">
+            {fixture.playerRatings
+              .sort((a, b) => b.official.rating - a.official.rating)
+              .slice(0, 5)
+              .map((rating, index) => (
+                <div key={index} className="flex items-center justify-between p-2 bg-primary-foreground rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center text-xs font-bold">
+                      {index + 1}
+                    </div>
+                    <div>
+                      <div className="text-sm font-medium">{rating.player.name}</div>
+                      <div className="text-xs text-muted-foreground">{rating.player.position}</div>
+                    </div>
+                  </div>
+                  <div className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
+                    {rating.official.rating.toFixed(1)}
+                  </div>
+                </div>
+              ))}
+          </div>
+        </div>
+      )}
+
+      {/* Call to Action */}
+      <div className="border-t pt-3 mt-4 text-center">
+        <div className="text-xs text-muted-foreground">View detailed player ratings on</div>
+        <div className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">Fupre Sports Media</div>
+      </div>
+    </div>
+  );
+
+  const StatsCard = () => (
+    <div ref={statsCardRef} className="bg-card p-6 rounded-xl shadow-lg max-w-md mx-auto border border-muted-foreground">
+      {/* Header */}
+      <div className="text-center mb-4">
+        <div className="flex items-center justify-center gap-2 mb-2">
+          <Trophy className="w-5 h-5 text-emerald-500" />
+          <span className="text-lg font-bold">Match Statistics</span>
+        </div>
+        <div className="text-sm">{fixture.homeTeam.name} vs {fixture.awayTeam.name}</div>
+        <div className="text-lg font-bold text-emerald-600 mt-2">
+          {fixture.result.homeScore} - {fixture.result.awayScore}
+        </div>
+      </div>
+
+      {/* Stats */}
+      {fixture.statistics && (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium">{fixture.statistics.home.shotsOnTarget + fixture.statistics.home.shotsOffTarget}</span>
+            <span className="text-sm text-muted-foreground font-medium">Shots</span>
+            <span className="text-sm font-medium">{fixture.statistics.away.shotsOnTarget + fixture.statistics.away.shotsOffTarget}</span>
+          </div>
+          
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium">{fixture.statistics.home.shotsOnTarget}</span>
+            <span className="text-sm text-muted-foreground font-medium">Shots on Target</span>
+            <span className="text-sm font-medium">{fixture.statistics.away.shotsOnTarget}</span>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium">{homePossession.toFixed(1)}%</span>
+            <span className="text-sm text-muted-foreground font-medium">Possession</span>
+            <span className="text-sm font-medium">{awayPossession.toFixed(1)}%</span>
+          </div>
+
+          {/* Possession Bar */}
+          <div className="w-full bg-gray-200 rounded-full h-2">
+            <div 
+              className="bg-emerald-500 h-2 rounded-full" 
+              style={{ width: `${homePossession}%` }}
+            ></div>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium ">{fixture.statistics.home.fouls}</span>
+            <span className="text-sm text-muted-foreground">Fouls</span>
+            <span className="text-sm font-medium ">{fixture.statistics.away.fouls}</span>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium ">{fixture.statistics.home.yellowCards}</span>
+            <span className="text-sm text-muted-foreground">Yellow Cards</span>
+            <span className="text-sm font-medium ">{fixture.statistics.away.yellowCards}</span>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium ">{fixture.statistics.home.corners}</span>
+            <span className="text-sm text-muted-foreground">Corners</span>
+            <span className="text-sm font-medium ">{fixture.statistics.away.corners}</span>
+          </div>
+        </div>
+      )}
+
+      {/* Call to Action */}
+      <div className="border-t pt-3 mt-4 text-center">
+        <div className="text-xs text-muted-foreground">Get detailed match analysis on</div>
+        <div className="text-sm font-semibold text-emerald-600">Fupre Sports Media</div>
+      </div>
+    </div>
+  );
+
+  const RatingsCard = () => {
+    const [selectedPlayerIndex, setSelectedPlayerIndex] = useState(0);
+    const topRatedPlayers = fixture.playerRatings?.sort((a, b) => b.official.rating - a.official.rating) || [];
+    
+    if (topRatedPlayers.length === 0) return null;
+
+    const topRatedPlayer = topRatedPlayers[selectedPlayerIndex];
+
+    return (
+      <div ref={ratingsCardRef} className="bg-card p-6 rounded-xl shadow-lg max-w-md mx-auto border border-muted-foreground">
+        {/* Header */}
+        <div className="text-center mb-4">
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <Star className="w-5 h-5 text-emerald-500" />
+            <span className="text-lg font-bold">Player Rating</span>
+          </div>
+          <div className="text-sm">{fixture.homeTeam.name} vs {fixture.awayTeam.name}</div>
+        </div>
+
+        {/* Player Selector */}
+        {topRatedPlayers.length > 1 && (
+          <div className="mb-4">
+            <div className="flex items-center justify-center gap-2">
+              <button
+                onClick={() => setSelectedPlayerIndex(prev => Math.max(0, prev - 1))}
+                disabled={selectedPlayerIndex === 0}
+                className="p-1 rounded-full bg-secondary disabled:opacity-50"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+              </button>
+              <div className="text-sm font-medium">
+                {selectedPlayerIndex + 1} of {topRatedPlayers.length}
+              </div>
+              <button
+                onClick={() => setSelectedPlayerIndex(prev => Math.min(topRatedPlayers.length - 1, prev + 1))}
+                disabled={selectedPlayerIndex === topRatedPlayers.length - 1}
+                className="p-1 rounded-full bg-secondary disabled:opacity-50"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Player Card */}
+        <div className="bg-secondary/50 rounded-lg p-4 border border-border/50">
+          <div className="flex items-start justify-between mb-3">
+            <div className="flex-1">
+              <div className="font-bold text-xl">{topRatedPlayer.player.name}</div>
+              <div className="text-sm">{topRatedPlayer.player.department}</div>
+              <div className={cn(
+                "inline-block px-2 py-1 rounded-full text-xs font-medium mt-1 border",
+                getPositionColor(topRatedPlayer.player.position || '')
+              )}>
+                {topRatedPlayer.player.position}
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="text-3xl font-bold text-emerald-500">
+                {topRatedPlayer.official.rating.toFixed(1)}
+              </div>
+              <div className="text-xs text-muted-foreground">Official Rating</div>
+            </div>
+          </div>
+
+          {/* Fan Rating */}
+          <div className="mb-3">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-sm text-muted-foreground">Fan Rating</span>
+              <span className="text-sm font-medium">
+                {topRatedPlayer.fanRatings.average.toFixed(1)} ({topRatedPlayer.fanRatings.count} votes)
+              </span>
+            </div>
+            <div className="flex items-center gap-1">
+              {[...Array(Math.floor(topRatedPlayer.fanRatings.average))].map((_, i) => (
+                <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+              ))}
+              {topRatedPlayer.fanRatings.average % 1 >= 0.5 && (
+                <div className="relative">
+                  <Star className="w-4 h-4" />
+                  <div className="absolute inset-0 overflow-hidden" style={{ width: '50%' }}>
+                    <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                  </div>
+                </div>
+              )}
+              {[...Array(Math.max(0, 10 - Math.ceil(topRatedPlayer.fanRatings.average)))].map((_, i) => (
+                <Star key={`empty-${i}`} className="w-4 h-4" />
+              ))}
+            </div>
+          </div>
+
+          {/* Stats */}
+          <div className="grid grid-cols-3 gap-2">
+            <div className="text-center p-2 bg-background rounded">
+              <div className="font-bold text-emerald-500">{topRatedPlayer.stats.goals}</div>
+              <div className="text-xs text-muted-foreground">Goals</div>
+            </div>
+            <div className="text-center p-2 bg-background rounded">
+              <div className="font-bold text-blue-500">{topRatedPlayer.stats.assists}</div>
+              <div className="text-xs text-muted-foreground">Assists</div>
+            </div>
+            <div className="text-center p-2 bg-background rounded">
+              <div className="font-bold text-orange-500">{topRatedPlayer.stats.shots}</div>
+              <div className="text-xs text-muted-foreground">Shots</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Call to Action */}
+        <div className="border-t pt-3 mt-4 text-center">
+          <div className="text-xs text-muted-foreground">Rate players and view all ratings on</div>
+          <div className="text-sm font-semibold text-emerald-600">Fupre Sports Media</div>
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -227,8 +605,138 @@ export default function MatchStatsPage({
                     <span>{fixture.stadium}</span>
                   </div>
                 </div>
+
+                {/* Share Button */}
+                {(fixture.status === FixtureStatus.COMPLETED || fixture.status === FixtureStatus.LIVE) && (
+                  <div className="flex justify-center mt-4">
+                    <button
+                      onClick={() => setShowShareCards(!showShareCards)}
+                      className="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium transition-colors"
+                    >
+                      <Share2 className="w-4 h-4" />
+                      Share Match Cards
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
+
+            {/* Shareable Cards Modal/Section */}
+            <AnimatePresence>
+              {showShareCards && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className="bg-card/40 backdrop-blur-sm rounded-xl p-6 border border-border"
+                >
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-xl font-semibold flex items-center gap-2">
+                      <Share2 className="w-5 h-5 text-emerald-500" />
+                      Share Match Cards
+                    </h2>
+                    <button
+                      onClick={() => setShowShareCards(false)}
+                      className="text-muted-foreground hover:text-foreground p-1"
+                    >
+                      ✕
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Score Card */}
+                    <div className="space-y-3">
+                      <ScoreCard />
+                      <div className="flex gap-2 justify-center">
+                        <button
+                          onClick={() => downloadCard(scoreCardRef, 'match-score')}
+                          className="bg-emerald-500 hover:bg-emerald-600 text-white px-3 py-2 rounded-lg flex items-center gap-2 text-sm"
+                        >
+                          <Download className="w-4 h-4" />
+                          Download
+                        </button>
+                        <button
+                          onClick={() => shareCard(scoreCardRef, 'Match Score')}
+                          className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-lg flex items-center gap-2 text-sm"
+                        >
+                          <Share2 className="w-4 h-4" />
+                          Share
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* POTM Card */}
+                    {fixture.playerOfTheMatch && (
+                      <div className="space-y-3">
+                        <POTMCard />
+                        <div className="flex gap-2 justify-center">
+                          <button
+                            onClick={() => downloadCard(potmCardRef, 'player-of-match')}
+                            className="bg-emerald-500 hover:bg-emerald-600 text-white px-3 py-2 rounded-lg flex items-center gap-2 text-sm"
+                          >
+                            <Download className="w-4 h-4" />
+                            Download
+                          </button>
+                          <button
+                            onClick={() => shareCard(potmCardRef, 'Player of the Match')}
+                            className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-lg flex items-center gap-2 text-sm"
+                          >
+                            <Share2 className="w-4 h-4" />
+                            Share
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Stats Card */}
+                    {fixture.statistics && (
+                      <div className="space-y-3">
+                        <StatsCard />
+                        <div className="flex gap-2 justify-center">
+                          <button
+                            onClick={() => downloadCard(statsCardRef, 'match-statistics')}
+                            className="bg-emerald-500 hover:bg-emerald-600 text-white px-3 py-2 rounded-lg flex items-center gap-2 text-sm"
+                          >
+                            <Download className="w-4 h-4" />
+                            Download
+                          </button>
+                          <button
+                            onClick={() => shareCard(statsCardRef, 'Match Statistics')}
+                            className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-lg flex items-center gap-2 text-sm"
+                          >
+                            <Share2 className="w-4 h-4" />
+                            Share
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Individual Rating Card */}
+                    {fixture.playerRatings && fixture.playerRatings.length > 0 && (
+                      <div className="space-y-3">
+                        <RatingsCard />
+                        <div className="flex gap-2 justify-center">
+                          <button
+                            onClick={() => downloadCard(ratingsCardRef, 'player-rating')}
+                            className="bg-emerald-500 hover:bg-emerald-600 text-white px-3 py-2 rounded-lg flex items-center gap-2 text-sm"
+                          >
+                            <Download className="w-4 h-4" />
+                            Download
+                          </button>
+                          <button
+                            onClick={() => shareCard(ratingsCardRef, 'Player Rating')}
+                            className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-lg flex items-center gap-2 text-sm"
+                          >
+                            <Share2 className="w-4 h-4" />
+                            Share
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* Tabs */}
             <div className="flex border-b border-border overflow-x-auto">
