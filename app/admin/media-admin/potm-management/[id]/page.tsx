@@ -96,7 +96,7 @@ const POTMMangementPage = (
             toast.success(response.message || 'Rating saved successfully');
             setRatingFormData({
                 playerId: '',
-                isHomePlayer: true,
+                isHomePlayer: ratingFormData.isHomePlayer,
                 rating: 1,
                 stats: {
                     goals: 0,
