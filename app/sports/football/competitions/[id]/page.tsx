@@ -3,7 +3,7 @@
 import { Loader } from '@/components/ui/loader';
 import { BackButton } from '@/components/ui/back-button';
 import { IGroupTable, IKnockoutRounds, ILeagueStandings, IPopKnockoutRounds, IV2FootballCompetition, PopIV2FootballFixture } from '@/utils/V2Utils/v2requestData.types';
-import { Award, Calendar, Crown, Info, Shield, Target, Trophy, Users, ChevronDown, ChevronUp } from 'lucide-react';
+import { Award, Calendar, Crown, Info, Shield, Target, Trophy, Users, ChevronDown, ChevronUp, Share2 } from 'lucide-react';
 import React, { use, useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion';
 import LeagueTable from '@/components/competition/LeagueTable';
@@ -13,6 +13,8 @@ import { getCompetitionById, getCompetitionFixtures, getCompetitionGroups, getCo
 import Link from 'next/link';
 import { format } from 'date-fns';
 import Timeline from '@/components/newLive/Timeline';
+import { LeagueTableShareCard } from '@/components/share/CompetitionTableCard';
+import { UpcomingFixturesShareCard } from '@/components/share/CompetitionFixtureCard';
 
 enum LeagueTabs {
     TABLES = 'tables',
@@ -62,6 +64,10 @@ params
     const [stats, setStats] = useState<IV2FootballCompetition['stats'] | null>(null);
     const [activeTab, setActiveTab] = useState<LeagueTabs | KnockoutTabs | HybridTabs >(LeagueTabs.INFO);
     const [expandedLiveMatches, setExpandedLiveMatches] = useState<Set<string>>(new Set());
+
+    const [showTableShareCard, setShowTableShareCard] = useState<boolean>(false);
+    const [showTableStandingsRange, setShowTableStandingsRange] = useState<number[]>([0,8]);
+    const [showUpcomingFixturesCard, setShowUpcomingFixturesCard] = useState<boolean>(false);
     // End of States //
 
     // On Load //
@@ -287,7 +293,72 @@ params
                       <Shield className="w-5 h-5 text-emerald-500" />
                       {group.name}
                     </h3>
+
+                    <div className='flex gap-2 items-center flex-wrap'>
+                      <button
+                        onClick={
+                          () => {
+                            setShowTableShareCard(true)
+                            setShowTableStandingsRange([0, 8])
+                          }}
+                        className="flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-sm"
+                      >
+                        <Share2 className="w-4 h-4" />
+                        Share Direct Qual
+                      </button>
+                      <button
+                        onClick={
+                          () => {
+                            setShowTableShareCard(true);
+                            setShowTableStandingsRange([8, 16]);
+                          }
+                        }
+                        className="flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-sm"
+                      >
+                        <Share2 className="w-4 h-4" />
+                        Share Playoffs
+                      </button>
+                      <button
+                        onClick={
+                          () => {
+                            setShowTableShareCard(true);
+                            setShowTableStandingsRange([16, 18]);
+                          }
+                        }
+                        className="flex items-center gap-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm"
+                      >
+                        <Share2 className="w-4 h-4" />
+                        Share Eliminated
+                      </button>
+                    </div>
+
                     <LeagueTable table={group.standings} />
+
+                    {/* Add this modal */}
+                    <AnimatePresence>
+                      {showTableShareCard && (
+                        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+                          <motion.div 
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.9, opacity: 0 }}
+                            className="bg-background rounded-xl p-6 max-w-md md:max-w-lg w-full"
+                          >
+                            <div className="flex justify-between items-center mb-4">
+                              <h3 className="text-lg font-semibold">Share League Table</h3>
+                              <button onClick={() => setShowTableShareCard(false)} className="text-muted-foreground hover:text-foreground">
+                                ✕
+                              </button>
+                            </div>
+                            <LeagueTableShareCard 
+                              table={group.standings} 
+                              competition={competition} 
+                              showTableStandingsRange={showTableStandingsRange}  
+                            />
+                          </motion.div>
+                        </div>
+                      )}
+                    </AnimatePresence>
                   </div>
                 </div>
               ))}
@@ -432,6 +503,15 @@ params
             <div className="mb-6">
               <h2 className="text-2xl font-bold text-foreground mb-2">Fixtures</h2>
               <p className="text-muted-foreground">Browse all fixtures by status. Live matches are highlighted.</p>
+              {fixtures.some(f => f.status === FixtureStatus.SCHEDULED) && (
+                <button
+                  onClick={() => setShowUpcomingFixturesCard(true)}
+                  className="flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-sm"
+                >
+                  <Share2 className="w-4 h-4" />
+                  Share Upcoming
+                </button>
+              )}
             </div>
 
             {/* Filters */}
@@ -592,6 +672,33 @@ params
                   })}
               </div>
             )}
+
+            <AnimatePresence>
+            {showUpcomingFixturesCard && (
+              <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+                <motion.div 
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.9, opacity: 0 }}
+                  className="bg-background rounded-xl p-6 max-w-md w-full"
+                >
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-semibold">Share Upcoming Fixtures</h3>
+                    <button 
+                      onClick={() => setShowUpcomingFixturesCard(false)} 
+                      className="text-muted-foreground hover:text-foreground"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                  <UpcomingFixturesShareCard
+                    fixtures={fixtures} 
+                    competition={competition!} 
+                  />
+                </motion.div>
+              </div>
+            )}
+          </AnimatePresence>
           </div>
         )}
 
