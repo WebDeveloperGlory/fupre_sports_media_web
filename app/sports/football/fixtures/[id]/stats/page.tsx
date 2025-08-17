@@ -1020,7 +1020,7 @@ export default function MatchStatsPage({
                                 </div>
                                 <div className="text-right">
                                   <div className="text-2xl font-bold text-emerald-500">
-                                    {rating.official.rating.toFixed(1)}
+                                    {rating.official.rating.toFixed(1) || 'unknown'}
                                   </div>
                                   <div className="text-xs text-muted-foreground">Official</div>
                                 </div>
