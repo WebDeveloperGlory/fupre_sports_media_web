@@ -258,7 +258,7 @@ export default function MatchStatsPage({
           <div className="text-sm font-semibold text-muted-foreground mb-3">Top Rated Players</div>
           <div className="space-y-2">
             {fixture.playerRatings
-              .sort((a, b) => b.official.rating - a.official.rating)
+              .sort((a, b) => b.official ? b.official.rating - a.official.rating : 0)
               .slice(0, 5)
               .map((rating, index) => (
                 <div key={index} className="flex items-center justify-between p-2 bg-primary-foreground rounded-lg">
@@ -361,7 +361,7 @@ export default function MatchStatsPage({
 
   const RatingsCard = () => {
     const [selectedPlayerIndex, setSelectedPlayerIndex] = useState(0);
-    const topRatedPlayers = fixture.playerRatings?.sort((a, b) => b.official.rating - a.official.rating) || [];
+    const topRatedPlayers = fixture.playerRatings?.sort((a, b) => b.official ? b.official.rating - a.official.rating : 0) || [];
     
     if (topRatedPlayers.length === 0) return null;
 
@@ -1020,7 +1020,7 @@ export default function MatchStatsPage({
                                 </div>
                                 <div className="text-right">
                                   <div className="text-2xl font-bold text-emerald-500">
-                                    {rating.official.rating.toFixed(1) || 'unknown'}
+                                    { rating.official ? rating.official.rating.toFixed(1) : 'unknown'}
                                   </div>
                                   <div className="text-xs text-muted-foreground">Official</div>
                                 </div>
