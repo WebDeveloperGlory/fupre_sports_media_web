@@ -999,7 +999,7 @@ export default function MatchStatsPage({
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {fixture.playerRatings
                           .filter(rating => rating.team === 'home')
-                          .sort((a, b) => b.official.rating - a.official.rating)
+                          .sort((a, b) => a.official ? b.official.rating - a.official.rating : 0)
                           .map((rating, index) => (
                             <motion.div
                               key={index}
