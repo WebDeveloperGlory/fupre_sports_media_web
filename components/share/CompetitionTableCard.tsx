@@ -22,7 +22,7 @@ export const LeagueTableShareCard = ({
   try {
     const canvas = await html2canvas(cardRef!.current, {
     backgroundColor: '#ffffff',
-    scale: 2,
+    scale: 1,
     logging: false,
     useCORS: true,
     });
@@ -104,7 +104,7 @@ const shareCard = async (cardRef: React.RefObject<HTMLDivElement | null>, title:
                 <td className="text-center py-2 px-1 text-sm font-bold">{entry.points}</td>
                 <td className="text-center py-2 px-1">
                   <div className="flex justify-center gap-0.5">
-                    {[...entry.form].reverse().slice(0, 3).map((result, i) => (
+                    {[...entry.form].slice(0, 3).map((result, i) => (
                       <span key={i} className={`w-4 h-4 flex items-center justify-center text-[8px] ${
                         result === 'W' ? 'bg-emerald-500 text-white' :
                         result === 'D' ? 'bg-orange-500 text-white' :

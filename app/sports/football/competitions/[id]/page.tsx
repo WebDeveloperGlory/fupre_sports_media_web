@@ -180,13 +180,13 @@ params
             <div className="grid grid-cols-2 lg:grid-cols-1 gap-4 lg:w-64">
               <div className="text-center lg:text-right">
                 <div className="text-2xl font-bold text-emerald-600">
-                  {String(Math.ceil(Number(competition?.stats?.averageGoalsPerMatch || 0) * 12))}
+                  {String(Math.floor(Number(competition?.stats?.averageGoalsPerMatch || 0) * fixtures.filter(fix => fix.status === 'completed').length))}
                 </div>
                 <div className="text-sm text-muted-foreground uppercase tracking-wide">Total Goals</div>
               </div>
               <div className="text-center lg:text-right">
                 <div className="text-2xl font-bold text-blue-600">
-                  {String(competition?.stats?.averageGoalsPerMatch || 0)}
+                  {String(competition?.stats?.averageGoalsPerMatch.toFixed(2) || 0)}
                 </div>
                 <div className="text-sm text-muted-foreground uppercase tracking-wide">Goals/Match</div>
               </div>
@@ -413,7 +413,7 @@ params
                     </div>
                     <div className="p-4 space-y-3">
                       {stats.topScorers && stats.topScorers.length > 0 ? (
-                        stats.topScorers.map((s, i) => (
+                        stats.topScorers.sort((a,b) => b.goals - a.goals).map((s, i) => (
                           <div key={i} className="flex items-center justify-between text-sm">
                             <div className="min-w-0">
                               <div className="font-medium truncate">{(s.player as any)?.name ?? 'Unknown'}</div>

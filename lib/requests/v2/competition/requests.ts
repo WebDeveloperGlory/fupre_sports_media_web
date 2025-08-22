@@ -161,7 +161,7 @@ export const getCompetitionLeagueTable = async ( competitionId: string ) => {
 
 export const getCompetitionFixtures = async ( competitionId: string ) => {
     try {
-        const response = await axiosInstance.get( `${ API_URL }/competition/${ competitionId }/fixture` );
+        const response = await axiosInstance.get( `${ API_URL }/competition/${ competitionId }/fixture?limit=50` );
         const { data }: { data: SuccessRequest } = response;
 
         if( data.code === '99' ) {

@@ -60,7 +60,7 @@ export type CompFormFixture = {
     homeTeam: string;
     awayTeam: string;
     stadium: string;
-    scheduledDate: Date;
+    scheduledDate: string;
     referee: string;
     isDerby?: boolean;
     isKnockoutRound?: boolean;

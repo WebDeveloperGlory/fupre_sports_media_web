@@ -1,4 +1,4 @@
-import { generalUpdates } from '@/lib/requests/v2/admin/super-admin/live-management/requests'
+import { endLiveFixture, generalUpdates } from '@/lib/requests/v2/admin/super-admin/live-management/requests'
 import { LivFixGeneralUpdates } from '@/utils/V2Utils/formData'
 import { Cog, Plus, Save, Signal } from 'lucide-react'
 import React, { useState } from 'react'
@@ -45,6 +45,20 @@ const General = (
             toast.success(response.message);
         } else {
             toast.error(response?.message || 'An Error Occurred');
+        }
+    }
+    const handleEndFixture = async () => {
+        const canEndFixture = window.confirm('Are You Sure You Want To End Fixture?(Confirm Player Ratings and POTM if applicable)');
+
+        if(canEndFixture) {
+            const response = await endLiveFixture( liveId );
+            if(response?.code === '00') {
+                toast.success(response.message);
+            } else {
+                toast.error(response?.message || 'An Error Occurred');
+            }
+        } else {
+            toast.error('Action Cancelled');
         }
     }
   return (
@@ -281,6 +295,24 @@ const General = (
                     >
                         <Plus className='w-5 h-5' />
                         Add Stream Link
+                    </button>
+                </div>
+            </div>
+
+            {/* End Fixture */}
+            <div className='px-4 py-4 bg-card border border-muted-foreground rounded-lg my-4'>
+                {/* Title */}
+                <h2 className='text-lg font-bold flex gap-2 items-center text-emerald-500'>
+                    <Save className='w-5 h-5' />
+                    End Fixture
+                </h2>
+
+                <div className='space-y-4 mt-4'>
+                    <button
+                        onClick={handleEndFixture}
+                        className='flex gap-2 items-center py-2 justify-center w-full bg-red-600 hover:bg-red-500 transition rounded-lg'
+                    >
+                        Calculate Results
                     </button>
                 </div>
             </div>

@@ -1,16 +1,17 @@
 'use client'
 
 import Link from 'next/link';
-import { getAllFixtures, getAllCompetitions, createFixture, updateFixture, deleteFixture, rescheduleFixture } from '@/lib/requests/v2/admin/super-admin/live-management/requests';
+import { getAllFixtures, getAllCompetitions, updateFixture, deleteFixture, rescheduleFixture } from '@/lib/requests/v2/admin/super-admin/live-management/requests';
 import { getAllTeams } from '@/lib/requests/v2/admin/super-admin/team/requests';
 import { checkSuperAdminStatus } from '@/lib/requests/v2/authentication/requests';
 import { PopIV2FootballFixture, IV2FootballCompetition, IV2FootballTeam } from '@/utils/V2Utils/v2requestData.types';
-import { FixtureStatus } from '@/utils/V2Utils/v2requestData.enums';
+import { CompetitionTypes, FixtureStatus } from '@/utils/V2Utils/v2requestData.enums';
 import { ArrowLeft, Calendar, Clock, Edit, MapPin, Plus, Search, Trash2, Users, Trophy, AlertCircle, CheckCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import { Loader } from '@/components/ui/loader';
+import { createCompetitionFixture } from '@/lib/requests/v2/admin/super-admin/competition/requests';
 
 type FixtureFormData = {
     competition: string;
@@ -18,15 +19,21 @@ type FixtureFormData = {
     awayTeam: string;
     matchType: string;
     stadium: string;
+    groupId?: string;
+    knockoutId?: string;
     scheduledDate: string;
     referee: string;
 }
+type CompetitionTables = IV2FootballCompetition['groupStage']
+type CompetitionKnockouts = IV2FootballCompetition['knockoutRounds']
 
 const initialFormData: FixtureFormData = {
     competition: '',
     homeTeam: '',
     awayTeam: '',
     matchType: 'league',
+    groupId: '',
+    knockoutId: '',
     stadium: '',
     scheduledDate: '',
     referee: ''
@@ -38,6 +45,8 @@ const SuperAdminFixturesPage = () => {
     const [loading, setLoading] = useState<boolean>(true);
     const [fixtures, setFixtures] = useState<PopIV2FootballFixture[]>([]);
     const [competitions, setCompetitions] = useState<IV2FootballCompetition[]>([]);
+    const [competitionTables, setCompetitionTables] = useState<CompetitionTables>([]);
+    const [competitionKnockouts, setCompetitionKnockouts] = useState<CompetitionKnockouts>([]);
     const [teams, setTeams] = useState<IV2FootballTeam[]>([]);
     const [searchTerm, setSearchTerm] = useState<string>('');
     const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -118,7 +127,28 @@ const SuperAdminFixturesPage = () => {
             return;
         }
 
-        const data = await createFixture(formData);
+        if(formData.matchType === 'group' && (!formData.groupId || formData.groupId === '')) {
+            toast.error('Select A Group')
+        }
+
+        if(formData.matchType === 'knockout' && (!formData.knockoutId || formData.knockoutId === '')) {
+            toast.error('Select A Knockout Round')
+        }
+
+        const finalForm = {
+            homeTeam: formData.homeTeam,
+            awayTeam: formData.awayTeam,
+            stadium: formData.stadium,
+            scheduledDate: new Date(formData.scheduledDate).toISOString(),
+            referee: formData.referee,
+            isDerby: false,
+            isKnockoutRound: formData.matchType === 'knockout',
+            isGroupFixture: formData.matchType === 'group',
+            knockoutId: formData.knockoutId,
+            groupId: formData.groupId,
+        }
+
+        const data = await createCompetitionFixture(finalForm, formData.competition);
         if (data && data.code === '00') {
             toast.success(data.message);
             setFormData(initialFormData);
@@ -223,7 +253,7 @@ const SuperAdminFixturesPage = () => {
     return (
         <div className='space-y-6'>
             {/* Header */}
-            <div className='flex items-center justify-between'>
+            <div className='flex md:items-center md:justify-between gap-4 flex-col md:flex-row'>
                 <div className='flex items-center gap-4'>
                     <Link
                         href='/admin/super-admin/football/dashboard'
@@ -423,7 +453,20 @@ const SuperAdminFixturesPage = () => {
                                 </label>
                                 <select
                                     value={formData.competition}
-                                    onChange={(e) => setFormData({...formData, competition: e.target.value})}
+                                    onChange={
+                                        (e) => {
+                                            setFormData({...formData, competition: e.target.value, groupId: '', knockoutId: ''});
+                                            const comp = competitions.find(comp => comp._id === e.target.value);
+
+                                            if(comp && comp.type === CompetitionTypes.HYBRID){
+                                                setCompetitionKnockouts(comp?.knockoutRounds ?? []);
+                                                setCompetitionTables(comp?.groupStage ?? []);
+                                            }
+                                            if(comp && comp.type === CompetitionTypes.KNOCKOUT){
+                                                setCompetitionKnockouts(comp?.knockoutRounds ?? []);
+                                            }
+                                        }
+                                    }
                                     className='w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900'
                                 >
                                     <option value='' className='text-gray-500'>Select Competition</option>
@@ -474,12 +517,48 @@ const SuperAdminFixturesPage = () => {
                                     onChange={(e) => setFormData({...formData, matchType: e.target.value})}
                                     className='w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900'
                                 >
-                                    <option value='league' className='text-gray-900'>League</option>
-                                    <option value='knockout' className='text-gray-900'>Knockout</option>
+                                    <option value='' className='text-gray-900'>Select Type</option>
+                                    {competitionTables.length > 0 && <option value='group' className='text-gray-900'>Group</option>}
+                                    {competitionKnockouts.length > 0 && <option value='knockout' className='text-gray-900'>Knockout</option>}
                                     <option value='friendly' className='text-gray-900'>Friendly</option>
                                 </select>
                             </div>
 
+                            {formData.matchType === 'group' && competitionTables.length > 0 && (
+                                <div>
+                                    <label className='block text-sm font-medium text-gray-700 mb-2'>
+                                        Group <span className='text-red-500'>*</span>
+                                    </label>
+                                    <select
+                                        value={formData.groupId}
+                                        onChange={(e) => setFormData({...formData, groupId: e.target.value})}
+                                        className='w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900'
+                                    >
+                                        <option value='' className='text-gray-500'>Select Group</option>
+                                        {competitionTables.map(table => (
+                                            <option key={table._id} value={table._id} className='text-gray-900'>{table.name}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            )}
+                            {formData.matchType === 'knockout' && competitionKnockouts.length > 0 && (
+                                <div>
+                                    <label className='block text-sm font-medium text-gray-700 mb-2'>
+                                        Knockout <span className='text-red-500'>*</span>
+                                    </label>
+                                    <select
+                                        value={formData.knockoutId}
+                                        onChange={(e) => setFormData({...formData, knockoutId: e.target.value})}
+                                        className='w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900'
+                                    >
+                                        <option value='' className='text-gray-500'>Select Knockout Round</option>
+                                        {competitionKnockouts.map(round => (
+                                            <option key={round._id} value={round._id} className='text-gray-900'>{round.name}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            )}
+                            
                             <div>
                                 <label className='block text-sm font-medium text-gray-700 mb-2'>
                                     Stadium <span className='text-red-500'>*</span>

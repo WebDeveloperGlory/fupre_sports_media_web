@@ -93,7 +93,7 @@ const LeagueTable = ({ table }: { table: ILeagueStandings[] }) => {
                 <td className="text-center py-4 px-3 text-sm font-bold text-foreground">{entry.points}</td>
                 <td className="text-center py-4 px-3">
                   <div className="flex items-center justify-center gap-1">
-                    {[...entry.form].reverse().slice(0, 5).map((result, i) => (
+                    {[...entry.form].slice(0, 5).map((result, i) => (
                       <div
                         key={i}
                         className={`w-6 h-6 flex items-center justify-center text-xs font-bold ${
