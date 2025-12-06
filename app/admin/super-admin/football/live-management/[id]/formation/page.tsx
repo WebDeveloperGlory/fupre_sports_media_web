@@ -135,7 +135,7 @@ const FormationPage = (
         startingXI: [ ...newStarting, player ],
         substitutes: newSubstitutes
       }));
-    } else if (destinationSquad === 'substitutes' && newSubstitutes.length < 7) {
+    } else if (destinationSquad === 'substitutes' && newSubstitutes.length < 15) {
       setTeam(( prev ) => ({
         ...prev,
         startingXI: newStarting,

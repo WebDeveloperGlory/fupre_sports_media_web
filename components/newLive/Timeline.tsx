@@ -5,15 +5,16 @@ import { motion } from 'framer-motion'
 import { FixtureTimeline } from '@/utils/V2Utils/v2requestSubData.types'
 import { FixtureTimelineType, FixtureTimelineGoalType, FixtureTimelineCardType, TeamType } from '@/utils/V2Utils/v2requestData.enums'
 import { Clock, Target, AlertTriangle, RotateCcw, Flag, UserX, Zap, Shield, Activity } from 'lucide-react'
+import { PopulatedFixtureTimeline } from '@/utils/V2Utils/v2requestData.types'
 
 interface TimelineProps {
-  events?: FixtureTimeline[]
+  events?: PopulatedFixtureTimeline[]
   homeTeamName?: string
   awayTeamName?: string
   isLive?: boolean
 }
 
-const getEventIcon = (event: FixtureTimeline) => {
+const getEventIcon = (event: PopulatedFixtureTimeline) => {
   switch (event.type) {
     case FixtureTimelineType.GOAL:
       return <Target className="w-3 h-3 text-emerald-500" />
@@ -44,7 +45,7 @@ const getEventIcon = (event: FixtureTimeline) => {
   }
 }
 
-const getEventText = (event: FixtureTimeline, homeTeamName?: string, awayTeamName?: string) => {
+const getEventText = (event: PopulatedFixtureTimeline, homeTeamName?: string, awayTeamName?: string) => {
   const teamName = event.team === TeamType.HOME ? (homeTeamName || 'Home Team') : (awayTeamName || 'Away Team')
   const playerName = event.player?.name || 'Unknown Player'
   const relatedPlayerName = event.relatedPlayer?.name
@@ -98,7 +99,7 @@ const getEventText = (event: FixtureTimeline, homeTeamName?: string, awayTeamNam
   }
 }
 
-const getEventColor = (event: FixtureTimeline) => {
+const getEventColor = (event: PopulatedFixtureTimeline) => {
   switch (event.type) {
     case FixtureTimelineType.GOAL:
     case FixtureTimelineType.OWNGOAL:

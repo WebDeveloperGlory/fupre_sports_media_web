@@ -83,7 +83,7 @@ export default function FootballCompetitionsPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
           {/* Back Button */}
           <div className="mb-6">
-            <BackButton href="/sports/football" />
+            <BackButton />
           </div>
           
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">

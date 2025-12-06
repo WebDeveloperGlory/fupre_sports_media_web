@@ -37,8 +37,9 @@ const LeagueTable = ({ table }: { table: ILeagueStandings[] }) => {
         </thead>
         <tbody>
           {table.map((entry, index) => {
-            const isTopPosition = index < 3;
-            const isRelegationZone = index >= table.length - 3;
+            const isTopPosition = index < 8;
+            const isPlayoffPosition = index > 7 && index < 16;
+            const isRelegationZone = index >= table.length - 2;
 
             return (
               <tr
@@ -46,8 +47,9 @@ const LeagueTable = ({ table }: { table: ILeagueStandings[] }) => {
                 className={`
                   border-b border-border hover:bg-muted/30 transition-colors
                   ${isTopPosition ? 'border-l-4 border-l-emerald-500' : ''}
+                  ${isPlayoffPosition ? 'border-l-4 border-l-orange-500' : ''}
                   ${isRelegationZone ? 'border-l-4 border-l-red-500' : ''}
-                  ${!isTopPosition && !isRelegationZone ? 'border-l-4 border-l-transparent' : ''}
+                  ${!isTopPosition && !isPlayoffPosition && !isRelegationZone ? 'border-l-4 border-l-transparent' : ''}
                 `}
               >
                 <td className="py-4 px-4">
@@ -55,8 +57,9 @@ const LeagueTable = ({ table }: { table: ILeagueStandings[] }) => {
                     <span className={`
                       w-6 h-6 flex items-center justify-center text-xs font-bold
                       ${isTopPosition ? 'bg-emerald-100 text-emerald-800' : ''}
+                      ${isPlayoffPosition ? 'bg-orange-100 text-orange-800' : ''}
                       ${isRelegationZone ? 'bg-red-100 text-red-800' : ''}
-                      ${!isTopPosition && !isRelegationZone ? 'text-muted-foreground' : ''}
+                      ${!isTopPosition && !isPlayoffPosition && !isRelegationZone ? 'text-muted-foreground' : ''}
                     `}>
                       {index + 1}
                     </span>
@@ -90,7 +93,7 @@ const LeagueTable = ({ table }: { table: ILeagueStandings[] }) => {
                 <td className="text-center py-4 px-3 text-sm font-bold text-foreground">{entry.points}</td>
                 <td className="text-center py-4 px-3">
                   <div className="flex items-center justify-center gap-1">
-                    {[...entry.form].reverse().slice(0, 5).map((result, i) => (
+                    {[...entry.form].slice(0, 5).map((result, i) => (
                       <div
                         key={i}
                         className={`w-6 h-6 flex items-center justify-center text-xs font-bold ${
@@ -116,7 +119,11 @@ const LeagueTable = ({ table }: { table: ILeagueStandings[] }) => {
       <div className="mt-6 flex flex-wrap gap-4 text-xs text-muted-foreground">
         <div className="flex items-center gap-2">
           <div className="w-4 h-1 bg-emerald-500"></div>
-          <span>Top 3 positions</span>
+          <span>Direct Qualification</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-1 bg-orange-500"></div>
+          <span>Playoffs</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-4 h-1 bg-red-500"></div>

@@ -1,5 +1,5 @@
 import axiosInstance from "@/lib/config/axiosInstance";
-import { Cheer, LiveFixLineupForm, LiveFixScore, LiveFixStatForm, LiveFixStatusForm, LiveFixSubCreate, LiveFixSubEdit, LiveFixTimelineCreate, LiveFixTimelineEdit, LivFixGeneralUpdates, LivFixGoalScorer, LivFixPlayerRatingOfficial, LivFixPOTMOfficial, LivFixTimeUpdates, UserPlayerRating } from "@/utils/V2Utils/formData";
+import { Cheer, CompFormFixture, LiveFixLineupForm, LiveFixScore, LiveFixStatForm, LiveFixStatusForm, LiveFixSubCreate, LiveFixSubEdit, LiveFixTimelineCreate, LiveFixTimelineEdit, LivFixGeneralUpdates, LivFixGoalScorer, LivFixPlayerRatingOfficial, LivFixPOTMOfficial, LivFixTimeUpdates, UserPlayerRating } from "@/utils/V2Utils/formData";
 
 interface CustomError {
     status?: number;
@@ -217,42 +217,6 @@ export const getAllCompetitions = async (limit: number = 100) => {
     }
 };
 
-export const createFixture = async ( fixtureData: {
-    competition: string;
-    homeTeam: string;
-    awayTeam: string;
-    matchType: string;
-    stadium: string;
-    scheduledDate: string;
-    referee: string;
-} ) => {
-    try {
-        const response = await axiosInstance.post(
-            `${API_URL}/fixture`,
-            fixtureData,
-            { withCredentials: true }
-        );
-        const { data }: { data: SuccessRequest } = response;
-
-        if (data.code === '99') {
-            throw data;
-        }
-
-        return data;
-    } catch( err: any ) {
-        const { response } = err as CustomError;
-        console.log( err, response );
-
-        if( err?.status && err?.message ) {
-            console.error( `Error ${ err.status }: `, response?.data.message )
-            return response?.data || null;
-        } else {
-            console.error('Error creating fixture: ', err );
-            return null;
-        }
-    }
-};
-
 export const updateFixture = async ( fixtureId: string, fixtureData: {
     competition?: string;
     homeTeam?: string;
@@ -429,6 +393,31 @@ export const initiateLiveFixture = async ( fixtureId: string, adminId: string ) 
         const response = await axiosInstance.post(
             `${ API_URL }/live`,
             { fixtureId, adminId },
+            { withCredentials: true }
+        );
+        const { data }: { data: SuccessRequest } = response;
+
+        if( data.code === '99' ) {
+            throw data
+        }
+        return data;
+    } catch( err: any ) {
+        const { response } = err as CustomError;
+
+        if( err?.status && err?.message ) {
+            console.error( `Error ${ err.status }: `, response?.data.message )
+            return response?.data || null;
+        } else {
+            console.error('Signup Error: ', err );
+            return null;
+        }
+    }
+}
+
+export const endLiveFixture = async ( fixtureId: string ) => {
+    try {
+        const response = await axiosInstance.post(
+            `${ API_URL }/live/${fixtureId}/end`,
             { withCredentials: true }
         );
         const { data }: { data: SuccessRequest } = response;

@@ -67,7 +67,7 @@ const RecentGames: FC<RecentGamesProps> = ({ fixtures, loading = false }) => {
         return (
           <Link
             key={fixture._id}
-            href={`/fixtures/${fixture._id}/stats`}
+            href={`/sports/football/fixtures/${fixture._id}/stats`}
             className="block group"
           >
             <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg border border-border/50 hover:border-emerald-500/30 hover:bg-accent/30 transition-all duration-200">

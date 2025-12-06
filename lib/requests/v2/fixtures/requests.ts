@@ -18,7 +18,8 @@ interface SuccessRequest {
     data?: any
 }
 
-const API_URL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_PROD_API_URL : process.env.NEXT_PUBLIC_DEV_API_URL;
+const PART_API_URL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_PROD_API_URL : process.env.NEXT_PUBLIC_DEV_PARTIAL_API_URL;
+const API_URL = process.env.NEXT_PUBLIC_DEV_MODE === 'partial' ? PART_API_URL : `${PART_API_URL}/v2`;
 
 export const getFixtures = async (status?: string, limit: number = 50) => {
     try {
@@ -84,10 +85,9 @@ export const getFixturesByCompetition = async (competitionId: string, status?: s
     }
 };
 
-
 export const getFixtureById = async (fixtureId: string) => {
     try {
-        const response = await axiosInstance.get(`${API_URL}/fixture/${fixtureId}`);
+        const response = await axiosInstance.get(`${API_URL}/fixture/single/${fixtureId}`);
         const { data }: { data: SuccessRequest } = response;
 
         if (data.code === '99') {

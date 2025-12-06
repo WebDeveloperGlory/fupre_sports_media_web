@@ -1,5 +1,5 @@
 import { LiveStatus } from '@/utils/V2Utils/v2requestData.enums';
-import { FixtureCheerMeter, FixturePlayerOfTheMatch, FixtureResult, FixtureStat, FixtureSubstitutions, FixtureTimeline } from '@/utils/V2Utils/v2requestSubData.types';
+import { FixtureCheerMeter, FixturePlayerOfTheMatch, FixtureResult, FixtureStat, FixtureSubstitutions, FixtureTimeline, ShortPopulatedCompetition, ShortPopulatedPlayer, ShortPopulatedTeam } from '@/utils/V2Utils/v2requestSubData.types';
 import { useEffect, useState } from 'react';
 import io, { Socket } from 'socket.io-client';
 
@@ -20,7 +20,7 @@ interface FixtureSocketState {
   playerOfTheMatch: FixturePlayerOfTheMatch | null;
   liveWatchers: number | null;
   substitution: FixtureSubstitutions | null;
-  goalScorers: { player: string; team: string; time: number }[] | null;
+  goalScorers: { player: ShortPopulatedPlayer; team: ShortPopulatedTeam; time: number }[] | null;
 }
 
 const SOCKET_URL = process.env.NEXT_PUBLIC_DEV_MODE === 'partial1' 
@@ -116,7 +116,7 @@ const useFixtureSocket = (fixtureId: string) => {
       setState((prev) => ({ ...prev, substitution }));
     });
 
-    newSocket.on('goalscorer-update', (goalScorers: { player: string; team: string; time: number }[]) => {
+    newSocket.on('goalscorer-update', (goalScorers: { player: ShortPopulatedPlayer; team: ShortPopulatedTeam; time: number }[]) => {
       setState((prev) => ({ ...prev, goalScorers }));
     });
 

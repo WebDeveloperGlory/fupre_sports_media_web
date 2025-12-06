@@ -1,4 +1,4 @@
-import { BlogCategories, CoachRoles, CompetitionSponsors, CompetitionStatus, CompetitionTeamForm, CompetitionTypes, FixtureStatus, LogAction, SportType, TeamTypes, UserRole, UserStatus } from "./v2requestData.enums";
+import { BlogCategories, CoachRoles, CompetitionSponsors, CompetitionStatus, CompetitionTeamForm, CompetitionTypes, FixtureStatus, FixtureTimelineCardType, FixtureTimelineGoalType, FixtureTimelineType, LogAction, SportType, TeamType, TeamTypes, UserRole, UserStatus } from "./v2requestData.enums";
 import { FixtureCheerMeter, FixtureCommentary, FixtureLineup, FixtureOdds, FixturePlayerOfTheMatch, FixturePlayerRatings, FixtureResult, FixtureStat, FixtureStreamLinks, FixtureSubstitutions, FixtureTimeline, ShortPopulatedCompetition, ShortPopulatedPlayer, ShortPopulatedTeam } from "./v2requestSubData.types";
 
 export type UserPreference = {
@@ -64,7 +64,7 @@ export interface IV2FootballLiveFixture {
         away: FixtureLineup
     };
     substitutions: FixtureSubstitutions[];
-    timeline: FixtureTimeline[];
+    timeline: PopulatedFixtureTimeline[];
     commentary: FixtureCommentary[];
     streamLinks: FixtureStreamLinks[];
     cheerMeter: FixtureCheerMeter;
@@ -159,8 +159,8 @@ export interface IV2FootballCompetition {
         player: {
             name: string,
             winner: {
-                player: string,
-                team: string,
+                player: ShortPopulatedPlayer,
+                team: ShortPopulatedTeam,
             } | null
         }[],
         team: {
@@ -311,6 +311,7 @@ export interface IV2FootballFixture {
     };
     highlights: FixtureStreamLinks[];
     isDerby: Boolean;
+    odds: FixtureOdds;
 
     createdAt: Date;
     updatedAt: Date;
@@ -319,8 +320,8 @@ export interface IV2FootballFixture {
 export interface PopIV2FootballFixture {
     _id: string;
     competition: ShortPopulatedCompetition;
-    homeTeam: ShortPopulatedTeam; // hometeamID
-    awayTeam: ShortPopulatedTeam; // awayTeamID
+    homeTeam: ShortPopulatedTeam;
+    awayTeam: ShortPopulatedTeam;
     matchType: string;
     stadium: string;
     
@@ -330,23 +331,23 @@ export interface PopIV2FootballFixture {
     rescheduledDate: Date;
 
     result: FixtureResult;
-    goalScorers: { player: string, team: string, time: number }[];
+    goalScorers: { player: ExtendedPopulatedPlayer, team: ShortPopulatedTeam, time: number }[];
     statistics: {
         home: FixtureStat,
         away: FixtureStat
     };
 
     lineups: {
-            home: FixtureLineup,
-            away: FixtureLineup
-        };
-    substitutions: FixtureSubstitutions[];
+        home: PopulatedFixtureLineup;
+        away: PopulatedFixtureLineup;
+    };
+    substitutions: PopulatedFixtureSubstitutions[];
     
-    timeline: FixtureTimeline[];
+    timeline: PopulatedFixtureTimeline[];
     commentary: FixtureCommentary[];
 
-    playerOfTheMatch: FixturePlayerOfTheMatch;
-    playerRatings: FixturePlayerRatings[];
+    playerOfTheMatch: PopulatedFixturePlayerOfTheMatch;
+    playerRatings: PopulatedPlayerRatings[];
 
     referee: string;
     attendance: number;
@@ -356,10 +357,105 @@ export interface PopIV2FootballFixture {
     };
     highlights: FixtureStreamLinks[];
     isDerby: Boolean;
+    odds: FixtureOdds;
 
     createdAt: Date;
     updatedAt: Date;
 }
+
+// Updated type definitions to match the populate structure
+export type ExtendedPopulatedPlayer = {
+    _id: string;
+    name: string;
+    department: string;
+    admissionYear: string;
+    position?: string; // Optional as it's not in all populate selects
+}
+
+export type PopulatedFixtureLineup = {
+    startingXI: PopulatedStartingXI[];
+    substitutes: PopulatedSubstitute[];
+    formation: string;
+    coach: string;
+};
+
+export type PopulatedStartingXI = {
+    player: ExtendedPopulatedPlayer;
+    position: string;
+    shirtNumber: number;
+    isCaptain: boolean;
+};
+
+export type PopulatedSubstitute = {
+    player: ExtendedPopulatedPlayer;
+    position: string;
+    shirtNumber: number;
+};
+
+export type PopulatedFixtureSubstitutions = {
+    team: TeamType;
+    playerOut: ExtendedPopulatedPlayer;
+    playerIn: ExtendedPopulatedPlayer;
+    minute: number;
+    injury: boolean;
+};
+
+export type PopulatedFixtureTimeline = {
+    _id: string;
+    type: FixtureTimelineType;
+    team: TeamType;
+    player: ExtendedPopulatedPlayer;
+    relatedPlayer: ExtendedPopulatedPlayer | null;
+    minute: number;
+    injuryTime: boolean;
+    description: string;
+    goalType: FixtureTimelineGoalType | null;
+    cardType: FixtureTimelineCardType | null;
+};
+
+export type PopulatedFixturePlayerOfTheMatch = {
+    official: ExtendedPopulatedPlayer;
+    fanVotes: PopulatedFanPOTMVote[];
+    userVotes: PopulatedUserPOTMVote[];
+};
+
+export type PopulatedFanPOTMVote = {
+    player: ExtendedPopulatedPlayer;
+    votes: number;
+};
+
+export type PopulatedUserPOTMVote = {
+    userId: string;
+    playerId: ExtendedPopulatedPlayer;
+    timestamp: Date;
+};
+
+export type PopulatedPlayerRatings = {
+    player: ExtendedPopulatedPlayer;
+    team: TeamType;
+    official: {
+        rating: number;
+        ratedBy: string;
+    };
+    fanRatings: {
+        average: number;
+        count: number;
+        distribution: { 
+            '1': number; '2': number; '3': number;
+            '4': number; '5': number; '6': number;
+            '7': number; '8': number; '9': number;
+            '10': number;
+        };
+    };
+    stats: {
+        goals: number;
+        assists: number;
+        shots: number;
+        passes: number;
+        tackles: number;
+        saves: number;
+    };
+};
 
 export interface IV2Blog {
     _id: string;

@@ -32,6 +32,7 @@ type DashboardData = {
   };
   fixtures: {
     latest: {
+      _id: string;
       scheduledDate: Date;
       homeTeam: ShortPopulatedTeam;
       awayTeam: ShortPopulatedTeam;
@@ -452,7 +453,7 @@ export default function SportsOverviewPage() {
                     {dashboardData && dashboardData.fixtures.latest.length > 0 && dashboardData.fixtures.latest.map((fixture, index) => (
                       <Link
                         key={index}
-                        href={fixture.sport?.toLowerCase() === 'football' ? '/sports/football/fixtures' : fixture.sport?.toLowerCase() === 'basketball' ? '/sports/basketball/fixtures' : '/sports/football/fixtures'}
+                        href={fixture.sport?.toLowerCase() === 'football' ? `/sports/football/fixtures/${fixture._id}/stats` : fixture.sport?.toLowerCase() === 'basketball' ? `/sports/basketball/fixtures` : `/sports/football/fixtures/${fixture._id}/stats`}
                         className="block"
                       >
                         <div className="bg-card/40 backdrop-blur-sm rounded-xl p-6 border border-border hover:border-orange-500/30 transition-all duration-300">
