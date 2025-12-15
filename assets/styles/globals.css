@@ -1,3 +1,4 @@
+@import url('https://api.fontshare.com/v2/css?f[]=clash-grotesk@200,300,400,500,600,700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -32,6 +33,15 @@
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: 'Clash Grotesk', sans-serif;
   }
 
   .dark {
@@ -69,7 +79,7 @@
   * {
     @apply border-border;
   }
-  
+
   html {
     @apply antialiased;
   }

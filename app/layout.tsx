@@ -1,8 +1,9 @@
 // app/layout.tsx
 import '@/assets/styles/globals.css';
-import { Space_Grotesk } from 'next/font/google';
+import { GeistSans } from 'geist/font/sans';
 import { Analytics } from '@vercel/analytics/react';
 import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
 import { ThemeProvider } from '@/providers/theme-provider';
 import { LoadingProvider } from "@/providers/loading-provider";
 import { LoadingOverlay } from "@/components/ui/loading-overlay";
@@ -13,10 +14,7 @@ import { cookies } from 'next/headers';
 import AuthWrapper from '@/components/wrappers/AuthWrapper';
 import { AuthCheckWrapper } from '@/components/auth/AuthCheckWrapper';
 
-const spaceGrotesk = Space_Grotesk({ 
-  subsets: ['latin'],
-  weight: ['300', '400', '500', '600', '700']
-});
+
 
 export const metadata = {
   title: 'FUPRE Sports Media',
@@ -36,12 +34,12 @@ export default async function RootLayout({
 
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={spaceGrotesk.className}>
+      <body className={GeistSans.className}>
         <LoadingProvider>
           <ThemeProvider>
             <ToastProvider>
               {/* AuthWrapper for jwt */}
-              <AuthWrapper data={ availableCookies } />
+              <AuthWrapper data={availableCookies} />
               <LoadingOverlay />
               <NavigationEvents />
               <AuthCheckWrapper>
@@ -49,6 +47,7 @@ export default async function RootLayout({
                 <main className="px-4 pt-8 pb-20 md:px-6 md:pt-24 md:pb-6">
                   {children}
                   <Analytics />
+                  <Footer />
                 </main>
               </AuthCheckWrapper>
             </ToastProvider>

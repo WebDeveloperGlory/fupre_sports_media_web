@@ -1,103 +1,77 @@
-// components/Navbar.tsx
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { useState } from 'react';
-import { useTheme } from '@/providers/theme-provider';
-import { motion } from 'framer-motion';
-import { Home, Trophy, Newspaper, Play, Menu, X, LayoutDashboard, Award } from 'lucide-react';
-import { usePathname } from 'next/navigation';
-import { cn } from '@/utils/cn';
-import { useAuthStore } from '@/stores/v2/authStore';
-import { User } from 'lucide-react';
-import { UserRole } from '@/utils/V2Utils/v2requestData.enums';
-
-const menuVariants = {
-  hidden: { x: "100%", opacity: 0 },
-  visible: { x: "0%", opacity: 1, transition: { duration: 0.3, ease: "easeInOut" as const } },
-  exit: { x: "100%", opacity: 0, transition: { duration: 0.2, ease: "easeInOut" as const } },
-}
+import React, { useEffect, useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
+import { motion, AnimatePresence } from "framer-motion";
+import { useTheme } from "@/providers/theme-provider";
+import {
+  Home,
+  Trophy,
+  Newspaper,
+  Menu,
+  X,
+  User,
+  LogOut,
+  LayoutDashboard,
+  Sun,
+  Moon,
+  Search,
+  Bell,
+  ChevronRight,
+} from "lucide-react";
+import { useAuthStore } from "@/stores/v2/authStore";
 
 const Navbar = () => {
   const { theme, toggleTheme } = useTheme();
   const pathname = usePathname();
-  const { loading, user, isLoggedIn } = useAuthStore();
+  const { user, isLoggedIn } = useAuthStore();
   const [openMobileMenu, setOpenMobileMenu] = useState<boolean>(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  // Handle scroll effect
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const isActiveRoute = (path: string) => {
-    if (path === '/') return pathname === '/sports';
-    if (path === '/sports/competitions') {
-      return pathname === '/sports/competitions' ||
-        pathname === '/sports/football' ||
-        pathname === '/sports/basketball' ||
-        pathname.startsWith('/competitions') ||
-        pathname.startsWith('/fixtures') ||
-        pathname.startsWith('/live') ||
-        pathname.startsWith('/sports/football/competitions') ||
-        pathname.startsWith('/sports/football/fixtures') ||
-        pathname.startsWith('/sports/football/teams') ||
-        pathname.startsWith('/sports/football/live');
+    if (path === "/") {
+      return pathname === "/";
     }
-    if (path === '/sports/football/tots') {
-      return pathname.startsWith('/sports/football/tots');
-    }
-    if (path === '/news') {
-      return pathname === '/news' || pathname.startsWith('/news/');
-    }
-    if (path === '/admin/super-admin/football/dashboard') {
-      return pathname.startsWith('/admin/super-admin');
-    }
-    if (path === '/admin/media-admin/dashboard') {
-      return pathname.startsWith('/admin/media-admin');
-    }
-    return pathname === path;
+    return pathname.startsWith(path);
   };
 
   const navLinks = [
-    { href: '/', label: 'Home', icon: Home },
-    { href: '/sports/competitions', label: 'Competitions', icon: Trophy },
-    { href: '/sports/football/tots', label: 'TOTS', icon: Award },
-    { href: '/news', label: 'News', icon: Newspaper },
-    { href: '/highlights', label: 'Highlights', icon: Play },
+    { href: "/", label: "Home", icon: Home },
+    { href: "/matches", label: "Matches", icon: Trophy },
+    { href: "/news", label: "News", icon: Newspaper },
   ];
 
-  // Mobile bottom navigation links (excluding TOTS)
   const mobileBottomNavLinks = [
-    { href: '/', label: 'Home', icon: Home },
-    { href: '/sports/competitions', label: 'Competitions', icon: Trophy },
-    { href: '/news', label: 'News', icon: Newspaper },
-    { href: '/highlights', label: 'Highlights', icon: Play },
+    { href: "/", label: "Home", icon: Home },
+    { href: "/sports/competitions", label: "Scores", icon: Trophy },
+    { href: "/news", label: "News", icon: Newspaper },
+    { href: isLoggedIn ? "/profile" : "/auth/login", label: isLoggedIn ? "Profile" : "Login", icon: User },
   ];
 
-  // Admin links based on role
   const getAdminLinks = () => {
     if (!user) return [];
-    
-    switch(user.role) {
-      case UserRole.SUPER_ADMIN:
-        return [
-          { href: '/admin/super-admin/football/dashboard', label: 'Super Admin', icon: LayoutDashboard }
-        ];
-      case UserRole.MEDIA_ADMIN:
-      case UserRole.HEAD_MEDIA_ADMIN:
-        return [
-          { href: '/admin/media-admin/dashboard', label: 'Media Admin', icon: LayoutDashboard }
-        ];
-      case UserRole.COMPETITION_ADMIN:
-        return [
-          { href: '/admin/competition-admin/dashboard', label: 'Competition Admin', icon: LayoutDashboard }
-        ];
-      case UserRole.TEAM_ADMIN:
-        return [
-          { href: '/admin/team-admin/dashboard', label: 'Team Admin', icon: LayoutDashboard }
-        ];
-      case UserRole.LIVE_FIXTURE_ADMIN:
-        return [
-          { href: '/admin/live-fixture-admin/dashboard', label: 'Live Fixture Admin', icon: LayoutDashboard }
-        ];
-      default:
-        return [];
+
+    // Check if user has admin role (either locally or from Appwrite)
+    // Adjust this check based on your actual user object structure
+    const isAdmin = user.labels?.includes('admin') || user.email === 'admin@fupre.edu.ng'; // fallback for dev
+
+    if (isAdmin) {
+      return [
+        { href: "/admin", label: "Admin", icon: LayoutDashboard },
+      ];
     }
+    return [];
   };
 
   const adminLinks = getAdminLinks();
@@ -105,302 +79,268 @@ const Navbar = () => {
   return (
     <>
       {/* Desktop Navbar */}
-      <div className="fixed top-0 left-0 right-0 z-50 p-4 md:block hidden">
-        <nav className="mx-auto max-w-2xl rounded-full bg-navbar/60 backdrop-blur-md border border-white/30 dark:border-white/10 shadow-lg">
-          <div className="relative h-12 flex items-center justify-between px-4">
-            {/* Logo */}
+      <div className="fixed top-0 left-0 right-0 z-50 flex justify-center pt-6 px-4 pointer-events-none hidden md:flex">
+        <nav
+          className={cn(
+            "pointer-events-auto transition-all duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)]",
+            "relative flex items-center rounded-full",
+            "bg-background/70 backdrop-blur-2xl backdrop-saturate-150 border border-white/20 dark:border-white/10 shadow-lg shadow-black/5",
+            scrolled
+              ? "justify-center gap-1 px-3 py-2"
+              : "justify-between w-full max-w-4xl px-4 py-3"
+          )}
+        >
+          {/* Logo Section - Hidden when scrolled */}
+          <div className={cn(
+            "flex items-center z-10 transition-all duration-300",
+            scrolled ? "w-0 opacity-0 overflow-hidden" : "w-auto opacity-100"
+          )}>
             <Link
               href="/"
-              className={cn(
-                "text-lg font-semibold transition-colors",
-                isActiveRoute('/')
-                  ? "text-emerald-500"
-                  : "text-navbar-foreground hover:text-navbar-foreground/80"
-              )}
+              className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-gold/20 to-gold/5 text-gold font-bold text-lg shrink-0 transition-transform hover:scale-105 border border-gold/10"
             >
               FSM
             </Link>
-
-            {/* Desktop Navigation */}
-            <div className="flex items-center justify-center space-x-8">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.label}
-                  href={link.href}
-                  className={cn(
-                    "text-[15px] font-medium transition-colors",
-                    isActiveRoute(link.href)
-                      ? "text-emerald-500"
-                      : "text-navbar-muted hover:text-navbar-foreground"
-                  )}
-                >
-                  {link.label}
-                </Link>
-              ))}
-              {isLoggedIn && adminLinks.map((link) => (
-                <Link
-                  key={link.label}
-                  href={link.href}
-                  className={cn(
-                    "text-[15px] font-medium transition-colors",
-                    isActiveRoute(link.href)
-                      ? "text-emerald-500"
-                      : "text-navbar-muted hover:text-navbar-foreground"
-                  )}
-                >
-                  {link.label}
-                </Link>
-              ))}
-            </div>
-
-            {/* Modified auth section */}
-            <div className="flex items-center gap-4">
-              <Link
-                href={isLoggedIn ? "/profile" : "/auth/login"}
-                className="p-2 hover:bg-muted rounded-full transition-colors"
-              >
-                <User className="w-5 h-5" />
-              </Link>
-
-              {/* Theme toggle */}
-              <button
-                onClick={toggleTheme}
-                className="p-2 text-navbar-muted hover:text-navbar-foreground transition-colors"
-                aria-label="Toggle theme"
-              >
-                {theme === 'dark' ? (
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
-                    />
-                  </svg>
-                ) : (
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
-                    />
-                  </svg>
-                )}
-              </button>
-            </div>
           </div>
-        </nav>
-      </div>
 
-      {/* Mobile Bottom Navbar */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-navbar/60 backdrop-blur-md border-t border-white/20 dark:border-white/10 shadow-2xl">
-        <nav className="h-16">
-          <div className="grid grid-cols-5 h-full">
-            {mobileBottomNavLinks.map((link) => {
-              const Icon = link.icon;
+          {/* Desktop Navigation */}
+          <div className={cn(
+            "flex items-center gap-1",
+            !scrolled && "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+          )}>
+            {navLinks.map((link) => {
+              const isActive = isActiveRoute(link.href);
               return (
                 <Link
                   key={link.label}
                   href={link.href}
                   className={cn(
-                    "flex flex-col items-center justify-center space-y-1 transition-colors",
-                    isActiveRoute(link.href)
-                      ? "text-emerald-500"
-                      : "text-navbar-muted hover:text-navbar-foreground"
+                    "relative px-4 py-2 text-sm font-medium transition-colors rounded-full z-10",
+                    isActive
+                      ? "text-gold"
+                      : "text-muted-foreground hover:text-foreground"
                   )}
                 >
-                  <Icon className="h-5 w-5" />
-                  <span className="text-xs font-medium">{link.label}</span>
+                  {isActive && (
+                    <motion.div
+                      layoutId="navbar-pill"
+                      className="absolute inset-0 bg-gold/10 dark:bg-gold/20 rounded-full -z-10"
+                      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                    />
+                  )}
+                  {link.label}
                 </Link>
               );
             })}
+            {/* Admin Links */}
+            {adminLinks.map((link) => (
+              <Link
+                key={link.label}
+                href={link.href}
+                className="relative px-4 py-2 text-sm font-medium transition-colors rounded-full z-10 text-rose-500 hover:bg-rose-500/10"
+              >
+                {link.label}
+              </Link>
+            ))}
+          </div>
+
+          {/* Auth & Theme Section - Hidden when scrolled */}
+          <div className={cn(
+            "flex items-center gap-2 z-10 transition-all duration-300",
+            scrolled ? "w-0 opacity-0 overflow-hidden" : "w-auto opacity-100"
+          )}>
+            <button
+              onClick={toggleTheme}
+              className="relative w-10 h-10 flex items-center justify-center rounded-full hover:bg-muted/50 text-muted-foreground hover:text-foreground transition-colors outline-none focus-visible:ring-2 focus-visible:ring-gold/30"
+              aria-label="Toggle theme"
+            >
+              <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0 absolute" />
+              <Moon className="h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100 absolute" />
+            </button>
+
+            <Link
+              href={isLoggedIn ? "/profile" : "/auth/login"}
+              className="p-1 rounded-full border border-border/50 bg-background/50 hover:bg-accent transition-colors"
+            >
+              <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-gold to-yellow-300 flex items-center justify-center text-black font-medium text-xs">
+                {isLoggedIn && user?.name ? user.name[0].toUpperCase() : <User size={14} />}
+              </div>
+            </Link>
+          </div>
+        </nav>
+      </div>
+
+      {/* Mobile Bottom Navigation */}
+      <div className="md:hidden fixed bottom-4 left-4 right-4 z-50">
+        <nav className="rounded-2xl border border-white/20 bg-background/80 backdrop-blur-2xl backdrop-saturate-150 shadow-2xl shadow-black/10">
+          <div className="grid grid-cols-5 h-16 items-center px-2">
+            {mobileBottomNavLinks.map((link) => {
+              const isActive = isActiveRoute(link.href);
+              return (
+                <Link
+                  key={link.label}
+                  href={link.href}
+                  className={cn(
+                    "flex flex-col items-center justify-center space-y-1 h-full w-full rounded-xl transition-all duration-200",
+                    isActive ? "text-gold" : "text-muted-foreground hover:text-foreground active:scale-95"
+                  )}
+                >
+                  <link.icon className={cn("w-5 h-5", isActive && "fill-current")} />
+                  {/* <span className="text-[10px] font-medium">{link.label}</span> */}
+                </Link>
+              )
+            })}
             <button
               onClick={() => setOpenMobileMenu(true)}
-              className="flex flex-col items-center justify-center space-y-1 text-navbar-muted hover:text-navbar-foreground transition-colors"
+              className="flex flex-col items-center justify-center space-y-1 h-full w-full rounded-xl text-muted-foreground hover:text-foreground active:scale-95 transition-all"
             >
               <Menu className="w-5 h-5" />
-              <span className="text-xs font-medium">Menu</span>
             </button>
           </div>
         </nav>
       </div>
 
-      {/* Mobile Menu Display */}
-      {openMobileMenu && (
-        <motion.div
-          variants={menuVariants}
-          initial="hidden"
-          animate="visible"
-          exit="exit"
-          className="fixed inset-0 bg-navbar text-navbar-foreground z-50 lg:hidden"
-        >
-          <div className="flex flex-col h-full overflow-y-auto scrollbar-hide">
-            {/* Header */}
-            <div className="flex justify-between items-center border-b border-border p-5">
-              {/* Logo */}
-              <Link
-                href="/"
-                className={cn(
-                  "text-lg font-semibold transition-colors",
-                  isActiveRoute('/')
-                    ? "text-emerald-500"
-                    : "text-navbar-foreground hover:text-navbar-foreground/80"
-                )}
+      {/* Mobile Menu Overlay */}
+      <AnimatePresence>
+        {openMobileMenu && (
+          <motion.div
+            initial={{ opacity: 0, y: "100%" }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: "100%" }}
+            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            className="fixed inset-0 z-[60] bg-background/95 backdrop-blur-3xl md:hidden flex flex-col"
+          >
+            {/* Mobile Header */}
+            <div className="flex items-center justify-between p-6 border-b border-border/10">
+              <span className="text-xl font-bold tracking-tight">Menu</span>
+              <button
+                onClick={() => setOpenMobileMenu(false)}
+                className="p-2 rounded-full bg-muted/50 hover:bg-muted transition-colors"
               >
-                FSM
-              </Link>
-              <div className="flex items-center gap-4">
-                {/* Profile Link */}
-                <Link
-                  href={isLoggedIn ? "/profile" : "/auth/login"}
-                  onClick={() => setOpenMobileMenu(false)}
-                  className="p-2 rounded-full bg-secondary text-secondary-foreground hover:bg-muted transition-all"
-                >
-                  <User className="w-5 h-5" />
-                </Link>
+                <X className="w-5 h-5" />
+              </button>
+            </div>
 
-                {/* Theme Toggle Button */}
-                <button
-                  onClick={toggleTheme}
-                  className="p-2 rounded-full bg-secondary text-secondary-foreground hover:bg-muted transition-all"
-                  aria-label="Toggle theme"
-                >
-                  {theme === "dark" ? (
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
-                      />
-                    </svg>
-                  ) : (
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
-                      />
-                    </svg>
-                  )}
-                </button>
+            {/* Mobile Content */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-8">
 
-                {/* Close Menu Button */}
-                <X
-                  onClick={() => setOpenMobileMenu(false)}
-                  className="w-6 h-6 cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
+              {/* Search */}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <input
+                  type="text"
+                  placeholder="Search news, teams..."
+                  className="w-full h-12 pl-10 pr-4 rounded-xl bg-muted/30 border border-border/10 focus:border-gold/50 focus:ring-1 focus:ring-gold/50 outline-none transition-all placeholder:text-muted-foreground/50"
                 />
               </div>
-            </div>
 
-            {/* Navigation */}
-            <div className="p-5">
-              <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                Main Navigation
-              </h3>
-              <div className="space-y-2 mt-2">
-                {navLinks.map((link) => {
-                  const Icon = link.icon;
-                  return (
-                    <motion.div
+              {/* Quick Links */}
+              <div className="space-y-4">
+                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Navigation</h3>
+                <div className="grid gap-2">
+                  {navLinks.map((link) => (
+                    <Link
                       key={link.label}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
+                      href={link.href}
+                      onClick={() => setOpenMobileMenu(false)}
+                      className={cn(
+                        "flex items-center justify-between p-4 rounded-2xl border border-border/40 bg-card/30 hover:bg-card hover:border-gold/20 transition-all",
+                        isActiveRoute(link.href) && "border-gold/20 bg-gold/5"
+                      )}
                     >
-                      <Link
-                        href={link.href}
-                        onClick={() => setOpenMobileMenu(false)}
-                        className={cn(
-                          "flex items-center gap-4 px-4 py-3 rounded-lg transition-all",
-                          isActiveRoute(link.href)
-                            ? "bg-emerald-500/10 text-emerald-500"
-                            : "bg-secondary text-secondary-foreground hover:bg-accent hover:text-accent-foreground"
-                        )}
-                      >
-                        <Icon className={cn(
-                          "w-5 h-5",
-                          isActiveRoute(link.href)
-                            ? "text-emerald-500"
-                            : "text-muted-foreground"
-                        )} />
-                        <h3 className="font-medium">{link.label}</h3>
-                      </Link>
-                    </motion.div>
-                  );
-                })}
+                      <div className="flex items-center gap-4">
+                        <div className={cn("p-2 rounded-lg bg-background", isActiveRoute(link.href) ? "text-gold" : "text-muted-foreground")}>
+                          <link.icon className="w-5 h-5" />
+                        </div>
+                        <span className="font-medium">{link.label}</span>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-muted-foreground/50" />
+                    </Link>
+                  ))}
+                  {adminLinks.map((link) => (
+                    <Link
+                      key={link.label}
+                      href={link.href}
+                      onClick={() => setOpenMobileMenu(false)}
+                      className="flex items-center justify-between p-4 rounded-2xl border border-border/40 bg-red-500/5 hover:bg-red-500/10 hover:border-red-500/20 transition-all"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="p-2 rounded-lg bg-background text-red-500">
+                          <link.icon className="w-5 h-5" />
+                        </div>
+                        <span className="font-medium text-red-600 dark:text-red-400">{link.label}</span>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-red-500/50" />
+                    </Link>
+                  ))}
+                </div>
               </div>
 
-              {/* TOTS Promotional Banner */}
-              <div className="mt-6 mb-4">
-                <Link
-                  href="/football/tots"
-                  onClick={() => setOpenMobileMenu(false)}
-                >
-                  <motion.div
-                    className="relative overflow-hidden rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-800 p-4 shadow-lg"
-                    whileHover={{ scale: 1.03 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-emerald-500/20 blur-xl"></div>
-                    <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-emerald-500/20 blur-xl"></div>
-
-                    <div className="relative flex items-center gap-3">
-                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/10 backdrop-blur-sm">
-                        <Award className="h-6 w-6 text-white" />
+              {/* Auth Actions */}
+              <div className="space-y-4">
+                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Account</h3>
+                {isLoggedIn ? (
+                  <div className="space-y-2">
+                    <Link
+                      href="/profile"
+                      onClick={() => setOpenMobileMenu(false)}
+                      className="flex items-center gap-4 p-4 rounded-2xl bg-muted/30"
+                    >
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-gold to-yellow-300 flex items-center justify-center text-black font-bold">
+                        {user?.name?.[0].toUpperCase()}
                       </div>
                       <div>
-                        <h3 className="font-bold text-white">Team of the Season</h3>
-                        <p className="text-xs text-emerald-100">Vote for the best players now!</p>
+                        <p className="font-semibold">{user?.name}</p>
+                        <p className="text-sm text-muted-foreground">{user?.email}</p>
                       </div>
-                    </div>
-                  </motion.div>
-                </Link>
+                    </Link>
+                    <button className="w-full flex items-center justify-center gap-2 p-4 rounded-2xl border border-red-500/20 text-red-500 font-medium hover:bg-red-500/5 transition-colors">
+                      <LogOut className="w-4 h-4" />
+                      Sign Out
+                    </button>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 gap-4">
+                    <Link
+                      href="/auth/login"
+                      onClick={() => setOpenMobileMenu(false)}
+                      className="flex items-center justify-center p-4 rounded-xl border border-border/50 font-medium hover:bg-muted transition-colors"
+                    >
+                      Log In
+                    </Link>
+                    <Link
+                      href="/auth/signup"
+                      onClick={() => setOpenMobileMenu(false)}
+                      className="flex items-center justify-center p-4 rounded-xl bg-gold text-black font-bold hover:bg-gold/90 transition-colors"
+                    >
+                      Sign Up
+                    </Link>
+                  </div>
+                )}
               </div>
 
-              {isLoggedIn && user && adminLinks.length > 0 && (
-                <>
-                  <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mt-4">
-                    Admin Navigation
-                  </h3>
-                  <div className="space-y-2 mt-2">
-                    {adminLinks.map((link) => {
-                      const Icon = link.icon;
-                      return (
-                        <motion.div
-                          key={link.label}
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                        >
-                          <Link
-                            href={link.href}
-                            onClick={() => setOpenMobileMenu(false)}
-                            className={cn(
-                              "flex items-center gap-4 px-4 py-3 rounded-lg transition-all",
-                              isActiveRoute(link.href)
-                                ? "bg-emerald-500/10 text-emerald-500"
-                                : "bg-secondary text-secondary-foreground hover:bg-accent hover:text-accent-foreground"
-                            )}
-                          >
-                            <Icon className={cn(
-                              "w-5 h-5",
-                              isActiveRoute(link.href)
-                                ? "text-emerald-500"
-                                : "text-muted-foreground"
-                            )} />
-                            <h3 className="font-medium">{link.label}</h3>
-                          </Link>
-                        </motion.div>
-                      );
-                    })}
-                  </div>
-                </>
-              )}
+              {/* Theme Toggle in Menu */}
+              <div className="flex items-center justify-between p-4 rounded-2xl bg-muted/20">
+                <span className="font-medium">Appearance</span>
+                <button
+                  onClick={toggleTheme}
+                  className="flex items-center gap-2 px-4 py-2 rounded-full bg-background border border-border/50 text-sm font-medium"
+                >
+                  {theme === 'dark' ? (
+                    <>
+                      <Moon className="w-4 h-4" /> Dark Mode
+                    </>
+                  ) : (
+                    <>
+                      <Sun className="w-4 h-4" /> Light Mode
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
-          </div>
-        </motion.div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 };

@@ -20,6 +20,7 @@
     "cookie": "^1.0.2",
     "date-fns": "^4.1.0",
     "framer-motion": "^12.4.0",
+    "geist": "^1.5.1",
     "gsap": "^3.13.0",
     "html2canvas": "^1.4.1",
     "jwt-decode": "^4.0.0",
@@ -34,13 +35,19 @@
     "socket.io-client": "^4.8.1",
     "zustand": "^5.0.3"
   },
+  "pnpm": {
+    "overrides": {
+      "@types/react": "^19.0.8",
+      "@types/react-dom": "^19.0.3"
+    }
+  },
   "devDependencies": {
     "@types/cors": "^2.8.19",
     "@types/lodash": "^4.17.15",
     "@types/node": "^20.17.17",
     "@types/react": "^19.0.8",
     "@types/react-dom": "^19.0.3",
-    "next": "15.2.4",
+    "next": "16.0.10",
     "postcss": "^8",
     "tailwind-merge": "^3.0.1",
     "tailwind-scrollbar-hide": "^2.0.0",

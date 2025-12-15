@@ -55,7 +55,7 @@ const Footer = () => {
             <p className="text-muted-foreground text-sm mb-6 max-w-xs">
               Your ultimate destination for university sports coverage, live updates, and comprehensive sports media.
             </p>
-            
+
             {/* Contact Info */}
             <div className="space-y-2">
               {contactInfo.map((item, index) => {
