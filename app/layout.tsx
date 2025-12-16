@@ -3,7 +3,6 @@ import '@/assets/styles/globals.css';
 import { GeistSans } from 'geist/font/sans';
 import { Analytics } from '@vercel/analytics/react';
 import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
 import { ThemeProvider } from '@/providers/theme-provider';
 import { LoadingProvider } from "@/providers/loading-provider";
 import { LoadingOverlay } from "@/components/ui/loading-overlay";
@@ -47,7 +46,6 @@ export default async function RootLayout({
                 <main className="px-4 pt-8 pb-20 md:px-6 md:pt-24 md:pb-6">
                   {children}
                   <Analytics />
-                  <Footer />
                 </main>
               </AuthCheckWrapper>
             </ToastProvider>

@@ -6,6 +6,7 @@ import { ArrowRight, Trophy, Newspaper, Zap, Activity, Clock, Calendar, ChevronR
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { motion } from 'framer-motion';
+import Footer from '@/components/Footer';
 
 // Mock Data (In a real app, this would be fetched)
 const latestArticles = [
@@ -308,7 +309,7 @@ export default function RootPage() {
         </div>
       </section>
 
-
+      <Footer />
 
     </div>
   );
