@@ -20,6 +20,7 @@ import {
   Search,
   Bell,
   ChevronRight,
+  Play,
 } from "lucide-react";
 import { useAuthStore } from "@/stores/v2/authStore";
 
@@ -39,9 +40,13 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const isActiveRoute = (path: string) => {
+  const isActiveRoute = (path: string, parentPath?: string) => {
     if (path === "/") {
       return pathname === "/";
+    }
+    // If a parentPath is specified, check if pathname starts with it
+    if (parentPath) {
+      return pathname.startsWith(parentPath);
     }
     return pathname.startsWith(path);
   };
@@ -49,14 +54,15 @@ const Navbar = () => {
   const navLinks = [
     { href: "/", label: "Home", icon: Home },
     { href: "/matches", label: "Matches", icon: Trophy },
+    { href: "/highlights", label: "Highlights", icon: Trophy },
     { href: "/news", label: "News", icon: Newspaper },
   ];
 
   const mobileBottomNavLinks = [
     { href: "/", label: "Home", icon: Home },
-    { href: "/sports/competitions", label: "Scores", icon: Trophy },
+    { href: "/sports/competitions", label: "Scores", icon: Trophy, parentPath: "/sports" },
+    { href: "/highlights", label: "Highlights", icon: Play },
     { href: "/news", label: "News", icon: Newspaper },
-    { href: isLoggedIn ? "/profile" : "/auth/login", label: isLoggedIn ? "Profile" : "Login", icon: User },
   ];
 
   const getAdminLinks = () => {
@@ -175,18 +181,24 @@ const Navbar = () => {
         <nav className="rounded-2xl border border-white/20 bg-background/80 backdrop-blur-2xl backdrop-saturate-150 shadow-2xl shadow-black/10">
           <div className="grid grid-cols-5 h-16 items-center px-2">
             {mobileBottomNavLinks.map((link) => {
-              const isActive = isActiveRoute(link.href);
+              const isActive = isActiveRoute(link.href, link.parentPath);
               return (
                 <Link
                   key={link.label}
                   href={link.href}
                   className={cn(
-                    "flex flex-col items-center justify-center space-y-1 h-full w-full rounded-xl transition-all duration-200",
+                    "relative flex flex-col items-center justify-center space-y-1 h-full w-full rounded-xl transition-all duration-200",
                     isActive ? "text-gold" : "text-muted-foreground hover:text-foreground active:scale-95"
                   )}
                 >
+                  {isActive && (
+                    <motion.div
+                      layoutId="mobile-navbar-pill"
+                      className="absolute inset-1 bg-gold/10 dark:bg-gold/20 rounded-xl -z-10"
+                      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                    />
+                  )}
                   <link.icon className={cn("w-5 h-5", isActive && "fill-current")} />
-                  {/* <span className="text-[10px] font-medium">{link.label}</span> */}
                 </Link>
               )
             })}
