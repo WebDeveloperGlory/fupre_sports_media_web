@@ -40,13 +40,13 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const isActiveRoute = (path: string, parentPath?: string) => {
+  const isActiveRoute = (path: string, parentPaths?: string[]) => {
     if (path === "/") {
       return pathname === "/";
     }
-    // If a parentPath is specified, check if pathname starts with it
-    if (parentPath) {
-      return pathname.startsWith(parentPath);
+    // If parentPaths are specified, check if pathname starts with any of them
+    if (parentPaths && parentPaths.length > 0) {
+      return parentPaths.some(p => pathname.startsWith(p));
     }
     return pathname.startsWith(path);
   };
@@ -60,7 +60,7 @@ const Navbar = () => {
 
   const mobileBottomNavLinks = [
     { href: "/", label: "Home", icon: Home },
-    { href: "/sports/competitions", label: "Scores", icon: Trophy, parentPath: "/sports" },
+    { href: "/sports/competitions", label: "Scores", icon: Trophy, parentPaths: ["/sports", "/live"] },
     { href: "/highlights", label: "Highlights", icon: Play },
     { href: "/news", label: "News", icon: Newspaper },
   ];
@@ -68,9 +68,9 @@ const Navbar = () => {
   const getAdminLinks = () => {
     if (!user) return [];
 
-    // Check if user has admin role (either locally or from Appwrite)
-    // Adjust this check based on your actual user object structure
-    const isAdmin = user.labels?.includes('admin') || user.email === 'admin@fupre.edu.ng'; // fallback for dev
+    // Check if user has admin role
+    const adminRoles = ['super-admin', 'media-admin', 'head-media-admin', 'competition-admin', 'team-admin', 'live-fixture-admin'];
+    const isAdmin = adminRoles.includes(user.role) || user.email === 'admin@fupre.edu.ng';
 
     if (isAdmin) {
       return [
@@ -181,7 +181,7 @@ const Navbar = () => {
         <nav className="rounded-2xl border border-white/20 bg-background/80 backdrop-blur-2xl backdrop-saturate-150 shadow-2xl shadow-black/10">
           <div className="grid grid-cols-5 h-16 items-center px-2">
             {mobileBottomNavLinks.map((link) => {
-              const isActive = isActiveRoute(link.href, link.parentPath);
+              const isActive = isActiveRoute(link.href, link.parentPaths);
               return (
                 <Link
                   key={link.label}
