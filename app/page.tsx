@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight, Trophy, Newspaper, Play, Calendar, Clock, MapPin, ChevronRight } from 'lucide-react';
@@ -7,8 +8,10 @@ import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import Footer from '@/components/Footer';
 import GalleryCarousel from '@/components/GalleryCarousel';
+import { getFixtures, getUpcomingFixtures } from '@/lib/requests/v2/fixtures/requests';
+import { getAllCompetitions } from '@/lib/requests/v2/competition/requests';
 
-// Mock Data
+// Mock Data for news (to be replaced with real data later)
 const latestArticles = [
   {
     id: 3,
@@ -39,24 +42,105 @@ const latestArticles = [
   }
 ];
 
-const upcomingMatch = {
-  competition: "Unity Cup Championship",
-  teams: {
-    home: "Engineering FC",
-    away: "Science United"
-  },
-  date: "Tomorrow",
-  time: "4:00 PM",
-  venue: "FUPRE Sports Complex"
-};
-
 const quickLinks = [
   { href: "/sports/competitions", label: "Scores", icon: Trophy },
   { href: "/news", label: "News", icon: Newspaper },
   { href: "/highlights", label: "Highlights", icon: Play },
 ];
 
+// Types
+interface Fixture {
+  _id: string;
+  competition: { name: string; _id: string };
+  homeTeam: { name: string; shorthand?: string };
+  awayTeam: { name: string; shorthand?: string };
+  scheduledDate: string;
+  venue?: string;
+  status: string;
+}
+
+interface Stats {
+  liveMatches: number;
+  competitions: number;
+  teams: number;
+  fixtures: number;
+}
+
 export default function RootPage() {
+  const [stats, setStats] = useState<Stats>({
+    liveMatches: 0,
+    competitions: 0,
+    teams: 0,
+    fixtures: 0,
+  });
+  const [nextMatch, setNextMatch] = useState<Fixture | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch all data in parallel
+        const [liveRes, upcomingRes, competitionsRes, fixturesRes] = await Promise.all([
+          getFixtures('live', 50),
+          getUpcomingFixtures(1), // Get just the next match
+          getAllCompetitions(),
+          getFixtures(undefined, 100), // Get all fixtures for count
+        ]);
+
+        // Extract counts
+        const liveMatches = liveRes?.data?.length || 0;
+        const competitions = competitionsRes?.data?.length || 0;
+        const fixtures = fixturesRes?.data?.length || 0;
+
+        // Count unique teams from competitions
+        let teams = 0;
+        if (competitionsRes?.data) {
+          const teamSet = new Set<string>();
+          competitionsRes.data.forEach((comp: any) => {
+            if (comp.teams) {
+              comp.teams.forEach((team: any) => teamSet.add(team._id || team));
+            }
+          });
+          teams = teamSet.size || 12; // Fallback
+        }
+
+        setStats({
+          liveMatches,
+          competitions,
+          teams: teams || 12,
+          fixtures,
+        });
+
+        // Set next match
+        if (upcomingRes?.data && upcomingRes.data.length > 0) {
+          setNextMatch(upcomingRes.data[0]);
+        }
+      } catch (error) {
+        console.error('Error fetching homepage data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // Format date helper
+  const formatMatchDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    if (date.toDateString() === now.toDateString()) return 'Today';
+    if (date.toDateString() === tomorrow.toDateString()) return 'Tomorrow';
+    return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+  };
+
+  const formatMatchTime = (dateString: string) => {
+    return new Date(dateString).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground">
 
@@ -110,19 +194,19 @@ export default function RootPage() {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 text-center">
             <div className="py-2">
-              <span className="text-2xl md:text-4xl font-bold text-emerald-600 dark:text-emerald-400">2</span>
+              <span className="text-2xl md:text-4xl font-bold text-emerald-600 dark:text-emerald-400">{stats.liveMatches}</span>
               <p className="text-xs md:text-sm text-muted-foreground mt-1">Live Matches</p>
             </div>
             <div className="py-2">
-              <span className="text-2xl md:text-4xl font-bold">5</span>
+              <span className="text-2xl md:text-4xl font-bold">{stats.competitions}</span>
               <p className="text-xs md:text-sm text-muted-foreground mt-1">Competitions</p>
             </div>
             <div className="py-2">
-              <span className="text-2xl md:text-4xl font-bold">12</span>
+              <span className="text-2xl md:text-4xl font-bold">{stats.teams}</span>
               <p className="text-xs md:text-sm text-muted-foreground mt-1">Teams</p>
             </div>
             <div className="py-2">
-              <span className="text-2xl md:text-4xl font-bold">48</span>
+              <span className="text-2xl md:text-4xl font-bold">{stats.fixtures}</span>
               <p className="text-xs md:text-sm text-muted-foreground mt-1">Fixtures</p>
             </div>
           </div>
@@ -130,65 +214,73 @@ export default function RootPage() {
       </section>
 
       {/* Featured Match - Clean Split Layout */}
-      <section className="py-16 md:py-24">
-        <div className="container mx-auto px-4 max-w-4xl">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-2xl md:text-3xl font-bold">Next Match</h2>
+      <section className="py-12 md:py-24">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between mb-6 md:mb-8">
+            <h2 className="text-xl md:text-3xl font-bold">Next Match</h2>
             <Link href="/sports/competitions" className="text-sm font-medium text-muted-foreground hover:text-foreground flex items-center">
               All Fixtures <ChevronRight className="w-4 h-4 ml-1" />
             </Link>
           </div>
 
-          <div className="border border-border rounded-2xl overflow-hidden">
-            {/* Competition Header */}
-            <div className="bg-secondary/50 px-6 py-3 text-center">
-              <span className="text-sm font-medium text-muted-foreground">
-                {upcomingMatch.competition}
-              </span>
-            </div>
-
-            {/* Match Content */}
-            <div className="p-8 md:p-12">
-              <div className="flex items-center justify-between gap-4">
-                {/* Home Team */}
-                <div className="flex-1 text-center">
-                  <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-secondary mx-auto mb-4 flex items-center justify-center">
-                    <span className="text-2xl md:text-3xl font-bold">E</span>
-                  </div>
-                  <h3 className="font-bold text-lg md:text-xl">{upcomingMatch.teams.home}</h3>
-                </div>
-
-                {/* VS */}
-                <div className="flex flex-col items-center px-4 md:px-8">
-                  <span className="text-2xl md:text-3xl font-bold text-muted-foreground">VS</span>
-                </div>
-
-                {/* Away Team */}
-                <div className="flex-1 text-center">
-                  <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-secondary mx-auto mb-4 flex items-center justify-center">
-                    <span className="text-2xl md:text-3xl font-bold">S</span>
-                  </div>
-                  <h3 className="font-bold text-lg md:text-xl">{upcomingMatch.teams.away}</h3>
-                </div>
+          {nextMatch ? (
+            <div className="border border-border rounded-2xl overflow-hidden">
+              {/* Competition Header */}
+              <div className="bg-secondary/50 px-4 py-2 md:px-6 md:py-3 text-center">
+                <span className="text-xs md:text-sm font-medium text-muted-foreground">
+                  {nextMatch.competition?.name || 'Competition'}
+                </span>
               </div>
 
-              {/* Match Details */}
-              <div className="flex flex-wrap justify-center gap-6 mt-8 text-sm text-muted-foreground">
-                <div className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4" />
-                  <span>{upcomingMatch.date}</span>
+              {/* Match Content */}
+              <div className="p-4 md:p-12">
+                <div className="flex items-center justify-between gap-2 md:gap-4">
+                  {/* Home Team */}
+                  <div className="flex-1 text-center min-w-0">
+                    <div className="w-12 h-12 md:w-20 md:h-20 rounded-full bg-secondary mx-auto mb-2 md:mb-4 flex items-center justify-center">
+                      <span className="text-lg md:text-3xl font-bold">{nextMatch.homeTeam?.shorthand?.[0] || nextMatch.homeTeam?.name?.[0] || 'H'}</span>
+                    </div>
+                    <h3 className="font-bold text-sm md:text-xl truncate">{nextMatch.homeTeam?.name || 'Home Team'}</h3>
+                  </div>
+
+                  {/* VS */}
+                  <div className="flex flex-col items-center px-2 md:px-8 flex-shrink-0">
+                    <span className="text-lg md:text-3xl font-bold text-muted-foreground">VS</span>
+                  </div>
+
+                  {/* Away Team */}
+                  <div className="flex-1 text-center min-w-0">
+                    <div className="w-12 h-12 md:w-20 md:h-20 rounded-full bg-secondary mx-auto mb-2 md:mb-4 flex items-center justify-center">
+                      <span className="text-lg md:text-3xl font-bold">{nextMatch.awayTeam?.shorthand?.[0] || nextMatch.awayTeam?.name?.[0] || 'A'}</span>
+                    </div>
+                    <h3 className="font-bold text-sm md:text-xl truncate">{nextMatch.awayTeam?.name || 'Away Team'}</h3>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Clock className="w-4 h-4" />
-                  <span>{upcomingMatch.time}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <MapPin className="w-4 h-4" />
-                  <span>{upcomingMatch.venue}</span>
+
+                {/* Match Details */}
+                <div className="flex flex-col md:flex-row items-center justify-center gap-3 md:gap-6 mt-6 md:mt-8 text-xs md:text-sm text-muted-foreground">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-3 h-3 md:w-4 md:h-4" />
+                    <span>{formatMatchDate(nextMatch.scheduledDate)}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-3 h-3 md:w-4 md:h-4" />
+                    <span>{formatMatchTime(nextMatch.scheduledDate)}</span>
+                  </div>
+                  {nextMatch.venue && (
+                    <div className="flex items-center gap-2">
+                      <MapPin className="w-3 h-3 md:w-4 md:h-4" />
+                      <span>{nextMatch.venue}</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
-          </div>
+          ) : (
+            <div className="border border-border rounded-2xl p-8 md:p-12 text-center">
+              <p className="text-muted-foreground">No upcoming matches scheduled</p>
+            </div>
+          )}
         </div>
       </section>
 
