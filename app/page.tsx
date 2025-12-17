@@ -86,34 +86,36 @@ export default function RootPage() {
           getAllCompetitions(),
           getFixtures(undefined, 100), // Get all fixtures for count
         ]);
+        // Extract counts with Array.isArray checks
+        const liveData = Array.isArray(liveRes?.data) ? liveRes.data : [];
+        const competitionsData = Array.isArray(competitionsRes?.data) ? competitionsRes.data : [];
+        const fixturesData = Array.isArray(fixturesRes?.data) ? fixturesRes.data : [];
+        const upcomingData = Array.isArray(upcomingRes?.data) ? upcomingRes.data : [];
 
-        // Extract counts
-        const liveMatches = liveRes?.data?.length || 0;
-        const competitions = competitionsRes?.data?.length || 0;
-        const fixtures = fixturesRes?.data?.length || 0;
+        const liveMatches = liveData.length;
+        const competitions = competitionsData.length;
+        const fixtures = fixturesData.length;
 
         // Count unique teams from competitions
         let teams = 0;
-        if (competitionsRes?.data) {
-          const teamSet = new Set<string>();
-          competitionsRes.data.forEach((comp: any) => {
-            if (comp.teams) {
-              comp.teams.forEach((team: any) => teamSet.add(team._id || team));
-            }
-          });
-          teams = teamSet.size || 12; // Fallback
-        }
+        const teamSet = new Set<string>();
+        competitionsData.forEach((comp: any) => {
+          if (comp.teams && Array.isArray(comp.teams)) {
+            comp.teams.forEach((team: any) => teamSet.add(team._id || team));
+          }
+        });
+        teams = teamSet.size || 12;
 
         setStats({
           liveMatches,
           competitions,
-          teams: teams || 12,
+          teams,
           fixtures,
         });
 
         // Set next match
-        if (upcomingRes?.data && upcomingRes.data.length > 0) {
-          setNextMatch(upcomingRes.data[0]);
+        if (upcomingData.length > 0) {
+          setNextMatch(upcomingData[0]);
         }
       } catch (error) {
         console.error('Error fetching homepage data:', error);
@@ -145,13 +147,13 @@ export default function RootPage() {
     <div className="min-h-screen bg-background text-foreground pb-20 md:pb-0">
 
       {/* Hero Section - Clean, Bold, Minimal */}
-      <section className="pt-16 pb-12 md:pt-24 md:pb-20 px-4">
+      <section className="pt-12 pb-8 md:pt-16 md:pb-12 px-4">
         <div className="container mx-auto max-w-5xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="text-center space-y-8"
+            className="text-center space-y-5"
           >
             {/* Season Badge */}
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-emerald-500/30 bg-emerald-500/10">

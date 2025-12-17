@@ -30,23 +30,24 @@ export default function CompetitionsPage() {
           getFixtures(undefined, 100),
         ]);
 
-        const competitions = competitionsRes?.data?.length || 0;
-        const matches = fixturesRes?.data?.length || 0;
+        const competitionsData = Array.isArray(competitionsRes?.data) ? competitionsRes.data : [];
+        const fixturesData = Array.isArray(fixturesRes?.data) ? fixturesRes.data : [];
+
+        const competitions = competitionsData.length;
+        const matches = fixturesData.length;
 
         // Count unique teams
         let teams = 0;
-        if (competitionsRes?.data) {
-          const teamSet = new Set<string>();
-          competitionsRes.data.forEach((comp: any) => {
-            if (comp.teams) {
-              comp.teams.forEach((team: any) => teamSet.add(team._id || team));
-            }
-          });
-          teams = teamSet.size || 12;
-        }
+        const teamSet = new Set<string>();
+        competitionsData.forEach((comp: any) => {
+          if (comp.teams && Array.isArray(comp.teams)) {
+            comp.teams.forEach((team: any) => teamSet.add(team._id || team));
+          }
+        });
+        teams = teamSet.size || 12;
 
         // Count completed competitions as champions
-        const champions = competitionsRes?.data?.filter((c: any) => c.status === 'completed')?.length || 0;
+        const champions = competitionsData.filter((c: any) => c.status === 'completed').length;
 
         setStats({
           competitions,
@@ -111,13 +112,13 @@ export default function CompetitionsPage() {
   return (
     <main className="min-h-screen bg-background pb-20 md:pb-0">
       {/* Hero Section - Clean, Minimal */}
-      <section className="pt-16 pb-12 md:pt-24 md:pb-16 px-4">
+      <section className="pt-12 pb-8 md:pt-16 md:pb-12 px-4">
         <div className="container mx-auto max-w-5xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="text-center space-y-6"
+            className="text-center space-y-4"
           >
             {/* Season Badge */}
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-emerald-500/30 bg-emerald-500/10">
