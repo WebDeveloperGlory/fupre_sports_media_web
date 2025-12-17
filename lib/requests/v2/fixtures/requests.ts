@@ -21,9 +21,10 @@ interface SuccessRequest {
 const PART_API_URL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_PROD_API_URL : process.env.NEXT_PUBLIC_DEV_PARTIAL_API_URL;
 const API_URL = process.env.NEXT_PUBLIC_DEV_MODE === 'partial' ? PART_API_URL : `${PART_API_URL}/v2`;
 
-export const getFixtures = async (status?: string, limit: number = 50) => {
+export const getFixtures = async (status?: string, limit: number = 50, sortAscending: boolean = false) => {
     try {
-        let url = `${API_URL}/fixture?limit=${limit}&sort=-scheduledDate`;
+        const sortOrder = sortAscending ? 'scheduledDate' : '-scheduledDate';
+        let url = `${API_URL}/fixture?limit=${limit}&sort=${sortOrder}`;
         if (status) {
             url += `&status=${status}`;
         }
@@ -36,21 +37,21 @@ export const getFixtures = async (status?: string, limit: number = 50) => {
         }
 
         return data;
-    } catch( err: any ) {
+    } catch (err: any) {
         const { response } = err as CustomError;
 
-        if( err?.status && err?.message ) {
-            console.error( `Error ${ err.status }: `, response?.data.message )
+        if (err?.status && err?.message) {
+            console.error(`Error ${err.status}: `, response?.data.message)
             return response?.data || null;
         } else {
-            console.error('Error fetching fixtures: ', err );
+            console.error('Error fetching fixtures: ', err);
             return null;
         }
     }
 };
 
 export const getUpcomingFixtures = async (limit: number = 50) => {
-    return getFixtures('scheduled', limit);
+    return getFixtures('scheduled', limit, true); // Sort ascending to get soonest first
 };
 
 export const getCompletedFixtures = async (limit: number = 50) => {
@@ -72,14 +73,14 @@ export const getFixturesByCompetition = async (competitionId: string, status?: s
         }
 
         return data;
-    } catch( err: any ) {
+    } catch (err: any) {
         const { response } = err as CustomError;
 
-        if( err?.status && err?.message ) {
-            console.error( `Error ${ err.status }: `, response?.data.message )
+        if (err?.status && err?.message) {
+            console.error(`Error ${err.status}: `, response?.data.message)
             return response?.data || null;
         } else {
-            console.error('Error fetching fixtures by competition: ', err );
+            console.error('Error fetching fixtures by competition: ', err);
             return null;
         }
     }
@@ -95,14 +96,14 @@ export const getFixtureById = async (fixtureId: string) => {
         }
 
         return data;
-    } catch( err: any ) {
+    } catch (err: any) {
         const { response } = err as CustomError;
 
-        if( err?.status && err?.message ) {
-            console.error( `Error ${ err.status }: `, response?.data.message )
+        if (err?.status && err?.message) {
+            console.error(`Error ${err.status}: `, response?.data.message)
             return response?.data || null;
         } else {
-            console.error('Error fetching fixture by id: ', err );
+            console.error('Error fetching fixture by id: ', err);
             return null;
         }
     }

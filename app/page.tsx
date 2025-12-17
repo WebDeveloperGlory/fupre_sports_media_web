@@ -142,7 +142,7 @@ export default function RootPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground pb-20 md:pb-0">
 
       {/* Hero Section - Clean, Bold, Minimal */}
       <section className="pt-16 pb-12 md:pt-24 md:pb-20 px-4">
