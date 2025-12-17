@@ -1,13 +1,11 @@
 'use client';
 
-import { BlurFade } from "@/components/ui/blur-fade";
 import { BackButton } from "@/components/ui/back-button";
 import { Loader } from "@/components/ui/loader";
 import Image from "next/image";
-import { Trophy, Calendar, Clock, Users, History, Swords, Target, AlertCircle, Star, Crown, Award, ThumbsUp, Download, Share2 } from "lucide-react";
+import { Trophy, Calendar, Clock, Users, Target, Star, Crown, Award, ThumbsUp, Download, Share2 } from "lucide-react";
 import { notFound } from "next/navigation";
 import { use, useEffect, useState, useRef } from "react";
-import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { PopIV2FootballFixture } from "@/utils/V2Utils/v2requestData.types";
 import { FixtureStatus } from "@/utils/V2Utils/v2requestData.enums";
@@ -28,7 +26,6 @@ export default function MatchStatsPage({
   const [activeTab, setActiveTab] = useState<'details' | 'lineups' | 'stats' | 'ratings'>('details');
   const [showShareCards, setShowShareCards] = useState(false);
 
-  // Refs for share cards
   const scoreCardRef = useRef<HTMLDivElement>(null);
   const potmCardRef = useRef<HTMLDivElement>(null);
   const statsCardRef = useRef<HTMLDivElement>(null);
@@ -43,7 +40,6 @@ export default function MatchStatsPage({
 
         if (response && response.data) {
           setFixture(response.data);
-          // Set default tab based on fixture status
           setActiveTab(response.data.status === FixtureStatus.SCHEDULED ? 'details' : 'stats');
         } else {
           setError("Fixture not found");
@@ -59,10 +55,9 @@ export default function MatchStatsPage({
     fetchFixture();
   }, [resolvedParams.id]);
 
-  // Function to download card as image
   const downloadCard = async (cardRef: React.RefObject<HTMLDivElement | null>, filename: string) => {
     if (!cardRef.current) return;
-    
+
     try {
       const canvas = await html2canvas(cardRef!.current, {
         backgroundColor: '#ffffff',
@@ -70,7 +65,7 @@ export default function MatchStatsPage({
         logging: false,
         useCORS: true,
       });
-      
+
       const link = document.createElement('a');
       link.download = `${filename}.png`;
       link.href = canvas.toDataURL();
@@ -80,7 +75,6 @@ export default function MatchStatsPage({
     }
   };
 
-  // Function to share card
   const shareCard = async (cardRef: React.RefObject<HTMLDivElement | null>, title: string) => {
     if (navigator.share) {
       try {
@@ -93,195 +87,85 @@ export default function MatchStatsPage({
         console.error('Error sharing:', error);
       }
     } else {
-      // Fallback - copy URL to clipboard
       navigator.clipboard.writeText(window.location.href);
       alert('Link copied to clipboard!');
     }
   };
 
-  if (loading) {
-    return <Loader />;
-  }
-
-  if (error || !fixture) {
-    notFound();
-  }
+  if (loading) return <Loader />;
+  if (error || !fixture) notFound();
 
   const formattedDate = format(new Date(fixture.scheduledDate), 'MMM dd, yyyy');
   const formattedTime = format(new Date(fixture.scheduledDate), 'HH:mm');
 
   const totalElapsedGameTime = fixture ? fixture.statistics.home.possessionTime + fixture.statistics.away.possessionTime : 0;
-  const homePossession = totalElapsedGameTime > 0 ? ( fixture!.statistics.home.possessionTime / totalElapsedGameTime ) * 100 : 50;
+  const homePossession = totalElapsedGameTime > 0 ? (fixture!.statistics.home.possessionTime / totalElapsedGameTime) * 100 : 50;
   const awayPossession = 100 - homePossession;
 
-  // Helper function to get star rating display
-  const getStarRating = (rating: number) => {
-    const fullStars = Math.floor(rating);
-    const hasHalfStar = rating % 1 >= 0.5;
-    
-    return (
-      <div className="flex items-center gap-0.5">
-        {[...Array(fullStars)].map((_, i) => (
-          <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-        ))}
-        {hasHalfStar && (
-          <div className="relative">
-            <Star className="w-4 h-4 text-gray-300" />
-            <div className="absolute inset-0 overflow-hidden" style={{ width: '50%' }}>
-              <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-            </div>
-          </div>
-        )}
-        {[...Array(Math.max(0, 10 - Math.ceil(rating)))].map((_, i) => (
-          <Star key={`empty-${i}`} className="w-4 h-4 text-gray-300" />
-        ))}
-        <span className="ml-2 text-sm font-medium">{rating.toFixed(1)}</span>
-      </div>
-    );
-  };
-
-  // Helper function to get position badge color
   const getPositionColor = (position: string) => {
     const pos = position?.toLowerCase();
-    if (pos?.includes('gk') || pos?.includes('goalkeeper')) return 'bg-yellow-500/10 text-yellow-600 border-yellow-500/20';
-    if (pos?.includes('def') || pos?.includes('back')) return 'bg-blue-500/10 text-blue-600 border-blue-500/20';
-    if (pos?.includes('mid')) return 'bg-green-500/10 text-green-600 border-green-500/20';
-    if (pos?.includes('for') || pos?.includes('att') || pos?.includes('wing')) return 'bg-red-500/10 text-red-600 border-red-500/20';
-    return 'bg-gray-500/10 text-gray-600 border-gray-500/20';
+    if (pos?.includes('gk') || pos?.includes('goalkeeper')) return 'bg-amber-500/10 text-amber-600 border-amber-500/30';
+    if (pos?.includes('def') || pos?.includes('back')) return 'bg-blue-500/10 text-blue-600 border-blue-500/30';
+    if (pos?.includes('mid')) return 'bg-emerald-500/10 text-emerald-600 border-emerald-500/30';
+    if (pos?.includes('for') || pos?.includes('att') || pos?.includes('wing')) return 'bg-red-500/10 text-red-600 border-red-500/30';
+    return 'bg-secondary text-muted-foreground border-border';
   };
 
-  // Shareable Cards Components
+  // Shareable Cards
   const ScoreCard = () => (
-    <div ref={scoreCardRef} className="bg-card p-6 rounded-xl shadow-lg max-w-md mx-auto border border-muted-foreground z-10">
-      {/* Header */}
+    <div ref={scoreCardRef} className="bg-background p-6 rounded-lg border border-border max-w-md mx-auto">
       <div className="text-center mb-4">
-        <div className="text-emerald-600 font-bold text-lg">{fixture.competition.name}</div>
+        <div className="text-emerald-600 dark:text-emerald-400 font-bold">{fixture.competition.name}</div>
         <div className="text-muted-foreground text-sm">{formattedDate}</div>
       </div>
-
-      {/* Teams and Score */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex flex-col items-center gap-2 w-1/3">
-          <div className="w-16 h-16 relative">
-            <Image
-              src={teamLogos[fixture.homeTeam.name] || '/images/team_logos/default.jpg'}
-              alt={fixture.homeTeam.name}
-              fill
-              className="object-contain rounded-full"
-            />
+          <div className="w-14 h-14 relative">
+            <Image src={teamLogos[fixture.homeTeam.name] || '/images/team_logos/default.jpg'} alt={fixture.homeTeam.name} fill className="object-contain rounded-full" />
           </div>
-          <span className="text-sm font-medium text-center">
-            {fixture.homeTeam.name}
-          </span>
+          <span className="text-sm font-medium text-center">{fixture.homeTeam.name}</span>
         </div>
-
         <div className="flex flex-col items-center">
-          <div className="text-3xl font-bold text-emerald-600">
+          <div className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">
             {fixture.result.homeScore} - {fixture.result.awayScore}
           </div>
-          <div className="text-xs">Full Time</div>
-          {/* Half Time Score if available */}
-          {fixture.result.halftimeHomeScore !== null && fixture.result.halftimeAwayScore !== null && (
-            <div className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-              HT: {fixture.result.halftimeHomeScore} - {fixture.result.halftimeAwayScore}
-            </div>
-          )}
+          <div className="text-xs text-muted-foreground">Full Time</div>
         </div>
-
         <div className="flex flex-col items-center gap-2 w-1/3">
-          <div className="w-16 h-16 relative">
-            <Image
-              src={teamLogos[fixture.awayTeam.name] || '/images/team_logos/default.jpg'}
-              alt={fixture.awayTeam.name}
-              fill
-              className="object-contain rounded-full"
-            />
+          <div className="w-14 h-14 relative">
+            <Image src={teamLogos[fixture.awayTeam.name] || '/images/team_logos/default.jpg'} alt={fixture.awayTeam.name} fill className="object-contain rounded-full" />
           </div>
-          <span className="text-sm font-medium text-center">
-            {fixture.awayTeam.name}
-          </span>
+          <span className="text-sm font-medium text-center">{fixture.awayTeam.name}</span>
         </div>
       </div>
-
-      {/* Goal Scorers */}
-      {fixture.goalScorers && fixture.goalScorers.length > 0 && (
-        <div className="border-t pt-3">
-          <div className="text-sm font-semibold mb-2">Goal Scorers</div>
-          {fixture.goalScorers.slice(0, 4).map((scorer, index) => (
-            <div key={index} className={`text-xs text-muted-foreground mb-1 ${scorer.team?.name === fixture.awayTeam.name ? 'text-right' : 'text-left'}`}>
-              ⚽ {scorer.player?.name} {scorer.time}'
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Call to Action */}
-      <div className="border-t pt-3 mt-3 text-center">
+      <div className="border-t border-border pt-3 text-center">
         <div className="text-xs text-muted-foreground">Get live match updates on</div>
-        <div className="text-sm font-semibold text-emerald-600">Fupre Sports Media</div>
+        <div className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">Fupre Sports Media</div>
       </div>
     </div>
   );
 
   const POTMCard = () => (
-    <div ref={potmCardRef} className="bg-card p-6 rounded-xl shadow-lg max-w-md mx-auto border border-muted-foreground">
-      {/* Header */}
+    <div ref={potmCardRef} className="bg-background p-6 rounded-lg border border-border max-w-md mx-auto">
       <div className="text-center mb-4">
         <div className="flex items-center justify-center gap-2 mb-2">
-          <Crown className="w-5 h-5 text-yellow-500" />
-          <span className="text-lg font-bold">Player of the Match</span>
+          <Crown className="w-5 h-5 text-amber-500" />
+          <span className="font-bold">Player of the Match</span>
         </div>
-        <div className="text-sm">{fixture.homeTeam.name} vs {fixture.awayTeam.name}</div>
+        <div className="text-sm text-muted-foreground">{fixture.homeTeam.name} vs {fixture.awayTeam.name}</div>
       </div>
-
-      {/* POTM */}
       {fixture.playerOfTheMatch?.official && (
-        <div className="bg-primary-foreground rounded-lg p-4 mb-4 border border-muted-foreground">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-12 h-12 bg-yellow-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
-              👑
-            </div>
+        <div className="bg-secondary rounded-lg p-4 mb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-amber-500 rounded-full flex items-center justify-center text-xl">👑</div>
             <div>
               <div className="font-bold text-lg">{fixture.playerOfTheMatch.official.name}</div>
               <div className="text-sm text-muted-foreground">{fixture.playerOfTheMatch.official.department}</div>
-              <div className="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full inline-block mt-1">
-                {fixture.playerOfTheMatch.official.position}
-              </div>
             </div>
           </div>
         </div>
       )}
-
-      {/* Top 5 Ratings */}
-      {fixture.playerRatings && fixture.playerRatings.length > 0 && (
-        <div>
-          <div className="text-sm font-semibold text-muted-foreground mb-3">Top Rated Players</div>
-          <div className="space-y-2">
-            {fixture.playerRatings
-              .sort((a, b) => b.official ? b.official.rating - a.official.rating : 0)
-              .slice(0, 5)
-              .map((rating, index) => (
-                <div key={index} className="flex items-center justify-between p-2 bg-primary-foreground rounded-lg">
-                  <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center text-xs font-bold">
-                      {index + 1}
-                    </div>
-                    <div>
-                      <div className="text-sm font-medium">{rating.player.name}</div>
-                      <div className="text-xs text-muted-foreground">{rating.player.position}</div>
-                    </div>
-                  </div>
-                  <div className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
-                    {rating.official.rating.toFixed(1)}
-                  </div>
-                </div>
-              ))}
-          </div>
-        </div>
-      )}
-
-      {/* Call to Action */}
-      <div className="border-t pt-3 mt-4 text-center">
+      <div className="border-t border-border pt-3 text-center">
         <div className="text-xs text-muted-foreground">View detailed player ratings on</div>
         <div className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">Fupre Sports Media</div>
       </div>
@@ -289,72 +173,35 @@ export default function MatchStatsPage({
   );
 
   const StatsCard = () => (
-    <div ref={statsCardRef} className="bg-card p-6 rounded-xl shadow-lg max-w-md mx-auto border border-muted-foreground">
-      {/* Header */}
+    <div ref={statsCardRef} className="bg-background p-6 rounded-lg border border-border max-w-md mx-auto">
       <div className="text-center mb-4">
         <div className="flex items-center justify-center gap-2 mb-2">
-          <Trophy className="w-5 h-5 text-emerald-500" />
-          <span className="text-lg font-bold">Match Statistics</span>
+          <Trophy className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+          <span className="font-bold">Match Statistics</span>
         </div>
-        <div className="text-sm">{fixture.homeTeam.name} vs {fixture.awayTeam.name}</div>
-        <div className="text-lg font-bold text-emerald-600 mt-2">
-          {fixture.result.homeScore} - {fixture.result.awayScore}
-        </div>
+        <div className="text-lg font-bold text-emerald-600 dark:text-emerald-400">{fixture.result.homeScore} - {fixture.result.awayScore}</div>
       </div>
-
-      {/* Stats */}
       {fixture.statistics && (
         <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium">{fixture.statistics.home.shotsOnTarget + fixture.statistics.home.shotsOffTarget}</span>
-            <span className="text-sm text-muted-foreground font-medium">Shots</span>
-            <span className="text-sm font-medium">{fixture.statistics.away.shotsOnTarget + fixture.statistics.away.shotsOffTarget}</span>
+          <div className="flex items-center justify-between text-sm">
+            <span className="font-medium">{fixture.statistics.home.shotsOnTarget + fixture.statistics.home.shotsOffTarget}</span>
+            <span className="text-muted-foreground">Shots</span>
+            <span className="font-medium">{fixture.statistics.away.shotsOnTarget + fixture.statistics.away.shotsOffTarget}</span>
           </div>
-          
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium">{fixture.statistics.home.shotsOnTarget}</span>
-            <span className="text-sm text-muted-foreground font-medium">Shots on Target</span>
-            <span className="text-sm font-medium">{fixture.statistics.away.shotsOnTarget}</span>
+          <div className="flex items-center justify-between text-sm">
+            <span className="font-medium">{homePossession.toFixed(0)}%</span>
+            <span className="text-muted-foreground">Possession</span>
+            <span className="font-medium">{awayPossession.toFixed(0)}%</span>
           </div>
-
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium">{homePossession.toFixed(1)}%</span>
-            <span className="text-sm text-muted-foreground font-medium">Possession</span>
-            <span className="text-sm font-medium">{awayPossession.toFixed(1)}%</span>
-          </div>
-
-          {/* Possession Bar */}
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div 
-              className="bg-emerald-500 h-2 rounded-full" 
-              style={{ width: `${homePossession}%` }}
-            ></div>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium ">{fixture.statistics.home.fouls}</span>
-            <span className="text-sm text-muted-foreground">Fouls</span>
-            <span className="text-sm font-medium ">{fixture.statistics.away.fouls}</span>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium ">{fixture.statistics.home.yellowCards}</span>
-            <span className="text-sm text-muted-foreground">Yellow Cards</span>
-            <span className="text-sm font-medium ">{fixture.statistics.away.yellowCards}</span>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium ">{fixture.statistics.home.corners}</span>
-            <span className="text-sm text-muted-foreground">Corners</span>
-            <span className="text-sm font-medium ">{fixture.statistics.away.corners}</span>
+          <div className="flex h-2 bg-secondary rounded-full overflow-hidden">
+            <div className="bg-emerald-600 dark:bg-emerald-500" style={{ width: `${homePossession}%` }} />
+            <div className="bg-emerald-600/30 dark:bg-emerald-500/30" style={{ width: `${awayPossession}%` }} />
           </div>
         </div>
       )}
-
-      {/* Call to Action */}
-      <div className="border-t pt-3 mt-4 text-center">
+      <div className="border-t border-border pt-3 mt-4 text-center">
         <div className="text-xs text-muted-foreground">Get detailed match analysis on</div>
-        <div className="text-sm font-semibold text-emerald-600">Fupre Sports Media</div>
+        <div className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">Fupre Sports Media</div>
       </div>
     </div>
   );
@@ -362,955 +209,571 @@ export default function MatchStatsPage({
   const RatingsCard = () => {
     const [selectedPlayerIndex, setSelectedPlayerIndex] = useState(0);
     const topRatedPlayers = fixture.playerRatings?.sort((a, b) => b.official ? b.official.rating - a.official.rating : 0) || [];
-    
     if (topRatedPlayers.length === 0) return null;
-
     const topRatedPlayer = topRatedPlayers[selectedPlayerIndex];
 
     return (
-      <div ref={ratingsCardRef} className="bg-card p-6 rounded-xl shadow-lg max-w-md mx-auto border border-muted-foreground">
-        {/* Header */}
+      <div ref={ratingsCardRef} className="bg-background p-6 rounded-lg border border-border max-w-md mx-auto">
         <div className="text-center mb-4">
           <div className="flex items-center justify-center gap-2 mb-2">
-            <Star className="w-5 h-5 text-emerald-500" />
-            <span className="text-lg font-bold">Player Rating</span>
+            <Star className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+            <span className="font-bold">Player Rating</span>
           </div>
-          <div className="text-sm">{fixture.homeTeam.name} vs {fixture.awayTeam.name}</div>
         </div>
-
-        {/* Player Selector */}
         {topRatedPlayers.length > 1 && (
-          <div className="mb-4">
-            <div className="flex items-center justify-center gap-2">
-              <button
-                onClick={() => setSelectedPlayerIndex(prev => Math.max(0, prev - 1))}
-                disabled={selectedPlayerIndex === 0}
-                className="p-1 rounded-full bg-secondary disabled:opacity-50"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
-                </svg>
-              </button>
-              <div className="text-sm font-medium">
-                {selectedPlayerIndex + 1} of {topRatedPlayers.length}
-              </div>
-              <button
-                onClick={() => setSelectedPlayerIndex(prev => Math.min(topRatedPlayers.length - 1, prev + 1))}
-                disabled={selectedPlayerIndex === topRatedPlayers.length - 1}
-                className="p-1 rounded-full bg-secondary disabled:opacity-50"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                </svg>
-              </button>
-            </div>
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <button onClick={() => setSelectedPlayerIndex(prev => Math.max(0, prev - 1))} disabled={selectedPlayerIndex === 0} className="p-1.5 rounded-lg bg-secondary disabled:opacity-50">←</button>
+            <span className="text-sm">{selectedPlayerIndex + 1} of {topRatedPlayers.length}</span>
+            <button onClick={() => setSelectedPlayerIndex(prev => Math.min(topRatedPlayers.length - 1, prev + 1))} disabled={selectedPlayerIndex === topRatedPlayers.length - 1} className="p-1.5 rounded-lg bg-secondary disabled:opacity-50">→</button>
           </div>
         )}
-
-        {/* Player Card */}
-        <div className="bg-secondary/50 rounded-lg p-4 border border-border/50">
+        <div className="bg-secondary rounded-lg p-4">
           <div className="flex items-start justify-between mb-3">
-            <div className="flex-1">
-              <div className="font-bold text-xl">{topRatedPlayer.player.name}</div>
-              <div className="text-sm">{topRatedPlayer.player.department}</div>
-              <div className={cn(
-                "inline-block px-2 py-1 rounded-full text-xs font-medium mt-1 border",
-                getPositionColor(topRatedPlayer.player.position || '')
-              )}>
-                {topRatedPlayer.player.position}
-              </div>
+            <div>
+              <div className="font-bold text-lg">{topRatedPlayer.player.name}</div>
+              <div className="text-sm text-muted-foreground">{topRatedPlayer.player.department}</div>
             </div>
-            <div className="text-right">
-              <div className="text-3xl font-bold text-emerald-500">
-                {topRatedPlayer.official.rating.toFixed(1)}
-              </div>
-              <div className="text-xs text-muted-foreground">Official Rating</div>
-            </div>
+            <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{topRatedPlayer.official.rating.toFixed(1)}</div>
           </div>
-
-          {/* Fan Rating */}
-          <div className="mb-3">
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-sm text-muted-foreground">Fan Rating</span>
-              <span className="text-sm font-medium">
-                {topRatedPlayer.fanRatings.average.toFixed(1)} ({topRatedPlayer.fanRatings.count} votes)
-              </span>
-            </div>
-            <div className="flex items-center gap-1">
-              {[...Array(Math.floor(topRatedPlayer.fanRatings.average))].map((_, i) => (
-                <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-              ))}
-              {topRatedPlayer.fanRatings.average % 1 >= 0.5 && (
-                <div className="relative">
-                  <Star className="w-4 h-4" />
-                  <div className="absolute inset-0 overflow-hidden" style={{ width: '50%' }}>
-                    <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                  </div>
-                </div>
-              )}
-              {[...Array(Math.max(0, 10 - Math.ceil(topRatedPlayer.fanRatings.average)))].map((_, i) => (
-                <Star key={`empty-${i}`} className="w-4 h-4" />
-              ))}
-            </div>
-          </div>
-
-          {/* Stats */}
-          <div className="grid grid-cols-3 gap-2">
-            <div className="text-center p-2 bg-background rounded">
-              <div className="font-bold text-emerald-500">{topRatedPlayer.stats.goals}</div>
+          <div className="grid grid-cols-3 gap-2 text-center">
+            <div className="p-2 bg-background rounded-lg">
+              <div className="font-bold text-emerald-600 dark:text-emerald-400">{topRatedPlayer.stats.goals}</div>
               <div className="text-xs text-muted-foreground">Goals</div>
             </div>
-            <div className="text-center p-2 bg-background rounded">
-              <div className="font-bold text-blue-500">{topRatedPlayer.stats.assists}</div>
+            <div className="p-2 bg-background rounded-lg">
+              <div className="font-bold text-blue-600">{topRatedPlayer.stats.assists}</div>
               <div className="text-xs text-muted-foreground">Assists</div>
             </div>
-            <div className="text-center p-2 bg-background rounded">
-              <div className="font-bold text-orange-500">{topRatedPlayer.stats.shots}</div>
+            <div className="p-2 bg-background rounded-lg">
+              <div className="font-bold text-orange-600">{topRatedPlayer.stats.shots}</div>
               <div className="text-xs text-muted-foreground">Shots</div>
             </div>
           </div>
         </div>
-
-        {/* Call to Action */}
-        <div className="border-t pt-3 mt-4 text-center">
-          <div className="text-xs text-muted-foreground">Rate players and view all ratings on</div>
-          <div className="text-sm font-semibold text-emerald-600">Fupre Sports Media</div>
+        <div className="border-t border-border pt-3 mt-4 text-center">
+          <div className="text-xs text-muted-foreground">Rate players on</div>
+          <div className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">Fupre Sports Media</div>
         </div>
       </div>
     );
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-background to-background/50">
-      {/* Back Button */}
-      <div className="fixed top-4 left-3 md:top-8 md:left-8 z-10">
-        <BackButton />
-      </div>
+    <main className="min-h-screen bg-background pb-20 md:pb-0">
+      <div className="pt-4 pb-8 px-2 md:px-4">
+        <div className="mx-auto max-w-4xl space-y-3 md:space-y-4">
+          {/* Back Button */}
+          <div className="px-2 md:px-0">
+            <BackButton />
+          </div>
 
-      <div className="pt-12 pb-4 md:pt-4 md:pb-6">
-        <BlurFade>
-          <div className="max-w-4xl mx-auto space-y-4 md:space-y-6">
-            {/* Match Header */}
-            <div className="relative bg-card/40 backdrop-blur-sm rounded-xl md:rounded-2xl p-4 md:p-6 border border-border overflow-hidden">
-              {/* Background decoration */}
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-emerald-500/10 via-transparent to-transparent" />
-              
-              <div className="relative">
-                <div className="text-center mb-3 md:mb-4">
-                  <div className="inline-flex items-center gap-2 bg-emerald-500 text-white px-2.5 py-1 md:px-3 md:py-1 rounded-full text-xs md:text-sm font-medium">
-                    <Trophy className="w-3 h-3 md:w-3.5 md:h-3.5" />
-                    <span>{fixture.competition.name}</span>
+          {/* Match Header */}
+          <div className="border border-border rounded-lg md:rounded-xl overflow-hidden">
+            <div className="bg-secondary/50 px-4 py-2 text-center">
+              <span className="inline-flex items-center gap-2 text-sm font-medium">
+                <Trophy className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                {fixture.competition.name}
+              </span>
+            </div>
+
+            <div className="p-6 md:p-8">
+              <div className="flex items-center justify-between gap-4 md:gap-8">
+                {/* Home Team */}
+                <div className="flex flex-col items-center gap-2 flex-1 min-w-0">
+                  <div className="relative w-14 h-14 md:w-20 md:h-20">
+                    <Image src={teamLogos[fixture.homeTeam.name] || '/images/team_logos/default.jpg'} alt={fixture.homeTeam.name} fill className="object-contain rounded-full" />
+                  </div>
+                  <span className="text-xs md:text-base font-medium text-center truncate w-full">{fixture.homeTeam.name}</span>
+                </div>
+
+                {/* Score */}
+                <div className="flex flex-col items-center">
+                  {fixture.status === FixtureStatus.COMPLETED ? (
+                    <>
+                      <div className="text-3xl md:text-4xl font-bold">
+                        <span className="text-emerald-600 dark:text-emerald-400">{fixture.result.homeScore}</span>
+                        <span className="mx-2 text-muted-foreground">-</span>
+                        <span className="text-emerald-600 dark:text-emerald-400">{fixture.result.awayScore}</span>
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-1">Full Time</div>
+                      {fixture.result.halftimeHomeScore !== null && (
+                        <div className="text-xs text-muted-foreground">HT: {fixture.result.halftimeHomeScore} - {fixture.result.halftimeAwayScore}</div>
+                      )}
+                    </>
+                  ) : fixture.status === FixtureStatus.LIVE ? (
+                    <>
+                      <div className="text-3xl md:text-4xl font-bold">
+                        <span className="text-emerald-600 dark:text-emerald-400">{fixture.result.homeScore}</span>
+                        <span className="mx-2 text-muted-foreground">-</span>
+                        <span className="text-emerald-600 dark:text-emerald-400">{fixture.result.awayScore}</span>
+                      </div>
+                      <div className="text-xs text-red-500 font-medium mt-1">LIVE</div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="text-3xl md:text-4xl font-bold text-muted-foreground">VS</div>
+                      <div className="text-xs text-muted-foreground mt-1">Upcoming</div>
+                    </>
+                  )}
+                </div>
+
+                {/* Away Team */}
+                <div className="flex flex-col items-center gap-2 flex-1 min-w-0">
+                  <div className="relative w-14 h-14 md:w-20 md:h-20">
+                    <Image src={teamLogos[fixture.awayTeam.name] || '/images/team_logos/default.jpg'} alt={fixture.awayTeam.name} fill className="object-contain rounded-full" />
+                  </div>
+                  <span className="text-xs md:text-base font-medium text-center truncate w-full">{fixture.awayTeam.name}</span>
+                </div>
+              </div>
+
+              {/* Match Details */}
+              <div className="mt-4 flex flex-wrap items-center justify-center gap-3 md:gap-4 text-xs text-muted-foreground">
+                <div className="flex items-center gap-1">
+                  <Calendar className="w-3.5 h-3.5" />
+                  <span>{formattedDate}</span>
+                </div>
+                <span>•</span>
+                <div className="flex items-center gap-1">
+                  <Clock className="w-3.5 h-3.5" />
+                  <span>{formattedTime}</span>
+                </div>
+                <span>•</span>
+                <div className="flex items-center gap-1">
+                  <Users className="w-3.5 h-3.5" />
+                  <span>{fixture.stadium}</span>
+                </div>
+              </div>
+
+              {/* Share Button */}
+              {(fixture.status === FixtureStatus.COMPLETED || fixture.status === FixtureStatus.LIVE) && (
+                <div className="flex justify-center mt-4">
+                  <button onClick={() => setShowShareCards(!showShareCards)} className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium transition-colors">
+                    <Share2 className="w-4 h-4" />
+                    Share Match Cards
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Share Cards Section */}
+          {showShareCards && (
+            <div className="border border-border rounded-lg p-4 md:p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="font-bold flex items-center gap-2">
+                  <Share2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                  Share Match Cards
+                </h2>
+                <button onClick={() => setShowShareCards(false)} className="text-muted-foreground hover:text-foreground p-1">✕</button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-3">
+                  <ScoreCard />
+                  <div className="flex gap-2 justify-center">
+                    <button onClick={() => downloadCard(scoreCardRef, 'match-score')} className="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-lg flex items-center gap-2 text-sm">
+                      <Download className="w-4 h-4" /> Download
+                    </button>
+                    <button onClick={() => shareCard(scoreCardRef, 'Match Score')} className="border border-border hover:bg-secondary px-3 py-2 rounded-lg flex items-center gap-2 text-sm">
+                      <Share2 className="w-4 h-4" /> Share
+                    </button>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between gap-2 md:gap-8">
+                {fixture.playerOfTheMatch && (
+                  <div className="space-y-3">
+                    <POTMCard />
+                    <div className="flex gap-2 justify-center">
+                      <button onClick={() => downloadCard(potmCardRef, 'player-of-match')} className="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-lg flex items-center gap-2 text-sm">
+                        <Download className="w-4 h-4" /> Download
+                      </button>
+                      <button onClick={() => shareCard(potmCardRef, 'Player of the Match')} className="border border-border hover:bg-secondary px-3 py-2 rounded-lg flex items-center gap-2 text-sm">
+                        <Share2 className="w-4 h-4" /> Share
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {fixture.statistics && (
+                  <div className="space-y-3">
+                    <StatsCard />
+                    <div className="flex gap-2 justify-center">
+                      <button onClick={() => downloadCard(statsCardRef, 'match-statistics')} className="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-lg flex items-center gap-2 text-sm">
+                        <Download className="w-4 h-4" /> Download
+                      </button>
+                      <button onClick={() => shareCard(statsCardRef, 'Match Statistics')} className="border border-border hover:bg-secondary px-3 py-2 rounded-lg flex items-center gap-2 text-sm">
+                        <Share2 className="w-4 h-4" /> Share
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {fixture.playerRatings && fixture.playerRatings.length > 0 && (
+                  <div className="space-y-3">
+                    <RatingsCard />
+                    <div className="flex gap-2 justify-center">
+                      <button onClick={() => downloadCard(ratingsCardRef, 'player-rating')} className="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-lg flex items-center gap-2 text-sm">
+                        <Download className="w-4 h-4" /> Download
+                      </button>
+                      <button onClick={() => shareCard(ratingsCardRef, 'Player Rating')} className="border border-border hover:bg-secondary px-3 py-2 rounded-lg flex items-center gap-2 text-sm">
+                        <Share2 className="w-4 h-4" /> Share
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Navigation Tabs */}
+          <div className="border border-border rounded-lg p-1">
+            <div className="flex overflow-x-auto scrollbar-hide gap-1">
+              {fixture.status === FixtureStatus.SCHEDULED && (
+                <button
+                  onClick={() => setActiveTab('details')}
+                  className={cn("flex-shrink-0 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors whitespace-nowrap",
+                    activeTab === 'details' ? "bg-emerald-600 text-white" : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+                  )}
+                >Details</button>
+              )}
+              {(fixture.status === FixtureStatus.COMPLETED || fixture.status === FixtureStatus.LIVE) && (
+                <>
+                  <button
+                    onClick={() => setActiveTab('stats')}
+                    className={cn("flex-shrink-0 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors whitespace-nowrap",
+                      activeTab === 'stats' ? "bg-emerald-600 text-white" : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+                    )}
+                  >Stats</button>
+                  <button
+                    onClick={() => setActiveTab('ratings')}
+                    className={cn("flex-shrink-0 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors whitespace-nowrap",
+                      activeTab === 'ratings' ? "bg-emerald-600 text-white" : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+                    )}
+                  >Ratings</button>
+                </>
+              )}
+              <button
+                onClick={() => setActiveTab('lineups')}
+                className={cn("flex-shrink-0 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors whitespace-nowrap",
+                  activeTab === 'lineups' ? "bg-emerald-600 text-white" : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+                )}
+              >Lineups</button>
+            </div>
+          </div>
+
+          {/* Tab Content */}
+          {fixture.status === FixtureStatus.SCHEDULED && activeTab === 'details' && (
+            <div className="border border-border rounded-lg p-4 md:p-6">
+              <h2 className="font-bold mb-4">Match Information</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="p-3 bg-secondary rounded-lg">
+                  <div className="text-xs text-muted-foreground">Referee</div>
+                  <div className="font-medium">{fixture.referee || 'TBD'}</div>
+                </div>
+                <div className="p-3 bg-secondary rounded-lg">
+                  <div className="text-xs text-muted-foreground">Match Type</div>
+                  <div className="font-medium capitalize">{fixture.matchType}</div>
+                </div>
+                {fixture.weather && (
+                  <div className="p-3 bg-secondary rounded-lg">
+                    <div className="text-xs text-muted-foreground">Weather</div>
+                    <div className="font-medium">{fixture.weather.condition}, {fixture.weather.temperature}°C</div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {(fixture.status === FixtureStatus.COMPLETED || fixture.status === FixtureStatus.LIVE) && activeTab === 'stats' && (
+            <div className="space-y-3">
+              {/* Goal Scorers */}
+              {fixture.goalScorers && fixture.goalScorers.length > 0 && (
+                <div className="border border-border rounded-lg p-4 md:p-6">
+                  <h2 className="font-bold mb-4 flex items-center gap-2">
+                    <Target className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                    Goal Scorers
+                  </h2>
+                  <div className="space-y-2">
+                    {fixture.goalScorers.map((scorer, index) => (
+                      <div key={index} className="flex items-center justify-between py-2 border-b border-border last:border-0">
+                        <div className="flex items-center gap-3">
+                          <span className="text-lg">⚽</span>
+                          <div>
+                            <div className="font-medium text-sm">{scorer.player ? scorer.player.name : 'Unknown'}</div>
+                            <div className="text-xs text-muted-foreground">{scorer.team ? scorer.team.name : 'Unknown'}</div>
+                          </div>
+                        </div>
+                        <span className="text-sm font-medium text-emerald-600 dark:text-emerald-400">{scorer.time}'</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Match Statistics */}
+              {fixture.statistics && (
+                <div className="border border-border rounded-lg p-4 md:p-6">
+                  <h2 className="font-bold mb-4 flex items-center gap-2">
+                    <Trophy className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                    Match Statistics
+                  </h2>
+                  <div className="space-y-4">
+                    {[
+                      { label: 'Shots', home: fixture.statistics.home.shotsOnTarget + fixture.statistics.home.shotsOffTarget, away: fixture.statistics.away.shotsOnTarget + fixture.statistics.away.shotsOffTarget },
+                      { label: 'Shots on Target', home: fixture.statistics.home.shotsOnTarget, away: fixture.statistics.away.shotsOnTarget },
+                      { label: 'Fouls', home: fixture.statistics.home.fouls, away: fixture.statistics.away.fouls },
+                      { label: 'Yellow Cards', home: fixture.statistics.home.yellowCards, away: fixture.statistics.away.yellowCards },
+                      { label: 'Red Cards', home: fixture.statistics.home.redCards, away: fixture.statistics.away.redCards },
+                      { label: 'Corners', home: fixture.statistics.home.corners, away: fixture.statistics.away.corners },
+                    ].map((stat, i) => (
+                      <div key={i} className="flex items-center justify-between text-sm">
+                        <span className="font-bold w-8 text-emerald-600 dark:text-emerald-400">{stat.home}</span>
+                        <span className="text-muted-foreground flex-1 text-center">{stat.label}</span>
+                        <span className="font-bold w-8 text-right text-emerald-600 dark:text-emerald-400">{stat.away}</span>
+                      </div>
+                    ))}
+
+                    {/* Possession Bar */}
+                    <div>
+                      <div className="flex items-center justify-between text-sm mb-2">
+                        <span className="font-bold text-emerald-600 dark:text-emerald-400">{homePossession.toFixed(0)}%</span>
+                        <span className="text-muted-foreground">Possession</span>
+                        <span className="font-bold text-emerald-600 dark:text-emerald-400">{awayPossession.toFixed(0)}%</span>
+                      </div>
+                      <div className="flex h-2 bg-secondary rounded-full overflow-hidden">
+                        <div className="bg-emerald-600 dark:bg-emerald-500" style={{ width: `${homePossession}%` }} />
+                        <div className="bg-emerald-600/30 dark:bg-emerald-500/30" style={{ width: `${awayPossession}%` }} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Ratings Tab */}
+          {(fixture.status === FixtureStatus.COMPLETED || fixture.status === FixtureStatus.LIVE) && activeTab === 'ratings' && (
+            <div className="space-y-3">
+              {/* POTM Section */}
+              {fixture.playerOfTheMatch && (
+                <div className="border border-border rounded-lg p-4 md:p-6">
+                  <h2 className="font-bold mb-4 flex items-center gap-2">
+                    <Crown className="w-5 h-5 text-amber-500" />
+                    Player of the Match
+                  </h2>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Official */}
+                    <div className="border border-amber-500/30 bg-amber-500/5 rounded-lg p-4">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Award className="w-4 h-4 text-amber-500" />
+                        <span className="font-medium text-sm text-amber-600">Official Selection</span>
+                      </div>
+                      {fixture.playerOfTheMatch.official ? (
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-amber-500 rounded-full flex items-center justify-center text-lg">👑</div>
+                          <div>
+                            <div className="font-bold">{fixture.playerOfTheMatch.official.name}</div>
+                            <div className="text-xs text-muted-foreground">{fixture.playerOfTheMatch.official.position}</div>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="text-sm text-muted-foreground">Not selected yet</div>
+                      )}
+                    </div>
+
+                    {/* Fan Votes */}
+                    <div className="border border-blue-500/30 bg-blue-500/5 rounded-lg p-4">
+                      <div className="flex items-center gap-2 mb-3">
+                        <ThumbsUp className="w-4 h-4 text-blue-500" />
+                        <span className="font-medium text-sm text-blue-600">Fan Favorite</span>
+                      </div>
+                      {fixture.playerOfTheMatch.fanVotes && fixture.playerOfTheMatch.fanVotes.length > 0 ? (
+                        <div className="space-y-2">
+                          {fixture.playerOfTheMatch.fanVotes.slice(0, 3).map((vote, index) => (
+                            <div key={index} className="flex items-center justify-between text-sm">
+                              <div className="flex items-center gap-2">
+                                <span className={cn("w-5 h-5 rounded-full flex items-center justify-center text-xs text-white font-bold",
+                                  index === 0 ? "bg-amber-500" : index === 1 ? "bg-gray-400" : "bg-orange-400"
+                                )}>{index + 1}</span>
+                                <span className="font-medium">{vote.player.name}</span>
+                              </div>
+                              <span className="text-blue-600">{vote.votes} votes</span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-sm text-muted-foreground">No votes yet</div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Player Ratings */}
+              {fixture.playerRatings && fixture.playerRatings.length > 0 && (
+                <div className="border border-border rounded-lg p-4 md:p-6">
+                  <h2 className="font-bold mb-4 flex items-center gap-2">
+                    <Star className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                    Player Ratings
+                  </h2>
+
                   {/* Home Team */}
-                  <div className="flex flex-col items-center gap-2 md:gap-3 w-1/3">
-                    <motion.div
-                      className="relative w-12 h-12 md:w-20 md:h-20"
-                      whileHover={{ scale: 1.05 }}
-                      transition={{ type: "spring", stiffness: 300 }}
-                    >
-                      <Image
-                        src={teamLogos[fixture.homeTeam.name] || '/images/team_logos/default.jpg'}
-                        alt={fixture.homeTeam.name}
-                        fill
-                        className="object-contain rounded-full"
-                      />
-                    </motion.div>
-                    <span className="text-xs md:text-base font-medium text-center">
+                  <div className="mb-6">
+                    <h3 className="font-medium mb-3 flex items-center gap-2">
+                      <Image src={teamLogos[fixture.homeTeam.name] || '/images/team_logos/default.jpg'} alt="" width={20} height={20} className="rounded-full" />
                       {fixture.homeTeam.name}
-                    </span>
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {fixture.playerRatings.filter(r => r.team === 'home').sort((a, b) => (b.official?.rating || 0) - (a.official?.rating || 0)).map((rating, idx) => (
+                        <div key={idx} className="border border-border rounded-lg p-3">
+                          <div className="flex items-start justify-between mb-2">
+                            <div>
+                              <div className="font-medium">{rating.player.name}</div>
+                              <span className={cn("inline-block px-2 py-0.5 rounded text-xs border mt-1", getPositionColor(rating.player.position || ''))}>{rating.player.position}</span>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-xl font-bold text-emerald-600 dark:text-emerald-400">{rating.official ? rating.official.rating.toFixed(1) : '-'}</div>
+                              <div className="text-xs text-muted-foreground">Official</div>
+                            </div>
+                          </div>
+                          <div className="flex items-center justify-between text-xs text-muted-foreground">
+                            <span>Fan: {rating.fanRatings.average.toFixed(1)} ({rating.fanRatings.count})</span>
+                            <span>G: {rating.stats.goals} A: {rating.stats.assists}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
 
-                  {/* Center Section - VS or Score */}
-                  <div className="flex flex-col items-center justify-center">
-                    <div className="bg-card shadow-xl rounded-lg md:rounded-xl p-2 md:p-3 border border-border min-w-[90px] md:min-w-[120px] text-center">
-                      {fixture.status === FixtureStatus.COMPLETED ? (
+                  {/* Away Team */}
+                  <div>
+                    <h3 className="font-medium mb-3 flex items-center gap-2">
+                      <Image src={teamLogos[fixture.awayTeam.name] || '/images/team_logos/default.jpg'} alt="" width={20} height={20} className="rounded-full" />
+                      {fixture.awayTeam.name}
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {fixture.playerRatings.filter(r => r.team === 'away').sort((a, b) => (b.official?.rating || 0) - (a.official?.rating || 0)).map((rating, idx) => (
+                        <div key={idx} className="border border-border rounded-lg p-3">
+                          <div className="flex items-start justify-between mb-2">
+                            <div>
+                              <div className="font-medium">{rating.player.name}</div>
+                              <span className={cn("inline-block px-2 py-0.5 rounded text-xs border mt-1", getPositionColor(rating.player.position || ''))}>{rating.player.position}</span>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-xl font-bold text-emerald-600 dark:text-emerald-400">{rating.official ? rating.official.rating.toFixed(1) : '-'}</div>
+                              <div className="text-xs text-muted-foreground">Official</div>
+                            </div>
+                          </div>
+                          <div className="flex items-center justify-between text-xs text-muted-foreground">
+                            <span>Fan: {rating.fanRatings.average.toFixed(1)} ({rating.fanRatings.count})</span>
+                            <span>G: {rating.stats.goals} A: {rating.stats.assists}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Lineups Tab */}
+          {activeTab === 'lineups' && (
+            <div className="border border-border rounded-lg p-4 md:p-6">
+              <h2 className="font-bold mb-4 flex items-center gap-2">
+                <Users className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                Team Lineups
+              </h2>
+
+              {fixture.lineups ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Home Team */}
+                  <div>
+                    <h3 className="font-medium text-center mb-3 flex items-center justify-center gap-2">
+                      <Image src={teamLogos[fixture.homeTeam.name] || '/images/team_logos/default.jpg'} alt="" width={20} height={20} className="rounded-full" />
+                      {fixture.homeTeam.name}
+                    </h3>
+                    <div className="text-center text-sm text-muted-foreground bg-secondary rounded-lg py-2 mb-3">
+                      Formation: <span className="font-medium">{fixture.lineups.home.formation}</span>
+                    </div>
+
+                    <div className="space-y-2">
+                      <div className="text-sm font-medium text-emerald-600 dark:text-emerald-400 mb-2">Starting XI</div>
+                      {fixture.lineups.home.startingXI.map((player, idx) => (
+                        <div key={idx} className="flex items-center gap-3 p-2.5 border border-border rounded-lg">
+                          <div className="w-7 h-7 bg-emerald-600 rounded-full flex items-center justify-center text-white text-xs font-bold">{player.shirtNumber}</div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium text-sm truncate">{player.player.name}</span>
+                              {player.isCaptain && <span className="text-xs bg-amber-500 text-white px-1.5 py-0.5 rounded font-bold">C</span>}
+                            </div>
+                          </div>
+                          <span className={cn("px-2 py-0.5 rounded text-xs border", getPositionColor(player.position))}>{player.position}</span>
+                        </div>
+                      ))}
+
+                      {fixture.lineups.home.substitutes && fixture.lineups.home.substitutes.length > 0 && (
                         <>
-                          <div className="text-2xl md:text-4xl font-bold tracking-tighter">
-                            <span className="text-emerald-500">{fixture.result.homeScore}</span>
-                            <span className="mx-2 md:mx-3 text-muted-foreground">-</span>
-                            <span className="text-emerald-500">{fixture.result.awayScore}</span>
-                          </div>
-                          <div className="flex items-center justify-center gap-1 md:gap-1.5 mt-0.5 md:mt-1 text-[10px] md:text-xs text-muted-foreground">
-                            <Clock className="w-3 h-3 md:w-3.5 md:h-3.5" />
-                            <span>Full Time</span>
-                          </div>
-                        </>
-                      ) : fixture.status === FixtureStatus.LIVE ? (
-                        <>
-                          <div className="text-2xl md:text-4xl font-bold tracking-tighter">
-                            <span className="text-emerald-500">{fixture.result.homeScore}</span>
-                            <span className="mx-2 md:mx-3 text-muted-foreground">-</span>
-                            <span className="text-emerald-500">{fixture.result.awayScore}</span>
-                          </div>
-                          <div className="flex items-center justify-center gap-1 md:gap-1.5 mt-0.5 md:mt-1 text-[10px] md:text-xs text-red-500">
-                            <Clock className="w-3 h-3 md:w-3.5 md:h-3.5" />
-                            <span>LIVE</span>
-                          </div>
-                        </>
-                      ) : (
-                        <>
-                          <div className="text-2xl md:text-4xl font-bold tracking-tighter text-center">
-                            <span className="text-muted-foreground">VS</span>
-                          </div>
-                          <div className="flex items-center justify-center gap-1 md:gap-1.5 mt-0.5 md:mt-1 text-[10px] md:text-xs text-muted-foreground capitalize">
-                            <Clock className="w-3 h-3 md:w-3.5 md:h-3.5" />
-                            <span>{fixture.status === FixtureStatus.SCHEDULED ? 'Upcoming' : fixture.status}</span>
-                          </div>
+                          <div className="text-sm font-medium text-blue-600 mt-4 mb-2">Substitutes</div>
+                          {fixture.lineups.home.substitutes.map((player, idx) => (
+                            <div key={idx} className="flex items-center gap-3 p-2 border border-border/50 rounded-lg">
+                              <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center text-white text-xs font-bold">{player.shirtNumber}</div>
+                              <span className="font-medium text-sm flex-1 truncate">{player.player.name}</span>
+                              <span className={cn("px-2 py-0.5 rounded text-xs border", getPositionColor(player.position))}>{player.position}</span>
+                            </div>
+                          ))}
                         </>
                       )}
                     </div>
                   </div>
 
                   {/* Away Team */}
-                  <div className="flex flex-col items-center gap-2 md:gap-3 w-1/3">
-                    <motion.div
-                      className="relative w-12 h-12 md:w-20 md:h-20"
-                      whileHover={{ scale: 1.05 }}
-                      transition={{ type: "spring", stiffness: 300 }}
-                    >
-                      <Image
-                        src={teamLogos[fixture.awayTeam.name] || '/images/team_logos/default.jpg'}
-                        alt={fixture.awayTeam.name}
-                        fill
-                        className="object-contain rounded-full"
-                      />
-                    </motion.div>
-                    <span className="text-xs md:text-base font-medium text-center">
+                  <div>
+                    <h3 className="font-medium text-center mb-3 flex items-center justify-center gap-2">
+                      <Image src={teamLogos[fixture.awayTeam.name] || '/images/team_logos/default.jpg'} alt="" width={20} height={20} className="rounded-full" />
                       {fixture.awayTeam.name}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap items-center justify-center gap-2 md:gap-4 text-xs md:text-sm text-muted-foreground mt-3 md:mt-4">
-                  <div className="flex items-center gap-1">
-                    <Trophy className="w-3 h-3 md:w-4 md:h-4" />
-                    <span>{fixture.competition.name}</span>
-                  </div>
-                  <span>•</span>
-                  <div className="flex items-center gap-1">
-                    <Calendar className="w-3 h-3 md:w-4 md:h-4" />
-                    <span>{formattedDate}</span>
-                  </div>
-                  <span>•</span>
-                  <div className="flex items-center gap-1">
-                    <Clock className="w-3 h-3 md:w-4 md:h-4" />
-                    <span>{formattedTime}</span>
-                  </div>
-                  <span>•</span>
-                  <div className="flex items-center gap-1">
-                    <Users className="w-3 h-3 md:w-4 md:h-4" />
-                    <span>{fixture.stadium}</span>
-                  </div>
-                </div>
-
-                {/* Share Button */}
-                {(fixture.status === FixtureStatus.COMPLETED || fixture.status === FixtureStatus.LIVE) && (
-                  <div className="flex justify-center mt-4">
-                    <button
-                      onClick={() => setShowShareCards(!showShareCards)}
-                      className="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium transition-colors"
-                    >
-                      <Share2 className="w-4 h-4" />
-                      Share Match Cards
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Shareable Cards Modal/Section */}
-            <AnimatePresence>
-              {showShareCards && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  className="bg-card/40 backdrop-blur-sm rounded-xl p-6 border border-border"
-                >
-                  <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-xl font-semibold flex items-center gap-2">
-                      <Share2 className="w-5 h-5 text-emerald-500" />
-                      Share Match Cards
-                    </h2>
-                    <button
-                      onClick={() => setShowShareCards(false)}
-                      className="text-muted-foreground hover:text-foreground p-1"
-                    >
-                      ✕
-                    </button>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Score Card */}
-                    <div className="space-y-3">
-                      <ScoreCard />
-                      <div className="flex gap-2 justify-center">
-                        <button
-                          onClick={() => downloadCard(scoreCardRef, 'match-score')}
-                          className="bg-emerald-500 hover:bg-emerald-600 text-white px-3 py-2 rounded-lg flex items-center gap-2 text-sm"
-                        >
-                          <Download className="w-4 h-4" />
-                          Download
-                        </button>
-                        <button
-                          onClick={() => shareCard(scoreCardRef, 'Match Score')}
-                          className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-lg flex items-center gap-2 text-sm"
-                        >
-                          <Share2 className="w-4 h-4" />
-                          Share
-                        </button>
-                      </div>
+                    </h3>
+                    <div className="text-center text-sm text-muted-foreground bg-secondary rounded-lg py-2 mb-3">
+                      Formation: <span className="font-medium">{fixture.lineups.away.formation}</span>
                     </div>
 
-                    {/* POTM Card */}
-                    {fixture.playerOfTheMatch && (
-                      <div className="space-y-3">
-                        <POTMCard />
-                        <div className="flex gap-2 justify-center">
-                          <button
-                            onClick={() => downloadCard(potmCardRef, 'player-of-match')}
-                            className="bg-emerald-500 hover:bg-emerald-600 text-white px-3 py-2 rounded-lg flex items-center gap-2 text-sm"
-                          >
-                            <Download className="w-4 h-4" />
-                            Download
-                          </button>
-                          <button
-                            onClick={() => shareCard(potmCardRef, 'Player of the Match')}
-                            className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-lg flex items-center gap-2 text-sm"
-                          >
-                            <Share2 className="w-4 h-4" />
-                            Share
-                          </button>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Stats Card */}
-                    {fixture.statistics && (
-                      <div className="space-y-3">
-                        <StatsCard />
-                        <div className="flex gap-2 justify-center">
-                          <button
-                            onClick={() => downloadCard(statsCardRef, 'match-statistics')}
-                            className="bg-emerald-500 hover:bg-emerald-600 text-white px-3 py-2 rounded-lg flex items-center gap-2 text-sm"
-                          >
-                            <Download className="w-4 h-4" />
-                            Download
-                          </button>
-                          <button
-                            onClick={() => shareCard(statsCardRef, 'Match Statistics')}
-                            className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-lg flex items-center gap-2 text-sm"
-                          >
-                            <Share2 className="w-4 h-4" />
-                            Share
-                          </button>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Individual Rating Card */}
-                    {fixture.playerRatings && fixture.playerRatings.length > 0 && (
-                      <div className="space-y-3">
-                        <RatingsCard />
-                        <div className="flex gap-2 justify-center">
-                          <button
-                            onClick={() => downloadCard(ratingsCardRef, 'player-rating')}
-                            className="bg-emerald-500 hover:bg-emerald-600 text-white px-3 py-2 rounded-lg flex items-center gap-2 text-sm"
-                          >
-                            <Download className="w-4 h-4" />
-                            Download
-                          </button>
-                          <button
-                            onClick={() => shareCard(ratingsCardRef, 'Player Rating')}
-                            className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-lg flex items-center gap-2 text-sm"
-                          >
-                            <Share2 className="w-4 h-4" />
-                            Share
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            {/* Tabs */}
-            <div className="flex border-b border-border overflow-x-auto">
-              {fixture.status === FixtureStatus.SCHEDULED && (
-                <button
-                  onClick={() => setActiveTab('details')}
-                  className={cn(
-                    "px-4 py-2 text-sm font-medium transition-colors whitespace-nowrap",
-                    activeTab === 'details'
-                      ? "text-emerald-500 border-b-2 border-emerald-500"
-                      : "text-muted-foreground hover:text-foreground"
-                  )}
-                >
-                  Details
-                </button>
-              )}
-              {(fixture.status === FixtureStatus.COMPLETED || fixture.status === FixtureStatus.LIVE) && (
-                <>
-                  <button
-                    onClick={() => setActiveTab('stats')}
-                    className={cn(
-                      "px-4 py-2 text-sm font-medium transition-colors whitespace-nowrap",
-                      activeTab === 'stats'
-                        ? "text-emerald-500 border-b-2 border-emerald-500"
-                        : "text-muted-foreground hover:text-foreground"
-                    )}
-                  >
-                    Stats
-                  </button>
-                  <button
-                    onClick={() => setActiveTab('ratings')}
-                    className={cn(
-                      "px-4 py-2 text-sm font-medium transition-colors whitespace-nowrap",
-                      activeTab === 'ratings'
-                        ? "text-emerald-500 border-b-2 border-emerald-500"
-                        : "text-muted-foreground hover:text-foreground"
-                    )}
-                  >
-                    Ratings & POTM
-                  </button>
-                </>
-              )}
-              <button
-                onClick={() => setActiveTab('lineups')}
-                className={cn(
-                  "px-4 py-2 text-sm font-medium transition-colors whitespace-nowrap",
-                  activeTab === 'lineups'
-                    ? "text-emerald-500 border-b-2 border-emerald-500"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                Lineups
-              </button>
-            </div>
-
-            {/* Tab Content */}
-            {fixture.status === FixtureStatus.SCHEDULED && activeTab === 'details' && (
-              <div className="bg-card/40 backdrop-blur-sm rounded-xl p-6 border border-border">
-                <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                  <AlertCircle className="w-5 h-5 text-emerald-500" />
-                  Match Information
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="p-4 bg-secondary rounded-lg">
-                    <div className="text-sm text-muted-foreground">Referee</div>
-                    <div className="font-medium">{fixture.referee || 'TBD'}</div>
-                  </div>
-                  <div className="p-4 bg-secondary rounded-lg">
-                    <div className="text-sm text-muted-foreground">Match Type</div>
-                    <div className="font-medium capitalize">{fixture.matchType}</div>
-                  </div>
-                  {fixture.weather && (
-                    <div className="p-4 bg-secondary rounded-lg">
-                      <div className="text-sm text-muted-foreground">Weather</div>
-                      <div className="font-medium">{fixture.weather.condition}, {fixture.weather.temperature}°C</div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {(fixture.status === FixtureStatus.COMPLETED || fixture.status === FixtureStatus.LIVE) && activeTab === 'stats' && (
-              <div className="space-y-6">
-                {/* Goal Scorers */}
-                {fixture.goalScorers && fixture.goalScorers.length > 0 && (
-                  <div className="bg-card/40 backdrop-blur-sm rounded-xl p-6 border border-border">
-                    <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                      <Target className="w-5 h-5 text-emerald-500" />
-                      Goal Scorers
-                    </h2>
-                    <div className="space-y-3">
-                      {fixture.goalScorers.map((scorer, index) => (
-                        <div key={index} className="flex items-center justify-between p-3 bg-secondary rounded-lg">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
-                              ⚽
-                            </div>
-                            <div>
-                              <div className="font-medium">{scorer.player ? scorer.player.name : 'Unknown'}</div>
-                              <div className="text-sm text-muted-foreground">{scorer.team ? scorer.team.name : 'Unknown'}</div>
+                    <div className="space-y-2">
+                      <div className="text-sm font-medium text-emerald-600 dark:text-emerald-400 mb-2">Starting XI</div>
+                      {fixture.lineups.away.startingXI.map((player, idx) => (
+                        <div key={idx} className="flex items-center gap-3 p-2.5 border border-border rounded-lg">
+                          <div className="w-7 h-7 bg-emerald-600 rounded-full flex items-center justify-center text-white text-xs font-bold">{player.shirtNumber}</div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium text-sm truncate">{player.player.name}</span>
+                              {player.isCaptain && <span className="text-xs bg-amber-500 text-white px-1.5 py-0.5 rounded font-bold">C</span>}
                             </div>
                           </div>
-                          <div className="text-sm font-medium text-emerald-500">
-                            {scorer.time}'
-                          </div>
+                          <span className={cn("px-2 py-0.5 rounded text-xs border", getPositionColor(player.position))}>{player.position}</span>
                         </div>
                       ))}
-                    </div>
-                  </div>
-                )}
 
-                {/* Match Statistics */}
-                {fixture.statistics && (
-                  <div className="bg-card/40 backdrop-blur-sm rounded-xl p-6 border border-border">
-                    <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                      <Trophy className="w-5 h-5 text-emerald-500" />
-                      Match Statistics
-                    </h2>
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">{fixture.statistics.home.shotsOnTarget + fixture.statistics.home.shotsOffTarget}</span>
-                        <span className="text-sm text-muted-foreground">Shots</span>
-                        <span className="text-sm font-medium">{fixture.statistics.away.shotsOnTarget + fixture.statistics.away.shotsOffTarget}</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">{fixture.statistics.home.shotsOnTarget}</span>
-                        <span className="text-sm text-muted-foreground">Shots on Target</span>
-                        <span className="text-sm font-medium">{fixture.statistics.away.shotsOnTarget}</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">{homePossession.toFixed(1)}%</span>
-                        <span className="text-sm text-muted-foreground">Possession</span>
-                        <span className="text-sm font-medium">{awayPossession.toFixed(1)}%</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">{fixture.statistics.home.fouls}</span>
-                        <span className="text-sm text-muted-foreground">Fouls</span>
-                        <span className="text-sm font-medium">{fixture.statistics.away.fouls}</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">{fixture.statistics.home.yellowCards}</span>
-                        <span className="text-sm text-muted-foreground">Yellow Cards</span>
-                        <span className="text-sm font-medium">{fixture.statistics.away.yellowCards}</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">{fixture.statistics.home.redCards}</span>
-                        <span className="text-sm text-muted-foreground">Red Cards</span>
-                        <span className="text-sm font-medium">{fixture.statistics.away.redCards}</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">{fixture.statistics.home.corners}</span>
-                        <span className="text-sm text-muted-foreground">Corners</span>
-                        <span className="text-sm font-medium">{fixture.statistics.away.corners}</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Player Ratings & POTM Tab */}
-            {(fixture.status === FixtureStatus.COMPLETED || fixture.status === FixtureStatus.LIVE) && activeTab === 'ratings' && (
-              <div className="space-y-6">
-                {/* Player of the Match Section */}
-                {fixture.playerOfTheMatch && (
-                  <div className="bg-card/40 backdrop-blur-sm rounded-xl p-6 border border-border">
-                    <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
-                      <Crown className="w-5 h-5 text-yellow-500" />
-                      Player of the Match
-                    </h2>
-                    
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                      {/* Official POTM */}
-                      <div className="bg-gradient-to-br from-yellow-500/10 to-orange-500/10 rounded-lg p-4 border border-yellow-500/20">
-                        <div className="flex items-center gap-2 mb-3">
-                          <Award className="w-5 h-5 text-yellow-500" />
-                          <h3 className="font-semibold text-yellow-600">Official Selection</h3>
-                        </div>
-                        {fixture.playerOfTheMatch.official ? (
-                          <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 bg-yellow-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                              👑
+                      {fixture.lineups.away.substitutes && fixture.lineups.away.substitutes.length > 0 && (
+                        <>
+                          <div className="text-sm font-medium text-blue-600 mt-4 mb-2">Substitutes</div>
+                          {fixture.lineups.away.substitutes.map((player, idx) => (
+                            <div key={idx} className="flex items-center gap-3 p-2 border border-border/50 rounded-lg">
+                              <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center text-white text-xs font-bold">{player.shirtNumber}</div>
+                              <span className="font-medium text-sm flex-1 truncate">{player.player.name}</span>
+                              <span className={cn("px-2 py-0.5 rounded text-xs border", getPositionColor(player.position))}>{player.position}</span>
                             </div>
-                            <div>
-                              <div className="font-medium text-lg">{fixture.playerOfTheMatch.official.name}</div>
-                              <div className="text-sm text-muted-foreground">{fixture.playerOfTheMatch.official.department}</div>
-                              <div className={cn(
-                                "inline-block px-2 py-1 rounded-full text-xs font-medium mt-1 border",
-                                getPositionColor(fixture.playerOfTheMatch.official.position || '')
-                              )}>
-                                {fixture.playerOfTheMatch.official.position}
-                              </div>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="text-center text-muted-foreground py-4">
-                            No official selection yet
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Fan Votes POTM */}
-                      <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-lg p-4 border border-blue-500/20">
-                        <div className="flex items-center gap-2 mb-3">
-                          <ThumbsUp className="w-5 h-5 text-blue-500" />
-                          <h3 className="font-semibold text-blue-600">Fan Favorite</h3>
-                        </div>
-                        {fixture.playerOfTheMatch.fanVotes && fixture.playerOfTheMatch.fanVotes.length > 0 ? (
-                          <div className="space-y-3">
-                            {fixture.playerOfTheMatch.fanVotes.slice(0, 3).map((vote, index) => (
-                              <div key={index} className="flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                  <div className={cn(
-                                    "w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold",
-                                    index === 0 ? "bg-yellow-500" : index === 1 ? "bg-gray-400" : "bg-orange-400"
-                                  )}>
-                                    {index + 1}
-                                  </div>
-                                  <div>
-                                    <div className="font-medium">{vote.player.name}</div>
-                                    <div className="text-xs text-muted-foreground">{vote.player.position}</div>
-                                  </div>
-                                </div>
-                                <div className="text-sm font-medium text-blue-600">
-                                  {vote.votes} votes
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <div className="text-center text-muted-foreground py-4">
-                            No fan votes yet
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Player Ratings Section */}
-                {fixture.playerRatings && fixture.playerRatings.length > 0 && (
-                  <div className="bg-card/40 backdrop-blur-sm rounded-xl p-6 border border-border">
-                    <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
-                      <Star className="w-5 h-5 text-emerald-500" />
-                      Player Ratings
-                    </h2>
-
-                    {/* Home Team Ratings */}
-                    <div className="mb-8">
-                      <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
-                        <Image
-                          src={teamLogos[fixture.homeTeam.name] || '/images/team_logos/default.jpg'}
-                          alt={fixture.homeTeam.name}
-                          width={24}
-                          height={24}
-                          className="rounded-full"
-                        />
-                        {fixture.homeTeam.name}
-                      </h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {fixture.playerRatings
-                          .filter(rating => rating.team === 'home')
-                          .sort((a, b) => a.official ? b.official.rating - a.official.rating : 0)
-                          .map((rating, index) => (
-                            <motion.div
-                              key={index}
-                              className="bg-secondary/50 rounded-lg p-4 border border-border/50"
-                              whileHover={{ scale: 1.02 }}
-                              transition={{ type: "spring", stiffness: 300 }}
-                            >
-                              <div className="flex items-start justify-between mb-3">
-                                <div className="flex-1">
-                                  <div className="font-medium">{rating.player.name}</div>
-                                  <div className="text-sm text-muted-foreground">{rating.player.department}</div>
-                                  <div className={cn(
-                                    "inline-block px-2 py-1 rounded-full text-xs font-medium mt-1 border",
-                                    getPositionColor(rating.player.position || '')
-                                  )}>
-                                    {rating.player.position}
-                                  </div>
-                                </div>
-                                <div className="text-right">
-                                  <div className="text-2xl font-bold text-emerald-500">
-                                    { rating.official ? rating.official.rating.toFixed(1) : 'unknown'}
-                                  </div>
-                                  <div className="text-xs text-muted-foreground">Official</div>
-                                </div>
-                              </div>
-                              
-                              {/* Fan Rating */}
-                              <div className="mb-3">
-                                <div className="flex items-center justify-between mb-1">
-                                  <span className="text-sm text-muted-foreground">Fan Rating</span>
-                                  <span className="text-sm font-medium">{rating.fanRatings.average.toFixed(1)} ({rating.fanRatings.count} votes)</span>
-                                </div>
-                                {getStarRating(rating.fanRatings.average)}
-                              </div>
-
-                              {/* Player Stats */}
-                              <div className="grid grid-cols-3 gap-2 text-xs">
-                                <div className="text-center p-2 bg-background rounded">
-                                  <div className="font-medium text-emerald-500">{rating.stats.goals}</div>
-                                  <div className="text-muted-foreground">Goals</div>
-                                </div>
-                                <div className="text-center p-2 bg-background rounded">
-                                  <div className="font-medium text-blue-500">{rating.stats.assists}</div>
-                                  <div className="text-muted-foreground">Assists</div>
-                                </div>
-                                <div className="text-center p-2 bg-background rounded">
-                                  <div className="font-medium text-orange-500">{rating.stats.shots}</div>
-                                  <div className="text-muted-foreground">Shots</div>
-                                </div>
-                              </div>
-                            </motion.div>
                           ))}
-                      </div>
-                    </div>
-
-                    {/* Away Team Ratings */}
-                    <div>
-                      <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
-                        <Image
-                          src={teamLogos[fixture.awayTeam.name] || '/images/team_logos/default.jpg'}
-                          alt={fixture.awayTeam.name}
-                          width={24}
-                          height={24}
-                          className="rounded-full"
-                        />
-                        {fixture.awayTeam.name}
-                      </h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {fixture.playerRatings
-                          .filter(rating => rating.team === 'away')
-                          .sort((a, b) => b.official.rating - a.official.rating)
-                          .map((rating, index) => (
-                            <motion.div
-                              key={index}
-                              className="bg-secondary/50 rounded-lg p-4 border border-border/50"
-                              whileHover={{ scale: 1.02 }}
-                              transition={{ type: "spring", stiffness: 300 }}
-                            >
-                              <div className="flex items-start justify-between mb-3">
-                                <div className="flex-1">
-                                  <div className="font-medium">{rating.player.name}</div>
-                                  <div className="text-sm text-muted-foreground">{rating.player.department}</div>
-                                  <div className={cn(
-                                    "inline-block px-2 py-1 rounded-full text-xs font-medium mt-1 border",
-                                    getPositionColor(rating.player.position || '')
-                                  )}>
-                                    {rating.player.position}
-                                  </div>
-                                </div>
-                                <div className="text-right">
-                                  <div className="text-2xl font-bold text-emerald-500">
-                                    {rating.official.rating.toFixed(1)}
-                                  </div>
-                                  <div className="text-xs text-muted-foreground">Official</div>
-                                </div>
-                              </div>
-                              
-                              {/* Fan Rating */}
-                              <div className="mb-3">
-                                <div className="flex items-center justify-between mb-1">
-                                  <span className="text-sm text-muted-foreground">Fan Rating</span>
-                                  <span className="text-sm font-medium">{rating.fanRatings.average.toFixed(1)} ({rating.fanRatings.count} votes)</span>
-                                </div>
-                                {getStarRating(rating.fanRatings.average)}
-                              </div>
-
-                              {/* Player Stats */}
-                              <div className="grid grid-cols-3 gap-2 text-xs">
-                                <div className="text-center p-2 bg-background rounded">
-                                  <div className="font-medium text-emerald-500">{rating.stats.goals}</div>
-                                  <div className="text-muted-foreground">Goals</div>
-                                </div>
-                                <div className="text-center p-2 bg-background rounded">
-                                  <div className="font-medium text-blue-500">{rating.stats.assists}</div>
-                                  <div className="text-muted-foreground">Assists</div>
-                                </div>
-                                <div className="text-center p-2 bg-background rounded">
-                                  <div className="font-medium text-orange-500">{rating.stats.shots}</div>
-                                  <div className="text-muted-foreground">Shots</div>
-                                </div>
-                              </div>
-                            </motion.div>
-                          ))}
-                      </div>
+                        </>
+                      )}
                     </div>
                   </div>
-                )}
-              </div>
-            )}
-
-            {activeTab === 'lineups' && (
-              <div className="bg-card/40 backdrop-blur-sm rounded-xl p-6 border border-border">
-                <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                  <Users className="w-5 h-5 text-emerald-500" />
-                  Team Lineups
-                </h2>
-                {fixture.lineups ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Home Team Lineup */}
-                    <div>
-                      <h3 className="font-semibold mb-3 text-center flex items-center justify-center gap-2">
-                        <Image
-                          src={teamLogos[fixture.homeTeam.name] || '/images/team_logos/default.jpg'}
-                          alt={fixture.homeTeam.name}
-                          width={20}
-                          height={20}
-                          className="rounded-full"
-                        />
-                        {fixture.homeTeam.name}
-                      </h3>
-                      <div className="space-y-4">
-                        <div className="text-sm text-muted-foreground text-center bg-secondary/50 rounded-lg py-2">
-                          Formation: <span className="font-medium">{fixture.lineups.home.formation}</span>
-                        </div>
-                        <div>
-                          <div className="text-sm font-medium mb-3 text-emerald-600">Starting XI</div>
-                          <div className="space-y-2">
-                            {fixture.lineups.home.startingXI.map((player, index) => (
-                              <motion.div
-                                key={index}
-                                className="flex items-center gap-3 p-3 bg-secondary/30 rounded-lg border border-border/30"
-                                whileHover={{ backgroundColor: "rgba(var(--secondary), 0.6)" }}
-                              >
-                                <div className="w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
-                                  {player.shirtNumber}
-                                </div>
-                                <div className="flex-1">
-                                  <div className="flex items-center gap-2">
-                                    <span className="font-medium">{player.player.name}</span>
-                                    {player.isCaptain && (
-                                      <div className="w-5 h-5 bg-yellow-500 rounded-full flex items-center justify-center">
-                                        <span className="text-white text-xs font-bold">C</span>
-                                      </div>
-                                    )}
-                                  </div>
-                                  <div className="text-xs text-muted-foreground">{player.player.department}</div>
-                                </div>
-                                <div className={cn(
-                                  "px-2 py-1 rounded-full text-xs font-medium border",
-                                  getPositionColor(player.position)
-                                )}>
-                                  {player.position}
-                                </div>
-                              </motion.div>
-                            ))}
-                          </div>
-                        </div>
-                        
-                        {/* Substitutes */}
-                        {fixture.lineups.home.substitutes && fixture.lineups.home.substitutes.length > 0 && (
-                          <div>
-                            <div className="text-sm font-medium mb-3 text-blue-600">Substitutes</div>
-                            <div className="space-y-2">
-                              {fixture.lineups.home.substitutes.map((player, index) => (
-                                <motion.div
-                                  key={index}
-                                  className="flex items-center gap-3 p-2 bg-secondary/20 rounded-lg border border-border/20"
-                                  whileHover={{ backgroundColor: "rgba(var(--secondary), 0.4)" }}
-                                >
-                                  <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
-                                    {player.shirtNumber}
-                                  </div>
-                                  <div className="flex-1">
-                                    <div className="font-medium text-sm">{player.player.name}</div>
-                                    <div className="text-xs text-muted-foreground">{player.player.department}</div>
-                                  </div>
-                                  <div className={cn(
-                                    "px-2 py-1 rounded-full text-xs font-medium border",
-                                    getPositionColor(player.position)
-                                  )}>
-                                    {player.position}
-                                  </div>
-                                </motion.div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Away Team Lineup */}
-                    <div>
-                      <h3 className="font-semibold mb-3 text-center flex items-center justify-center gap-2">
-                        <Image
-                          src={teamLogos[fixture.awayTeam.name] || '/images/team_logos/default.jpg'}
-                          alt={fixture.awayTeam.name}
-                          width={20}
-                          height={20}
-                          className="rounded-full"
-                        />
-                        {fixture.awayTeam.name}
-                      </h3>
-                      <div className="space-y-4">
-                        <div className="text-sm text-muted-foreground text-center bg-secondary/50 rounded-lg py-2">
-                          Formation: <span className="font-medium">{fixture.lineups.away.formation}</span>
-                        </div>
-                        <div>
-                          <div className="text-sm font-medium mb-3 text-emerald-600">Starting XI</div>
-                          <div className="space-y-2">
-                            {fixture.lineups.away.startingXI.map((player, index) => (
-                              <motion.div
-                                key={index}
-                                className="flex items-center gap-3 p-3 bg-secondary/30 rounded-lg border border-border/30"
-                                whileHover={{ backgroundColor: "rgba(var(--secondary), 0.6)" }}
-                              >
-                                <div className="w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
-                                  {player.shirtNumber}
-                                </div>
-                                <div className="flex-1">
-                                  <div className="flex items-center gap-2">
-                                    <span className="font-medium">{player.player.name}</span>
-                                    {player.isCaptain && (
-                                      <div className="w-5 h-5 bg-yellow-500 rounded-full flex items-center justify-center">
-                                        <span className="text-white text-xs font-bold">C</span>
-                                      </div>
-                                    )}
-                                  </div>
-                                  <div className="text-xs text-muted-foreground">{player.player.department}</div>
-                                </div>
-                                <div className={cn(
-                                  "px-2 py-1 rounded-full text-xs font-medium border",
-                                  getPositionColor(player.position)
-                                )}>
-                                  {player.position}
-                                </div>
-                              </motion.div>
-                            ))}
-                          </div>
-                        </div>
-                        
-                        {/* Substitutes */}
-                        {fixture.lineups.away.substitutes && fixture.lineups.away.substitutes.length > 0 && (
-                          <div>
-                            <div className="text-sm font-medium mb-3 text-blue-600">Substitutes</div>
-                            <div className="space-y-2">
-                              {fixture.lineups.away.substitutes.map((player, index) => (
-                                <motion.div
-                                  key={index}
-                                  className="flex items-center gap-3 p-2 bg-secondary/20 rounded-lg border border-border/20"
-                                  whileHover={{ backgroundColor: "rgba(var(--secondary), 0.4)" }}
-                                >
-                                  <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
-                                    {player.shirtNumber}
-                                  </div>
-                                  <div className="flex-1">
-                                    <div className="font-medium text-sm">{player.player.name}</div>
-                                    <div className="text-xs text-muted-foreground">{player.player.department}</div>
-                                  </div>
-                                  <div className={cn(
-                                    "px-2 py-1 rounded-full text-xs font-medium border",
-                                    getPositionColor(player.position)
-                                  )}>
-                                    {player.position}
-                                  </div>
-                                </motion.div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="text-center text-muted-foreground py-8">
-                    Lineups not available yet
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        </BlurFade>
+                </div>
+              ) : (
+                <div className="text-center text-muted-foreground py-8">Lineups not available yet</div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </main>
   );
