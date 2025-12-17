@@ -2,13 +2,13 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowRight, Trophy, Newspaper, Zap, Activity, Clock, Calendar, ChevronRight } from 'lucide-react';
+import { ArrowRight, Trophy, Newspaper, Play, Calendar, Clock, MapPin, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import { motion } from 'framer-motion';
 import Footer from '@/components/Footer';
+import GalleryCarousel from '@/components/GalleryCarousel';
 
-// Mock Data (In a real app, this would be fetched)
+// Mock Data
 const latestArticles = [
   {
     id: 3,
@@ -50,261 +50,248 @@ const upcomingMatch = {
   venue: "FUPRE Sports Complex"
 };
 
+const quickLinks = [
+  { href: "/sports/competitions", label: "Scores", icon: Trophy },
+  { href: "/news", label: "News", icon: Newspaper },
+  { href: "/highlights", label: "Highlights", icon: Play },
+];
+
 export default function RootPage() {
-  const container = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1
-      }
-    }
-  };
-
-  const item = {
-    hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0 }
-  };
-
   return (
-    <div className="min-h-screen bg-background text-foreground selection:bg-emerald-500/30">
+    <div className="min-h-screen bg-background text-foreground">
 
-      {/* Hero Section */}
-      <section className="relative pt-24 pb-16 md:pt-32 md:pb-24 overflow-hidden">
-        {/* Background Elements */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-emerald-500/10 rounded-full blur-[120px] -z-10 dark:bg-emerald-500/5 animate-pulse" />
-
-        <div className="container px-4 md:px-6 mx-auto">
+      {/* Hero Section - Clean, Bold, Minimal */}
+      <section className="pt-16 pb-12 md:pt-24 md:pb-20 px-4">
+        <div className="container mx-auto max-w-5xl">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-            className="flex flex-col items-center text-center space-y-8 max-w-4xl mx-auto"
+            transition={{ duration: 0.5 }}
+            className="text-center space-y-8"
           >
-            <div className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80">
-              <span className="flex h-2 w-2 rounded-full bg-emerald-500 mr-2 animate-pulse"></span>
-              Live Season 2025/2026
+            {/* Season Badge */}
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-emerald-500/30 bg-emerald-500/10">
+              <span className="w-2 h-2 rounded-full bg-emerald-500" />
+              <span className="text-sm font-medium text-emerald-700 dark:text-emerald-400">2025/2026</span>
             </div>
 
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-b from-foreground to-foreground/50">
-              Elevating <br className="hidden md:block" />
-              University Sports.
+            {/* Main Headline */}
+            <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-[0.9]">
+              Elevating<br />
+              <span className="text-muted-foreground">University Sports.</span>
             </h1>
 
-            <p className="text-xl text-muted-foreground max-w-2xl leading-relaxed">
-              The official digital hub for FUPRE sports. Experience live scores,
-              comprehensive match statistics, and breaking news from the heart of the action.
+            {/* Subtitle */}
+            <p className="text-lg md:text-xl text-muted-foreground max-w-xl mx-auto">
+              Live scores, match statistics, and breaking news from FUPRE.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 pt-4">
+            {/* CTAs */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
               <Link href="/sports/competitions">
-                <Button size="lg" className="h-12 px-8 text-base bg-emerald-600 hover:bg-emerald-700 text-white rounded-full transition-all hover:scale-105">
+                <Button size="lg" className="h-14 w-64 text-base rounded-full bg-emerald-600 hover:bg-emerald-700 text-white">
                   Explore Competitions
-                  <ArrowRight className="ml-2 h-4 w-4" />
+                  <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
-              <Link href="/news">
-                <Button variant="outline" size="lg" className="h-12 px-8 text-base rounded-full hover:bg-secondary transition-all">
-                  Latest News
-                </Button>
-              </Link>
-            </div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Featured Grid */}
-      <section className="py-20 bg-secondary/30 border-y border-border/50">
-        <div className="container px-4 md:px-6 mx-auto">
-          <motion.div
-            variants={container}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true }}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
-          >
-            {/* Live Scores Card */}
-            <motion.div variants={item} className="group">
-              <Link href="/sports/competitions">
-                <Card className="h-full p-6 bg-card hover:bg-emerald-500/5 border-border/50 hover:border-emerald-500/20 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
-                  <div className="h-12 w-12 rounded-2xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                    <Activity className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
-                  </div>
-                  <h3 className="text-xl font-bold mb-2 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">Live Scores</h3>
-                  <p className="text-muted-foreground text-sm leading-relaxed">
-                    Real-time updates from all ongoing matches across different sports categories.
-                  </p>
-                </Card>
-              </Link>
-            </motion.div>
-
-            {/* Team of the Season Card */}
-            <motion.div variants={item} className="group">
-              <Link href="/sports/football/tots">
-                <Card className="h-full p-6 bg-card hover:bg-emerald-500/5 border-border/50 hover:border-emerald-500/20 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
-                  <div className="h-12 w-12 rounded-2xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                    <Trophy className="h-6 w-6 text-amber-600 dark:text-amber-400" />
-                  </div>
-                  <h3 className="text-xl font-bold mb-2 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">Team of the Season</h3>
-                  <p className="text-muted-foreground text-sm leading-relaxed">
-                    Vote for your favorite players and see who makes the ultimate squad lineup.
-                  </p>
-                </Card>
-              </Link>
-            </motion.div>
-
-            {/* News Card */}
-            <motion.div variants={item} className="group">
-              <Link href="/news">
-                <Card className="h-full p-6 bg-card hover:bg-emerald-500/5 border-border/50 hover:border-emerald-500/20 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
-                  <div className="h-12 w-12 rounded-2xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                    <Newspaper className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-                  </div>
-                  <h3 className="text-xl font-bold mb-2 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">Latest News</h3>
-                  <p className="text-muted-foreground text-sm leading-relaxed">
-                    Stay updated with match reports, player interviews, and university sports announcements.
-                  </p>
-                </Card>
-              </Link>
-            </motion.div>
-
-            {/* Highlights Card */}
-            <motion.div variants={item} className="group">
               <Link href="/highlights">
-                <Card className="h-full p-6 bg-card hover:bg-emerald-500/5 border-border/50 hover:border-emerald-500/20 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
-                  <div className="h-12 w-12 rounded-2xl bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                    <Zap className="h-6 w-6 text-rose-600 dark:text-rose-400" />
-                  </div>
-                  <h3 className="text-xl font-bold mb-2 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">Highlights</h3>
-                  <p className="text-muted-foreground text-sm leading-relaxed">
-                    Watch best moments, top goals, and game-changing plays from recent fixtures.
-                  </p>
-                </Card>
+                <Button size="lg" variant="outline" className="h-14 w-64 text-base rounded-full border-border hover:bg-secondary">
+                  <Play className="mr-2 h-5 w-5" />
+                  Watch Highlights
+                </Button>
               </Link>
-            </motion.div>
+            </div>
           </motion.div>
         </div>
       </section>
 
-      {/* Featured Content Area */}
-      <section className="py-24 bg-background">
-        <div className="container px-4 md:px-6 mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+      {/* Stats Bar - Minimal horizontal strip */}
+      <section className="border-y border-border py-6">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 text-center">
+            <div className="py-2">
+              <span className="text-2xl md:text-4xl font-bold text-emerald-600 dark:text-emerald-400">2</span>
+              <p className="text-xs md:text-sm text-muted-foreground mt-1">Live Matches</p>
+            </div>
+            <div className="py-2">
+              <span className="text-2xl md:text-4xl font-bold">5</span>
+              <p className="text-xs md:text-sm text-muted-foreground mt-1">Competitions</p>
+            </div>
+            <div className="py-2">
+              <span className="text-2xl md:text-4xl font-bold">12</span>
+              <p className="text-xs md:text-sm text-muted-foreground mt-1">Teams</p>
+            </div>
+            <div className="py-2">
+              <span className="text-2xl md:text-4xl font-bold">48</span>
+              <p className="text-xs md:text-sm text-muted-foreground mt-1">Fixtures</p>
+            </div>
+          </div>
+        </div>
+      </section>
 
-            {/* Upcoming Match Spotlight */}
-            <div className="lg:col-span-4 space-y-8">
-              <div className="flex items-center justify-between">
-                <h2 className="text-3xl font-bold">Next Match</h2>
-                <Link href="/sports/competitions" className="text-emerald-500 hover:text-emerald-600 flex items-center text-sm font-medium">
-                  View Schedule <ChevronRight className="w-4 h-4 ml-1" />
-                </Link>
-              </div>
+      {/* Featured Match - Clean Split Layout */}
+      <section className="py-16 md:py-24">
+        <div className="container mx-auto px-4 max-w-4xl">
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-2xl md:text-3xl font-bold">Next Match</h2>
+            <Link href="/sports/competitions" className="text-sm font-medium text-muted-foreground hover:text-foreground flex items-center">
+              All Fixtures <ChevronRight className="w-4 h-4 ml-1" />
+            </Link>
+          </div>
 
-              <Card className="p-0 overflow-hidden border-border/50 shadow-lg group">
-                <div className="bg-emerald-900/10 p-6 flex flex-col items-center justify-center border-b border-border/50 relative overflow-hidden">
-                  <div className="absolute inset-0 bg-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  <span className="inline-block px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold mb-4 z-10">
-                    {upcomingMatch.competition}
-                  </span>
-
-                  <div className="flex w-full items-center justify-between z-10">
-                    <div className="text-center w-1/3">
-                      <div className="w-16 h-16 rounded-full bg-secondary mx-auto mb-2 flex items-center justify-center">
-                        <span className="text-2xl font-bold text-muted-foreground">E</span>
-                      </div>
-                      <span className="text-sm font-bold block">{upcomingMatch.teams.home}</span>
-                    </div>
-
-                    <div className="text-center w-1/3">
-                      <span className="text-3xl font-bold text-muted-foreground">VS</span>
-                    </div>
-
-                    <div className="text-center w-1/3">
-                      <div className="w-16 h-16 rounded-full bg-secondary mx-auto mb-2 flex items-center justify-center">
-                        <span className="text-2xl font-bold text-muted-foreground">S</span>
-                      </div>
-                      <span className="text-sm font-bold block">{upcomingMatch.teams.away}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="p-4 bg-card space-y-3">
-                  <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                    <Calendar className="w-4 h-4 text-emerald-500" />
-                    <span>{upcomingMatch.date}</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                    <Clock className="w-4 h-4 text-emerald-500" />
-                    <span>{upcomingMatch.time}</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                    <Activity className="w-4 h-4 text-emerald-500" />
-                    <span>{upcomingMatch.venue}</span>
-                  </div>
-
-                  <Link href="/sports/competitions" className="block mt-4">
-                    <Button className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/80">Match Details</Button>
-                  </Link>
-                </div>
-              </Card>
+          <div className="border border-border rounded-2xl overflow-hidden">
+            {/* Competition Header */}
+            <div className="bg-secondary/50 px-6 py-3 text-center">
+              <span className="text-sm font-medium text-muted-foreground">
+                {upcomingMatch.competition}
+              </span>
             </div>
 
-            {/* Latest News Feed */}
-            <div className="lg:col-span-8 space-y-8">
-              <div className="flex items-center justify-between">
-                <h2 className="text-3xl font-bold">Trending News</h2>
-                <Link href="/news" className="text-emerald-500 hover:text-emerald-600 flex items-center text-sm font-medium">
-                  View All News <ChevronRight className="w-4 h-4 ml-1" />
-                </Link>
+            {/* Match Content */}
+            <div className="p-8 md:p-12">
+              <div className="flex items-center justify-between gap-4">
+                {/* Home Team */}
+                <div className="flex-1 text-center">
+                  <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-secondary mx-auto mb-4 flex items-center justify-center">
+                    <span className="text-2xl md:text-3xl font-bold">E</span>
+                  </div>
+                  <h3 className="font-bold text-lg md:text-xl">{upcomingMatch.teams.home}</h3>
+                </div>
+
+                {/* VS */}
+                <div className="flex flex-col items-center px-4 md:px-8">
+                  <span className="text-2xl md:text-3xl font-bold text-muted-foreground">VS</span>
+                </div>
+
+                {/* Away Team */}
+                <div className="flex-1 text-center">
+                  <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-secondary mx-auto mb-4 flex items-center justify-center">
+                    <span className="text-2xl md:text-3xl font-bold">S</span>
+                  </div>
+                  <h3 className="font-bold text-lg md:text-xl">{upcomingMatch.teams.away}</h3>
+                </div>
               </div>
 
-              <div className="grid gap-6">
-                {latestArticles.map((article) => (
-                  <motion.div
-                    key={article.id}
-                    initial={{ opacity: 0, x: 20 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    className="group"
-                  >
-                    <Link href={`/news/${article.id}`}>
-                      <Card className="flex flex-col md:flex-row overflow-hidden hover:shadow-lg transition-all border-border/50 bg-card/50 hover:bg-card">
-                        <div className="relative w-full md:w-48 h-48 md:h-auto shrink-0 overflow-hidden">
-                          {/* Placeholder for real image since we might not have access to public assets */}
-                          <div className="absolute inset-0 bg-muted flex items-center justify-center text-muted-foreground">
-                            <Newspaper className="w-8 h-8 opacity-20" />
-                          </div>
-                          {/* Try to use Image if src works, otherwise fallback will be needed in production code, but here we just use what was in news page */}
-
-                        </div>
-                        <div className="p-6 flex flex-col justify-center">
-                          <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
-                            <span className="text-emerald-500 font-medium">Sports</span>
-                            <span>•</span>
-                            <span>{article.readTime}</span>
-                          </div>
-                          <h3 className="text-xl font-bold mb-2 group-hover:text-emerald-500 transition-colors line-clamp-1">
-                            {article.title}
-                          </h3>
-                          <p className="text-muted-foreground text-sm line-clamp-2 mb-4">
-                            {article.excerpt}
-                          </p>
-                          <div className="flex items-center gap-2 text-xs text-muted-foreground mt-auto">
-                            <div className="w-5 h-5 rounded-full bg-secondary flex items-center justify-center">
-                              <span className="text-[10px] font-bold">CU</span>
-                            </div>
-                            <span>{article.author}</span>
-                            <span>•</span>
-                            <span>{article.date}</span>
-                          </div>
-                        </div>
-                      </Card>
-                    </Link>
-                  </motion.div>
-                ))}
+              {/* Match Details */}
+              <div className="flex flex-wrap justify-center gap-6 mt-8 text-sm text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  <Calendar className="w-4 h-4" />
+                  <span>{upcomingMatch.date}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Clock className="w-4 h-4" />
+                  <span>{upcomingMatch.time}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <MapPin className="w-4 h-4" />
+                  <span>{upcomingMatch.venue}</span>
+                </div>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
 
+      {/* News Section - Clean Minimal */}
+      <section className="py-16 md:py-24 border-t border-border">
+        <div className="container mx-auto px-4 max-w-4xl">
+          <div className="flex items-center justify-between mb-10">
+            <h2 className="text-2xl md:text-3xl font-bold">Latest News</h2>
+            <Link href="/news" className="text-sm font-medium text-emerald-600 dark:text-emerald-400 hover:underline flex items-center">
+              View All <ChevronRight className="w-4 h-4 ml-1" />
+            </Link>
+          </div>
+
+          {/* Featured Article */}
+          {latestArticles[0] && (
+            <Link href={`/news/${latestArticles[0].id}`} className="block group mb-10">
+              <article className="md:flex md:gap-8 md:items-center">
+                <div className="w-full md:w-1/2 aspect-video rounded-xl bg-secondary mb-4 md:mb-0 overflow-hidden relative">
+                  <Image
+                    src={latestArticles[0].image}
+                    alt={latestArticles[0].title}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                <div className="md:w-1/2">
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3">
+                    <span className="text-emerald-600 dark:text-emerald-400 font-medium">Featured</span>
+                    <span>•</span>
+                    <span>{latestArticles[0].readTime}</span>
+                  </div>
+                  <h3 className="text-xl md:text-2xl font-bold leading-tight group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors mb-3">
+                    {latestArticles[0].title}
+                  </h3>
+                  <p className="text-muted-foreground text-sm md:text-base leading-relaxed mb-4">
+                    {latestArticles[0].excerpt}
+                  </p>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <span className="font-medium">{latestArticles[0].author}</span>
+                    <span>•</span>
+                    <span>{latestArticles[0].date}</span>
+                  </div>
+                </div>
+              </article>
+            </Link>
+          )}
+
+          {/* Other Articles - Simple List */}
+          <div className="divide-y divide-border">
+            {latestArticles.slice(1).map((article) => (
+              <Link key={article.id} href={`/news/${article.id}`} className="block group py-6 first:pt-0">
+                <article className="flex gap-4 items-start">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
+                      <span className="text-emerald-600 dark:text-emerald-400 font-medium">Sports</span>
+                      <span>•</span>
+                      <span>{article.readTime}</span>
+                    </div>
+                    <h3 className="font-bold text-base md:text-lg leading-snug group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                      {article.title}
+                    </h3>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground mt-2">
+                      <span>{article.author}</span>
+                      <span>•</span>
+                      <span>{article.date}</span>
+                    </div>
+                  </div>
+                  <div className="w-20 h-20 md:w-24 md:h-24 rounded-lg bg-secondary flex-shrink-0 overflow-hidden relative">
+                    <Image
+                      src={article.image}
+                      alt={article.title}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                </article>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Gallery Section - Full Width Parallax */}
+      <GalleryCarousel />
+
+      {/* Quick Links - Icon Row */}
+      <section className="py-16 border-b border-border">
+        <div className="container mx-auto px-4">
+          <div className="flex justify-center gap-8 md:gap-16">
+            {quickLinks.map((link) => (
+              <Link
+                key={link.label}
+                href={link.href}
+                className="flex flex-col items-center gap-3 group"
+              >
+                <div className="w-14 h-14 md:w-16 md:h-16 rounded-full border border-border bg-background flex items-center justify-center group-hover:bg-secondary group-hover:border-foreground/20 transition-colors">
+                  <link.icon className="w-6 h-6 md:w-7 md:h-7 text-muted-foreground group-hover:text-foreground transition-colors" />
+                </div>
+                <span className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">
+                  {link.label}
+                </span>
+              </Link>
+            ))}
           </div>
         </div>
       </section>

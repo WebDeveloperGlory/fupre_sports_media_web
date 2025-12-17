@@ -142,26 +142,11 @@ const Footer = () => {
           </div>
         </div>
 
-        {/* Bottom Section */}
-        <div className="border-t border-border mt-8 pt-6">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-sm text-muted-foreground">
-              © {currentYear} FUPRE Sports Media. All rights reserved.
-            </p>
-            <div className="flex items-center gap-4 text-sm text-muted-foreground">
-              <Link href="/privacy" className="hover:text-emerald-500 transition-colors">
-                Privacy
-              </Link>
-              <span>•</span>
-              <Link href="/terms" className="hover:text-emerald-500 transition-colors">
-                Terms
-              </Link>
-              <span>•</span>
-              <Link href="/contact" className="hover:text-emerald-500 transition-colors">
-                Contact
-              </Link>
-            </div>
-          </div>
+        {/* Bottom Section - Full Width Bold Branding */}
+        <div className="mt-12 -mx-4 bg-emerald-500 py-8">
+          <h2 className="text-[9vw] md:text-[7vw] font-black tracking-tight text-black leading-none text-center">
+            FUPRE SPORTS MEDIA
+          </h2>
         </div>
       </div>
     </footer>
