@@ -7,6 +7,7 @@ import { Camera } from 'lucide-react';
 
 // Gallery images from /public/images/gallery/
 const galleryImages = [
+    { src: '/images/gallery/The Team.jpg', alt: 'FUPRE Sports Team' },
     { src: '/images/gallery/Gallery (1).jpg', alt: 'FUPRE Sports Moment 1' },
     { src: '/images/gallery/Gallery (2).jpg', alt: 'FUPRE Sports Moment 2' },
     { src: '/images/gallery/Gallery (3).jpg', alt: 'FUPRE Sports Moment 3' },

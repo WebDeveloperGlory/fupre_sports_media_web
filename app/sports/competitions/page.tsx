@@ -1,25 +1,77 @@
 'use client'
 
+import { useState, useEffect } from 'react';
 import Link from "next/link";
-import { Trophy, Target, ArrowRight, Calendar, Users, Award, Clock, Flame } from "lucide-react";
+import { Trophy, Target, ArrowRight, Calendar, Users, Award, Clock } from "lucide-react";
 import { motion } from "framer-motion";
-import { Card } from "@/components/ui/card";
+import { getAllCompetitions } from '@/lib/requests/v2/competition/requests';
+import { getFixtures } from '@/lib/requests/v2/fixtures/requests';
+
+interface Stats {
+  competitions: number;
+  teams: number;
+  matches: number;
+  champions: number;
+}
 
 export default function CompetitionsPage() {
+  const [stats, setStats] = useState<Stats>({
+    competitions: 0,
+    teams: 0,
+    matches: 0,
+    champions: 0,
+  });
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const [competitionsRes, fixturesRes] = await Promise.all([
+          getAllCompetitions(),
+          getFixtures(undefined, 100),
+        ]);
+
+        const competitions = competitionsRes?.data?.length || 0;
+        const matches = fixturesRes?.data?.length || 0;
+
+        // Count unique teams
+        let teams = 0;
+        if (competitionsRes?.data) {
+          const teamSet = new Set<string>();
+          competitionsRes.data.forEach((comp: any) => {
+            if (comp.teams) {
+              comp.teams.forEach((team: any) => teamSet.add(team._id || team));
+            }
+          });
+          teams = teamSet.size || 12;
+        }
+
+        // Count completed competitions as champions
+        const champions = competitionsRes?.data?.filter((c: any) => c.status === 'completed')?.length || 0;
+
+        setStats({
+          competitions,
+          teams: teams || 12,
+          matches,
+          champions,
+        });
+      } catch (error) {
+        console.error('Error fetching stats:', error);
+      }
+    };
+
+    fetchStats();
+  }, []);
   const competitions = [
     {
       name: "Football",
       href: "/sports/football",
       description: "University football competitions, leagues, and tournaments",
       icon: Trophy,
-      color: "emerald" as const,
-      gradient: "from-emerald-500/20 to-emerald-600/5",
       available: true,
       stats: {
         activeCompetitions: "3",
         teams: "16",
         upcomingMatches: "8",
-        currentSeason: "2024/25"
       },
       competitions: [
         "Unity Cup Championship",
@@ -37,14 +89,11 @@ export default function CompetitionsPage() {
       href: "/sports/basketball",
       description: "Basketball tournaments, leagues, and championship games",
       icon: Target,
-      color: "orange" as const,
-      gradient: "from-orange-500/20 to-orange-600/5",
       available: false,
       stats: {
         activeCompetitions: "2",
         teams: "12",
         upcomingMatches: "4",
-        currentSeason: "2024/25"
       },
       competitions: [
         "Basketball Championship",
@@ -59,226 +108,203 @@ export default function CompetitionsPage() {
     }
   ];
 
-  // Animation variants
-  const container = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: { staggerChildren: 0.15 }
-    }
-  };
-
-  const item = {
-    hidden: { opacity: 0, y: 30 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.6 } }
-  };
-
-  const colorClasses = {
-    emerald: {
-      border: "border-emerald-500/20",
-      hoverBorder: "hover:border-emerald-500/40",
-      text: "text-emerald-500",
-      button: "bg-emerald-600 hover:bg-emerald-700",
-      accent: "bg-emerald-500/10",
-      iconBg: "bg-emerald-100 dark:bg-emerald-900/40",
-    },
-    orange: {
-      border: "border-orange-500/20",
-      hoverBorder: "hover:border-orange-500/40",
-      text: "text-orange-500",
-      button: "bg-orange-600 hover:bg-orange-700",
-      accent: "bg-orange-500/10",
-      iconBg: "bg-orange-100 dark:bg-orange-900/40",
-    }
-  };
-
   return (
-    <main className="min-h-screen bg-background selection:bg-emerald-500/30">
-      {/* Hero Section */}
-      <section className="relative pt-6 sm:pt-28 pb-12 sm:pb-16 overflow-hidden">
-        {/* Animated Background Glows */}
-        <div className="absolute top-0 left-1/4 w-[400px] sm:w-[600px] h-[400px] sm:h-[600px] bg-emerald-500/10 rounded-full blur-[100px] sm:blur-[140px] -z-10 dark:bg-emerald-500/5 animate-pulse" />
-        <div className="absolute top-20 right-1/4 w-[300px] sm:w-[500px] h-[300px] sm:h-[500px] bg-orange-500/8 rounded-full blur-[100px] sm:blur-[120px] -z-10 animate-pulse" style={{ animationDelay: '1s' }} />
-
-        <div className="container px-4 sm:px-6 mx-auto max-w-6xl">
+    <main className="min-h-screen bg-background pb-20 md:pb-0">
+      {/* Hero Section - Clean, Minimal */}
+      <section className="pt-16 pb-12 md:pt-24 md:pb-16 px-4">
+        <div className="container mx-auto max-w-5xl">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7 }}
-            className="text-center space-y-3 sm:space-y-6"
+            transition={{ duration: 0.5 }}
+            className="text-center space-y-6"
           >
-            <div className="inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold bg-secondary text-secondary-foreground">
-              <span className="flex h-2 w-2 rounded-full bg-emerald-500 mr-2 animate-pulse" />
-              Season 2024/2025
+            {/* Season Badge */}
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-emerald-500/30 bg-emerald-500/10">
+              <span className="w-2 h-2 rounded-full bg-emerald-500" />
+              <span className="text-sm font-medium text-emerald-700 dark:text-emerald-400">2025/2026</span>
             </div>
 
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-b from-foreground to-foreground/60">
+            <h1 className="text-4xl md:text-6xl font-bold tracking-tight">
               Sports Competitions
             </h1>
 
-            <p className="text-base sm:text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               Explore all sports competitions at FUPRE. Choose your sport and dive into the action.
             </p>
           </motion.div>
         </div>
       </section>
 
-      {/* Sports Grid */}
-      <section className="py-8 sm:py-12">
-        <div className="container px-4 sm:px-6 mx-auto max-w-6xl">
-          <motion.div
-            variants={container}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true }}
-            className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6"
-          >
+      {/* Stats Bar - Minimal horizontal strip */}
+      <section className="border-y border-border py-6">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 text-center">
+            <div className="py-2">
+              <span className="text-2xl md:text-4xl font-bold text-emerald-600 dark:text-emerald-400">{stats.competitions}</span>
+              <p className="text-xs md:text-sm text-muted-foreground mt-1">Competitions</p>
+            </div>
+            <div className="py-2">
+              <span className="text-2xl md:text-4xl font-bold">{stats.teams}</span>
+              <p className="text-xs md:text-sm text-muted-foreground mt-1">Teams</p>
+            </div>
+            <div className="py-2">
+              <span className="text-2xl md:text-4xl font-bold">{stats.matches}</span>
+              <p className="text-xs md:text-sm text-muted-foreground mt-1">Matches</p>
+            </div>
+            <div className="py-2">
+              <span className="text-2xl md:text-4xl font-bold">{stats.champions}</span>
+              <p className="text-xs md:text-sm text-muted-foreground mt-1">Champions</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Sports Section */}
+      <section className="py-12 md:py-20">
+        <div className="container mx-auto px-2 md:px-4 max-w-5xl">
+          <div className="space-y-4 md:space-y-6">
             {competitions.map((sport) => {
               const Icon = sport.icon;
-              const colors = colorClasses[sport.color];
 
               return (
-                <motion.div key={sport.name} variants={item}>
-                  <Card className={`relative overflow-hidden p-5 sm:p-6 lg:p-8 bg-gradient-to-br ${sport.gradient} backdrop-blur-sm border ${colors.border} ${sport.available ? colors.hoverBorder : ''} transition-all duration-500 ${sport.available ? 'hover:shadow-2xl hover:-translate-y-1' : 'opacity-80'}`}>
-                    {/* Coming Soon Badge */}
-                    {!sport.available && (
-                      <div className="absolute top-4 right-4 z-10">
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 text-xs font-medium border border-amber-500/30">
+                <motion.div
+                  key={sport.name}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5 }}
+                  className={`border border-border rounded-xl md:rounded-2xl overflow-hidden ${!sport.available ? 'opacity-60' : ''}`}
+                >
+                  {/* Header */}
+                  <div className="p-4 md:p-8 border-b border-border">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-emerald-500/10 flex items-center justify-center">
+                          <Icon className="w-6 h-6 md:w-7 md:h-7 text-emerald-600 dark:text-emerald-400" />
+                        </div>
+                        <div>
+                          <h2 className="text-xl md:text-2xl font-bold">{sport.name}</h2>
+                          <p className="text-sm text-muted-foreground">{sport.description}</p>
+                        </div>
+                      </div>
+
+                      {!sport.available && (
+                        <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-muted text-muted-foreground text-xs font-medium">
                           <Clock className="w-3 h-3" />
                           Coming Soon
                         </span>
-                      </div>
-                    )}
-
-                    {/* Background Icon */}
-                    <div className={`absolute top-0 right-0 w-24 sm:w-32 h-24 sm:h-32 ${colors.text} opacity-[0.03] transform rotate-12 translate-x-6 -translate-y-6 ${sport.available ? 'group-hover:scale-110' : ''} transition-transform duration-500`}>
-                      <Icon className="w-full h-full" />
+                      )}
                     </div>
+                  </div>
 
-                    <div className="relative space-y-4 sm:space-y-5">
-                      {/* Header */}
-                      <div className="flex items-center gap-3 sm:gap-4">
-                        <div className={`flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-2xl ${colors.iconBg} ${sport.available ? 'group-hover:scale-110' : ''} transition-transform duration-300`}>
-                          <Icon className={`h-6 w-6 sm:h-7 sm:w-7 ${colors.text}`} />
-                        </div>
-                        <div>
-                          <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground">
-                            {sport.name}
-                          </h3>
-                          <p className="text-xs sm:text-sm text-muted-foreground">Competitions & Tournaments</p>
-                        </div>
-                      </div>
-
-                      <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-                        {sport.description}
-                      </p>
-
+                  {/* Content */}
+                  <div className="p-4 md:p-8">
+                    <div className="grid md:grid-cols-2 gap-6 md:gap-8">
                       {/* Stats */}
-                      <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                        <div className="text-center p-3 sm:p-4 rounded-xl bg-background/40 backdrop-blur-sm border border-border/50">
-                          <div className="text-xl sm:text-2xl font-bold">{sport.stats.activeCompetitions}</div>
-                          <div className="text-[10px] sm:text-xs text-muted-foreground">Active</div>
-                        </div>
-                        <div className="text-center p-3 sm:p-4 rounded-xl bg-background/40 backdrop-blur-sm border border-border/50">
-                          <div className="text-xl sm:text-2xl font-bold">{sport.stats.teams}</div>
-                          <div className="text-[10px] sm:text-xs text-muted-foreground">Teams</div>
+                      <div>
+                        <h3 className="text-sm font-medium text-muted-foreground mb-3 md:mb-4">Quick Stats</h3>
+                        <div className="grid grid-cols-3 gap-2 md:gap-4">
+                          <div className="text-center py-3 px-2 md:p-4 bg-secondary/50 rounded-lg md:rounded-xl">
+                            <div className="text-lg md:text-2xl font-bold">{sport.stats.activeCompetitions}</div>
+                            <div className="text-[10px] md:text-xs text-muted-foreground mt-1">Active</div>
+                          </div>
+                          <div className="text-center py-3 px-2 md:p-4 bg-secondary/50 rounded-lg md:rounded-xl">
+                            <div className="text-lg md:text-2xl font-bold">{sport.stats.teams}</div>
+                            <div className="text-[10px] md:text-xs text-muted-foreground mt-1">Teams</div>
+                          </div>
+                          <div className="text-center py-3 px-2 md:p-4 bg-secondary/50 rounded-lg md:rounded-xl">
+                            <div className="text-lg md:text-2xl font-bold">{sport.stats.upcomingMatches}</div>
+                            <div className="text-[10px] md:text-xs text-muted-foreground mt-1">Upcoming</div>
+                          </div>
                         </div>
                       </div>
 
                       {/* Active Competitions */}
                       <div>
-                        <h4 className="font-semibold text-xs sm:text-sm mb-2 sm:mb-3 flex items-center gap-2">
-                          <Award className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                        <h3 className="text-sm font-medium text-muted-foreground mb-4 flex items-center gap-2">
+                          <Award className="w-4 h-4" />
                           Active Competitions
-                        </h4>
-                        <div className="space-y-1.5 sm:space-y-2">
+                        </h3>
+                        <div className="space-y-3">
                           {sport.competitions.map((comp, index) => (
-                            <div key={index} className="text-xs sm:text-sm text-muted-foreground flex items-center gap-2">
-                              <div className={`w-1.5 h-1.5 rounded-full ${colors.text.replace('text-', 'bg-')}`} />
-                              {comp}
+                            <div key={index} className="flex items-center gap-3 text-sm">
+                              <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                              <span>{comp}</span>
                             </div>
                           ))}
                         </div>
                       </div>
+                    </div>
 
-                      {/* Next Match */}
-                      {sport.available && (
-                        <div className="p-3 sm:p-4 rounded-xl bg-background/30 backdrop-blur-sm border border-border/50">
-                          <h4 className="font-semibold text-xs sm:text-sm mb-2 flex items-center gap-2">
-                            <Flame className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-red-500" />
-                            Next Match
-                          </h4>
-                          <div className="text-xs sm:text-sm">
-                            <div className="font-medium text-foreground">{sport.nextMatch.teams}</div>
-                            <div className="text-muted-foreground text-[10px] sm:text-xs mt-0.5">
+                    {/* Next Match */}
+                    {sport.available && (
+                      <div className="mt-8 p-4 border border-border rounded-xl">
+                        <h3 className="text-sm font-medium text-muted-foreground mb-3 flex items-center gap-2">
+                          <Calendar className="w-4 h-4" />
+                          Next Match
+                        </h3>
+                        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                          <div>
+                            <div className="font-bold">{sport.nextMatch.teams}</div>
+                            <div className="text-sm text-muted-foreground">
                               {sport.nextMatch.date} at {sport.nextMatch.time}
                             </div>
                           </div>
+                          <Link
+                            href={sport.href}
+                            className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium transition-colors"
+                          >
+                            View Competitions
+                            <ArrowRight className="w-4 h-4" />
+                          </Link>
                         </div>
-                      )}
+                      </div>
+                    )}
 
-                      {/* Action Button */}
-                      {sport.available ? (
-                        <Link
-                          href={sport.href}
-                          className={`inline-flex items-center gap-2 px-5 sm:px-6 py-2.5 sm:py-3 rounded-full ${colors.button} text-white text-xs sm:text-sm font-medium transition-all duration-300 hover:scale-105 shadow-lg`}
-                        >
-                          View Competitions
-                          <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 group-hover:translate-x-1 transition-transform" />
-                        </Link>
-                      ) : (
-                        <div className="inline-flex items-center gap-2 px-5 sm:px-6 py-2.5 sm:py-3 rounded-full bg-muted text-muted-foreground text-xs sm:text-sm font-medium cursor-not-allowed">
+                    {/* Action Button for unavailable sports */}
+                    {!sport.available && (
+                      <div className="mt-8">
+                        <div className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-muted text-muted-foreground text-sm font-medium cursor-not-allowed">
                           Coming Soon
-                          <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                          <Clock className="w-4 h-4" />
                         </div>
-                      )}
-                    </div>
-                  </Card>
+                      </div>
+                    )}
+                  </div>
                 </motion.div>
               );
             })}
-          </motion.div>
+          </div>
         </div>
       </section>
 
-      {/* Quick Stats Section */}
-      <section className="py-10 sm:py-16 bg-secondary/20 border-y border-border/50">
-        <div className="container px-4 sm:px-6 mx-auto max-w-5xl">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-8 sm:mb-10"
-          >
-            <h2 className="text-2xl sm:text-3xl font-bold mb-2 sm:mb-3">Season Overview</h2>
-            <p className="text-sm sm:text-base text-muted-foreground max-w-xl mx-auto">
-              Current season statistics across all sports
-            </p>
-          </motion.div>
-
-          <motion.div
-            variants={container}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true }}
-            className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4"
-          >
-            {[
-              { icon: Trophy, label: "Competitions", value: "5", color: "text-emerald-500" },
-              { icon: Users, label: "Teams", value: "28", color: "text-blue-500" },
-              { icon: Calendar, label: "Matches", value: "12", color: "text-purple-500" },
-              { icon: Award, label: "Champions", value: "3", color: "text-orange-500" },
-            ].map((stat) => (
-              <motion.div key={stat.label} variants={item}>
-                <Card className="p-4 sm:p-6 bg-card/50 backdrop-blur-sm border-border/50 text-center hover:shadow-lg transition-all duration-300">
-                  <stat.icon className={`h-5 w-5 sm:h-6 sm:w-6 ${stat.color} mx-auto mb-2 sm:mb-3`} />
-                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold mb-1">{stat.value}</div>
-                  <div className="text-[10px] sm:text-xs text-muted-foreground">{stat.label}</div>
-                </Card>
-              </motion.div>
-            ))}
-          </motion.div>
+      {/* Quick Links */}
+      <section className="py-10 border-t border-border">
+        <div className="container mx-auto px-4 max-w-5xl">
+          <div className="flex flex-wrap justify-center gap-4">
+            <Link
+              href="/sports/football"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-border hover:bg-secondary transition-colors text-sm font-medium"
+            >
+              <Trophy className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+              Football
+            </Link>
+            <Link
+              href="/sports/football/fixtures"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-border hover:bg-secondary transition-colors text-sm font-medium"
+            >
+              <Calendar className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+              Fixtures
+            </Link>
+            <Link
+              href="/teams"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-border hover:bg-secondary transition-colors text-sm font-medium"
+            >
+              <Users className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+              Teams
+            </Link>
+          </div>
         </div>
       </section>
     </main>
