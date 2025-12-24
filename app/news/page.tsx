@@ -59,7 +59,7 @@ export default function NewsPage() {
         {/* Animated Background Glow */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] sm:w-[700px] h-[400px] sm:h-[500px] bg-emerald-500/10 rounded-full blur-[100px] sm:blur-[120px] -z-10 dark:bg-emerald-500/5 animate-pulse" />
 
-        <div className="container px-4 mx-auto max-w-6xl">
+        <div className="container px-0 sm:px-4 mx-auto max-w-6xl">
           {/* Hero Content */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}

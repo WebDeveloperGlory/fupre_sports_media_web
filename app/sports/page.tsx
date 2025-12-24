@@ -224,7 +224,7 @@ export default function SportsOverviewPage() {
             />
           </div>
 
-          <div className="relative container mx-auto px-4 py-8 sm:py-12 lg:py-16">
+          <div className="relative container mx-auto px-0 sm:px-4 py-6 sm:py-12 lg:py-16">
             <BlurFade>
               <div className="text-center space-y-6 sm:space-y-8 mb-16">
                 <div className="relative max-w-[90vw] sm:max-w-none hero-title">

@@ -62,8 +62,8 @@ const FootballHomePage: FC = () => {
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-0">
       {/* Hero Section - Minimal */}
-      <section className="pt-12 pb-6 md:pt-16 md:pb-10 px-4">
-        <div className="container mx-auto max-w-5xl">
+      <section className="pt-10 pb-4 md:pt-16 md:pb-10 px-0 sm:px-4">
+        <div className="container mx-auto max-w-5xl px-2 sm:px-0">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -71,7 +71,7 @@ const FootballHomePage: FC = () => {
             className="text-center space-y-4"
           >
             {/* Season Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-emerald-500/30 bg-emerald-500/10">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full border border-emerald-500/30 bg-emerald-500/10">
               <span className="w-2 h-2 rounded-full bg-emerald-500" />
               <span className="text-sm font-medium text-emerald-700 dark:text-emerald-400">2025/2026</span>
             </div>
@@ -88,8 +88,8 @@ const FootballHomePage: FC = () => {
       </section>
 
       {/* Live Match Section */}
-      <section className="py-8 md:py-12">
-        <div className="container mx-auto px-4 max-w-5xl">
+      <section className="py-6 md:py-12">
+        <div className="container mx-auto px-0 sm:px-4 max-w-5xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -97,7 +97,7 @@ const FootballHomePage: FC = () => {
           >
             <div className="border border-border rounded-xl md:rounded-2xl overflow-hidden">
               {/* Header */}
-              <div className="bg-secondary/50 px-4 py-3 text-center">
+              <div className="bg-secondary/50 px-3 py-1.5 sm:px-4 sm:py-3 text-center">
                 {liveFixture ? (
                   <span className="inline-flex items-center gap-2 px-3 py-1 bg-red-500/10 text-red-500 rounded-full text-sm font-medium">
                     <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
@@ -109,7 +109,7 @@ const FootballHomePage: FC = () => {
               </div>
 
               {/* Content */}
-              <div className="p-6 md:p-10">
+              <div className="p-4 sm:p-6 md:p-10">
                 {liveFixture ? (
                   <div>
                     {/* Teams and Score */}
@@ -202,8 +202,8 @@ const FootballHomePage: FC = () => {
       </section>
 
       {/* Recent Games Section */}
-      <section className="py-8 md:py-12 border-y border-border">
-        <div className="container mx-auto px-4 max-w-5xl">
+      <section className="py-6 md:py-12 border-y border-border">
+        <div className="container mx-auto px-0 sm:px-4 max-w-5xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -223,15 +223,15 @@ const FootballHomePage: FC = () => {
       </section>
 
       {/* Quick Links */}
-      <section className="py-10 md:py-16">
-        <div className="container mx-auto px-4 max-w-5xl">
+      <section className="py-8 md:py-16">
+        <div className="container mx-auto px-0 sm:px-4 max-w-5xl">
           <h2 className="text-xl md:text-2xl font-bold mb-6">Explore</h2>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
             {/* TOTS */}
             <Link
               href="/sports/football/tots"
-              className="group p-4 md:p-6 border border-border rounded-xl hover:bg-secondary/50 transition-colors"
+              className="group p-3 sm:p-4 md:p-6 border border-border rounded-xl hover:bg-secondary/50 transition-colors"
             >
               <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-emerald-500/10 flex items-center justify-center mb-3">
                 <Trophy className="w-5 h-5 md:w-6 md:h-6 text-emerald-600 dark:text-emerald-400" />
@@ -243,7 +243,7 @@ const FootballHomePage: FC = () => {
             {/* Competitions */}
             <Link
               href="/sports/football/competitions"
-              className="group p-4 md:p-6 border border-border rounded-xl hover:bg-secondary/50 transition-colors"
+              className="group p-3 sm:p-4 md:p-6 border border-border rounded-xl hover:bg-secondary/50 transition-colors"
             >
               <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-emerald-500/10 flex items-center justify-center mb-3">
                 <CalendarDays className="w-5 h-5 md:w-6 md:h-6 text-emerald-600 dark:text-emerald-400" />
@@ -255,7 +255,7 @@ const FootballHomePage: FC = () => {
             {/* Fixtures */}
             <Link
               href="/sports/football/fixtures"
-              className="group p-4 md:p-6 border border-border rounded-xl hover:bg-secondary/50 transition-colors"
+              className="group p-3 sm:p-4 md:p-6 border border-border rounded-xl hover:bg-secondary/50 transition-colors"
             >
               <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-emerald-500/10 flex items-center justify-center mb-3">
                 <Calendar className="w-5 h-5 md:w-6 md:h-6 text-emerald-600 dark:text-emerald-400" />
@@ -267,7 +267,7 @@ const FootballHomePage: FC = () => {
             {/* Teams */}
             <Link
               href="/sports/football/teams"
-              className="group p-4 md:p-6 border border-border rounded-xl hover:bg-secondary/50 transition-colors"
+              className="group p-3 sm:p-4 md:p-6 border border-border rounded-xl hover:bg-secondary/50 transition-colors"
             >
               <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-emerald-500/10 flex items-center justify-center mb-3">
                 <Users className="w-5 h-5 md:w-6 md:h-6 text-emerald-600 dark:text-emerald-400" />

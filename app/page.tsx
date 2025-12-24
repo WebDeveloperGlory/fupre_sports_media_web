@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowRight, Trophy, Newspaper, Play, Calendar, Clock, MapPin, ChevronRight } from 'lucide-react';
+import { ArrowRight, Trophy, Newspaper, Play, Calendar, Clock, MapPin, ChevronRight, Sparkles, Gift } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import Footer from '@/components/Footer';
@@ -74,7 +74,6 @@ export default function RootPage() {
     fixtures: 0,
   });
   const [nextMatch, setNextMatch] = useState<Fixture | null>(null);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -119,8 +118,6 @@ export default function RootPage() {
         }
       } catch (error) {
         console.error('Error fetching homepage data:', error);
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -147,8 +144,8 @@ export default function RootPage() {
     <div className="min-h-screen bg-background text-foreground pb-20 md:pb-0">
 
       {/* Hero Section - Clean, Bold, Minimal */}
-      <section className="pt-12 pb-8 md:pt-16 md:pb-12 px-4">
-        <div className="container mx-auto max-w-5xl">
+      <section className="pt-10 pb-6 md:pt-16 md:pb-12 px-0 sm:px-4">
+        <div className="container mx-auto max-w-5xl px-2 sm:px-0">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -191,9 +188,64 @@ export default function RootPage() {
         </div>
       </section>
 
+      {/* 2025 Wrapped Banner */}
+      <section className="py-6 px-0 sm:px-4">
+        <div className="container mx-auto max-w-5xl px-2 sm:px-0">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="relative overflow-hidden rounded-2xl md:rounded-3xl bg-gradient-to-br from-emerald-600 via-green-500 to-teal-500 p-3 sm:p-6 md:p-12"
+          >
+            <div className="absolute inset-0 bg-black/20" />
+            <div className="relative z-10">
+              <div className="flex items-center gap-1.5 sm:gap-2 mb-3 md:mb-4">
+                <Sparkles className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
+                <span className="text-white/90 text-[10px] sm:text-xs md:text-sm font-medium uppercase tracking-wide sm:tracking-widest">Your Year in Sports</span>
+              </div>
+              <h2 className="text-3xl sm:text-4xl md:text-6xl font-bold text-white mb-2 sm:mb-4 leading-tight">
+                2025 Wrapped
+              </h2>
+              <p className="text-white/80 text-sm sm:text-base md:text-lg mb-4 sm:mb-6 max-w-xl">
+                Relive the unforgettable moments, top performances, and memorable games from FUPRE sports in 2025.
+              </p>
+              <motion.div
+                className="inline-flex items-center gap-2 sm:gap-3 bg-white/20 text-white/60 px-5 py-2.5 sm:px-7 sm:py-3 md:px-8 md:py-4 rounded-full font-bold text-sm sm:text-base md:text-lg cursor-not-allowed"
+              >
+                <Gift className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
+                <span className="hidden sm:inline">Coming Soon</span>
+                <span className="sm:hidden">Coming Soon</span>
+              </motion.div>
+            </div>
+            <motion.div
+              animate={{
+                rotate: [0, 360],
+              }}
+              transition={{
+                duration: 20,
+                repeat: Infinity,
+                ease: "linear",
+              }}
+              className="absolute -top-10 -right-10 sm:-top-16 sm:-right-16 md:-top-20 md:-right-20 w-32 h-32 sm:w-48 sm:h-48 md:w-64 md:h-64 bg-white/10 rounded-full blur-2xl sm:blur-3xl"
+            />
+            <motion.div
+              animate={{
+                rotate: [360, 0],
+              }}
+              transition={{
+                duration: 15,
+                repeat: Infinity,
+                ease: "linear",
+              }}
+              className="absolute -bottom-8 -left-8 sm:-bottom-12 sm:-left-12 md:-bottom-16 md:-left-16 w-24 h-24 sm:w-36 sm:h-36 md:w-48 md:h-48 bg-emerald-500/20 rounded-full blur-xl sm:blur-2xl"
+            />
+          </motion.div>
+        </div>
+      </section>
+
       {/* Stats Bar - Minimal horizontal strip */}
-      <section className="border-y border-border py-6">
-        <div className="container mx-auto px-4">
+      <section className="border-y border-border py-4 sm:py-6">
+        <div className="container mx-auto px-0 sm:px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 text-center">
             <div className="py-2">
               <span className="text-2xl md:text-4xl font-bold text-emerald-600 dark:text-emerald-400">{stats.liveMatches}</span>
@@ -216,8 +268,8 @@ export default function RootPage() {
       </section>
 
       {/* Featured Match - Clean Split Layout */}
-      <section className="py-12 md:py-24">
-        <div className="container mx-auto px-4">
+      <section className="py-8 md:py-24">
+        <div className="container mx-auto px-0 sm:px-4">
           <div className="flex items-center justify-between mb-6 md:mb-8">
             <h2 className="text-xl md:text-3xl font-bold">Next Match</h2>
             <Link href="/sports/competitions" className="text-sm font-medium text-muted-foreground hover:text-foreground flex items-center">
@@ -228,14 +280,14 @@ export default function RootPage() {
           {nextMatch ? (
             <div className="border border-border rounded-2xl overflow-hidden">
               {/* Competition Header */}
-              <div className="bg-secondary/50 px-4 py-2 md:px-6 md:py-3 text-center">
+              <div className="bg-secondary/50 px-3 py-1.5 sm:px-4 sm:py-2 md:px-6 md:py-3 text-center">
                 <span className="text-xs md:text-sm font-medium text-muted-foreground">
                   {nextMatch.competition?.name || 'Competition'}
                 </span>
               </div>
 
               {/* Match Content */}
-              <div className="p-4 md:p-12">
+              <div className="p-3 sm:p-4 md:p-12">
                 <div className="flex items-center justify-between gap-2 md:gap-4">
                   {/* Home Team */}
                   <div className="flex-1 text-center min-w-0">
@@ -287,8 +339,8 @@ export default function RootPage() {
       </section>
 
       {/* News Section - Clean Minimal */}
-      <section className="py-16 md:py-24 border-t border-border">
-        <div className="container mx-auto px-4 max-w-4xl">
+      <section className="py-12 md:py-24 border-t border-border">
+        <div className="container mx-auto px-0 sm:px-4 max-w-4xl">
           <div className="flex items-center justify-between mb-10">
             <h2 className="text-2xl md:text-3xl font-bold">Latest News</h2>
             <Link href="/news" className="text-sm font-medium text-emerald-600 dark:text-emerald-400 hover:underline flex items-center">
@@ -369,8 +421,8 @@ export default function RootPage() {
       <GalleryCarousel />
 
       {/* Quick Links - Icon Row */}
-      <section className="py-16 border-b border-border">
-        <div className="container mx-auto px-4">
+      <section className="py-12 border-b border-border">
+        <div className="container mx-auto px-0 sm:px-4">
           <div className="flex justify-center gap-8 md:gap-16">
             {quickLinks.map((link) => (
               <Link

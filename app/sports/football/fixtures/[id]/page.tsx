@@ -80,7 +80,7 @@ export default function FixturePage({
         </div>
       )}
 
-      <div className="py-24 container">
+      <div className="py-20 sm:py-24 container px-0 sm:px-4">
         <BlurFade>
           <div className="space-y-8">
             {/* Header Card */}
@@ -275,7 +275,7 @@ export default function FixturePage({
                 Match Status
               </h2>
               <div className="flex items-center justify-center">
-                <div className={`px-4 py-2 rounded-full text-sm font-medium ${
+                <div className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-sm font-medium ${
                   fixture.status === FixtureStatus.COMPLETED ? 'bg-green-100 text-green-800' :
                   fixture.status === FixtureStatus.LIVE ? 'bg-red-100 text-red-800' :
                   fixture.status === FixtureStatus.SCHEDULED ? 'bg-blue-100 text-blue-800' :

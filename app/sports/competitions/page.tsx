@@ -112,8 +112,8 @@ export default function CompetitionsPage() {
   return (
     <main className="min-h-screen bg-background pb-20 md:pb-0">
       {/* Hero Section - Clean, Minimal */}
-      <section className="pt-12 pb-8 md:pt-16 md:pb-12 px-4">
-        <div className="container mx-auto max-w-5xl">
+      <section className="pt-10 pb-6 md:pt-16 md:pb-12 px-0 sm:px-4">
+        <div className="container mx-auto max-w-5xl px-2 sm:px-0">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -138,8 +138,8 @@ export default function CompetitionsPage() {
       </section>
 
       {/* Stats Bar - Minimal horizontal strip */}
-      <section className="border-y border-border py-6">
-        <div className="container mx-auto px-4">
+      <section className="border-y border-border py-4 sm:py-6">
+        <div className="container mx-auto px-0 sm:px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 text-center">
             <div className="py-2">
               <span className="text-2xl md:text-4xl font-bold text-emerald-600 dark:text-emerald-400">{stats.competitions}</span>
@@ -162,8 +162,8 @@ export default function CompetitionsPage() {
       </section>
 
       {/* Sports Section */}
-      <section className="py-12 md:py-20">
-        <div className="container mx-auto px-2 md:px-4 max-w-5xl">
+      <section className="py-10 md:py-20">
+        <div className="container mx-auto px-0 sm:px-4 max-w-5xl">
           <div className="space-y-4 md:space-y-6">
             {competitions.map((sport) => {
               const Icon = sport.icon;

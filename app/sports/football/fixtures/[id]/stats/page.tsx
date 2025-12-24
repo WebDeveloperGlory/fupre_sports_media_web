@@ -260,7 +260,7 @@ export default function MatchStatsPage({
 
   return (
     <main className="min-h-screen bg-background pb-20 md:pb-0">
-      <div className="pt-4 pb-8 px-2 md:px-4">
+      <div className="pt-4 pb-8 px-0 sm:px-2 md:px-4">
         <div className="mx-auto max-w-4xl space-y-3 md:space-y-4">
           {/* Back Button */}
           <div className="px-2 md:px-0">
@@ -269,7 +269,7 @@ export default function MatchStatsPage({
 
           {/* Match Header */}
           <div className="border border-border rounded-lg md:rounded-xl overflow-hidden">
-            <div className="bg-secondary/50 px-4 py-2 text-center">
+            <div className="bg-secondary/50 px-3 py-1.5 sm:px-4 sm:py-2 text-center">
               <span className="inline-flex items-center gap-2 text-sm font-medium">
                 <Trophy className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                 {fixture.competition.name}

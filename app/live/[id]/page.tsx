@@ -233,7 +233,7 @@ export default function LiveMatchPage({
               {/* Match Header */}
               <div className="border border-border rounded-lg md:rounded-2xl overflow-hidden">
                 {/* Competition Badge */}
-                <div className="bg-secondary/50 px-4 py-2 text-center">
+                <div className="bg-secondary/50 px-3 py-1.5 sm:px-4 sm:py-2 text-center">
                   <span className="inline-flex items-center gap-2 text-sm font-medium">
                     <Trophy className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                     {liveFixture.competition?.name || 'Friendly'}

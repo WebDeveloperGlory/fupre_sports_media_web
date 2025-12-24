@@ -187,9 +187,9 @@ export default function FootballCompetitionsPage() {
       <section className="relative pt-6 sm:pt-24 pb-10 sm:pb-16 overflow-hidden">
         {/* Animated Background Glow */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] sm:w-[800px] h-[400px] sm:h-[600px] bg-emerald-500/10 rounded-full blur-[100px] sm:blur-[120px] -z-10 dark:bg-emerald-500/5 animate-pulse" />
-        <div className="absolute top-20 right-0 w-[200px] sm:w-[400px] h-[200px] sm:h-[400px] bg-purple-500/5 rounded-full blur-[80px] sm:blur-[100px] -z-10" />
+        <div className="absolute top-20 right-0 w-[200px] sm:w-[400px] h-[200px] sm:h-[400px] bg-emerald-500/5 rounded-full blur-[80px] sm:blur-[100px] -z-10" />
 
-        <div className="container px-4 sm:px-6 mx-auto max-w-7xl">
+        <div className="container px-0 sm:px-4 lg:px-6 mx-auto max-w-7xl">
           {/* Back Button */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
@@ -263,8 +263,8 @@ export default function FootballCompetitionsPage() {
       </section>
 
       {/* Highlights: Fixtures + News */}
-      <section className="py-8 sm:py-12 bg-secondary/30 border-y border-border/50">
-        <div className="container px-4 sm:px-6 mx-auto max-w-7xl">
+      <section className="py-6 sm:py-12 bg-secondary/30 border-y border-border/50">
+        <div className="container px-0 sm:px-4 lg:px-6 mx-auto max-w-7xl">
           <motion.div
             variants={container}
             initial="hidden"
@@ -365,8 +365,8 @@ export default function FootballCompetitionsPage() {
       </section>
 
       {/* Filter Tabs */}
-      <section className="py-6 sm:py-8 bg-background">
-        <div className="container px-4 sm:px-6 mx-auto max-w-7xl">
+      <section className="py-4 sm:py-8 bg-background">
+        <div className="container px-0 sm:px-4 lg:px-6 mx-auto max-w-7xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -408,8 +408,8 @@ export default function FootballCompetitionsPage() {
       </section>
 
       {/* Competition List */}
-      <section className="pb-12 sm:pb-16 bg-background">
-        <div className="container px-4 sm:px-6 mx-auto max-w-7xl">
+      <section className="pb-10 sm:pb-16 bg-background">
+        <div className="container px-0 sm:px-4 lg:px-6 mx-auto max-w-7xl">
           <motion.div
             variants={container}
             initial="hidden"
