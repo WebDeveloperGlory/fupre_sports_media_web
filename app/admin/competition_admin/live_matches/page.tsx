@@ -5,7 +5,7 @@ import useAuthStore from '@/stores/authStore';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { Fixture, LiveAdmins } from '@/utils/requestDataTypes';
-import { getAllLiveAdmins, getAllUpcomingFixturesAdmin, initializeLiveFixture } from '@/lib/requests/liveAdminPage/requests';
+import { getAllLiveAdmins, getAllUpcomingFixturesAdmin, initializeLiveFixture } from '@/lib/requests/v1/liveAdminPage/requests';
 import { format } from 'date-fns';
 import { AlertCircle, Calendar, Clock, Users, X } from 'lucide-react';
 import Link from 'next/link';
@@ -172,6 +172,7 @@ const PopUpModal = (
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-semibold">Select a User</h2>
               <button
+                title='close'
                 onClick={ handleModalClose }
                 className="text-gray-500 hover:text-gray-700"
               >

@@ -3,8 +3,8 @@
 import FormationDropdown from '@/components/liveAdmin/FormationDropDown';
 import TeamSection from '@/components/liveAdmin/TeamSection';
 import TeamSquad from '@/components/liveAdmin/TeamSquad';
-import { getFixtureTeamPlayerData } from '@/lib/requests/fixturePage/requests';
-import { updateFixtureFormation, updateLiveFixtureFormation } from '@/lib/requests/liveAdminPage/requests';
+import { getFixtureTeamPlayerData } from '@/lib/requests/v1/fixturePage/requests';
+import { updateFixtureFormation, updateLiveFixtureFormation } from '@/lib/requests/v1/liveAdminPage/requests';
 import useAuthStore from '@/stores/authStore';
 import { Fixture, FixtureTeamPlayers } from '@/utils/requestDataTypes';
 import { Players } from '@/utils/stateTypes';

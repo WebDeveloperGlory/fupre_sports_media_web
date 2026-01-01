@@ -14,7 +14,7 @@ import ShareButton from '@/components/share/ShareButton';
 import useAuthStore from '@/stores/authStore';
 import { toast } from 'react-toastify';
 import { Loader } from '@/components/ui/loader';
-import { endLiveFixture, getLiveFixtureDetails, getLiveFixtureTeamPlayerList, updateLiveFixture } from '@/lib/requests/liveAdminPage/requests';
+import { endLiveFixture, getLiveFixtureDetails, getLiveFixtureTeamPlayerList, updateLiveFixture } from '@/lib/requests/v1/liveAdminPage/requests';
 import { BackButton } from '@/components/ui/back-button';
 import useLiveStore from '@/stores/liveStore';
 import useTimerStore from '@/stores/timerStore';

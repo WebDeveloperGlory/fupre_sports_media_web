@@ -9,11 +9,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import useTimerStore from "@/stores/timerStore";
 import useLiveStore from "@/stores/liveStore";
 import { liveFixtureInitialStateData, teamLogos } from "@/constants";
-import { getAllCompetitions, getLiveFixture } from "@/lib/requests/competitionPage/requests";
+import { getAllCompetitions, getLiveFixture } from "@/lib/requests/v1/competitionPage/requests";
 import { Loader } from "@/components/ui/loader";
 import { Competition, LiveFixture } from "@/utils/requestDataTypes";
 import { format } from "date-fns";
-import { getLiveFixtureDetails } from "@/lib/requests/liveAdminPage/requests";
+import { getLiveFixtureDetails } from "@/lib/requests/v1/liveAdminPage/requests";
 
 const FootballPage: FC = () => {
   const [ loading, setLoading ] = useState<boolean>( true );

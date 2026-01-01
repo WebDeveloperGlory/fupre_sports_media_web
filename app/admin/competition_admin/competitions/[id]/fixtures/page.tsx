@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { BackButton } from '@/components/ui/back-button'
 import { Competition, CompetitionAdminCreateFixtureRequestBody, Fixture } from '@/utils/requestDataTypes';
 import { toast } from 'react-toastify';
-import { createCompetitionFixture, getAdminCompetitionDetails, getAdminCompetitionFixtures } from '@/lib/requests/adminPage/requests';
+import { createCompetitionFixture, getAdminCompetitionDetails, getAdminCompetitionFixtures } from '@/lib/requests/v1/adminPage/requests';
 import { format } from 'date-fns';
 import Link from 'next/link';
 import { Team } from '@/utils/stateTypes';
@@ -256,6 +256,7 @@ const NewFixtureModal = (
                     <div>
                         <label className="block font-semibold mb-1.5">Home Team</label>
                         <select 
+                            title='home'
                             className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 cursor-pointer text-black"
                             value={ formData.homeTeam }
                             onChange={ (e) => setFormData({ 
@@ -277,6 +278,7 @@ const NewFixtureModal = (
                     <div>
                         <label className="block font-semibold mb-1.5">Away Team</label>
                         <select 
+                            title='away'
                             className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 cursor-pointer text-black"
                             value={ formData.awayTeam }
                             onChange={ 
@@ -299,6 +301,8 @@ const NewFixtureModal = (
                     <div className="space-y-2">
                         <label className="block font-semibold">Match Date & Time</label>
                         <input 
+                            placeholder=''
+                            title='date'
                             type="datetime-local" 
                             className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 text-black"
                             value={ formData.date }
@@ -315,6 +319,7 @@ const NewFixtureModal = (
                     <div>
                         <label className="block font-semibold mb-1.5">Round</label>
                         <select 
+                            title='round'
                             className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 cursor-pointer text-black"
                             value={ formData.round }
                             onChange={ 
@@ -336,6 +341,7 @@ const NewFixtureModal = (
                     <div>
                         <label className="block font-semibold mb-1.5">Referee</label>
                         <input
+                            placeholder='John'
                             type='text'
                             value={ formData.referee }
                             onChange={
@@ -352,6 +358,7 @@ const NewFixtureModal = (
                     <div>
                         <label className="block font-semibold mb-1.5">Venue</label>
                         <input
+                            placeholder='Stade et Fupre'
                             type='text'
                             value={ formData.stadium }
                             onChange={

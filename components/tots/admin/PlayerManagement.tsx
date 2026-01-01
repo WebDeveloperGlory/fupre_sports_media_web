@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, UserPlus, Trash, User } from "lucide-react";
 import { TOTSPlayer } from "@/utils/requestDataTypes";
-import { addPlayerToTOTSSession, removePlayerFromTOTSSession } from "@/lib/requests/tots/requests";
+import { addPlayerToTOTSSession, removePlayerFromTOTSSession } from "@/lib/requests/v1/tots/requests";
 import useAuthStore from "@/stores/authStore";
 import { toast } from "react-toastify";
 import { cn } from "@/lib/utils";
@@ -174,6 +174,7 @@ const PlayerManagement = ({ sessionId, players, onPlayersUpdated }: PlayerManage
                 />
               </div>
               <select
+                title="position"
                 value={selectedPosition}
                 onChange={(e) => setSelectedPosition(e.target.value)}
                 className="rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"

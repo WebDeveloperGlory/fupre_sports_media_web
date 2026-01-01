@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { format } from 'date-fns';
 import { Fixture, LiveFixture } from '@/utils/requestDataTypes';
-import { getAllPossibleAdminLiveFixtures } from '@/lib/requests/liveAdminPage/requests';
+import { getAllPossibleAdminLiveFixtures } from '@/lib/requests/v1/liveAdminPage/requests';
 import { BackButton } from '@/components/ui/back-button';
 import { Calendar, Clock, LocateIcon, User } from 'lucide-react';
 import Link from 'next/link';

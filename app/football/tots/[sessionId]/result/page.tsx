@@ -5,7 +5,7 @@ import { BlurFade } from "@/components/ui/blur-fade";
 import { BackButton } from "@/components/ui/back-button";
 import { AlertCircle } from "lucide-react";
 import { TOTSResult, TOTSSession } from "@/utils/requestDataTypes";
-import { getSingleTOTSSession, getTOTSSessionResults } from "@/lib/requests/tots/requests";
+import { getSingleTOTSSession, getTOTSSessionResults } from "@/lib/requests/v1/tots/requests";
 import ResultsDisplay from "@/components/tots/ResultsDisplay";
 import { Loader } from "@/components/ui/loader";
 import { Button } from "@/components/ui/button";

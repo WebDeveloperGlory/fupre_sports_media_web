@@ -10,7 +10,7 @@ import useAuthStore from '@/stores/authStore';
 import { Loader } from '@/components/ui/loader';
 import PopUpModal from '@/components/modal/PopUpModal';
 import PlayerCard from '@/components/admin/teamAdmin/PlayerCard';
-import { createTeamPlayer, deleteTeamPlayer, getTeamPlayerList, updateTeamPlayer } from '@/lib/requests/adminPage/requests';
+import { createTeamPlayer, deleteTeamPlayer, getTeamPlayerList, updateTeamPlayer } from '@/lib/requests/v1/adminPage/requests';
 import { sub } from 'date-fns';
 
 type ErrorType = {
@@ -437,6 +437,7 @@ const PlayerForm = (
             <div>
                 <label className="block font-semibold mb-1.5">Position</label>
                 <select 
+                    title='position'
                     className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 cursor-pointer text-black"
                     value={ formData.position }
                     onChange={ 

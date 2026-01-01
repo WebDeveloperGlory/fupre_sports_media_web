@@ -5,7 +5,7 @@ import { useState } from 'react'
 import { toast } from 'react-toastify';
 import { jwtDecode } from 'jwt-decode';
 import useAuthStore from '@/stores/authStore';
-import { loginUser } from '@/lib/requests/auth/requests';
+import { loginUser } from '@/lib/requests/v1/auth/requests';
 
 const AdminPage = () => {
   const router = useRouter();

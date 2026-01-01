@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Calendar, Trophy, Save } from "lucide-react";
-import { createTOTSSession } from "@/lib/requests/tots/requests";
+import { createTOTSSession } from "@/lib/requests/v1/tots/requests";
 import useAuthStore from "@/stores/authStore";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";

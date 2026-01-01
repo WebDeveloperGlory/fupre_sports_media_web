@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { BlurFade } from "@/components/ui/blur-fade";
 import { Trophy } from "lucide-react";
 import { TOTSSession } from "@/utils/requestDataTypes";
-import { getAllTOTSSessions } from "@/lib/requests/tots/requests";
+import { getAllTOTSSessions } from "@/lib/requests/v1/tots/requests";
 import TOTSSessionCard from "@/components/tots/TOTSSessionCard";
 import { Loader } from "@/components/ui/loader";
 

@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import useAuthStore from '@/stores/authStore';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
-import { getAdminCompetitions } from '@/lib/requests/adminPage/requests';
+import { getAdminCompetitions } from '@/lib/requests/v1/adminPage/requests';
 import { AdminCompetition } from '@/utils/requestDataTypes';
 import { Calendar, ChevronRight, Filter, Trophy } from 'lucide-react';
 import { BackButton } from '@/components/ui/back-button';

@@ -5,7 +5,7 @@ import useAuthStore from '@/stores/authStore';
 import { useRouter } from 'next/navigation';import { BackButton } from '@/components/ui/back-button'
 import { AdminCompetition, ExtendedAdminCompetition } from '@/utils/requestDataTypes';
 import { toast } from 'react-toastify';
-import { getAdminCompetitionDetails } from '@/lib/requests/adminPage/requests';
+import { getAdminCompetitionDetails } from '@/lib/requests/v1/adminPage/requests';
 import { Trophy } from 'lucide-react';
 import { format } from 'date-fns';
 import Link from 'next/link';

@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { getUserProfile, logoutUser } from '@/lib/requests/auth/requests';
+import { getUserProfile, logoutUser } from '@/lib/requests/v1/auth/requests';
 import useAuthStore from '@/stores/authStore';
 import { toast } from 'react-toastify';
 import { useRouter } from 'next/navigation';

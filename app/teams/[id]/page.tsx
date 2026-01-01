@@ -7,7 +7,7 @@ import Image from "next/image";
 import { use, useEffect, useState } from "react";
 import Link from "next/link";
 import { Loader } from "@/components/ui/loader";
-import { getIndividualTeam, getIndividualTeamFixtures, getIndividualTeamOverview, getIndividualTeamPlayers, getIndividualTeamStats } from "@/lib/requests/teamPage/requests";
+import { getIndividualTeam, getIndividualTeamFixtures, getIndividualTeamOverview, getIndividualTeamPlayers, getIndividualTeamStats } from "@/lib/requests/v1/teamPage/requests";
 import { Team } from "@/utils/stateTypes";
 import { teamLogos } from "@/constants";
 import { TeamFixtureType, TeamOverviewData, TeamPlayersData, TeamStatData } from "@/utils/requestDataTypes";
