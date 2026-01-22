@@ -14,6 +14,18 @@ export interface CreateAdminDto {
     password: string;
 }
 
+export interface UserUpdateDto {
+    username: string;
+    name: string;
+    preferences: {
+        notifications: {
+            inApp: boolean;
+            email: boolean;
+            fantasyUpdates: boolean;
+        };
+    };
+}
+
 export interface LoginDto {
     email: string;
     password: string;

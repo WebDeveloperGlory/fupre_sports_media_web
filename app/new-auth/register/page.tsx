@@ -17,9 +17,11 @@ import { motion } from "framer-motion";
 import { toast } from "react-toastify";
 import Link from "next/link";
 import { authApi } from "@/lib/api/v1/auth.api";
+import { useAuth } from '../../../providers/AuthProvider';
 
 export default function RegisterPage() {
   const router = useRouter();
+  const { setUser } = useAuth();
 
   const [formData, setFormData] = useState({
     name: "",
@@ -124,8 +126,18 @@ export default function RegisterPage() {
         email: formData.email,
         otp: otp.join(""),
       });
-      if (response.success) {
-        toast.success(response.message || "Signup successful");
+
+      if (response.success && response.data) {
+        // Set user data from OTP verification response
+        setUser({
+          id: response.data.user.id,
+          email: response.data.user.email,
+          name: response.data.user.name,
+          role: response.data.user.role,
+          permissions: response.data.user.permissions || [],
+        });
+
+        toast.success(response.message || "Registration successful!");
         router.push("/");
       } else {
         const errorMsg = response.message || "Verification failed";
@@ -134,7 +146,7 @@ export default function RegisterPage() {
         setFormData({ ...formData, password: "" });
       }
     } catch (error: any) {
-      console.error("Login failed:", error);
+      console.error("OTP verification failed:", error);
       let errorMsg = "Verification failed";
 
       if (error?.message) {
@@ -143,6 +155,8 @@ export default function RegisterPage() {
         errorMsg = error;
       } else if (error?.response?.data?.error) {
         errorMsg = error.response.data.error;
+      } else if (error?.response?.data?.message) {
+        errorMsg = error.response.data.message;
       }
 
       toast.error(errorMsg);

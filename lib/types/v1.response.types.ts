@@ -36,6 +36,7 @@ export interface UserResponse {
     username: string | undefined;
     email: string;
     role: UserRole;
+    avatar: string;
     permissions: UserPermissions[];
     sport: SportType;
     status: UserStatus;

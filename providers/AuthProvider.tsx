@@ -43,6 +43,7 @@ interface AuthContextType {
   logout: () => Promise<void>;
   isAuthenticated: boolean;
   refreshUser: () => Promise<void>;
+  setUser: (user: User | null) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -79,8 +80,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Redirect to login if not authenticated and not on public page
         router.push("/new-auth/login");
       } else if (isAuthenticated && isPublicPage) {
-        // Redirect to dashboard if authenticated and on public page
-        router.push("/");
+        
       }
     }
   }, [pathname, user, isLoading, router]);
@@ -198,6 +198,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         logout,
         isAuthenticated: !!user,
         refreshUser,
+        setUser,
       }}
     >
       {children}

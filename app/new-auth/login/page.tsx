@@ -2,20 +2,19 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useAuthStore } from '@/stores/v2/authStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { loginUser } from '@/lib/requests/v2/authentication/requests';
 import { toast } from 'react-toastify';
 import Link from 'next/link';
+import { useAuth } from '@/providers/AuthProvider';
 
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { setUser, setIsLoggedIn } = useAuthStore();
+  const { login } = useAuth();
 
   const [formData, setFormData] = useState({
     email: '',
@@ -50,23 +49,20 @@ export default function LoginPage() {
 
     setIsLoading(true);
     try {
-      const result = await loginUser( formData.email, formData.password );
-      if( result?.code === '00' ) {
-        toast.success( result.message || 'Login Successful' );
-        setIsLoggedIn( true );
-        setUser({ 
-          ...result.data.user,
-          _id: result.data.user.id.toString(),
-        });
-        router.push(redirectPath);
-      } else {
-        toast.error( result?.message || 'Login failed' );
-        setFormData({ ...formData, password: '' });
-        setIsLoggedIn(false);
-        setUser(null);
+      await login(formData.email, formData.password);
+    } catch (error: any) {
+      console.error("Login failed:", error);
+      let errorMsg = "Verification failed";
+
+      if (error?.message) {
+        errorMsg = error.message;
+      } else if (typeof error === "string") {
+        errorMsg = error;
+      } else if (error?.response?.data?.error) {
+        errorMsg = error.response.data.error;
       }
-    } catch (error) {
-      console.error('Login failed:', error);
+
+      toast.error(errorMsg);
     } finally {
       setIsLoading(false);
     }

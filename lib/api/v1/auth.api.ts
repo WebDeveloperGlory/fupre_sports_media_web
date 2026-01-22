@@ -23,6 +23,16 @@ export const authApi = {
 
     getCurrentUser: () => apiClient.get<UserResponse>('/v1/auth/me'),
 
+    uploadAvatar: (file: File) => {
+        const formData = new FormData();
+        formData.append('image', file);
+        return apiClient.post<UserResponse, FormData>('/v1/auth/me/avatar', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+    },
+
     requestOTP: async (payload: RequestOTPDto) => await apiClient.post<void, RequestOTPDto>('/v1/auth/otp/send', payload),
     
     verifyOTP: async (payload: VerifyOTPDto) => {
