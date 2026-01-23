@@ -22,6 +22,7 @@ import {
   Play,
 } from "lucide-react";
 import { useAuth } from "@/providers/AuthProvider";
+import { UserRole } from "@/types/v1.user.types";
 
 const Navbar = () => {
   const { theme, toggleTheme } = useTheme();
@@ -70,16 +71,14 @@ const Navbar = () => {
 
   const getAdminLinks = () => {
     if (!user) return [];
-    const adminRoles = [
-      "super-admin",
-      "media-admin",
-      "head-media-admin",
-      "competition-admin",
-      "team-admin",
-      "live-fixture-admin",
+
+    const adminRoles: UserRole[] = [
+      UserRole.SUPER_ADMIN,
+      UserRole.TENANT_ADMIN,
+      UserRole.LIVE_ADMIN,
     ];
-    const isAdmin =
-      adminRoles.includes(user.role) || user.email === "admin@fupre.edu.ng";
+
+    const isAdmin = adminRoles.includes(user.role);
     if (isAdmin) {
       return [{ href: "/admin", label: "Admin", icon: LayoutDashboard }];
     }
