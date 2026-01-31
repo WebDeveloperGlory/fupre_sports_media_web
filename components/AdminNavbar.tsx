@@ -1,3 +1,4 @@
+// components/AdminNavbar.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -324,14 +325,19 @@ export default function AdminNavigation() {
         />
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar - FIXED on desktop, FIXED with full height on mobile */}
       <aside
-        className={`fixed lg:relative inset-y-0 left-0 w-72 bg-card border-r border-border z-50 flex flex-col transition-transform duration-300 lg:translate-x-0 ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } lg:flex`}
+        className={cn(
+          "w-72 bg-card border-r border-border z-50 flex flex-col transition-transform duration-300",
+          // Mobile: fixed position, full height, slide in/out
+          "fixed inset-y-0 left-0 h-screen",
+          sidebarOpen ? "translate-x-0" : "-translate-x-full",
+          // Desktop: fixed position, always visible
+          "lg:translate-x-0 lg:fixed lg:h-screen"
+        )}
       >
         {/* Fixed Header Area */}
-        <div className="flex-shrink-0 bg-card md:sticky md:top-0">
+        <div className="flex-shrink-0 bg-card">
           {/* Header */}
           <div className="px-6 py-4 border-b border-border flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -404,7 +410,7 @@ export default function AdminNavigation() {
           )}
         </div>
 
-        {/* Scrollable Navigation Items - Only this area scrolls */}
+        {/* Scrollable Navigation Items */}
         <div className="flex-1 overflow-y-auto scrollbar-hide">
           <nav className="p-4">
             {/* Back to Home */}
@@ -418,7 +424,7 @@ export default function AdminNavigation() {
 
             {Object.entries(sections).map(([key, section], i) => (
               <div key={key} className={`${i !== 0 ? "mt-6" : ""}`}>
-                {/* Section Header with better visibility */}
+                {/* Section Header */}
                 <div className="flex items-center gap-2 px-2 mb-3">
                   <span className="text-lg">{section.icon}</span>
                   <h3 className="text-xs font-semibold text-primary uppercase tracking-wider">
@@ -466,8 +472,8 @@ export default function AdminNavigation() {
           </nav>
         </div>
 
-        {/* Fixed Footer - Always visible at bottom */}
-        <div className="flex-shrink-0 p-4 border-t border-border bg-card md:sticky md:bottom-0">
+        {/* Fixed Footer */}
+        <div className="flex-shrink-0 p-4 border-t border-border bg-card">
           <button
             onClick={handleLogout}
             className="w-full px-4 py-2.5 bg-destructive/10 hover:bg-destructive/20 text-destructive rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 mb-3 border border-destructive/20"

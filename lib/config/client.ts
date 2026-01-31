@@ -1,7 +1,7 @@
 import { AxiosRequestConfig } from 'axios';
 import axiosInstance from './newAxiosInstance';
 import { ApiError } from '../types/v1.types';
-import { APIResponse, DeleteAPIResponse } from '../types/v1.response.types';
+import { APIResponse, DeleteAPIResponse, PaginatedResponse } from '../types/v1.response.types';
 
 type ErrorHandler = (error: ApiError) => void;
 
@@ -28,6 +28,16 @@ class ApiClient {
             return this.handleError(error);
         }
     }
+
+    async getPaginated<T>(url: string, config?: AxiosRequestConfig): Promise<PaginatedResponse<T>> {
+        try {
+            const response = await axiosInstance.get(url, config);
+            return response.data as PaginatedResponse<T>;
+        } catch (error) {
+            return this.handleError(error);
+        }
+    }
+
 
     async post<T, D = any>(url: string, data?: D, config?: AxiosRequestConfig): Promise<APIResponse<T>> {
         try {
