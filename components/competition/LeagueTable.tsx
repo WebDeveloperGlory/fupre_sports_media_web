@@ -1,10 +1,29 @@
 import { teamLogos } from '@/constants'
-import { ILeagueStandings } from '@/utils/V2Utils/v2requestData.types'
 import Image from 'next/image'
 import React from 'react'
 import { Trophy } from 'lucide-react'
 
-const LeagueTable = ({ table }: { table: ILeagueStandings[] }) => {
+export type LeagueTableTeam = {
+  id?: string;
+  _id?: string;
+  name: string;
+  shorthand?: string;
+};
+
+export type LeagueTableEntry = {
+  team: LeagueTableTeam;
+  played: number;
+  wins: number;
+  draws: number;
+  losses: number;
+  goalsFor: number;
+  goalsAgainst: number;
+  goalDifference: number;
+  points: number;
+  form: string[];
+};
+
+const LeagueTable = ({ table }: { table: LeagueTableEntry[] }) => {
     if ( !table || table.length === 0 ) {
         return (
             <div className="text-center py-12 text-muted-foreground">
@@ -43,7 +62,7 @@ const LeagueTable = ({ table }: { table: ILeagueStandings[] }) => {
 
             return (
               <tr
-                key={entry.team._id}
+                key={entry.team.id ?? entry.team._id ?? index}
                 className={`
                   border-b border-border hover:bg-muted/30 transition-colors
                   ${isTopPosition ? 'border-l-4 border-l-emerald-500' : ''}
@@ -93,7 +112,7 @@ const LeagueTable = ({ table }: { table: ILeagueStandings[] }) => {
                 <td className="text-center py-4 px-3 text-sm font-bold text-foreground">{entry.points}</td>
                 <td className="text-center py-4 px-3">
                   <div className="flex items-center justify-center gap-1">
-                    {[...entry.form].slice(0, 5).map((result, i) => (
+                    {[...(entry.form || [])].slice(0, 5).map((result, i) => (
                       <div
                         key={i}
                         className={`w-6 h-6 flex items-center justify-center text-xs font-bold ${
