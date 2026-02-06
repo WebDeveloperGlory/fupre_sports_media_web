@@ -563,6 +563,11 @@ export default function SportsOverviewPage() {
                         </div>
                       )
                     }
+                    {dashboardData && (
+                      <div className="mt-2 rounded-lg border border-dashed border-border/70 bg-background/40 p-4 text-xs sm:text-sm text-muted-foreground">
+                        Basketball fixtures are not available yet. Check back later for updates.
+                      </div>
+                    )}
                   </div>
 
                   <div className="mt-8">
