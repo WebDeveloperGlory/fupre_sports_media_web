@@ -4,8 +4,9 @@ import { useState, useEffect } from 'react';
 import Link from "next/link";
 import { Trophy, Target, ArrowRight, Calendar, Users, Award, Clock } from "lucide-react";
 import { motion } from "framer-motion";
-import { getAllCompetitions } from '@/lib/requests/v2/competition/requests';
-import { getFixtures } from '@/lib/requests/v2/fixtures/requests';
+import { footballCompetitionApi } from '@/lib/api/v1/football-competition.api';
+import { footballFixtureApi } from '@/lib/api/v1/football-fixture.api';
+import { CompetitionStatus } from '@/types/v1.football-competition.types';
 
 interface Stats {
   competitions: number;
@@ -26,28 +27,35 @@ export default function CompetitionsPage() {
     const fetchStats = async () => {
       try {
         const [competitionsRes, fixturesRes] = await Promise.all([
-          getAllCompetitions(),
-          getFixtures(undefined, 100),
+          footballCompetitionApi.getAll(1, 200),
+          footballFixtureApi.getAll(1, 200),
         ]);
 
         const competitionsData = Array.isArray(competitionsRes?.data) ? competitionsRes.data : [];
         const fixturesData = Array.isArray(fixturesRes?.data) ? fixturesRes.data : [];
 
-        const competitions = competitionsData.length;
-        const matches = fixturesData.length;
+        const competitions = competitionsRes?.total ?? competitionsData.length;
+        const matches = fixturesRes?.total ?? fixturesData.length;
 
         // Count unique teams
-        let teams = 0;
         const teamSet = new Set<string>();
         competitionsData.forEach((comp: any) => {
           if (comp.teams && Array.isArray(comp.teams)) {
-            comp.teams.forEach((team: any) => teamSet.add(team._id || team));
+            comp.teams.forEach((team: any) => {
+              if (typeof team === "string") {
+                teamSet.add(team);
+                return;
+              }
+              if (team?.id) {
+                teamSet.add(team.id);
+              }
+            });
           }
         });
-        teams = teamSet.size || 12;
+        const teams = teamSet.size || 12;
 
         // Count completed competitions as champions
-        const champions = competitionsData.filter((c: any) => c.status === 'completed').length;
+        const champions = competitionsData.filter((c: any) => c.status === CompetitionStatus.COMPLETED).length;
 
         setStats({
           competitions,

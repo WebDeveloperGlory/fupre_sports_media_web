@@ -8,38 +8,27 @@ import { motion } from "framer-motion";
 import { teamLogos } from "@/constants";
 import { Loader } from "@/components/ui/loader";
 import RecentGames from "@/components/football/RecentGames";
-import { getAllLiveFixtures, getLiveFixtureById } from "@/lib/requests/v2/admin/super-admin/live-management/requests";
-import { IV2FootballLiveFixture, PopIV2FootballFixture } from "@/utils/V2Utils/v2requestData.types";
-import { getRecentFixtures } from "@/lib/requests/v2/public/requests";
+import { footballFixtureApi } from "@/lib/api/v1/football-fixture.api";
+import { FixtureResponse, LiveFixtureResponse } from "@/lib/types/v1.response.types";
 
 const FootballHomePage: FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
-  const [liveFixture, setLiveFixture] = useState<IV2FootballLiveFixture | null>(null);
-  const [recentFixtures, setRecentFixtures] = useState<PopIV2FootballFixture[]>([]);
+  const [liveFixture, setLiveFixture] = useState<LiveFixtureResponse | null>(null);
+  const [recentFixtures, setRecentFixtures] = useState<FixtureResponse[]>([]);
   const [recentLoading, setRecentLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const liveData = await getAllLiveFixtures();
-        if (liveData && liveData.code === '00' && liveData.data && liveData.data.length > 0) {
-          try {
-            const data = await getLiveFixtureById(liveData.data[0].fixture);
-            if (data && data.code === '00') {
-              setLiveFixture(data.data);
-            }
-          } catch (error) {
-            console.error('Error fetching live fixture details:', error);
-            setLiveFixture(null);
-          }
-        } else {
-          setLiveFixture(null);
-        }
+        const [liveRes, recentRes] = await Promise.all([
+          footballFixtureApi.getLive(),
+          footballFixtureApi.getRecentResults(1, 5),
+        ]);
+        const liveData = Array.isArray(liveRes?.data) ? liveRes.data : [];
+        const recentData = Array.isArray(recentRes?.data) ? recentRes.data : [];
 
-        const recentData = await getRecentFixtures();
-        if (recentData && recentData.code === '00') {
-          setRecentFixtures(recentData.data || []);
-        }
+        setLiveFixture(liveData.length > 0 ? liveData[0] : null);
+        setRecentFixtures(recentData);
       } catch (error) {
         console.error('Error fetching data:', error);
         setLiveFixture(null);
@@ -58,6 +47,11 @@ const FootballHomePage: FC = () => {
   if (loading) {
     return <Loader />;
   }
+
+  const liveHomeName = liveFixture?.homeTeam?.name ?? liveFixture?.temporaryHomeTeamName ?? 'Home';
+  const liveAwayName = liveFixture?.awayTeam?.name ?? liveFixture?.temporaryAwayTeamName ?? 'Away';
+  const liveHomeLogo = teamLogos[liveHomeName] || '/images/team_logos/default.jpg';
+  const liveAwayLogo = teamLogos[liveAwayName] || '/images/team_logos/default.jpg';
 
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-0">
@@ -118,32 +112,32 @@ const FootballHomePage: FC = () => {
                       <div className="flex flex-col items-center gap-3 flex-1">
                         <div className="relative w-14 h-14 md:w-20 md:h-20">
                           <Image
-                            src={teamLogos[liveFixture.homeTeam.name] || '/images/team_logos/default.jpg'}
-                            alt={liveFixture.homeTeam.name}
+                            src={liveHomeLogo}
+                            alt={liveHomeName}
                             fill
                             className="object-contain rounded-full"
                           />
                         </div>
                         <span className="text-sm md:text-base font-semibold text-center">
-                          {liveFixture.homeTeam.name}
+                          {liveHomeName}
                         </span>
                       </div>
 
                       {/* Score */}
                       <div className="flex flex-col items-center gap-2">
                         <div className="text-3xl md:text-5xl font-bold tracking-tight">
-                          <span>{liveFixture.result.homeScore}</span>
+                          <span>{liveFixture.result?.homeScore ?? 0}</span>
                           <span className="text-muted-foreground mx-2 md:mx-3">-</span>
-                          <span>{liveFixture.result.awayScore}</span>
+                          <span>{liveFixture.result?.awayScore ?? 0}</span>
                         </div>
-                        {liveFixture.result.homePenalty !== null && liveFixture.result.awayPenalty !== null && (
+                        {liveFixture.result && liveFixture.result.homePenalty !== null && liveFixture.result.awayPenalty !== null && (
                           <div className="text-xs text-muted-foreground">
                             ({liveFixture.result.homePenalty} - {liveFixture.result.awayPenalty})
                           </div>
                         )}
                         <div className="flex items-center gap-1.5 text-sm text-emerald-600 dark:text-emerald-400 font-medium">
                           <Clock className="w-4 h-4" />
-                          <span>{liveFixture.currentMinute}'</span>
+                          <span>{liveFixture.currentMinute ?? 0}'</span>
                         </div>
                       </div>
 
@@ -151,14 +145,14 @@ const FootballHomePage: FC = () => {
                       <div className="flex flex-col items-center gap-3 flex-1">
                         <div className="relative w-14 h-14 md:w-20 md:h-20">
                           <Image
-                            src={teamLogos[liveFixture.awayTeam.name] || '/images/team_logos/default.jpg'}
-                            alt={liveFixture.awayTeam.name}
+                            src={liveAwayLogo}
+                            alt={liveAwayName}
                             fill
                             className="object-contain rounded-full"
                           />
                         </div>
                         <span className="text-sm md:text-base font-semibold text-center">
-                          {liveFixture.awayTeam.name}
+                          {liveAwayName}
                         </span>
                       </div>
                     </div>
@@ -178,7 +172,7 @@ const FootballHomePage: FC = () => {
                     {/* Watch Live Button */}
                     <div className="mt-6 flex justify-center">
                       <Link
-                        href={`/live/${liveFixture.fixture}`}
+                        href={`/live/${liveFixture.id}`}
                         className="inline-flex items-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full text-sm font-medium transition-colors"
                       >
                         Watch Live

@@ -4,12 +4,12 @@ import { FC } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { format } from 'date-fns';
-import { Calendar, Clock, Trophy, MapPin } from 'lucide-react';
+import { Calendar, Trophy } from 'lucide-react';
 import { teamLogos } from '@/constants';
-import { PopIV2FootballFixture } from '@/utils/V2Utils/v2requestData.types';
+import { FixtureResponse } from '@/lib/types/v1.response.types';
 
 interface RecentGamesProps {
-  fixtures: PopIV2FootballFixture[];
+  fixtures: FixtureResponse[];
   loading?: boolean;
 }
 
@@ -62,12 +62,13 @@ const RecentGames: FC<RecentGamesProps> = ({ fixtures, loading = false }) => {
     <div className="space-y-3">
       {fixtures.map((fixture) => {
         const formattedDate = fixture.scheduledDate ? format(new Date(fixture.scheduledDate), "MMM dd") : null;
-        const formattedTime = fixture.scheduledDate ? format(new Date(fixture.scheduledDate), "HH:mm") : null;
+        const homeName = fixture.homeTeam?.name ?? fixture.temporaryHomeTeamName ?? 'Home';
+        const awayName = fixture.awayTeam?.name ?? fixture.temporaryAwayTeamName ?? 'Away';
         
         return (
           <Link
-            key={fixture._id}
-            href={`/sports/football/fixtures/${fixture._id}/stats`}
+            key={fixture.id}
+            href={`/sports/football/fixtures/${fixture.id}/stats`}
             className="block group"
           >
             <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg border border-border/50 hover:border-emerald-500/30 hover:bg-accent/30 transition-all duration-200">
@@ -76,22 +77,22 @@ const RecentGames: FC<RecentGamesProps> = ({ fixtures, loading = false }) => {
                 <div className="flex items-center gap-2 min-w-0 flex-1">
                   <div className="relative w-7 h-7 flex-shrink-0">
                     <Image
-                      src={teamLogos[fixture.homeTeam.name] || '/images/team_logos/default.jpg'}
-                      alt={fixture.homeTeam.name}
+                      src={teamLogos[homeName] || '/images/team_logos/default.jpg'}
+                      alt={homeName}
                       fill
                       className="object-contain rounded-full"
                     />
                   </div>
                   <span className="font-medium text-sm truncate group-hover:text-emerald-600 transition-colors">
-                    {fixture.homeTeam.name}
+                    {homeName}
                   </span>
                 </div>
 
                 <div className="flex items-center gap-2 px-2 py-1 bg-muted/50 rounded-full mx-3">
-                  <span className="font-bold text-base">{fixture.result.homeScore}</span>
+                  <span className="font-bold text-base">{fixture.result?.homeScore ?? 0}</span>
                   <span className="text-muted-foreground text-sm">-</span>
-                  <span className="font-bold text-base">{fixture.result.awayScore}</span>
-                  {fixture.result.homePenalty !== null && fixture.result.awayPenalty !== null && (
+                  <span className="font-bold text-base">{fixture.result?.awayScore ?? 0}</span>
+                  {fixture.result && fixture.result.homePenalty !== null && fixture.result.awayPenalty !== null && (
                     <span className="text-xs text-muted-foreground ml-1">
                       ({fixture.result.homePenalty}-{fixture.result.awayPenalty})
                     </span>
@@ -100,12 +101,12 @@ const RecentGames: FC<RecentGamesProps> = ({ fixtures, loading = false }) => {
 
                 <div className="flex items-center gap-2 min-w-0 flex-1 justify-end">
                   <span className="font-medium text-sm truncate group-hover:text-emerald-600 transition-colors">
-                    {fixture.awayTeam.name}
+                    {awayName}
                   </span>
                   <div className="relative w-7 h-7 flex-shrink-0">
                     <Image
-                      src={teamLogos[fixture.awayTeam.name] || '/images/team_logos/default.jpg'}
-                      alt={fixture.awayTeam.name}
+                      src={teamLogos[awayName] || '/images/team_logos/default.jpg'}
+                      alt={awayName}
                       fill
                       className="object-contain rounded-full"
                     />
@@ -119,23 +120,23 @@ const RecentGames: FC<RecentGamesProps> = ({ fixtures, loading = false }) => {
                 <div className="flex items-center gap-2 min-w-0 flex-1">
                   <div className="relative w-8 h-8 flex-shrink-0">
                     <Image
-                      src={teamLogos[fixture.homeTeam.name] || '/images/team_logos/default.jpg'}
-                      alt={fixture.homeTeam.name}
+                      src={teamLogos[homeName] || '/images/team_logos/default.jpg'}
+                      alt={homeName}
                       fill
                       className="object-contain rounded-full"
                     />
                   </div>
                   <span className="font-medium text-sm truncate group-hover:text-emerald-600 transition-colors">
-                    {fixture.homeTeam.name}
+                    {homeName}
                   </span>
                 </div>
 
                 {/* Score */}
                 <div className="flex items-center gap-2 px-3 py-1 bg-muted/50 rounded-full">
-                  <span className="font-bold text-lg">{fixture.result.homeScore}</span>
+                  <span className="font-bold text-lg">{fixture.result?.homeScore ?? 0}</span>
                   <span className="text-muted-foreground">-</span>
-                  <span className="font-bold text-lg">{fixture.result.awayScore}</span>
-                  {fixture.result.homePenalty !== null && fixture.result.awayPenalty !== null && (
+                  <span className="font-bold text-lg">{fixture.result?.awayScore ?? 0}</span>
+                  {fixture.result && fixture.result.homePenalty !== null && fixture.result.awayPenalty !== null && (
                     <span className="text-xs text-muted-foreground ml-1">
                       ({fixture.result.homePenalty}-{fixture.result.awayPenalty})
                     </span>
@@ -145,12 +146,12 @@ const RecentGames: FC<RecentGamesProps> = ({ fixtures, loading = false }) => {
                 {/* Away Team */}
                 <div className="flex items-center gap-2 min-w-0 flex-1 justify-end">
                   <span className="font-medium text-sm truncate group-hover:text-emerald-600 transition-colors">
-                    {fixture.awayTeam.name}
+                    {awayName}
                   </span>
                   <div className="relative w-8 h-8 flex-shrink-0">
                     <Image
-                      src={teamLogos[fixture.awayTeam.name] || '/images/team_logos/default.jpg'}
-                      alt={fixture.awayTeam.name}
+                      src={teamLogos[awayName] || '/images/team_logos/default.jpg'}
+                      alt={awayName}
                       fill
                       className="object-contain rounded-full"
                     />

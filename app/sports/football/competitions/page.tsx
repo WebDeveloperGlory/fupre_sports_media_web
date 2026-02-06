@@ -1,16 +1,17 @@
 'use client'
 
 import { Loader } from "@/components/ui/loader";
-import { getFootballCompetitionPageData } from "@/lib/requests/v2/homepage/requests";
-import { IV2FootballCompetition, IV2Blog, PopIV2FootballFixture } from "@/utils/V2Utils/v2requestData.types";
+import { footballCompetitionApi } from "@/lib/api/v1/football-competition.api";
+import { footballFixtureApi } from "@/lib/api/v1/football-fixture.api";
+import { CompetitionResponse, FixtureResponse } from "@/lib/types/v1.response.types";
+import { CompetitionType } from "@/types/v1.football-competition.types";
+import { IV2Blog } from "@/utils/V2Utils/v2requestData.types";
 import { ArrowRight, ArrowLeft, Bolt, CalendarClock, Crown, Trophy, Users, Flame, CalendarDays, Newspaper } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { getUpcomingFixtures } from "@/lib/requests/v2/fixtures/requests";
 import { getAllBlogs } from "@/lib/requests/v2/admin/media-admin/news-management/requests";
 import { cn } from "@/utils/cn";
-import { CompetitionTypes } from "@/utils/V2Utils/v2requestData.enums";
 import { format } from "date-fns";
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
@@ -18,16 +19,16 @@ import { Card } from "@/components/ui/card";
 type CompetitionPageData = {
   competitionFixturesCount: number;
   liveCompetitionFixturesCount: number;
-  allCompetitions: IV2FootballCompetition[];
-  allActiveCompetitions: IV2FootballCompetition[];
-  featuredCompetitions: IV2FootballCompetition[];
+  allCompetitions: CompetitionResponse[];
+  allActiveCompetitions: CompetitionResponse[];
+  featuredCompetitions: CompetitionResponse[];
 }
 
 export default function FootballCompetitionsPage() {
   const [loading, setLoading] = useState<boolean>(true);
   const [pageData, setPageData] = useState<CompetitionPageData | null>(null);
   const [activeTab, setActiveTab] = useState<string>('all competitions');
-  const [upcomingFixtures, setUpcomingFixtures] = useState<PopIV2FootballFixture[]>([]);
+  const [upcomingFixtures, setUpcomingFixtures] = useState<FixtureResponse[]>([]);
   const [latestBlogs, setLatestBlogs] = useState<IV2Blog[]>([]);
 
   // Animation variants
@@ -47,21 +48,28 @@ export default function FootballCompetitionsPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [compRes, fixturesRes, blogsRes] = await Promise.all([
-          getFootballCompetitionPageData(),
-          getUpcomingFixtures(5),
-          getAllBlogs()
+        const [competitionsRes, fixturesRes, liveRes, upcomingRes, blogsRes] = await Promise.all([
+          footballCompetitionApi.getAll(1, 200),
+          footballFixtureApi.getAll(1, 200),
+          footballFixtureApi.getLive(),
+          footballFixtureApi.getUpcoming(1, 5),
+          getAllBlogs(),
         ]);
 
-        if (compRes?.code === '00') {
-          setPageData(compRes.data);
-        } else if (compRes) {
-          toast.error(compRes?.message || 'Error getting competitions');
-        }
+        const competitionsData = Array.isArray(competitionsRes?.data) ? competitionsRes.data : [];
+        const fixturesData = Array.isArray(fixturesRes?.data) ? fixturesRes.data : [];
+        const liveData = Array.isArray(liveRes?.data) ? liveRes.data : [];
+        const upcomingData = Array.isArray(upcomingRes?.data) ? upcomingRes.data : [];
 
-        if (fixturesRes?.code === '00') {
-          setUpcomingFixtures(fixturesRes.data?.slice(0, 5) || []);
-        }
+        setPageData({
+          competitionFixturesCount: fixturesRes?.total ?? fixturesData.length,
+          liveCompetitionFixturesCount: liveData.length,
+          allCompetitions: competitionsData,
+          allActiveCompetitions: competitionsData.filter((comp) => comp.isActive),
+          featuredCompetitions: competitionsData.filter((comp) => comp.isFeatured),
+        });
+
+        setUpcomingFixtures(upcomingData.slice(0, 5));
 
         if (blogsRes?.code === '00') {
           const published = (blogsRes.data as IV2Blog[]).filter(b => b.isPublished);
@@ -93,7 +101,7 @@ export default function FootballCompetitionsPage() {
 
   const getTypeColors = (type: string) => {
     switch (type) {
-      case CompetitionTypes.LEAGUE:
+      case CompetitionType.LEAGUE:
         return {
           bg: 'bg-gradient-to-br from-emerald-500/20 to-emerald-600/10',
           border: 'border-emerald-500/30',
@@ -104,7 +112,7 @@ export default function FootballCompetitionsPage() {
           iconColor: 'text-emerald-600 dark:text-emerald-400',
           hoverBorder: 'hover:border-emerald-500/50',
         };
-      case CompetitionTypes.KNOCKOUT:
+      case CompetitionType.KNOCKOUT:
         return {
           bg: 'bg-gradient-to-br from-purple-500/20 to-purple-600/10',
           border: 'border-purple-500/30',
@@ -115,7 +123,7 @@ export default function FootballCompetitionsPage() {
           iconColor: 'text-purple-600 dark:text-purple-400',
           hoverBorder: 'hover:border-purple-500/50',
         };
-      case CompetitionTypes.HYBRID:
+      case CompetitionType.HYBRID:
         return {
           bg: 'bg-gradient-to-br from-orange-500/20 to-orange-600/10',
           border: 'border-orange-500/30',
@@ -170,11 +178,11 @@ export default function FootballCompetitionsPage() {
 
   const getCompetitionIcon = (type: string) => {
     switch (type) {
-      case CompetitionTypes.LEAGUE:
+      case CompetitionType.LEAGUE:
         return <Trophy className="w-5 h-5 sm:w-6 sm:h-6" />;
-      case CompetitionTypes.KNOCKOUT:
+      case CompetitionType.KNOCKOUT:
         return <Crown className="w-5 h-5 sm:w-6 sm:h-6" />;
-      case CompetitionTypes.HYBRID:
+      case CompetitionType.HYBRID:
         return <Bolt className="w-5 h-5 sm:w-6 sm:h-6" />;
       default:
         return <CalendarClock className="w-5 h-5 sm:w-6 sm:h-6" />;
@@ -292,18 +300,18 @@ export default function FootballCompetitionsPage() {
                   {upcomingFixtures.length > 0 ? (
                     upcomingFixtures.slice(0, 3).map((fx) => (
                       <Link
-                        key={fx._id}
-                        href={`/fixtures/${fx._id}/stats`}
+                        key={fx.id}
+                        href={`/sports/football/fixtures/${fx.id}/stats`}
                         className="group block rounded-xl border border-border/50 hover:border-emerald-500/30 bg-background/50 hover:bg-emerald-500/5 transition-all duration-300 p-3 sm:p-4"
                       >
                         <div className="flex items-center justify-between mb-1 sm:mb-2">
                           <div className="text-[10px] sm:text-xs text-muted-foreground bg-secondary px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full">
-                            {fx.scheduledDate ? format(fx.scheduledDate, 'EEE, MMM d • HH:mm') : 'TBD'}
+                            {fx.scheduledDate ? format(new Date(fx.scheduledDate), 'EEE, MMM d - HH:mm') : 'TBD'}
                           </div>
                           <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground group-hover:text-emerald-600 group-hover:translate-x-1 transition-all" />
                         </div>
                         <div className="text-sm sm:text-base font-semibold text-foreground">
-                          {fx.homeTeam.name} <span className="text-muted-foreground font-normal">vs</span> {fx.awayTeam.name}
+                          {fx.homeTeam?.name ?? fx.temporaryHomeTeamName ?? 'Home'} <span className="text-muted-foreground font-normal">vs</span> {fx.awayTeam?.name ?? fx.temporaryAwayTeamName ?? 'Away'}
                         </div>
                       </Link>
                     ))
@@ -420,10 +428,14 @@ export default function FootballCompetitionsPage() {
             {filteredCompetitions.length > 0 ? (
               filteredCompetitions.map((comp) => {
                 const colors = getTypeColors(comp.type);
+                const leaderTeamId = comp.leagueTable?.[0]?.team;
+                const leaderTeam = leaderTeamId
+                  ? comp.teams?.find((team) => team.id === leaderTeamId)
+                  : null;
 
                 return (
-                  <motion.div key={comp._id} variants={item}>
-                    <Link href={`/sports/football/competitions/${comp._id}`}>
+                  <motion.div key={comp.id} variants={item}>
+                    <Link href={`/sports/football/competitions/${comp.id}`}>
                       <Card className={cn(
                         "group p-4 sm:p-6 bg-card/50 backdrop-blur-sm border transition-all duration-300 hover:shadow-xl hover:-translate-y-1",
                         colors.border,
@@ -475,10 +487,10 @@ export default function FootballCompetitionsPage() {
                                   <span className="font-semibold capitalize text-xs sm:text-sm">{comp.currentStage || 'Registration'}</span>
                                 </div>
 
-                                {comp.type === CompetitionTypes.LEAGUE && comp.leagueTable.length > 0 && (
+                                {comp.type === CompetitionType.LEAGUE && comp.leagueTable?.length > 0 && leaderTeam && (
                                   <div className="hidden sm:flex items-center gap-2">
                                     <Crown className="w-4 h-4 text-amber-500" />
-                                    <span className="font-semibold text-emerald-600 truncate max-w-[100px]">{comp.leagueTable[0].team.name}</span>
+                                    <span className="font-semibold text-emerald-600 truncate max-w-[100px]">{leaderTeam.name}</span>
                                     <span className="text-muted-foreground">Leaders</span>
                                   </div>
                                 )}
@@ -535,3 +547,5 @@ export default function FootballCompetitionsPage() {
     </div>
   );
 }
+
+

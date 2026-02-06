@@ -8,8 +8,9 @@ import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import Footer from '@/components/Footer';
 import GalleryCarousel from '@/components/GalleryCarousel';
-import { getFixtures, getUpcomingFixtures } from '@/lib/requests/v2/fixtures/requests';
-import { getAllCompetitions } from '@/lib/requests/v2/competition/requests';
+import { footballFixtureApi } from '@/lib/api/v1/football-fixture.api';
+import { footballCompetitionApi } from '@/lib/api/v1/football-competition.api';
+import { FixtureResponse } from '@/lib/types/v1.response.types';
 
 // Mock Data for news (to be replaced with real data later)
 const latestArticles = [
@@ -49,16 +50,6 @@ const quickLinks = [
 ];
 
 // Types
-interface Fixture {
-  _id: string;
-  competition: { name: string; _id: string };
-  homeTeam: { name: string; shorthand?: string };
-  awayTeam: { name: string; shorthand?: string };
-  scheduledDate: string;
-  venue?: string;
-  status: string;
-}
-
 interface Stats {
   liveMatches: number;
   competitions: number;
@@ -73,17 +64,17 @@ export default function RootPage() {
     teams: 0,
     fixtures: 0,
   });
-  const [nextMatch, setNextMatch] = useState<Fixture | null>(null);
+  const [nextMatch, setNextMatch] = useState<FixtureResponse | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         // Fetch all data in parallel
         const [liveRes, upcomingRes, competitionsRes, fixturesRes] = await Promise.all([
-          getFixtures('live', 50),
-          getUpcomingFixtures(1), // Get just the next match
-          getAllCompetitions(),
-          getFixtures(undefined, 100), // Get all fixtures for count
+          footballFixtureApi.getLive(),
+          footballFixtureApi.getUpcoming(1, 1), // Get just the next match
+          footballCompetitionApi.getAll(1, 200),
+          footballFixtureApi.getAll(1, 200), // Get fixtures for count
         ]);
         // Extract counts with Array.isArray checks
         const liveData = Array.isArray(liveRes?.data) ? liveRes.data : [];
@@ -92,18 +83,25 @@ export default function RootPage() {
         const upcomingData = Array.isArray(upcomingRes?.data) ? upcomingRes.data : [];
 
         const liveMatches = liveData.length;
-        const competitions = competitionsData.length;
-        const fixtures = fixturesData.length;
+        const competitions = competitionsRes?.total ?? competitionsData.length;
+        const fixtures = fixturesRes?.total ?? fixturesData.length;
 
         // Count unique teams from competitions
-        let teams = 0;
         const teamSet = new Set<string>();
         competitionsData.forEach((comp: any) => {
           if (comp.teams && Array.isArray(comp.teams)) {
-            comp.teams.forEach((team: any) => teamSet.add(team._id || team));
+            comp.teams.forEach((team: any) => {
+              if (typeof team === "string") {
+                teamSet.add(team);
+                return;
+              }
+              if (team?.id) {
+                teamSet.add(team.id);
+              }
+            });
           }
         });
-        teams = teamSet.size || 12;
+        const teams = teamSet.size || 12;
 
         setStats({
           liveMatches,
@@ -125,8 +123,10 @@ export default function RootPage() {
   }, []);
 
   // Format date helper
-  const formatMatchDate = (dateString: string) => {
-    const date = new Date(dateString);
+  const formatMatchDate = (dateValue: Date | string | null | undefined) => {
+    if (!dateValue) return 'TBD';
+    const date = new Date(dateValue);
+    if (isNaN(date.getTime())) return 'TBD';
     const now = new Date();
     const tomorrow = new Date(now);
     tomorrow.setDate(tomorrow.getDate() + 1);
@@ -136,9 +136,17 @@ export default function RootPage() {
     return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
   };
 
-  const formatMatchTime = (dateString: string) => {
-    return new Date(dateString).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+  const formatMatchTime = (dateValue: Date | string | null | undefined) => {
+    if (!dateValue) return '--:--';
+    const date = new Date(dateValue);
+    if (isNaN(date.getTime())) return '--:--';
+    return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
   };
+  const homeDisplayName = nextMatch?.homeTeam?.name ?? nextMatch?.temporaryHomeTeamName ?? 'Home Team';
+  const awayDisplayName = nextMatch?.awayTeam?.name ?? nextMatch?.temporaryAwayTeamName ?? 'Away Team';
+  const competitionName = nextMatch?.competition?.name ?? 'Friendly';
+  const homeInitial = nextMatch?.homeTeam?.shorthand?.[0] ?? homeDisplayName.charAt(0) ?? 'H';
+  const awayInitial = nextMatch?.awayTeam?.shorthand?.[0] ?? awayDisplayName.charAt(0) ?? 'A';
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -282,7 +290,7 @@ export default function RootPage() {
               {/* Competition Header */}
               <div className="bg-secondary/50 px-3 py-1.5 sm:px-4 sm:py-2 md:px-6 md:py-3 text-center">
                 <span className="text-xs md:text-sm font-medium text-muted-foreground">
-                  {nextMatch.competition?.name || 'Competition'}
+                  {competitionName}
                 </span>
               </div>
 
@@ -292,9 +300,9 @@ export default function RootPage() {
                   {/* Home Team */}
                   <div className="flex-1 text-center min-w-0">
                     <div className="w-12 h-12 md:w-20 md:h-20 rounded-full bg-secondary mx-auto mb-2 md:mb-4 flex items-center justify-center">
-                      <span className="text-lg md:text-3xl font-bold">{nextMatch.homeTeam?.shorthand?.[0] || nextMatch.homeTeam?.name?.[0] || 'H'}</span>
+                      <span className="text-lg md:text-3xl font-bold">{homeInitial}</span>
                     </div>
-                    <h3 className="font-bold text-sm md:text-xl truncate">{nextMatch.homeTeam?.name || 'Home Team'}</h3>
+                    <h3 className="font-bold text-sm md:text-xl truncate">{homeDisplayName}</h3>
                   </div>
 
                   {/* VS */}
@@ -305,9 +313,9 @@ export default function RootPage() {
                   {/* Away Team */}
                   <div className="flex-1 text-center min-w-0">
                     <div className="w-12 h-12 md:w-20 md:h-20 rounded-full bg-secondary mx-auto mb-2 md:mb-4 flex items-center justify-center">
-                      <span className="text-lg md:text-3xl font-bold">{nextMatch.awayTeam?.shorthand?.[0] || nextMatch.awayTeam?.name?.[0] || 'A'}</span>
+                      <span className="text-lg md:text-3xl font-bold">{awayInitial}</span>
                     </div>
-                    <h3 className="font-bold text-sm md:text-xl truncate">{nextMatch.awayTeam?.name || 'Away Team'}</h3>
+                    <h3 className="font-bold text-sm md:text-xl truncate">{awayDisplayName}</h3>
                   </div>
                 </div>
 
@@ -321,10 +329,10 @@ export default function RootPage() {
                     <Clock className="w-3 h-3 md:w-4 md:h-4" />
                     <span>{formatMatchTime(nextMatch.scheduledDate)}</span>
                   </div>
-                  {nextMatch.venue && (
+                  {nextMatch.stadium && (
                     <div className="flex items-center gap-2">
                       <MapPin className="w-3 h-3 md:w-4 md:h-4" />
-                      <span>{nextMatch.venue}</span>
+                      <span>{nextMatch.stadium}</span>
                     </div>
                   )}
                 </div>
@@ -363,7 +371,7 @@ export default function RootPage() {
                 <div className="md:w-1/2">
                   <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3">
                     <span className="text-emerald-600 dark:text-emerald-400 font-medium">Featured</span>
-                    <span>•</span>
+                    <span>|</span>
                     <span>{latestArticles[0].readTime}</span>
                   </div>
                   <h3 className="text-xl md:text-2xl font-bold leading-tight group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors mb-3">
@@ -374,7 +382,7 @@ export default function RootPage() {
                   </p>
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
                     <span className="font-medium">{latestArticles[0].author}</span>
-                    <span>•</span>
+                    <span>|</span>
                     <span>{latestArticles[0].date}</span>
                   </div>
                 </div>
@@ -390,7 +398,7 @@ export default function RootPage() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
                       <span className="text-emerald-600 dark:text-emerald-400 font-medium">Sports</span>
-                      <span>•</span>
+                      <span>|</span>
                       <span>{article.readTime}</span>
                     </div>
                     <h3 className="font-bold text-base md:text-lg leading-snug group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
@@ -398,7 +406,7 @@ export default function RootPage() {
                     </h3>
                     <div className="flex items-center gap-2 text-xs text-muted-foreground mt-2">
                       <span>{article.author}</span>
-                      <span>•</span>
+                      <span>|</span>
                       <span>{article.date}</span>
                     </div>
                   </div>
@@ -447,3 +455,4 @@ export default function RootPage() {
     </div>
   );
 }
+
