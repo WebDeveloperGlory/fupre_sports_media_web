@@ -4,14 +4,14 @@ import { BlurFade } from "@/components/ui/blur-fade";
 import { BackButton } from "@/components/ui/back-button";
 import { Loader } from "@/components/ui/loader";
 import Image from "next/image";
-import { Calendar, Clock, MapPin, Users, Trophy, Target, AlertCircle } from "lucide-react";
+import { Calendar, Clock, MapPin, Trophy, Target, AlertCircle } from "lucide-react";
 import { notFound } from "next/navigation";
 import { use, useEffect, useState } from "react";
 import Link from "next/link";
 import { format } from "date-fns";
-import { PopIV2FootballFixture } from "@/utils/V2Utils/v2requestData.types";
-import { FixtureStatus } from "@/utils/V2Utils/v2requestData.enums";
-import { getFixtureById } from "@/lib/requests/v2/fixtures/requests";
+import { FixtureResponse } from "@/lib/types/v1.response.types";
+import { FixtureStatus } from "@/types/v1.football-fixture.types";
+import { footballFixtureApi } from "@/lib/api/v1/football-fixture.api";
 import { teamLogos } from "@/constants";
 
 export default function FixturePage({
@@ -20,7 +20,7 @@ export default function FixturePage({
   params: Promise<{ id: string }>
 }) {
   const resolvedParams = use(params);
-  const [fixture, setFixture] = useState<PopIV2FootballFixture | null>(null);
+  const [fixture, setFixture] = useState<FixtureResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -29,11 +29,10 @@ export default function FixturePage({
       try {
         setLoading(true);
         setError(null);
-        const response = await getFixtureById(resolvedParams.id);
+        const response = await footballFixtureApi.getById(resolvedParams.id);
 
         if (response && response.data) {
           setFixture(response.data);
-          console.log(response.data);
         } else {
           setError("Fixture not found");
         }
@@ -56,9 +55,18 @@ export default function FixturePage({
     notFound();
   }
 
-  const totalElapsedGameTime = fixture ? fixture.statistics.home.possessionTime + fixture.statistics.away.possessionTime : 0;
-  const homePossession = totalElapsedGameTime > 0 ? ( fixture!.statistics.home.possessionTime / totalElapsedGameTime ) * 100 : 50;
+  const totalElapsedGameTime = fixture.statistics
+    ? fixture.statistics.home.possessionTime + fixture.statistics.away.possessionTime
+    : 0;
+  const homePossession = totalElapsedGameTime > 0
+    ? (fixture.statistics.home.possessionTime / totalElapsedGameTime) * 100
+    : 50;
   const awayPossession = 100 - homePossession; // Ensures total is always 100%
+  const homeName = fixture.homeTeam?.name ?? fixture.temporaryHomeTeamName ?? "Home";
+  const awayName = fixture.awayTeam?.name ?? fixture.temporaryAwayTeamName ?? "Away";
+  const competitionName = fixture.competition?.name ?? "Friendly";
+  const scheduledDate = fixture.scheduledDate ? new Date(fixture.scheduledDate) : null;
+  const hasScheduledDate = scheduledDate instanceof Date && !isNaN(scheduledDate.getTime());
 
   return (
     <main className="min-h-screen">
@@ -71,7 +79,7 @@ export default function FixturePage({
       {(fixture.status === FixtureStatus.COMPLETED || fixture.status === FixtureStatus.LIVE) && (
         <div className="fixed top-24 right-8 z-10">
           <Link
-            href={`/sports/football/fixtures/${fixture._id}/stats`}
+            href={`/sports/football/fixtures/${fixture.id}/stats`}
             className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500 text-white font-medium hover:bg-emerald-600 transition-colors rounded-lg shadow-lg"
           >
             <Trophy className="w-4 h-4" />
@@ -89,7 +97,7 @@ export default function FixturePage({
                 {/* Competition Name */}
                 <div className="text-center">
                   <span className="text-sm font-medium text-emerald-500">
-                    {fixture.competition.name}
+                    {competitionName}
                   </span>
                 </div>
 
@@ -98,13 +106,13 @@ export default function FixturePage({
                   <div className="flex flex-col items-center gap-4">
                     <div className="relative w-20 h-20">
                       <Image
-                        src={teamLogos[fixture.homeTeam.name] || '/images/team_logos/default.jpg'}
-                        alt={fixture.homeTeam.name}
+                        src={teamLogos[homeName] || '/images/team_logos/default.jpg'}
+                        alt={homeName}
                         fill
                         className="object-contain"
                       />
                     </div>
-                    <span className="font-medium text-lg">{fixture.homeTeam.name}</span>
+                    <span className="font-medium text-lg">{homeName}</span>
                     {fixture.status === FixtureStatus.COMPLETED && (
                       <span className="text-3xl font-bold">{fixture.result.homeScore}</span>
                     )}
@@ -123,13 +131,13 @@ export default function FixturePage({
                   <div className="flex flex-col items-center gap-4">
                     <div className="relative w-20 h-20">
                       <Image
-                        src={teamLogos[fixture.awayTeam.name] || '/images/team_logos/default.jpg'}
-                        alt={fixture.awayTeam.name}
+                        src={teamLogos[awayName] || '/images/team_logos/default.jpg'}
+                        alt={awayName}
                         fill
                         className="object-contain"
                       />
                     </div>
-                    <span className="font-medium text-lg">{fixture.awayTeam.name}</span>
+                    <span className="font-medium text-lg">{awayName}</span>
                     {fixture.status === FixtureStatus.COMPLETED && (
                       <span className="text-3xl font-bold">{fixture.result.awayScore}</span>
                     )}
@@ -140,15 +148,15 @@ export default function FixturePage({
                 <div className="flex items-center justify-center gap-6 text-sm text-muted-foreground">
                   <div className="flex items-center gap-1">
                     <Calendar className="w-4 h-4" />
-                    <span>{format(new Date(fixture.scheduledDate), 'MMM dd, yyyy')}</span>
+                    <span>{hasScheduledDate ? format(scheduledDate, 'MMM dd, yyyy') : 'TBD'}</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <Clock className="w-4 h-4" />
-                    <span>{format(new Date(fixture.scheduledDate), 'HH:mm')}</span>
+                    <span>{hasScheduledDate ? format(scheduledDate, 'HH:mm') : '--:--'}</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <MapPin className="w-4 h-4" />
-                    <span>{fixture.stadium}</span>
+                    <span>{fixture.stadium || 'TBD'}</span>
                   </div>
                 </div>
               </div>
@@ -168,10 +176,10 @@ export default function FixturePage({
                     <div className="font-medium">{fixture.attendance.toLocaleString()}</div>
                   </div>
                 )}
-                {fixture.weather && (
+                {fixture.weather?.condition && (
                   <div className="p-4 bg-secondary rounded-lg">
                     <div className="text-sm text-muted-foreground">Weather</div>
-                    <div className="font-medium">{fixture.weather.condition}, {fixture.weather.temperature}°C</div>
+                    <div className="font-medium">{fixture.weather.condition}, {fixture.weather.temperature}C</div>
                   </div>
                 )}
                 <div className="p-4 bg-secondary rounded-lg">
@@ -193,11 +201,11 @@ export default function FixturePage({
                     <div key={index} className="flex items-center justify-between p-3 bg-secondary rounded-lg">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
-                          ⚽
+                          GOAL
                         </div>
                         <div>
-                          <div className="font-medium">{scorer.player ? scorer.player.name : 'Unknown'}</div>
-                          <div className="text-sm text-muted-foreground">{scorer.team ? scorer.team.name : 'Unknown'}</div>
+                          <div className="font-medium">{scorer.temporaryPlayerName ?? 'Unknown'}</div>
+                          <div className="text-sm text-muted-foreground">{scorer.temporaryTeamName ?? 'Unknown'}</div>
                         </div>
                       </div>
                       <div className="text-sm font-medium text-emerald-500">
@@ -286,7 +294,7 @@ export default function FixturePage({
                    fixture.status === FixtureStatus.LIVE ? 'Live Match' :
                    fixture.status === FixtureStatus.SCHEDULED ? 'Upcoming Match' :
                    fixture.status === FixtureStatus.POSTPONED ? 'Match Postponed' :
-                   'Match Cancelled'}
+                   'Match Canceled'}
                 </div>
               </div>
               {fixture.status === FixtureStatus.POSTPONED && fixture.postponedReason && (
@@ -308,3 +316,6 @@ export default function FixturePage({
     </main>
   );
 }
+
+
+

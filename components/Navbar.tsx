@@ -52,7 +52,7 @@ const Navbar = () => {
 
   const navLinks = [
     { href: "/", label: "Home", icon: Home },
-    { href: "/matches", label: "Matches", icon: Trophy },
+    { href: "/sports/competitions", label: "Matches", icon: Trophy },
     { href: "/highlights", label: "Highlights", icon: Play },
     { href: "/news", label: "News", icon: Newspaper },
   ];
