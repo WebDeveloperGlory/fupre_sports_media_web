@@ -7,10 +7,14 @@ import Footer from "@/components/Footer";
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { getHomepageData } from "@/lib/requests/v2/homepage/requests";
-import { IV2Blog, IV2FootballFixture } from "@/utils/V2Utils/v2requestData.types";
+import { footballCompetitionApi } from "@/lib/api/v1/football-competition.api";
+import { footballFixtureApi } from "@/lib/api/v1/football-fixture.api";
+import { FixtureResponse } from "@/lib/types/v1.response.types";
+import { CompetitionStatus } from "@/types/v1.football-competition.types";
+import { FixtureStatus } from "@/types/v1.football-fixture.types";
+import { getAllBlogs } from "@/lib/requests/v2/admin/media-admin/news-management/requests";
+import { IV2Blog } from "@/utils/V2Utils/v2requestData.types";
 import { toast } from "react-toastify";
-import { ShortPopulatedCompetition, ShortPopulatedTeam } from "@/utils/V2Utils/v2requestSubData.types";
 
 // Register GSAP plugins
 if (typeof window !== "undefined") {
@@ -31,15 +35,7 @@ type DashboardData = {
     totalActiveCompetitions: number;
   };
   fixtures: {
-    latest: {
-      _id: string;
-      scheduledDate: Date;
-      homeTeam: ShortPopulatedTeam;
-      awayTeam: ShortPopulatedTeam;
-      sport: string;
-      stadium: string;
-      competition: ShortPopulatedCompetition;
-    }[];
+    latest: FixtureResponse[];
   };
   blogs: {
     total: number;
@@ -56,26 +52,84 @@ export default function SportsOverviewPage() {
   const [loading, setLoading] = useState(true);
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
 
-  // Platform statistics
-  const platformStats = [
-    { label: "Total Teams", value: "28", icon: Users, color: "text-blue-500" },
-    { label: "Active Competitions", value: "5", icon: Trophy, color: "text-emerald-500" },
-    { label: "Matches Played", value: "156", icon: Play, color: "text-purple-500" },
-    { label: "News Articles", value: "89", icon: Newspaper, color: "text-orange-500" },
-  ];
-
   // Fetch news data
   useEffect(() => {
     const fetchData = async () => {
-      const response = await getHomepageData();
-      if(response?.code === '00') {
-        setDashboardData(response.data)
-      } else {
-        toast.error(response?.message || 'Error Getting Analytics')
+      try {
+        const [competitionsRes, fixturesRes, upcomingRes, blogsRes] = await Promise.all([
+          footballCompetitionApi.getAll(1, 200),
+          footballFixtureApi.getAll(1, 200),
+          footballFixtureApi.getUpcoming(1, 5),
+          getAllBlogs(),
+        ]);
+
+        const competitionsData = Array.isArray(competitionsRes?.data) ? competitionsRes.data : [];
+        const fixturesData = Array.isArray(fixturesRes?.data) ? fixturesRes.data : [];
+        const upcomingData = Array.isArray(upcomingRes?.data) ? upcomingRes.data : [];
+
+        const publishedBlogs = blogsRes?.code === '00'
+          ? (blogsRes.data as IV2Blog[]).filter((blog) => blog.isPublished)
+          : [];
+        const sortedBlogs = [...publishedBlogs].sort(
+          (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+        const latestBlogs = sortedBlogs.slice(0, 5);
+
+        const teamSet = new Set<string>();
+        competitionsData.forEach((comp) => {
+          if (comp.teams && Array.isArray(comp.teams)) {
+            comp.teams.forEach((team: any) => {
+              if (typeof team === 'string') {
+                teamSet.add(team);
+                return;
+              }
+              if (team?.id) {
+                teamSet.add(team.id);
+              }
+            });
+          }
+        });
+
+        const totalTeams = teamSet.size;
+        const totalCompetitions = competitionsRes?.total ?? competitionsData.length;
+        const totalActiveCompetitions = competitionsData.filter(
+          (comp) => comp.isActive || comp.status === CompetitionStatus.ONGOING
+        ).length;
+        const totalPlayedFixtures = fixturesData.filter(
+          (fixture) => fixture.status === FixtureStatus.COMPLETED
+        ).length;
+        const totalUpcomingFixtures = upcomingRes?.total ?? upcomingData.length;
+
+        setDashboardData({
+          football: {
+            totalCompetitions,
+            totalTeams,
+            totalUpcomingFixtures,
+          },
+          basketball: {},
+          general: {
+            totalCompetitions,
+            totalTeams,
+            totalPlayedFixtures,
+            totalActiveCompetitions,
+          },
+          fixtures: {
+            latest: upcomingData,
+          },
+          blogs: {
+            total: publishedBlogs.length,
+            latest: latestBlogs,
+          },
+        });
+      } catch (error) {
+        console.error('Error fetching sports overview data:', error);
+        toast.error('Error Getting Analytics');
+      } finally {
+        setLoading(false);
       }
     }
 
-    if(loading) fetchData();
+    if (loading) fetchData();
   }, [loading]);
 
   // GSAP Animations
@@ -178,9 +232,9 @@ export default function SportsOverviewPage() {
       color: "emerald" as const,
       gradient: "from-emerald-500/20 to-emerald-600/10",
       stats: {
-        activeCompetitions: dashboardData?.football.totalCompetitions || "0",
-        teams: dashboardData?.football.totalTeams || "0",
-        upcomingMatches: dashboardData?.football.totalUpcomingFixtures || "0"
+        activeCompetitions: dashboardData?.football.totalCompetitions ?? 0,
+        teams: dashboardData?.football.totalTeams ?? 0,
+        upcomingMatches: dashboardData?.football.totalUpcomingFixtures ?? 0
       },
       features: ["Live Matches", "Team Rankings", "TOTS Voting", "Match Statistics"],
       image: "/images/football-hero.jpg" // Add actual image path
@@ -450,42 +504,54 @@ export default function SportsOverviewPage() {
                   </div>
 
                   <div className="space-y-6">
-                    {dashboardData && dashboardData.fixtures.latest.length > 0 && dashboardData.fixtures.latest.map((fixture, index) => (
-                      <Link
-                        key={index}
-                        href={fixture.sport?.toLowerCase() === 'football' ? `/sports/football/fixtures/${fixture._id}/stats` : fixture.sport?.toLowerCase() === 'basketball' ? `/sports/basketball/fixtures` : `/sports/football/fixtures/${fixture._id}/stats`}
-                        className="block"
-                      >
-                        <div className="bg-card/40 backdrop-blur-sm rounded-xl p-6 border border-border hover:border-orange-500/30 transition-all duration-300">
-                        <div className="flex items-center justify-between mb-4">
-                          <span className="inline-block px-3 py-1 rounded-full bg-orange-500/10 text-orange-500 text-xs font-medium">
-                            {fixture.sport}
-                          </span>
-                          <div className="text-right">
-                            <div className="text-sm font-medium">{fixture.scheduledDate.toLocaleString().split('T')[0]}</div>
-                            <div className="text-xs text-muted-foreground">{fixture.scheduledDate.toLocaleString().split('T')[1]}</div>
-                          </div>
-                        </div>
+                    {dashboardData && dashboardData.fixtures.latest.length > 0 && dashboardData.fixtures.latest.map((fixture) => {
+                      const fixtureDate = fixture.scheduledDate ? new Date(fixture.scheduledDate) : null;
+                      const dateLabel = fixtureDate && !isNaN(fixtureDate.getTime())
+                        ? fixtureDate.toLocaleDateString('en-US')
+                        : 'TBD';
+                      const timeLabel = fixtureDate && !isNaN(fixtureDate.getTime())
+                        ? fixtureDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
+                        : '--:--';
+                      const homeName = fixture.homeTeam?.name ?? fixture.temporaryHomeTeamName ?? 'Home';
+                      const awayName = fixture.awayTeam?.name ?? fixture.temporaryAwayTeamName ?? 'Away';
 
-                        <div className="flex items-center justify-between mb-4">
-                          <div className="text-center flex-1">
-                            <div className="font-semibold text-sm">{fixture.homeTeam.name}</div>
-                          </div>
-                          <div className="px-4">
-                            <div className="text-lg font-bold text-muted-foreground">VS</div>
-                          </div>
-                          <div className="text-center flex-1">
-                            <div className="font-semibold text-sm">{fixture.awayTeam.name}</div>
-                          </div>
-                        </div>
+                      return (
+                        <Link
+                          key={fixture.id}
+                          href={`/sports/football/fixtures/${fixture.id}/stats`}
+                          className="block"
+                        >
+                          <div className="bg-card/40 backdrop-blur-sm rounded-xl p-6 border border-border hover:border-orange-500/30 transition-all duration-300">
+                            <div className="flex items-center justify-between mb-4">
+                              <span className="inline-block px-3 py-1 rounded-full bg-orange-500/10 text-orange-500 text-xs font-medium">
+                                Football
+                              </span>
+                              <div className="text-right">
+                                <div className="text-sm font-medium">{dateLabel}</div>
+                                <div className="text-xs text-muted-foreground">{timeLabel}</div>
+                              </div>
+                            </div>
 
-                        <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
-                          <Calendar className="h-3 w-3" />
-                          <span>{fixture.stadium}</span>
-                        </div>
-                        </div>
-                      </Link>
-                    ))}
+                            <div className="flex items-center justify-between mb-4">
+                              <div className="text-center flex-1">
+                                <div className="font-semibold text-sm">{homeName}</div>
+                              </div>
+                              <div className="px-4">
+                                <div className="text-lg font-bold text-muted-foreground">VS</div>
+                              </div>
+                              <div className="text-center flex-1">
+                                <div className="font-semibold text-sm">{awayName}</div>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+                              <Calendar className="h-3 w-3" />
+                              <span>{fixture.stadium || 'TBD'}</span>
+                            </div>
+                          </div>
+                        </Link>
+                      );
+                    })}
                     {
                       ( !dashboardData || dashboardData.fixtures.latest.length === 0 ) && (
                         <div className="flex flex-col justify-center items-center gap-6 p-8 border border-muted-foreground bg-card rounded-lg">
@@ -497,6 +563,11 @@ export default function SportsOverviewPage() {
                         </div>
                       )
                     }
+                    {dashboardData && (
+                      <div className="mt-2 rounded-lg border border-dashed border-border/70 bg-background/40 p-4 text-xs sm:text-sm text-muted-foreground">
+                        Basketball fixtures are not available yet. Check back later for updates.
+                      </div>
+                    )}
                   </div>
 
                   <div className="mt-8">

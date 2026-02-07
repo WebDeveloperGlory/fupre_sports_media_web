@@ -11,7 +11,7 @@ export const footballPlayerApi = {
     getPlayerSeasonStats: (id: string, season: string) => apiClient.get<FootballPlayerCareerStats>(`/v1/football/player/${id}/stat/season?season=${season}`),
     getPlayerFriendlyStats: (id: string, season?: string) => apiClient.get<FootballPlayerCareerStats>(`/v1/football/player/${id}/stat/friendly${season ? `?season=${season}` : ''}`),
     getPlayerCompetitionStats: (id: string, competition: string, season?: string) => apiClient.get<FootballPlayerCareerStats>(`/v1/football/player/${id}/stat/competition?competition=${competition}${season ? `&season=${season}` : ''}`),
-    getPlayerContracts: (id: string, page: number, limit: number) => apiClient.getPaginated<FootballPlayerContractResponse>(`v1/football/player/${id}/contract${page && limit ? `?page=${page}&limit=${limit}` : ''}`),
+    getPlayerContracts: (id: string, page: number, limit: number) => apiClient.getPaginated<FootballPlayerContractResponse>(`/v1/football/player/${id}/contract${page && limit ? `?page=${page}&limit=${limit}` : ''}`),
 
     createPlayer: (payload: CreatePlayerDto) => apiClient.post<FootballPlayerResponse, CreatePlayerDto>('/v1/football/player', payload),
     updatePlayer: (id: string, payload: UpdatePlayerDto) => apiClient.put<FootballPlayerResponse, UpdatePlayerDto>(`/v1/football/player/${id}`, payload),
