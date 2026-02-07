@@ -2,7 +2,6 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import "react-toastify/dist/ReactToastify.css";
 import { uniManagementApi } from "@/lib/api/v1/uni-management.api";
 import {
   PlayerPosition,

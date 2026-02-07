@@ -20,6 +20,7 @@ import {
   Shield,
   Users as PlayersIcon,
   ChevronDown,
+  UserPlus,
 } from "lucide-react";
 import { toast } from "react-toastify";
 
@@ -44,6 +45,7 @@ import TeamDetailsModal from "@/components/admin/super/TeamDetailsModal";
 import UpdateTeamModal from "@/components/admin/super/UpdateTeamModal";
 import UploadTeamLogoModal from "@/components/admin/super/UploadTeamLogoModal";
 import TeamPlayerStatsModal from "@/components/admin/super/TeamPlayerStatsModal";
+import SignContractModal from "@/components/admin/super/SignContractModal";
 
 export default function TeamsPage() {
   const [teams, setTeams] = useState<FootballTeamResponse[]>([]);
@@ -69,6 +71,7 @@ export default function TeamsPage() {
   const [showUploadLogoModal, setShowUploadLogoModal] = useState(false);
   const [showContractsModal, setShowContractsModal] = useState(false);
   const [showPlayerStatsModal, setShowPlayerStatsModal] = useState(false);
+  const [showSignContractModal, setShowSignContractModal] = useState(false);
 
   // Data for modals
   const [teamContracts, setTeamContracts] = useState<
@@ -253,6 +256,19 @@ export default function TeamsPage() {
   const handleUploadLogoSuccess = () => {
     setShowUploadLogoModal(false);
     fetchTeams();
+  };
+
+  const handleSignContract = (team: FootballTeamResponse) => {
+    setSelectedTeam(team);
+    setShowSignContractModal(true);
+  };
+
+  const handleContractSuccess = () => {
+    setShowSignContractModal(false);
+    // You might want to refresh contracts data here
+    if (selectedTeam) {
+      fetchTeamContracts(selectedTeam.id);
+    }
   };
 
   // Stats
@@ -696,6 +712,13 @@ export default function TeamsPage() {
                           <FileText className="h-4 w-4 text-purple-500" />
                         </button>
                         <button
+                          onClick={() => handleSignContract(team)}
+                          className="p-2 hover:bg-accent rounded-lg transition-colors"
+                          title="Sign Contract"
+                        >
+                          <UserPlus className="h-4 w-4 text-green-500" />
+                        </button>
+                        <button
                           onClick={() => handleViewPlayerStats(team)}
                           className="p-2 hover:bg-accent rounded-lg transition-colors"
                           title="Player Stats"
@@ -821,6 +844,15 @@ export default function TeamsPage() {
           loading={statsLoading}
           isOpen={showPlayerStatsModal}
           onClose={() => setShowPlayerStatsModal(false)}
+        />
+      )}
+
+      {showSignContractModal && selectedTeam && (
+        <SignContractModal
+          team={selectedTeam}
+          isOpen={showSignContractModal}
+          onClose={() => setShowSignContractModal(false)}
+          onSuccess={handleContractSuccess}
         />
       )}
     </div>

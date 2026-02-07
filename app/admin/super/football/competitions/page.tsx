@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import { footballCompetitionApi } from "@/lib/api/v1/football-competition.api";
 import {
   CompetitionResponse,

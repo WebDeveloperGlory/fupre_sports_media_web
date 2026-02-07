@@ -84,8 +84,8 @@ export interface FootballPlayerResponse {
 
 export interface FootballPlayerContractResponse {
     id: string;
-    player: string;
-    team: string;
+    player: { name: string; photo: string; _id: string; };
+    team: { name: string; shorthand: string; logo: string; };
     startDate: Date;
     endDate: Date | null;
     contractType: PlayerContractType;

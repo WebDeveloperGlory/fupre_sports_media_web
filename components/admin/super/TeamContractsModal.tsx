@@ -119,7 +119,7 @@ export default function TeamContractsModal({
                           <div className="flex items-center justify-between">
                             <div>
                               <div className="font-medium text-foreground">
-                                {contract.player} #{contract.jerseyNumber}
+                                {contract.player.name} #{contract.jerseyNumber}
                               </div>
                               <div className="flex items-center gap-4 mt-2 text-sm">
                                 <span className="flex items-center gap-1 text-muted-foreground">
@@ -172,7 +172,7 @@ export default function TeamContractsModal({
                           <div className="flex items-center justify-between">
                             <div>
                               <div className="font-medium text-foreground">
-                                {contract.player} #{contract.jerseyNumber}
+                                {contract.player.name} #{contract.jerseyNumber}
                               </div>
                               <div className="flex items-center gap-4 mt-2 text-sm">
                                 <span className="flex items-center gap-1 text-muted-foreground">
