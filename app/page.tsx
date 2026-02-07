@@ -280,7 +280,7 @@ export default function RootPage() {
         <div className="container mx-auto px-0 sm:px-4">
           <div className="flex items-center justify-between mb-6 md:mb-8">
             <h2 className="text-xl md:text-3xl font-bold">Next Match</h2>
-            <Link href="/sports/competitions" className="text-sm font-medium text-muted-foreground hover:text-foreground flex items-center">
+            <Link href="/sports/football/fixtures" className="text-sm font-medium text-muted-foreground hover:text-foreground flex items-center">
               All Fixtures <ChevronRight className="w-4 h-4 ml-1" />
             </Link>
           </div>
