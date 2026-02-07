@@ -2,7 +2,7 @@ import { CompetitionStatus, CompetitionTeamReg, CompetitionType, ExtraRule, Grou
 import { FixtureCommentary, FixtureGoalScorers, FixtureLineups, FixtureOdds, FixturePlayerOfTheMatch, FixtureResult, FixtureStatistics, FixtureStatus, FixtureStreamLinks, FixtureSubstitutions, FixtureTimeline, FixtureType, FixtureWeather } from "@/types/v1.football-fixture.types";
 import { LiveFixtureCheerMeter, LiveStatus } from "@/types/v1.football-live.types";
 import { AdvancedMetrics, DefensiveMetrics, DisciplineMetrics, DribblingMetrics, DuelMetrics, FanRating, KeeperMetrics, OffensiveMetrics, OfficialRating, PassingMetrics } from "@/types/v1.football-player-stat.types";
-import { PlayerContractType, PlayerFavoriteFoot, PlayerPosition, PlayerSeasonStatType, PlayerVerificationStatus } from "@/types/v1.football-player.types";
+import { PlayerContractType, PlayerFavoriteFoot, PlayerPosition, PlayerSeasonStatType, PlayerVerificationStatus, Stats } from "@/types/v1.football-player.types";
 import { CoachRoles, PerformanceStats, TeamColor, TeamTypes } from "@/types/v1.football-team.types";
 import { SportType, UserPermissions, UserPreference, UserRole, UserStatus } from "@/types/v1.user.types";
 

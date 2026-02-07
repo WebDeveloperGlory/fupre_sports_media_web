@@ -19,6 +19,7 @@ import {
     FixtureWeather
 } from "@/types/v1.football-fixture.types";
 import { LiveStatus } from "@/types/v1.football-live.types";
+import { TeamTypes } from "@/types/v1.football-team.types";
 
 export interface CreateUserDto {
     name: string;
@@ -130,7 +131,15 @@ export interface RequestTeamPlayerStatsDto {
 }
 
 export interface CreateFootballTeamDto {
-
+    name: string;
+    shorthand: string;
+    faculty?: string;
+    department?: string;
+    type: TeamTypes;
+    primaryColor: string;
+    secondaryColor: string;
+    academicYear: string;
+    admin?: string;
 }
 
 export interface UpdateFootballTeamDto {
