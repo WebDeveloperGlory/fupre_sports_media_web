@@ -487,7 +487,7 @@ export default function FootballCompetitionsPage() {
                                   <span className="font-semibold capitalize text-xs sm:text-sm">{comp.currentStage || 'Registration'}</span>
                                 </div>
 
-                                {comp.type === CompetitionType.LEAGUE && comp.leagueTable?.length > 0 && leaderTeam && (
+                                {comp.type === CompetitionType.LEAGUE && comp.leagueTable && comp.leagueTable?.length > 0 && leaderTeam && (
                                   <div className="hidden sm:flex items-center gap-2">
                                     <Crown className="w-4 h-4 text-amber-500" />
                                     <span className="font-semibold text-emerald-600 truncate max-w-[100px]">{leaderTeam.name}</span>
