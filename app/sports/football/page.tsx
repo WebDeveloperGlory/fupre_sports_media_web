@@ -223,16 +223,19 @@ const FootballHomePage: FC = () => {
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
             {/* TOTS */}
-            <Link
-              href="/sports/football/tots"
-              className="group p-3 sm:p-4 md:p-6 border border-border rounded-xl hover:bg-secondary/50 transition-colors"
+            <div
+              aria-disabled="true"
+              className="relative p-3 sm:p-4 md:p-6 border border-dashed border-border rounded-xl bg-muted/40 text-muted-foreground cursor-not-allowed"
             >
-              <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-emerald-500/10 flex items-center justify-center mb-3">
-                <Trophy className="w-5 h-5 md:w-6 md:h-6 text-emerald-600 dark:text-emerald-400" />
+              <span className="absolute top-3 right-3 text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-600 font-semibold">
+                Coming Soon
+              </span>
+              <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-muted flex items-center justify-center mb-3">
+                <Trophy className="w-5 h-5 md:w-6 md:h-6 text-muted-foreground" />
               </div>
               <h3 className="font-bold text-sm md:text-base mb-1">TOTS</h3>
               <p className="text-xs text-muted-foreground">Vote for your stars</p>
-            </Link>
+            </div>
 
             {/* Competitions */}
             <Link

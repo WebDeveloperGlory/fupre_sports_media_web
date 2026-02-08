@@ -11,6 +11,7 @@ import GalleryCarousel from '@/components/GalleryCarousel';
 import { footballFixtureApi } from '@/lib/api/v1/football-fixture.api';
 import { footballCompetitionApi } from '@/lib/api/v1/football-competition.api';
 import { FixtureResponse } from '@/lib/types/v1.response.types';
+import { teamLogos } from '@/constants';
 
 // Mock Data for news (to be replaced with real data later)
 const latestArticles = [
@@ -145,8 +146,8 @@ export default function RootPage() {
   const homeDisplayName = nextMatch?.homeTeam?.name ?? nextMatch?.temporaryHomeTeamName ?? 'Home Team';
   const awayDisplayName = nextMatch?.awayTeam?.name ?? nextMatch?.temporaryAwayTeamName ?? 'Away Team';
   const competitionName = nextMatch?.competition?.name ?? 'Friendly';
-  const homeInitial = nextMatch?.homeTeam?.shorthand?.[0] ?? homeDisplayName.charAt(0) ?? 'H';
-  const awayInitial = nextMatch?.awayTeam?.shorthand?.[0] ?? awayDisplayName.charAt(0) ?? 'A';
+  const homeLogoSrc = nextMatch?.homeTeam?.logo || teamLogos[homeDisplayName] || '/images/team_logos/default.jpg';
+  const awayLogoSrc = nextMatch?.awayTeam?.logo || teamLogos[awayDisplayName] || '/images/team_logos/default.jpg';
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -299,8 +300,16 @@ export default function RootPage() {
                 <div className="flex items-center justify-between gap-2 md:gap-4">
                   {/* Home Team */}
                   <div className="flex-1 text-center min-w-0">
-                    <div className="w-12 h-12 md:w-20 md:h-20 rounded-full bg-secondary mx-auto mb-2 md:mb-4 flex items-center justify-center">
-                      <span className="text-lg md:text-3xl font-bold">{homeInitial}</span>
+                    <div className="relative w-12 h-12 md:w-20 md:h-20 rounded-full bg-secondary mx-auto mb-2 md:mb-4 overflow-hidden">
+                      <img
+                        src={homeLogoSrc}
+                        alt={`${homeDisplayName} logo`}
+                        className="h-full w-full object-contain"
+                        loading="lazy"
+                        onError={(event) => {
+                          (event.currentTarget as HTMLImageElement).src = '/images/team_logos/default.jpg';
+                        }}
+                      />
                     </div>
                     <h3 className="font-bold text-sm md:text-xl truncate">{homeDisplayName}</h3>
                   </div>
@@ -312,8 +321,16 @@ export default function RootPage() {
 
                   {/* Away Team */}
                   <div className="flex-1 text-center min-w-0">
-                    <div className="w-12 h-12 md:w-20 md:h-20 rounded-full bg-secondary mx-auto mb-2 md:mb-4 flex items-center justify-center">
-                      <span className="text-lg md:text-3xl font-bold">{awayInitial}</span>
+                    <div className="relative w-12 h-12 md:w-20 md:h-20 rounded-full bg-secondary mx-auto mb-2 md:mb-4 overflow-hidden">
+                      <img
+                        src={awayLogoSrc}
+                        alt={`${awayDisplayName} logo`}
+                        className="h-full w-full object-contain"
+                        loading="lazy"
+                        onError={(event) => {
+                          (event.currentTarget as HTMLImageElement).src = '/images/team_logos/default.jpg';
+                        }}
+                      />
                     </div>
                     <h3 className="font-bold text-sm md:text-xl truncate">{awayDisplayName}</h3>
                   </div>

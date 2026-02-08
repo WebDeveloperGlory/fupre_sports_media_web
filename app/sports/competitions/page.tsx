@@ -15,6 +15,18 @@ interface Stats {
   champions: number;
 }
 
+interface FootballCardData {
+  activeCompetitions: number;
+  teams: number;
+  upcomingMatches: number;
+  competitions: string[];
+  nextMatch: {
+    date: string;
+    time: string;
+    teams: string;
+  };
+}
+
 export default function CompetitionsPage() {
   const [stats, setStats] = useState<Stats>({
     competitions: 0,
@@ -22,17 +34,30 @@ export default function CompetitionsPage() {
     matches: 0,
     champions: 0,
   });
+  const [footballCard, setFootballCard] = useState<FootballCardData>({
+    activeCompetitions: 0,
+    teams: 0,
+    upcomingMatches: 0,
+    competitions: [],
+    nextMatch: {
+      date: 'TBD',
+      time: '--:--',
+      teams: 'TBD',
+    },
+  });
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const [competitionsRes, fixturesRes] = await Promise.all([
+        const [competitionsRes, fixturesRes, upcomingRes] = await Promise.all([
           footballCompetitionApi.getAll(1, 200),
           footballFixtureApi.getAll(1, 200),
+          footballFixtureApi.getUpcoming(1, 50),
         ]);
 
         const competitionsData = Array.isArray(competitionsRes?.data) ? competitionsRes.data : [];
         const fixturesData = Array.isArray(fixturesRes?.data) ? fixturesRes.data : [];
+        const upcomingData = Array.isArray(upcomingRes?.data) ? upcomingRes.data : [];
 
         const competitions = competitionsRes?.total ?? competitionsData.length;
         const matches = fixturesRes?.total ?? fixturesData.length;
@@ -63,6 +88,36 @@ export default function CompetitionsPage() {
           matches,
           champions,
         });
+
+        const activeCompetitionsList = competitionsData.filter(
+          (c: any) => c.isActive || c.status === CompetitionStatus.ONGOING || c.status === CompetitionStatus.UPCOMING
+        );
+        const activeCompetitionNames = activeCompetitionsList.length > 0
+          ? activeCompetitionsList.map((c: any) => c.name)
+          : competitionsData.map((c: any) => c.name);
+
+        const nextMatch = upcomingData[0];
+        const nextMatchDate = nextMatch?.scheduledDate ? new Date(nextMatch.scheduledDate) : null;
+        const formattedDate = nextMatchDate && !isNaN(nextMatchDate.getTime())
+          ? nextMatchDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
+          : 'TBD';
+        const formattedTime = nextMatchDate && !isNaN(nextMatchDate.getTime())
+          ? nextMatchDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
+          : '--:--';
+        const homeName = nextMatch?.homeTeam?.name ?? nextMatch?.temporaryHomeTeamName ?? 'Home';
+        const awayName = nextMatch?.awayTeam?.name ?? nextMatch?.temporaryAwayTeamName ?? 'Away';
+
+        setFootballCard({
+          activeCompetitions: activeCompetitionsList.length,
+          teams: teams || 12,
+          upcomingMatches: upcomingRes?.total ?? upcomingData.length,
+          competitions: activeCompetitionNames.slice(0, 4),
+          nextMatch: {
+            date: formattedDate,
+            time: formattedTime,
+            teams: `${homeName} vs ${awayName}`,
+          },
+        });
       } catch (error) {
         console.error('Error fetching stats:', error);
       }
@@ -78,20 +133,12 @@ export default function CompetitionsPage() {
       icon: Trophy,
       available: true,
       stats: {
-        activeCompetitions: "3",
-        teams: "16",
-        upcomingMatches: "8",
+        activeCompetitions: String(footballCard.activeCompetitions),
+        teams: String(footballCard.teams),
+        upcomingMatches: String(footballCard.upcomingMatches),
       },
-      competitions: [
-        "Unity Cup Championship",
-        "Inter-Faculty League",
-        "FUPRE Super League",
-      ],
-      nextMatch: {
-        date: "Tomorrow",
-        time: "4:00 PM",
-        teams: "Engineering FC vs Science United"
-      }
+      competitions: footballCard.competitions.length > 0 ? footballCard.competitions : ["No active competitions"],
+      nextMatch: footballCard.nextMatch
     },
     {
       name: "Basketball",

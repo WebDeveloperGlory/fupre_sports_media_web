@@ -86,6 +86,7 @@ export default function SingleCompetitionPage({
           id: team?.id ?? entry.team,
           name: team?.name ?? 'Unknown',
           shorthand: team?.shorthand,
+          logo: team?.logo ?? null,
         },
         played: entry.played,
         wins: entry.wins,
@@ -135,6 +136,16 @@ export default function SingleCompetitionPage({
     return <div className="flex justify-center items-center">Competition not found.</div>;
   }
 
+  const competitionImage = competition.logo || competition.coverImage || null;
+  const competitionShort =
+    competition.shorthand ||
+    competition.name
+      .split(' ')
+      .map((part) => part[0])
+      .join('')
+      .slice(0, 4)
+      .toUpperCase();
+
   const totalTeams = competition.teams?.length ?? 0;
   const totalFixtures = fixtures.length;
   const completedFixtures = fixtures.filter((fx) => fx.status === FixtureStatus.COMPLETED).length;
@@ -159,8 +170,22 @@ export default function SingleCompetitionPage({
           <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-8">
             <div className="flex-1 space-y-6">
               <div className="flex items-start gap-6">
-                <div className="w-20 h-20 sm:w-24 sm:h-24 bg-muted flex items-center justify-center flex-shrink-0">
-                  <Trophy className="w-10 h-10 sm:w-12 sm:h-12 text-muted-foreground" />
+                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-muted flex items-center justify-center flex-shrink-0 overflow-hidden">
+                  {competitionImage ? (
+                    <img
+                      src={competitionImage}
+                      alt={`${competition.name} logo`}
+                      className="h-full w-full object-contain"
+                      loading="lazy"
+                      onError={(event) => {
+                        (event.currentTarget as HTMLImageElement).src = '/images/team_logos/default.jpg';
+                      }}
+                    />
+                  ) : (
+                    <span className="text-lg sm:text-xl font-bold text-muted-foreground">
+                      {competitionShort}
+                    </span>
+                  )}
                 </div>
 
                 <div className="flex-1 space-y-3">
@@ -361,22 +386,24 @@ export default function SingleCompetitionPage({
               <div className="text-sm text-muted-foreground">No fixtures available.</div>
             ) : (
               <div className="space-y-3">
-                {filteredFixtures
-                  .sort((a, b) => {
-                    const aTime = a.scheduledDate ? new Date(a.scheduledDate).getTime() : 0;
-                    const bTime = b.scheduledDate ? new Date(b.scheduledDate).getTime() : 0;
-                    return aTime - bTime;
-                  })
-                  .map((fx) => {
-                    const isLive = fx.status === FixtureStatus.LIVE;
-                    const isCompleted = fx.status === FixtureStatus.COMPLETED;
-                    const homeName = fx.homeTeam?.name ?? fx.temporaryHomeTeamName ?? 'Home';
-                    const awayName = fx.awayTeam?.name ?? fx.temporaryAwayTeamName ?? 'Away';
-                    const scheduledDate = fx.scheduledDate ? new Date(fx.scheduledDate) : null;
+                    {filteredFixtures
+                      .sort((a, b) => {
+                        const aTime = a.scheduledDate ? new Date(a.scheduledDate).getTime() : 0;
+                        const bTime = b.scheduledDate ? new Date(b.scheduledDate).getTime() : 0;
+                        return aTime - bTime;
+                      })
+                      .map((fx) => {
+                        const isLive = fx.status === FixtureStatus.LIVE;
+                        const isCompleted = fx.status === FixtureStatus.COMPLETED;
+                        const homeName = fx.homeTeam?.name ?? fx.temporaryHomeTeamName ?? 'Home';
+                        const awayName = fx.awayTeam?.name ?? fx.temporaryAwayTeamName ?? 'Away';
+                        const homeLogo = fx.homeTeam?.logo || teamLogos[homeName] || '/images/team_logos/default.jpg';
+                        const awayLogo = fx.awayTeam?.logo || teamLogos[awayName] || '/images/team_logos/default.jpg';
+                        const scheduledDate = fx.scheduledDate ? new Date(fx.scheduledDate) : null;
 
-                    return (
-                      <div
-                        key={fx.id}
+                        return (
+                          <div
+                            key={fx.id}
                         className={`rounded-xl border backdrop-blur-sm transition-colors ${
                           isLive
                             ? 'border-red-300/50 bg-red-50/40 dark:bg-red-900/10'
@@ -406,10 +433,32 @@ export default function SingleCompetitionPage({
                           </div>
 
                           <div className="flex items-center justify-between gap-3">
-                            <div className="font-medium truncate">
+                            <div className="font-medium truncate flex items-center gap-2 min-w-0">
+                              <div className="w-7 h-7 rounded-full bg-muted flex items-center justify-center overflow-hidden flex-shrink-0">
+                                <img
+                                  src={homeLogo}
+                                  alt={`${homeName} logo`}
+                                  className="h-full w-full object-contain"
+                                  loading="lazy"
+                                  onError={(event) => {
+                                    (event.currentTarget as HTMLImageElement).src = '/images/team_logos/default.jpg';
+                                  }}
+                                />
+                              </div>
                               <span className="mr-2 truncate">{homeName}</span>
                               <span className="text-muted-foreground">vs</span>
                               <span className="ml-2 truncate">{awayName}</span>
+                              <div className="w-7 h-7 rounded-full bg-muted flex items-center justify-center overflow-hidden flex-shrink-0">
+                                <img
+                                  src={awayLogo}
+                                  alt={`${awayName} logo`}
+                                  className="h-full w-full object-contain"
+                                  loading="lazy"
+                                  onError={(event) => {
+                                    (event.currentTarget as HTMLImageElement).src = '/images/team_logos/default.jpg';
+                                  }}
+                                />
+                              </div>
                             </div>
                             <div className="flex items-center gap-3">
                               {isCompleted && fx.result && (
@@ -457,8 +506,16 @@ export default function SingleCompetitionPage({
                     className="p-4 rounded-lg border border-border bg-card/40 backdrop-blur-sm hover:bg-accent/50 transition-colors"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-sm font-semibold">
-                        {(team.name || '?').slice(0, 2).toUpperCase()}
+                      <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center overflow-hidden">
+                        <img
+                          src={team.logo || teamLogos[team.name] || '/images/team_logos/default.jpg'}
+                          alt={`${team.name} logo`}
+                          className="h-full w-full object-contain"
+                          loading="lazy"
+                          onError={(event) => {
+                            (event.currentTarget as HTMLImageElement).src = '/images/team_logos/default.jpg';
+                          }}
+                        />
                       </div>
                       <div className="min-w-0">
                         <div className="font-medium truncate">{team.name}</div>
