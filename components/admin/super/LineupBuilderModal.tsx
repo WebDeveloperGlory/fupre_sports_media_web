@@ -28,22 +28,45 @@ import {
   Zap,
   UserPlus,
   UserMinus,
+  CheckCircle,
+  AlertCircle,
+  PlusCircle,
 } from "lucide-react";
+
+interface PlayerWithStats extends Player {
+  statId?: string;
+}
+
+interface Player {
+  id: string;
+  name: string;
+  position: PlayerPosition;
+  jerseyNumber?: number;
+  photo?: string | null;
+  isCaptain?: boolean;
+  isTemporary?: boolean;
+  temporaryName?: string | null;
+  teamId?: string | null;
+  temporaryTeamName?: string | null;
+}
 
 interface LineupBuilderModalProps {
   fixture: FixtureResponse;
   team: "home" | "away";
   teamName: string;
   formation: string;
-  startingXI: any[];
-  substitutes: any[];
-  availablePlayers: any[];
+  startingXI: PlayerWithStats[];
+  substitutes: PlayerWithStats[];
+  availablePlayers: Player[];
   onFormationChange: (formation: string) => void;
-  onStartingXIChange: (players: any[]) => void;
-  onSubstitutesChange: (players: any[]) => void;
-  onAvailablePlayersChange: (players: any[]) => void;
+  onStartingXIChange: (players: PlayerWithStats[]) => void;
+  onSubstitutesChange: (players: PlayerWithStats[]) => void;
+  onAvailablePlayersChange: (players: Player[]) => void;
   onClose: () => void;
   onSave: () => void;
+  isTemporaryMatch?: boolean;
+  temporaryTeamName?: string | null;
+  onAddTemporaryPlayer?: () => void;
 }
 
 const FORMATIONS = [
@@ -84,23 +107,13 @@ const POSITION_COLORS: Record<string, string> = {
   CF: "bg-red-400",
 };
 
-// Define types for formation positions
 interface FormationPosition {
   id: string;
   x: number;
   y: number;
   position: PlayerPosition | string;
   required: boolean;
-  player: any | null;
-}
-
-interface Player {
-  id: string;
-  name: string;
-  position: PlayerPosition | string;
-  jerseyNumber?: number;
-  photo?: string;
-  isCaptain?: boolean;
+  player: PlayerWithStats | null;
 }
 
 export function LineupBuilderModal({
@@ -117,6 +130,9 @@ export function LineupBuilderModal({
   onAvailablePlayersChange,
   onClose,
   onSave,
+  isTemporaryMatch = false,
+  temporaryTeamName = null,
+  onAddTemporaryPlayer,
 }: LineupBuilderModalProps) {
   const [draggedPlayer, setDraggedPlayer] = useState<Player | null>(null);
   const [formationPositions, setFormationPositions] = useState<
@@ -124,6 +140,8 @@ export function LineupBuilderModal({
   >([]);
   const [showPositions, setShowPositions] = useState(false);
   const pitchRef = useRef<HTMLDivElement>(null);
+  const [selectedPosition, setSelectedPosition] =
+    useState<FormationPosition | null>(null);
 
   // Calculate formation positions
   useEffect(() => {
@@ -144,20 +162,24 @@ export function LineupBuilderModal({
       y: 50,
       position: "GK",
       required: true,
-      player: startingXI.find((p: Player) => p.position === "GK"),
+      player:
+        startingXI.find((p: PlayerWithStats) => p.position === PlayerPosition.GK) || null,
     });
 
     // Defenders
     for (let i = 0; i < def; i++) {
       const x = 25;
       const y = (100 / (def + 1)) * (i + 1);
+      const position = i === 0 ? PlayerPosition.RB : i === def - 1 ? PlayerPosition.LB : PlayerPosition.CB;
       positions.push({
         id: `def-${i}`,
         x,
         y,
-        position: i === 0 ? "RB" : i === def - 1 ? "LB" : "CB",
+        position,
         required: true,
-        player: null,
+        player:
+          startingXI.find((p: PlayerWithStats) => p.position === position) ||
+          null,
       });
     }
 
@@ -165,13 +187,16 @@ export function LineupBuilderModal({
     for (let i = 0; i < mid; i++) {
       const x = 50;
       const y = (100 / (mid + 1)) * (i + 1);
+      const position = getMidfielderPosition(i, mid);
       positions.push({
         id: `mid-${i}`,
         x,
         y,
-        position: getMidfielderPosition(i, mid),
+        position,
         required: true,
-        player: null,
+        player:
+          startingXI.find((p: PlayerWithStats) => p.position === position) ||
+          null,
       });
     }
 
@@ -179,53 +204,46 @@ export function LineupBuilderModal({
     for (let i = 0; i < fwd; i++) {
       const x = 75;
       const y = (100 / (fwd + 1)) * (i + 1);
+      const position = getForwardPosition(i, fwd);
       positions.push({
         id: `fwd-${i}`,
         x,
         y,
-        position: getForwardPosition(i, fwd),
+        position,
         required: true,
-        player: null,
+        player:
+          startingXI.find((p: PlayerWithStats) => p.position === position) ||
+          null,
       });
     }
-
-    // Map players to positions
-    startingXI.forEach((player: Player) => {
-      const pos = positions.find(
-        (p) => !p.player && p.position === player.position,
-      );
-      if (pos) {
-        pos.player = player;
-      }
-    });
 
     return positions;
   };
 
   const getMidfielderPosition = (index: number, total: number): string => {
-    if (total === 1) return "CM";
+    if (total === 1) return PlayerPosition.CM;
     if (total === 2) return index === 0 ? "CDM" : "CAM";
-    if (total === 3) return index === 1 ? "CM" : index === 0 ? "CDM" : "CAM";
-    if (total === 4) return index < 2 ? "CDM" : "CM";
+    if (total === 3) return index === 1 ? PlayerPosition.CM : index === 0 ? "CDM" : "CAM";
+    if (total === 4) return index < 2 ? "CDM" : PlayerPosition.CM;
     if (total === 5) {
-      if (index === 0) return "RM";
+      if (index === 0) return PlayerPosition.RM;
       if (index === 1) return "CDM";
-      if (index === 2) return "CM";
+      if (index === 2) return PlayerPosition.CM;
       if (index === 3) return "CAM";
-      if (index === 4) return "LM";
+      if (index === 4) return PlayerPosition.LM;
     }
-    return "CM";
+    return PlayerPosition.CM;
   };
 
   const getForwardPosition = (index: number, total: number): string => {
-    if (total === 1) return "ST";
-    if (total === 2) return index === 0 ? "RW" : "LW";
+    if (total === 1) return PlayerPosition.SS;
+    if (total === 2) return index === 0 ? PlayerPosition.RW : PlayerPosition.LW;
     if (total === 3) {
-      if (index === 0) return "RW";
-      if (index === 1) return "ST";
-      if (index === 2) return "LW";
+      if (index === 0) return PlayerPosition.RW;
+      if (index === 1) return PlayerPosition.SS;
+      if (index === 2) return PlayerPosition.LW;
     }
-    return "ST";
+    return PlayerPosition.SS;
   };
 
   const handleDragStart = (e: React.DragEvent, player: Player) => {
@@ -249,7 +267,7 @@ export function LineupBuilderModal({
 
     // Remove from substitutes if present
     const newSubstitutes = substitutes.filter(
-      (p: Player) => p.id !== draggedPlayer.id,
+      (p: PlayerWithStats) => p.id !== draggedPlayer.id,
     );
     onSubstitutesChange(newSubstitutes);
 
@@ -265,12 +283,13 @@ export function LineupBuilderModal({
     position.player = {
       ...draggedPlayer,
       position: position.position as PlayerPosition,
+      isCaptain: false,
     };
 
     // Update starting XI
     const newStartingXI = formationPositions
       .filter((p) => p.player)
-      .map((p) => p.player);
+      .map((p) => p.player) as PlayerWithStats[];
     onStartingXIChange(newStartingXI);
 
     // Update formation positions state
@@ -285,13 +304,15 @@ export function LineupBuilderModal({
     const player = position.player;
     position.player = null;
 
-    // Add back to available players
-    onAvailablePlayersChange([...availablePlayers, player]);
+    // Add back to available players if not already saved
+    if (!player.statId) {
+      onAvailablePlayersChange([...availablePlayers, player]);
+    }
 
     // Update starting XI
     const newStartingXI = formationPositions
       .filter((p) => p.player)
-      .map((p) => p.player);
+      .map((p) => p.player) as PlayerWithStats[];
     onStartingXIChange(newStartingXI);
 
     // Update formation positions state
@@ -313,7 +334,7 @@ export function LineupBuilderModal({
       position.player = null;
       const newStartingXI = formationPositions
         .filter((p) => p.player)
-        .map((p) => p.player);
+        .map((p) => p.player) as PlayerWithStats[];
       onStartingXIChange(newStartingXI);
 
       // Update formation positions state
@@ -321,19 +342,29 @@ export function LineupBuilderModal({
     }
 
     // Add to substitutes
-    onSubstitutesChange([...substitutes, player]);
+    onSubstitutesChange([
+      ...substitutes,
+      {
+        ...player,
+        isCaptain: false,
+      },
+    ]);
   };
 
-  const removeFromSubstitutes = (player: Player) => {
+  const removeFromSubstitutes = (player: PlayerWithStats) => {
     const newSubstitutes = substitutes.filter(
-      (p: Player) => p.id !== player.id,
+      (p: PlayerWithStats) => p.id !== player.id,
     );
     onSubstitutesChange(newSubstitutes);
-    onAvailablePlayersChange([...availablePlayers, player]);
+
+    // Add back to available players if not already saved
+    if (!player.statId) {
+      onAvailablePlayersChange([...availablePlayers, player]);
+    }
   };
 
   const setCaptain = (playerId: string) => {
-    const newStartingXI = startingXI.map((player: Player) => ({
+    const newStartingXI = startingXI.map((player: PlayerWithStats) => ({
       ...player,
       isCaptain: player.id === playerId,
     }));
@@ -363,16 +394,17 @@ export function LineupBuilderModal({
 
   const requirements = getPositionRequirements();
   const currentCounts = {
-    defenders: startingXI.filter((p: Player) =>
-      ["CB", "RB", "LB", "SW"].includes(p.position),
+    defenders: startingXI.filter((p: PlayerWithStats) =>
+      [PlayerPosition.CB, PlayerPosition.RB, PlayerPosition.LB, "SW"].includes(p.position),
     ).length,
-    midfielders: startingXI.filter((p: Player) =>
-      ["CM", "CDM", "CAM", "RM", "LM", "RW", "LW"].includes(p.position),
+    midfielders: startingXI.filter((p: PlayerWithStats) =>
+      [PlayerPosition.CM, "CDM", "CAM", PlayerPosition.RM, PlayerPosition.LM, PlayerPosition.RW, PlayerPosition.LW].includes(p.position),
     ).length,
-    forwards: startingXI.filter((p: Player) =>
-      ["ST", "CF", "WF"].includes(p.position),
+    forwards: startingXI.filter((p: PlayerWithStats) =>
+      [PlayerPosition.SS, PlayerPosition.CF].includes(p.position),
     ).length,
-    goalkeeper: startingXI.filter((p: Player) => p.position === "GK").length,
+    goalkeeper: startingXI.filter((p: PlayerWithStats) => p.position === PlayerPosition.GK)
+      .length,
   };
 
   const isValidFormation =
@@ -381,6 +413,46 @@ export function LineupBuilderModal({
     currentCounts.forwards === requirements.forwards &&
     currentCounts.goalkeeper === requirements.goalkeeper;
 
+  const handlePositionClick = (position: FormationPosition) => {
+    if (!position.player && availablePlayers.length > 0) {
+      setSelectedPosition(position);
+    }
+  };
+
+  const assignPlayerToPosition = (player: Player) => {
+    if (!selectedPosition) return;
+
+    // Remove from available players
+    const newAvailable = availablePlayers.filter((p) => p.id !== player.id);
+    onAvailablePlayersChange(newAvailable);
+
+    // Remove from substitutes if present
+    const newSubstitutes = substitutes.filter((p) => p.id !== player.id);
+    onSubstitutesChange(newSubstitutes);
+
+    // Add to position
+    selectedPosition.player = {
+      ...player,
+      position: selectedPosition.position as PlayerPosition,
+      isCaptain: false,
+    };
+
+    // Update starting XI
+    const newStartingXI = formationPositions
+      .filter((p) => p.player)
+      .map((p) => p.player) as PlayerWithStats[];
+    onStartingXIChange(newStartingXI);
+
+    // Update formation positions state
+    setFormationPositions([...formationPositions]);
+    setSelectedPosition(null);
+  };
+
+  const savedPlayersCount = [...startingXI, ...substitutes].filter(
+    (p) => p.statId,
+  ).length;
+  const totalPlayersCount = startingXI.length + substitutes.length;
+
   return (
     <Dialog open={true} onOpenChange={onClose}>
       <DialogContent className="max-h-[90vh] max-w-6xl overflow-y-auto">
@@ -388,6 +460,7 @@ export function LineupBuilderModal({
           <DialogTitle className="text-2xl">Visual Lineup Builder</DialogTitle>
           <DialogDescription>
             Drag and drop players to build your lineup for {teamName}
+            {isTemporaryMatch && " (Temporary Match)"}
           </DialogDescription>
         </DialogHeader>
 
@@ -422,9 +495,25 @@ export function LineupBuilderModal({
                   {showPositions ? "Hide Positions" : "Show Positions"}
                 </button>
               </div>
+
+              {savedPlayersCount > 0 && (
+                <Badge
+                  variant="secondary"
+                  className="bg-emerald-500/10 text-emerald-600"
+                >
+                  <CheckCircle className="h-3 w-3 mr-1" />
+                  {savedPlayersCount}/{totalPlayersCount} Saved
+                </Badge>
+              )}
             </div>
 
             <div className="flex items-center gap-2">
+              {isTemporaryMatch && onAddTemporaryPlayer && (
+                <Button variant="outline" onClick={onAddTemporaryPlayer}>
+                  <PlusCircle className="h-4 w-4 mr-2" />
+                  Add Temp Player
+                </Button>
+              )}
               <Button variant="outline" onClick={onClose}>
                 Cancel
               </Button>
@@ -500,9 +589,21 @@ export function LineupBuilderModal({
             {/* Available Players */}
             <div className="lg:col-span-1">
               <div className="rounded-lg border border-border p-4 h-full">
-                <h3 className="font-semibold text-foreground mb-4">
-                  Available Players ({availablePlayers.length})
-                </h3>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-semibold text-foreground">
+                    Available Players ({availablePlayers.length})
+                  </h3>
+                  {isTemporaryMatch && onAddTemporaryPlayer && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={onAddTemporaryPlayer}
+                    >
+                      <Plus className="h-4 w-4 mr-1" />
+                      Add Temp
+                    </Button>
+                  )}
+                </div>
                 <div className="space-y-2 max-h-[400px] overflow-y-auto">
                   {availablePlayers.map((player: Player) => (
                     <div
@@ -525,6 +626,11 @@ export function LineupBuilderModal({
                       <div className="flex-1">
                         <div className="font-medium text-foreground">
                           {player.name}
+                          {player.isTemporary && (
+                            <span className="ml-2 text-xs bg-amber-500/10 text-amber-600 px-1.5 py-0.5 rounded">
+                              Temp
+                            </span>
+                          )}
                         </div>
                         <div className="text-xs text-muted-foreground">
                           #{player.jerseyNumber || "?"} • {player.position}
@@ -550,9 +656,10 @@ export function LineupBuilderModal({
                 <div className="mb-4">
                   <h3 className="font-semibold text-foreground text-center mb-2">
                     {teamName} - {formation} Formation
+                    {isTemporaryMatch && " (Temporary)"}
                   </h3>
                   <p className="text-sm text-muted-foreground text-center">
-                    Drag players onto the pitch or click positions to assign
+                    Drag players onto the pitch or click empty positions
                   </p>
                 </div>
 
@@ -578,7 +685,9 @@ export function LineupBuilderModal({
                     <div
                       key={position.id}
                       className={`absolute transform -translate-x-1/2 -translate-y-1/2 ${
-                        position.player ? "cursor-pointer" : "cursor-cell"
+                        position.player
+                          ? "cursor-pointer"
+                          : "cursor-cell hover:scale-110 transition-transform"
                       }`}
                       style={{
                         left: `${position.x}%`,
@@ -586,11 +695,7 @@ export function LineupBuilderModal({
                       }}
                       onDragOver={handleDragOver}
                       onDrop={(e) => handleDrop(e, position)}
-                      onClick={() => {
-                        if (showPositions && !position.player) {
-                          // Show available players for this position
-                        }
-                      }}
+                      onClick={() => handlePositionClick(position)}
                     >
                       {position.player ? (
                         <div className="relative group">
@@ -610,6 +715,11 @@ export function LineupBuilderModal({
                           {position.player.isCaptain && (
                             <div className="absolute -top-1 -right-1">
                               <Crown className="h-4 w-4 text-amber-500" />
+                            </div>
+                          )}
+                          {position.player.statId && (
+                            <div className="absolute -top-1 -left-1">
+                              <CheckCircle className="h-4 w-4 text-emerald-500" />
                             </div>
                           )}
                           <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 whitespace-nowrap">
@@ -632,12 +742,19 @@ export function LineupBuilderModal({
                               size="sm"
                               variant="secondary"
                               className="h-6 w-6 p-0 rounded-full"
-                              onClick={() => setCaptain(position.player.id)}
+                              onClick={() => setCaptain(position.player!.id)}
                               title="Set as captain"
                             >
                               <Crown className="h-3 w-3" />
                             </Button>
                           </div>
+                          {position.player.isTemporary && (
+                            <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2">
+                              <span className="text-xs bg-amber-500/10 text-amber-600 px-1.5 py-0.5 rounded">
+                                Temp
+                              </span>
+                            </div>
+                          )}
                         </div>
                       ) : (
                         <div className="relative group">
@@ -658,6 +775,11 @@ export function LineupBuilderModal({
                               </div>
                             </div>
                           )}
+                          <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div className="text-xs text-muted-foreground">
+                              Click to assign
+                            </div>
+                          </div>
                         </div>
                       )}
                     </div>
@@ -707,7 +829,7 @@ export function LineupBuilderModal({
               </div>
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-3">
-                {substitutes.map((player: Player) => (
+                {substitutes.map((player: PlayerWithStats) => (
                   <div
                     key={player.id}
                     className="relative group p-3 rounded-lg border border-input hover:border-primary transition-colors"
@@ -728,6 +850,18 @@ export function LineupBuilderModal({
                       <div className="text-xs text-muted-foreground">
                         #{player.jerseyNumber || "?"} • {player.position}
                       </div>
+                      {player.statId && (
+                        <div className="mt-1">
+                          <CheckCircle className="h-3 w-3 text-emerald-500" />
+                        </div>
+                      )}
+                      {player.isTemporary && (
+                        <div className="mt-1">
+                          <span className="text-xs bg-amber-500/10 text-amber-600 px-1.5 py-0.5 rounded">
+                            Temp
+                          </span>
+                        </div>
+                      )}
                     </div>
                     <Button
                       size="sm"
@@ -743,6 +877,39 @@ export function LineupBuilderModal({
             )}
           </div>
 
+          {/* Position Assignment Modal */}
+          {selectedPosition && availablePlayers.length > 0 && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+              <div className="bg-background rounded-lg p-6 max-w-md w-full mx-4">
+                <h3 className="font-semibold text-foreground mb-4">
+                  Assign Player to {selectedPosition.position}
+                </h3>
+                <div className="space-y-2 max-h-60 overflow-y-auto">
+                  {availablePlayers.map((player) => (
+                    <button
+                      key={player.id}
+                      onClick={() => assignPlayerToPosition(player)}
+                      className="w-full p-3 rounded-lg border border-input hover:bg-accent text-left"
+                    >
+                      <div className="font-medium">{player.name}</div>
+                      <div className="text-sm text-muted-foreground">
+                        #{player.jerseyNumber || "?"} • {player.position}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+                <div className="flex justify-end gap-2 mt-4">
+                  <Button
+                    variant="outline"
+                    onClick={() => setSelectedPosition(null)}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Instructions */}
           <div className="rounded-lg border border-border p-4 bg-muted/50">
             <h4 className="font-medium text-foreground mb-2">
@@ -750,21 +917,19 @@ export function LineupBuilderModal({
             </h4>
             <ul className="text-sm text-muted-foreground space-y-1">
               <li>
-                • Drag players from the "Available Players" section onto the
-                pitch positions
+                • Drag players from "Available Players" onto pitch positions
               </li>
-              <li>
-                • Click on a position circle to see available players for that
-                position
-              </li>
+              <li>• Click on empty position circles to assign players</li>
               <li>• Click the crown icon on a player to make them captain</li>
-              <li>
-                • Click the X icon on a player to remove them from the lineup
-              </li>
+              <li>• Click the X icon on a player to remove them from lineup</li>
               <li>• Use the "Sub" button to add players to substitutes</li>
               <li>
-                • Make sure all formation positions are filled before saving
+                •{" "}
+                {isTemporaryMatch
+                  ? "Add temporary players using the 'Add Temp Player' button"
+                  : "All players must be assigned positions before saving"}
               </li>
+              <li>• Save creates player stats first, then sets the lineup</li>
             </ul>
           </div>
         </div>

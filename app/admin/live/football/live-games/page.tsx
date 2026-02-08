@@ -32,6 +32,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { LiveFixtureDetailsModal } from "@/components/admin/super/LiveFixtureDetailsModal";
 import { CreateLiveFixtureModal } from "@/components/admin/super/CreateLiveFixtureModal";
 import { ManageLiveFixtureModal } from "@/components/admin/super/ManageLiveFixtureModal";
+import { useRouter } from "next/navigation";
 
 const LIVE_STATUS_OPTIONS = [
   {
@@ -91,6 +92,8 @@ const LIVE_STATUS_OPTIONS = [
 ];
 
 export default function LiveFixturesPage() {
+  const router = useRouter();
+
   // State
   const [liveFixtures, setLiveFixtures] = useState<LiveFixtureResponse[]>([]);
   const [loading, setLoading] = useState(true);
@@ -795,6 +798,17 @@ export default function LiveFixturesPage() {
                                   <Zap className="h-4 w-4 text-red-500" />
                                 </button>
                               )}
+                              <button
+                                onClick={() =>
+                                  router.push(
+                                    `/admin/live/football/match-events/${fixture.id}`,
+                                  )
+                                }
+                                className="p-2 hover:bg-accent rounded-lg transition-colors"
+                                title="Manage Live"
+                              >
+                                <Calendar className="h-4 w-4 text-blue-500" />
+                              </button>
                             </div>
                             <div className="flex items-center gap-2">
                               {isActive ? (
