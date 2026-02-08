@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { LiveFixtureResponse } from '@/lib/types/v1.response.types';
 import getLiveFixtureSocketService, { LiveFixtureSocketEvent } from '../socket/live-fixture-socket.service';
 import { footballLiveApi } from '../api/v1/football-live.api';
+import { ApiError } from '../types/v1.types';
 
 interface UseLiveFixtureOptions {
     /** Whether to automatically fetch initial data */
@@ -25,6 +26,7 @@ export function useLiveFixture(fixtureId: string, options: UseLiveFixtureOptions
     const [fixture, setFixture] = useState<LiveFixtureResponse | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<Error | null>(null);
+    const [roomId, setRoomId] = useState(fixtureId);
     const socketService = useRef(getLiveFixtureSocketService());
 
     // Fetch initial fixture data
@@ -36,8 +38,32 @@ export function useLiveFixture(fixtureId: string, options: UseLiveFixtureOptions
             setError(null);
             const response = await footballLiveApi.getById(fixtureId);
             setFixture(response.data);
+            const fixtureRef =
+                typeof response.data?.fixture === 'string'
+                    ? response.data.fixture
+                    : (response.data?.fixture as any)?.id;
+            if (fixtureRef === fixtureId && response.data?.id) {
+                setRoomId(response.data.id);
+            }
             onLoad?.(response.data);
         } catch (err) {
+            if (err instanceof ApiError && err.isNotFoundError()) {
+                try {
+                    const byFixture = await footballLiveApi.getByFixture(fixtureId);
+                    setFixture(byFixture.data);
+                    if (byFixture.data?.id) {
+                        setRoomId(byFixture.data.id);
+                    }
+                    onLoad?.(byFixture.data);
+                    setLoading(false);
+                    return;
+                } catch (fallbackError) {
+                    // If no live fixture exists, treat as a non-fatal state.
+                    setFixture(null);
+                    setLoading(false);
+                    return;
+                }
+            }
             const error = err instanceof Error ? err : new Error('Failed to fetch fixture');
             setError(error);
             onError?.(error);
@@ -47,27 +73,32 @@ export function useLiveFixture(fixtureId: string, options: UseLiveFixtureOptions
     }, [fixtureId, onLoad, onError]);
 
     useEffect(() => {
+        if (!fixtureId) return;
+        setRoomId(fixtureId);
+    }, [fixtureId]);
+
+    useEffect(() => {
         if (!fixtureId || !autoFetch) return;
         fetchFixture();
     }, [fixtureId, autoFetch, fetchFixture]);
 
     // Setup socket listeners
     useEffect(() => {
-        if (!fixtureId || !autoJoin) return;
+        if (!roomId || !autoJoin) return;
 
         const socket = socketService.current;
-        socket.joinFixture(fixtureId);
+        socket.joinFixture(roomId);
 
         // Full update (initial state)
         const unsubscribeFull = socket.on(LiveFixtureSocketEvent.FULL_UPDATE, (payload) => {
-            if (payload.fixtureId === fixtureId) {
+            if (payload.fixtureId === roomId) {
                 setFixture(payload.data);
             }
         });
 
         // Score updates
         const unsubscribeScore = socket.on(LiveFixtureSocketEvent.SCORE_UPDATE, (payload) => {
-            if (payload.fixtureId === fixtureId) {
+            if (payload.fixtureId === roomId) {
                 setFixture(prev => prev ? {
                     ...prev,
                     result: payload.data.result,
@@ -78,7 +109,7 @@ export function useLiveFixture(fixtureId: string, options: UseLiveFixtureOptions
 
         // Status updates
         const unsubscribeStatus = socket.on(LiveFixtureSocketEvent.STATUS_UPDATE, (payload) => {
-            if (payload.fixtureId === fixtureId) {
+            if (payload.fixtureId === roomId) {
                 setFixture(prev => prev ? {
                     ...prev,
                     status: payload.data.status,
@@ -90,7 +121,7 @@ export function useLiveFixture(fixtureId: string, options: UseLiveFixtureOptions
 
         // Timeline events
         const unsubscribeTimeline = socket.on(LiveFixtureSocketEvent.TIMELINE_EVENT, (payload) => {
-            if (payload.fixtureId === fixtureId) {
+            if (payload.fixtureId === roomId) {
                 setFixture(prev => prev ? {
                     ...prev,
                     timeline: payload.data.timeline
@@ -100,7 +131,7 @@ export function useLiveFixture(fixtureId: string, options: UseLiveFixtureOptions
 
         // Goal scorers
         const unsubscribeGoal = socket.on(LiveFixtureSocketEvent.GOAL_SCORER_ADDED, (payload) => {
-            if (payload.fixtureId === fixtureId) {
+            if (payload.fixtureId === roomId) {
                 setFixture(prev => prev ? {
                     ...prev,
                     goalScorers: payload.data.goalScorers,
@@ -111,7 +142,7 @@ export function useLiveFixture(fixtureId: string, options: UseLiveFixtureOptions
 
         // Substitutions
         const unsubscribeSub = socket.on(LiveFixtureSocketEvent.SUBSTITUTION_ADDED, (payload) => {
-            if (payload.fixtureId === fixtureId) {
+            if (payload.fixtureId === roomId) {
                 setFixture(prev => prev ? {
                     ...prev,
                     substitutions: payload.data.substitutions
@@ -121,7 +152,7 @@ export function useLiveFixture(fixtureId: string, options: UseLiveFixtureOptions
 
         // Commentary
         const unsubscribeCommentary = socket.on(LiveFixtureSocketEvent.COMMENTARY_ADDED, (payload) => {
-            if (payload.fixtureId === fixtureId) {
+            if (payload.fixtureId === roomId) {
                 setFixture(prev => prev ? {
                     ...prev,
                     commentary: payload.data.commentary
@@ -131,7 +162,7 @@ export function useLiveFixture(fixtureId: string, options: UseLiveFixtureOptions
 
         // Statistics
         const unsubscribeStats = socket.on(LiveFixtureSocketEvent.STATISTICS_UPDATE, (payload) => {
-            if (payload.fixtureId === fixtureId) {
+            if (payload.fixtureId === roomId) {
                 setFixture(prev => prev ? {
                     ...prev,
                     statistics: payload.data.statistics
@@ -141,7 +172,7 @@ export function useLiveFixture(fixtureId: string, options: UseLiveFixtureOptions
 
         // Lineup updates
         const unsubscribeLineup = socket.on(LiveFixtureSocketEvent.LINEUP_UPDATE, (payload) => {
-            if (payload.fixtureId === fixtureId) {
+            if (payload.fixtureId === roomId) {
                 setFixture(prev => prev ? {
                     ...prev,
                     lineups: payload.data.lineups
@@ -151,7 +182,7 @@ export function useLiveFixture(fixtureId: string, options: UseLiveFixtureOptions
 
         // POTM updates
         const unsubscribePOTM = socket.on(LiveFixtureSocketEvent.POTM_UPDATE, (payload) => {
-            if (payload.fixtureId === fixtureId) {
+            if (payload.fixtureId === roomId) {
                 setFixture(prev => prev ? {
                     ...prev,
                     playerOfTheMatch: payload.data.playerOfTheMatch
@@ -161,7 +192,7 @@ export function useLiveFixture(fixtureId: string, options: UseLiveFixtureOptions
 
         // Cheer meter updates
         const unsubscribeCheer = socket.on(LiveFixtureSocketEvent.CHEER_UPDATE, (payload) => {
-            if (payload.fixtureId === fixtureId) {
+            if (payload.fixtureId === roomId) {
                 setFixture(prev => prev ? {
                     ...prev,
                     cheerMeter: payload.data.cheerMeter
@@ -171,14 +202,14 @@ export function useLiveFixture(fixtureId: string, options: UseLiveFixtureOptions
 
         // Fixture ended
         const unsubscribeEnded = socket.on(LiveFixtureSocketEvent.FIXTURE_ENDED, (payload) => {
-            if (payload.fixtureId === fixtureId) {
+            if (payload.fixtureId === roomId) {
                 setFixture(payload.data);
             }
         });
 
         // Cleanup
         return () => {
-            socket.leaveFixture(fixtureId);
+            socket.leaveFixture(roomId);
             unsubscribeFull();
             unsubscribeScore();
             unsubscribeStatus();
@@ -192,7 +223,7 @@ export function useLiveFixture(fixtureId: string, options: UseLiveFixtureOptions
             unsubscribeCheer();
             unsubscribeEnded();
         };
-    }, [fixtureId, autoJoin]);
+    }, [roomId, autoJoin]);
 
     return {
         fixture,

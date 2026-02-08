@@ -60,7 +60,10 @@ class LiveFixtureSocketService {
         if (this.socket?.connected || this.isConnecting) return;
         
         this.isConnecting = true;
-        const serverUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+        const serverUrl =
+            process.env.NODE_ENV === 'production'
+                ? (process.env.NEXT_PUBLIC_PROD_SOCKET_URL || 'http://localhost:5000')
+                : (process.env.NEXT_PUBLIC_DEV_SOCKET_URL || 'http://localhost:5000');
 
         this.socket = io(serverUrl, {
             transports: ['websocket', 'polling'],

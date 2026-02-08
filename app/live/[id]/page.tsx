@@ -7,10 +7,10 @@ import { Loader } from '@/components/ui/loader';
 import { Trophy, Clock, CloudRain, User, MapPin, Clock12, ThumbsUp, Target } from 'lucide-react';
 import { teamLogos } from '@/constants';
 import { LiveFixtureResponse } from '@/lib/types/v1.response.types';
-import { footballLiveApi } from '@/lib/api/v1/football-live.api';
 import { FixtureTeamType } from '@/types/v1.football-fixture.types';
 import { toast } from 'react-toastify';
 import { format } from 'date-fns';
+import { useLiveFixture } from '@/lib/hooks/useLiveFixture';
 
 const templateStats = {
   home: {
@@ -52,26 +52,15 @@ export default function LiveMatchPage({
 }) {
   const resolvedParams = use(params);
 
-  const [loading, setLoading] = useState<boolean>(true);
-  const [liveFixture, setLiveFixture] = useState<LiveFixtureResponse | null>(null);
   const [activeTab, setActiveTab] = useState<Tabs>(Tabs.OVERVIEW);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const fixtureData = await footballLiveApi.getById(resolvedParams.id);
-        if (fixtureData?.success && fixtureData.data) {
-          setLiveFixture(fixtureData.data);
-        }
-      } catch (error) {
-        console.error('Error fetching live fixture:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (loading) fetchData();
-  }, [loading, resolvedParams.id]);
+  const { fixture: liveFixture, loading } = useLiveFixture(resolvedParams.id, {
+    autoFetch: true,
+    autoJoin: true,
+    onError: (error) => {
+      console.error('Error fetching live fixture:', error);
+    },
+  });
 
   if (loading) return <Loader />;
 
