@@ -26,6 +26,9 @@ import {
   Users as UsersIcon,
   Flag,
   Award as AwardIcon,
+  Edit,
+  Trash2,
+  Circle,
 } from "lucide-react";
 import { footballLiveApi } from "@/lib/api/v1/football-live.api";
 import { LiveFixtureResponse } from "@/lib/types/v1.response.types";
@@ -38,6 +41,10 @@ import {
   AddSubEventDto,
 } from "@/lib/types/v1.payload.types";
 import { footballPlayerStatApi } from "@/lib/api/v1/football-live-player-stat.api";
+import AddGoalModal from "@/components/admin/live/AddGoalModal";
+import GoalScorersModal, { GoalScorer } from "@/components/admin/live/GoalScorersModel";
+import AddEventModal from "@/components/admin/live/AddEventModal";
+import SubstitutionModal from "@/components/admin/live/SubstitutionModal";
 
 type VariantClasses = {
   default: string;
@@ -120,6 +127,12 @@ export default function LiveFixtureManagementPage() {
   const [showAddGoalModal, setShowAddGoalModal] = useState(false);
   const [showAddEventModal, setShowAddEventModal] = useState(false);
   const [showSubstitutionModal, setShowSubstitutionModal] = useState(false);
+  const [pendingUpdates, setPendingUpdates] = useState<Map<string, any>>(
+    new Map(),
+  );
+  const [showGoalScorersModal, setShowGoalScorersModal] = useState(false);
+  const [editingGoalScorer, setEditingGoalScorer] = useState<any>(null);
+  const [saveLoading, setSaveLoading] = useState(false);
 
   // Load fixture data
   const loadFixtureData = useCallback(async () => {
@@ -132,8 +145,9 @@ export default function LiveFixtureManagementPage() {
         setFixture(fixtureResponse.data);
 
         // Load player stats
-        const statsResponse =
-          await footballPlayerStatApi.getFixtureStats(fixtureResponse.data.fixture as string);
+        const statsResponse = await footballPlayerStatApi.getFixtureStats(
+          fixtureResponse.data.fixture as string,
+        );
         if (statsResponse.success) {
           setPlayerStats(statsResponse.data);
         } else {
@@ -259,6 +273,59 @@ export default function LiveFixtureManagementPage() {
     } catch (error: any) {
       toast.error(error.message || "Failed to make substitution");
     }
+  };
+
+  const handleDeleteGoalScorer = async (scorerId: string) => {
+    if (!confirm("Are you sure you want to delete this goal?")) return;
+
+    try {
+      const response = await footballLiveApi.deleteGoalScorer(
+        fixtureId,
+        scorerId,
+      );
+      if (response.success) {
+        toast.success("Goal deleted successfully");
+      }
+    } catch (error: any) {
+      toast.error(error.message || "Failed to delete goal");
+    }
+  };
+
+  const handleDeleteTimelineEvent = async (eventId: string) => {
+    if (!confirm("Are you sure you want to delete this event?")) return;
+
+    try {
+      const response = await footballLiveApi.deleteTimelineEvent(
+        fixtureId,
+        eventId,
+      );
+      if (response.success) {
+        toast.success("Event deleted successfully");
+      }
+    } catch (error: any) {
+      toast.error(error.message || "Failed to delete event");
+    }
+  };
+
+  const handleDeleteSubstitution = async (subId: string) => {
+    if (!confirm("Are you sure you want to delete this substitution?")) return;
+
+    try {
+      const response = await footballLiveApi.deleteSubstitution(
+        fixtureId,
+        subId,
+      );
+      if (response.success) {
+        toast.success("Substitution deleted successfully");
+      }
+    } catch (error: any) {
+      toast.error(error.message || "Failed to delete substitution");
+    }
+  };
+
+  const handleEditGoalScorer = (scorer: any) => {
+    setEditingGoalScorer(scorer);
+    setShowAddGoalModal(true);
   };
 
   // Player stat handlers
@@ -508,7 +575,7 @@ export default function LiveFixtureManagementPage() {
       handleUpdatePlayerStat(statId, update);
     }
   };
-  
+
   // Get players by team
   const homePlayers = useMemo(
     () => playerStats.filter((stat) => stat.team?.id === fixture?.homeTeam?.id),
@@ -1137,27 +1204,43 @@ export default function LiveFixtureManagementPage() {
 
             {/* Timeline */}
             <div className="bg-card border border-border rounded-xl p-6">
-              <h3 className="text-lg font-semibold text-foreground mb-4">
-                Recent Events
-              </h3>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-foreground">
+                  Recent Events
+                </h3>
+                <span className="text-sm text-muted-foreground">
+                  {fixture.timeline?.length || 0} events
+                </span>
+              </div>
               <div className="space-y-3">
                 {fixture.timeline && fixture.timeline.length > 0 ? (
                   fixture.timeline
                     .slice(-5)
                     .reverse()
-                    .map((event, index) => (
+                    .map((event) => (
                       <div
-                        key={index}
-                        className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg"
+                        key={event.id}
+                        className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg group"
                       >
-                        <div className="px-2 py-1 bg-primary/10 text-primary rounded text-xs font-medium">
+                        <div className="px-2 py-1 bg-primary/10 text-primary rounded text-xs font-medium flex-shrink-0">
                           {event.minute}'
                         </div>
-                        <div className="flex-1">
-                          <p className="text-sm font-medium text-foreground">
-                            {event.description}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-2">
+                            <p className="text-sm font-medium text-foreground truncate">
+                              {event.description}
+                            </p>
+                            <button
+                              onClick={() =>
+                                handleDeleteTimelineEvent(event.id)
+                              }
+                              className="p-1 hover:bg-accent rounded transition-colors opacity-0 group-hover:opacity-100"
+                              title="Delete event"
+                            >
+                              <Trash2 className="h-3 w-3 text-red-500" />
+                            </button>
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-1">
                             {event.team === FixtureTeamType.HOME
                               ? homeName
                               : awayName}
@@ -1173,12 +1256,171 @@ export default function LiveFixtureManagementPage() {
                 )}
               </div>
             </div>
+
+            {/* Goal Scorers */}
+            <div className="bg-card border border-border rounded-xl p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-foreground">
+                  Goal Scorers
+                </h3>
+                <button
+                  onClick={() => setShowGoalScorersModal(true)}
+                  className="text-sm text-primary hover:text-primary/80 transition-colors"
+                >
+                  View All ({fixture.goalScorers.length})
+                </button>
+              </div>
+
+              <div className="space-y-3">
+                {fixture.goalScorers.slice(0, 3).map((scorer, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+                        <Circle className="h-4 w-4 text-primary" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-foreground">
+                          {scorer.player?.name ||
+                            scorer.temporaryPlayerName ||
+                            "Unknown"}
+                          {scorer.assist && (
+                            <span className="text-xs text-muted-foreground ml-1">
+                              (assist:{" "}
+                              {scorer.assist?.name ||
+                                scorer.temporaryAssistName}
+                              )
+                            </span>
+                          )}
+                        </p>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <span>{scorer.time}'</span>
+                          <span>•</span>
+                          <span
+                            className={
+                              scorer.team === FixtureTeamType.HOME
+                                ? "text-primary"
+                                : "text-secondary"
+                            }
+                          >
+                            {scorer.team === FixtureTeamType.HOME
+                              ? homeName
+                              : awayName}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => handleDeleteGoalScorer(scorer.id)}
+                        className="p-1 hover:bg-accent rounded transition-colors"
+                        title="Delete goal"
+                      >
+                        <Trash2 className="h-4 w-4 text-red-500" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+
+                {fixture.goalScorers.length === 0 && (
+                  <div className="text-center py-4 text-muted-foreground">
+                    <Circle className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <p>No goals yet</p>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Modals would go here */}
-      {/* AddGoalModal, AddEventModal, SubstitutionModal */}
+      {/* Modals */}
+      {showAddGoalModal && fixture && (
+        <AddGoalModal
+          isOpen={showAddGoalModal}
+          onClose={() => setShowAddGoalModal(false)}
+          onSubmit={handleAddGoal}
+          homeTeamName={homeName}
+          awayTeamName={awayName}
+          currentMinute={fixture.currentMinute || 0}
+          players={[...homePlayers, ...awayPlayers].map((stat) => ({
+            id: stat.player?.id || stat.id,
+            name:
+              stat.player?.name || stat.temporaryPlayerName || "Unknown Player",
+            shirtNumber: stat.shirtNumber || 0,
+            position: stat.position || "Unknown",
+            team:
+              stat.team?.name === fixture.homeTeam?.name ||
+              stat.temporaryTeamName === fixture.awayTeam
+                ? FixtureTeamType.HOME
+                : FixtureTeamType.AWAY,
+          }))}
+        />
+      )}
+
+      {showAddEventModal && fixture && (
+        <AddEventModal
+          isOpen={showAddEventModal}
+          onClose={() => setShowAddEventModal(false)}
+          onSubmit={handleAddEvent}
+          homeTeamName={homeName}
+          awayTeamName={awayName}
+          currentMinute={fixture.currentMinute || 0}
+          players={[...homePlayers, ...awayPlayers].map((stat) => ({
+            id: stat.player?.id || stat.id,
+            name:
+              stat.player?.name || stat.temporaryPlayerName || "Unknown Player",
+            shirtNumber: stat.shirtNumber || 0,
+            position: stat.position || "Unknown",
+            team:
+              stat.team?.name === fixture.homeTeam?.name ||
+              stat.temporaryTeamName === fixture.awayTeam
+                ? FixtureTeamType.HOME
+                : FixtureTeamType.AWAY,
+          }))}
+        />
+      )}
+
+      {showSubstitutionModal && fixture && (
+        <SubstitutionModal
+          isOpen={showSubstitutionModal}
+          onClose={() => setShowSubstitutionModal(false)}
+          onSubmit={handleSubstitution}
+          homeTeamName={homeName}
+          awayTeamName={awayName}
+          currentMinute={fixture.currentMinute || 0}
+          players={[...homePlayers, ...awayPlayers].map((stat) => ({
+            id: stat.player?.id || stat.id,
+            name:
+              stat.player?.name || stat.temporaryPlayerName || "Unknown Player",
+            shirtNumber: stat.shirtNumber || 0,
+            position: stat.position || "Unknown",
+            team:
+              stat.team?.name === fixture.homeTeam?.name ||
+              stat.temporaryTeamName === fixture.awayTeam
+                ? FixtureTeamType.HOME
+                : FixtureTeamType.AWAY,
+          }))}
+        />
+      )}
+
+      {showGoalScorersModal && fixture && (
+        <GoalScorersModal
+          isOpen={showGoalScorersModal}
+          onClose={() => setShowGoalScorersModal(false)}
+          goalScorers={fixture.goalScorers as any}
+          homeTeamName={homeName}
+          awayTeamName={awayName}
+          onDeleteGoal={handleDeleteGoalScorer}
+          onEditGoal={(scorer) => {
+            setEditingGoalScorer(scorer);
+            setShowGoalScorersModal(false);
+            setShowAddGoalModal(true);
+          }}
+        />
+      )}
     </div>
   );
 }
@@ -1199,238 +1441,266 @@ const PlayerStatCard = ({
   onToggle,
   onIncrement,
   onDecrement,
-}: any) => (
-  <div className="border border-border rounded-lg overflow-hidden">
-    <div
-      className="flex items-center justify-between p-4 hover:bg-accent/50 cursor-pointer transition-colors"
-      onClick={onToggle}
-    >
-      <div className="flex items-center gap-3">
-        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-          <Shirt className="h-5 w-5" />
-        </div>
-        <div>
-          <h5 className="font-medium text-foreground">
-            {player.player?.name || player.temporaryPlayerName}
-          </h5>
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <span>#{player.shirtNumber}</span>
-            <span>•</span>
-            <span>{player.position}</span>
-            {player.isCaptain && (
-              <>
-                <span>•</span>
-                <span className="text-amber-600 font-medium">Captain</span>
-              </>
+}: any) => {
+  // Helper function to handle stat updates
+  const handleDirectInput = (value: string) => {
+    const numValue = parseInt(value) || 0;
+    // You can implement direct input handling here
+  };
+
+  return (
+    <div className="border border-border rounded-lg overflow-hidden">
+      <div
+        className="flex items-center justify-between p-4 hover:bg-accent/50 cursor-pointer transition-colors"
+        onClick={onToggle}
+      >
+        <div className="flex items-center gap-3 min-w-0 flex-1">
+          <div className="flex-shrink-0 h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+            {player.player?.photo ? (
+              <img
+                src={player.player.photo}
+                alt={player.player?.name}
+                className="h-10 w-10 rounded-full object-cover"
+              />
+            ) : (
+              <Shirt className="h-5 w-5" />
             )}
           </div>
+          <div className="min-w-0 flex-1">
+            <h5 className="font-medium text-foreground truncate">
+              {player.player?.name ||
+                player.temporaryPlayerName ||
+                "Unknown Player"}
+            </h5>
+            <div className="flex items-center gap-2 text-xs text-muted-foreground truncate">
+              <span>#{player.shirtNumber}</span>
+              <span>•</span>
+              <span className="truncate">{player.position}</span>
+              {player.isCaptain && (
+                <>
+                  <span>•</span>
+                  <span className="text-amber-600 font-medium truncate">
+                    Captain
+                  </span>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+        <div className="flex items-center gap-4 flex-shrink-0">
+          <div className="text-right">
+            <div className="text-sm font-medium">{player.minutesPlayed}'</div>
+            <div className="text-xs text-muted-foreground">Minutes</div>
+          </div>
+          <ChevronDown
+            className={`h-5 w-5 transition-transform flex-shrink-0 ${isExpanded ? "rotate-180" : ""}`}
+          />
         </div>
       </div>
-      <div className="flex items-center gap-4">
-        <div className="text-right">
-          <div className="text-sm font-medium">{player.minutesPlayed}'</div>
-          <div className="text-xs text-muted-foreground">Minutes</div>
-        </div>
-        <ChevronDown
-          className={`h-5 w-5 transition-transform ${isExpanded ? "rotate-180" : ""}`}
-        />
-      </div>
-    </div>
 
-    {isExpanded && (
-      <div className="p-4 border-t border-border bg-muted/30">
-        {/* Quick Stats Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-          {/* Offensive Stats */}
-          <div className="space-y-2">
-            <h6 className="text-xs font-semibold text-muted-foreground">
-              Offensive
-            </h6>
-            <StatControl
-              label="Goals"
-              value={player.offensiveMetrics.goals}
-              onIncrement={() => onIncrement("offensiveMetrics", "goals")}
-              onDecrement={() => onDecrement("offensiveMetrics", "goals")}
-              icon="⚽"
-            />
-            <StatControl
-              label="Assists"
-              value={player.offensiveMetrics.assists}
-              onIncrement={() => onIncrement("offensiveMetrics", "assists")}
-              onDecrement={() => onDecrement("offensiveMetrics", "assists")}
-              icon="🎯"
-            />
-            <StatControl
-              label="Shots"
-              value={player.offensiveMetrics.shots}
-              onIncrement={() => onIncrement("offensiveMetrics", "shots")}
-              onDecrement={() => onDecrement("offensiveMetrics", "shots")}
-              icon="🔫"
-            />
-          </div>
-
-          {/* Passing Stats */}
-          <div className="space-y-2">
-            <h6 className="text-xs font-semibold text-muted-foreground">
-              Passing
-            </h6>
-            <StatControl
-              label="Passes"
-              value={player.passingMetrics.passes}
-              onIncrement={() => onIncrement("passingMetrics", "passes")}
-              onDecrement={() => onDecrement("passingMetrics", "passes")}
-              icon="📍"
-            />
-            <StatControl
-              label="Completed"
-              value={player.passingMetrics.passesCompleted}
-              onIncrement={() =>
-                onIncrement("passingMetrics", "passesCompleted")
-              }
-              onDecrement={() =>
-                onDecrement("passingMetrics", "passesCompleted")
-              }
-              icon="✓"
-            />
-            <StatControl
-              label="Key Passes"
-              value={player.passingMetrics.keyPasses}
-              onIncrement={() => onIncrement("passingMetrics", "keyPasses")}
-              onDecrement={() => onDecrement("passingMetrics", "keyPasses")}
-              icon="🔑"
-            />
-          </div>
-
-          {/* Defensive Stats */}
-          <div className="space-y-2">
-            <h6 className="text-xs font-semibold text-muted-foreground">
-              Defensive
-            </h6>
-            <StatControl
-              label="Tackles"
-              value={player.defensiveMetrics.tackles}
-              onIncrement={() => onIncrement("defensiveMetrics", "tackles")}
-              onDecrement={() => onDecrement("defensiveMetrics", "tackles")}
-              icon="🛡️"
-            />
-            <StatControl
-              label="Interceptions"
-              value={player.defensiveMetrics.interceptions}
-              onIncrement={() =>
-                onIncrement("defensiveMetrics", "interceptions")
-              }
-              onDecrement={() =>
-                onDecrement("defensiveMetrics", "interceptions")
-              }
-              icon="🚫"
-            />
-            <StatControl
-              label="Clearances"
-              value={player.defensiveMetrics.clearances}
-              onIncrement={() => onIncrement("defensiveMetrics", "clearances")}
-              onDecrement={() => onDecrement("defensiveMetrics", "clearances")}
-              icon="🔄"
-            />
-          </div>
-
-          {/* Discipline Stats */}
-          <div className="space-y-2">
-            <h6 className="text-xs font-semibold text-muted-foreground">
-              Discipline
-            </h6>
-            <StatControl
-              label="Fouls"
-              value={player.disciplineMetrics.foulsCommitted}
-              onIncrement={() =>
-                onIncrement("disciplineMetrics", "foulsCommitted")
-              }
-              onDecrement={() =>
-                onDecrement("disciplineMetrics", "foulsCommitted")
-              }
-              icon="⚠️"
-              variant="warning"
-            />
-            <StatControl
-              label="Yellow Cards"
-              value={player.disciplineMetrics.yellowCards}
-              onIncrement={() =>
-                onIncrement("disciplineMetrics", "yellowCards")
-              }
-              onDecrement={() =>
-                onDecrement("disciplineMetrics", "yellowCards")
-              }
-              icon="🟨"
-              variant="warning"
-            />
-            <StatControl
-              label="Red Cards"
-              value={player.disciplineMetrics.redCards}
-              onIncrement={() => onIncrement("disciplineMetrics", "redCards")}
-              onDecrement={() => onDecrement("disciplineMetrics", "redCards")}
-              icon="🟥"
-              variant="danger"
-            />
-          </div>
-        </div>
-
-        {/* Advanced Controls */}
-        <div className="grid grid-cols-2 gap-3">
-          <div className="space-y-2">
-            <label className="block text-xs font-medium text-muted-foreground">
-              Minutes Played
-            </label>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => onDecrement("minutesPlayed", "minutesPlayed")}
-                className="px-2 py-1 border border-input rounded hover:bg-accent"
-              >
-                <Minus className="h-4 w-4" />
-              </button>
-              <input
-                type="number"
-                value={player.minutesPlayed}
-                onChange={(e) => {
-                  /* Handle direct input */
-                }}
-                className="flex-1 text-center border border-input rounded px-2 py-1"
+      {isExpanded && (
+        <div className="p-4 border-t border-border bg-muted/30">
+          {/* Quick Stats Grid - Fixed with better responsiveness */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+            {/* Offensive Stats */}
+            <div className="space-y-2">
+              <h6 className="text-xs font-semibold text-muted-foreground truncate">
+                Offensive
+              </h6>
+              <StatControl
+                label="Goals"
+                value={player.offensiveMetrics.goals}
+                onIncrement={() => onIncrement("offensiveMetrics", "goals")}
+                onDecrement={() => onDecrement("offensiveMetrics", "goals")}
+                icon="⚽"
               />
-              <button
-                onClick={() => onIncrement("minutesPlayed", "minutesPlayed")}
-                className="px-2 py-1 border border-input rounded hover:bg-accent"
-              >
-                <Plus className="h-4 w-4" />
-              </button>
+              <StatControl
+                label="Assists"
+                value={player.offensiveMetrics.assists}
+                onIncrement={() => onIncrement("offensiveMetrics", "assists")}
+                onDecrement={() => onDecrement("offensiveMetrics", "assists")}
+                icon="🎯"
+              />
+              <StatControl
+                label="Shots"
+                value={player.offensiveMetrics.shots}
+                onIncrement={() => onIncrement("offensiveMetrics", "shots")}
+                onDecrement={() => onDecrement("offensiveMetrics", "shots")}
+                icon="🔫"
+              />
+            </div>
+
+            {/* Passing Stats */}
+            <div className="space-y-2">
+              <h6 className="text-xs font-semibold text-muted-foreground truncate">
+                Passing
+              </h6>
+              <StatControl
+                label="Passes"
+                value={player.passingMetrics.passes}
+                onIncrement={() => onIncrement("passingMetrics", "passes")}
+                onDecrement={() => onDecrement("passingMetrics", "passes")}
+                icon="📍"
+              />
+              <StatControl
+                label="Completed"
+                value={player.passingMetrics.passesCompleted}
+                onIncrement={() =>
+                  onIncrement("passingMetrics", "passesCompleted")
+                }
+                onDecrement={() =>
+                  onDecrement("passingMetrics", "passesCompleted")
+                }
+                icon="✓"
+              />
+              <StatControl
+                label="Key Passes"
+                value={player.passingMetrics.keyPasses}
+                onIncrement={() => onIncrement("passingMetrics", "keyPasses")}
+                onDecrement={() => onDecrement("passingMetrics", "keyPasses")}
+                icon="🔑"
+              />
+            </div>
+
+            {/* Defensive Stats */}
+            <div className="space-y-2">
+              <h6 className="text-xs font-semibold text-muted-foreground truncate">
+                Defensive
+              </h6>
+              <StatControl
+                label="Tackles"
+                value={player.defensiveMetrics.tackles}
+                onIncrement={() => onIncrement("defensiveMetrics", "tackles")}
+                onDecrement={() => onDecrement("defensiveMetrics", "tackles")}
+                icon="🛡️"
+              />
+              <StatControl
+                label="Interceptions"
+                value={player.defensiveMetrics.interceptions}
+                onIncrement={() =>
+                  onIncrement("defensiveMetrics", "interceptions")
+                }
+                onDecrement={() =>
+                  onDecrement("defensiveMetrics", "interceptions")
+                }
+                icon="🚫"
+              />
+              <StatControl
+                label="Clearances"
+                value={player.defensiveMetrics.clearances}
+                onIncrement={() =>
+                  onIncrement("defensiveMetrics", "clearances")
+                }
+                onDecrement={() =>
+                  onDecrement("defensiveMetrics", "clearances")
+                }
+                icon="🔄"
+              />
+            </div>
+
+            {/* Discipline Stats */}
+            <div className="space-y-2">
+              <h6 className="text-xs font-semibold text-muted-foreground truncate">
+                Discipline
+              </h6>
+              <StatControl
+                label="Fouls"
+                value={player.disciplineMetrics.foulsCommitted}
+                onIncrement={() =>
+                  onIncrement("disciplineMetrics", "foulsCommitted")
+                }
+                onDecrement={() =>
+                  onDecrement("disciplineMetrics", "foulsCommitted")
+                }
+                icon="⚠️"
+                variant="warning"
+              />
+              <StatControl
+                label="Yellow Cards"
+                value={player.disciplineMetrics.yellowCards}
+                onIncrement={() =>
+                  onIncrement("disciplineMetrics", "yellowCards")
+                }
+                onDecrement={() =>
+                  onDecrement("disciplineMetrics", "yellowCards")
+                }
+                icon="🟨"
+                variant="warning"
+              />
+              <StatControl
+                label="Red Cards"
+                value={player.disciplineMetrics.redCards}
+                onIncrement={() => onIncrement("disciplineMetrics", "redCards")}
+                onDecrement={() => onDecrement("disciplineMetrics", "redCards")}
+                icon="🟥"
+                variant="danger"
+              />
             </div>
           </div>
 
-          <div className="space-y-2">
-            <label className="block text-xs font-medium text-muted-foreground">
-              Status
-            </label>
-            <div className="flex gap-2">
-              <button
-                className={`flex-1 px-2 py-1 text-xs rounded ${player.onPitch ? "bg-green-500 text-white" : "bg-muted"}`}
-                onClick={() => {
-                  /* Toggle on pitch status */
-                }}
-              >
-                On Pitch
-              </button>
-              <button
-                className={`flex-1 px-2 py-1 text-xs rounded ${!player.onPitch ? "bg-amber-500 text-white" : "bg-muted"}`}
-                onClick={() => {
-                  /* Toggle on pitch status */
-                }}
-              >
-                Subbed
-              </button>
+          {/* Advanced Controls */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="space-y-2">
+              <label className="block text-xs font-medium text-muted-foreground">
+                Minutes Played
+              </label>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => onDecrement("minutesPlayed", "minutesPlayed")}
+                  className="px-2 py-1 border border-input rounded hover:bg-accent transition-colors"
+                  title="Decrease minutes"
+                >
+                  <Minus className="h-4 w-4" />
+                </button>
+                <input
+                  type="number"
+                  value={player.minutesPlayed}
+                  onChange={(e) => handleDirectInput(e.target.value)}
+                  className="flex-1 min-w-0 text-center border border-input rounded px-2 py-1 bg-background"
+                  min="0"
+                  max="120"
+                />
+                <button
+                  onClick={() => onIncrement("minutesPlayed", "minutesPlayed")}
+                  className="px-2 py-1 border border-input rounded hover:bg-accent transition-colors"
+                  title="Increase minutes"
+                >
+                  <Plus className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="block text-xs font-medium text-muted-foreground">
+                Status
+              </label>
+              <div className="flex gap-2">
+                <button
+                  className={`flex-1 px-2 py-1 text-xs rounded transition-colors ${player.onPitch ? "bg-green-500 text-white" : "bg-muted hover:bg-accent"}`}
+                  onClick={() => {
+                    /* Toggle on pitch status */
+                  }}
+                  title="Toggle playing status"
+                >
+                  {player.onPitch ? "On Pitch" : "Subbed"}
+                </button>
+                <button
+                  className={`flex-1 px-2 py-1 text-xs rounded transition-colors ${player.starter ? "bg-blue-500 text-white" : "bg-muted hover:bg-accent"}`}
+                  onClick={() => {
+                    /* Toggle starter status */
+                  }}
+                  title="Toggle starter status"
+                >
+                  {player.starter ? "Starter" : "Substitute"}
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    )}
-  </div>
-);
+      )}
+    </div>
+  );
+};
 
 const StatControl = ({
   label,
@@ -1441,28 +1711,37 @@ const StatControl = ({
   variant = "default",
 }: any) => {
   const variantClasses: Variant = {
-    default: "bg-background",
-    warning: "bg-yellow-500/10",
-    danger: "bg-red-500/10",
+    default: "bg-background border border-border",
+    warning: "bg-yellow-500/10 border border-yellow-200/50",
+    danger: "bg-red-500/10 border border-red-200/50",
   };
 
   return (
-    <div className={`p-2 rounded ${variantClasses[variant as keyof Variant]}`}>
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="text-lg">{icon}</span>
-          <span className="text-xs text-muted-foreground">{label}</span>
+    <div
+      className={`p-2 rounded-lg ${variantClasses[variant as keyof Variant]}`}
+    >
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 min-w-0 flex-1">
+          <span className="text-lg flex-shrink-0">{icon}</span>
+          <span className="text-xs text-muted-foreground truncate">
+            {label}
+          </span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-shrink-0">
           <button
             onClick={onDecrement}
-            className="p-1 hover:bg-accent rounded"
+            className="p-1 hover:bg-accent rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-w-[24px] flex items-center justify-center"
             disabled={value <= 0}
+            title={`Decrease ${label}`}
           >
             <Minus className="h-3 w-3" />
           </button>
-          <span className="font-bold min-w-[20px] text-center">{value}</span>
-          <button onClick={onIncrement} className="p-1 hover:bg-accent rounded">
+          <span className="font-bold min-w-[28px] text-center">{value}</span>
+          <button
+            onClick={onIncrement}
+            className="p-1 hover:bg-accent rounded transition-colors min-w-[24px] flex items-center justify-center"
+            title={`Increase ${label}`}
+          >
             <Plus className="h-3 w-3" />
           </button>
         </div>
