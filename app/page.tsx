@@ -197,7 +197,8 @@ export default function RootPage() {
         </div>
       </section>
 
-      {/* 2025 Wrapped Banner */}
+      {/*
+      2025 Wrapped Banner (disabled for now)
       <section className="py-6 px-0 sm:px-4">
         <div className="container mx-auto max-w-5xl px-2 sm:px-0">
           <motion.div
@@ -251,6 +252,7 @@ export default function RootPage() {
           </motion.div>
         </div>
       </section>
+      */}
 
       {/* Stats Bar - Minimal horizontal strip */}
       <section className="border-y border-border py-4 sm:py-6">

@@ -7,6 +7,7 @@ import { Loader } from '@/components/ui/loader';
 import { Trophy, Clock, CloudRain, User, MapPin, Clock12, ThumbsUp, Target } from 'lucide-react';
 import { teamLogos } from '@/constants';
 import { LiveFixtureResponse } from '@/lib/types/v1.response.types';
+import { footballLiveApi } from '@/lib/api/v1/football-live.api';
 import { FixtureTeamType } from '@/types/v1.football-fixture.types';
 import { toast } from 'react-toastify';
 import { format } from 'date-fns';
