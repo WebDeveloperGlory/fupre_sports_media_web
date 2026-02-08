@@ -1,5 +1,4 @@
 import { teamLogos } from '@/constants'
-import Image from 'next/image'
 import React from 'react'
 import { Trophy } from 'lucide-react'
 
@@ -8,6 +7,7 @@ export type LeagueTableTeam = {
   _id?: string;
   name: string;
   shorthand?: string;
+  logo?: string | null;
 };
 
 export type LeagueTableEntry = {
@@ -86,12 +86,15 @@ const LeagueTable = ({ table }: { table: LeagueTableEntry[] }) => {
                 </td>
                 <td className="py-4 px-4">
                   <div className="flex items-center gap-3">
-                    <div className="relative w-8 h-8 flex-shrink-0">
-                      <Image
-                        src={teamLogos[entry.team.name] || '/images/team_logos/default.jpg'}
+                    <div className="w-8 h-8 flex-shrink-0 rounded-full bg-muted flex items-center justify-center overflow-hidden">
+                      <img
+                        src={entry.team.logo || teamLogos[entry.team.name] || '/images/team_logos/default.jpg'}
                         alt={`${entry.team.name} logo`}
-                        fill
-                        className="object-contain"
+                        className="h-full w-full object-contain"
+                        loading="lazy"
+                        onError={(event) => {
+                          (event.currentTarget as HTMLImageElement).src = '/images/team_logos/default.jpg';
+                        }}
                       />
                     </div>
                     <span className="font-medium text-foreground">{entry.team.name}</span>

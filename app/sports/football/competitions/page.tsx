@@ -15,6 +15,7 @@ import { cn } from "@/utils/cn";
 import { format } from "date-fns";
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
+import { teamLogos } from "@/constants";
 
 type CompetitionPageData = {
   competitionFixturesCount: number;
@@ -432,6 +433,16 @@ export default function FootballCompetitionsPage() {
                 const leaderTeam = leaderTeamId
                   ? comp.teams?.find((team) => team.id === leaderTeamId)
                   : null;
+                const competitionImage = comp.logo || comp.coverImage || null;
+                const competitionShort =
+                  comp.shorthand ||
+                  comp.name
+                    ?.split(' ')
+                    .map((part) => part[0])
+                    .join('')
+                    .slice(0, 4)
+                    .toUpperCase() ||
+                  'COMP';
 
                 return (
                   <motion.div key={comp.id} variants={item}>
@@ -449,9 +460,21 @@ export default function FootballCompetitionsPage() {
                               "w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0",
                               colors.iconBg
                             )}>
-                              <span className={colors.iconColor}>
-                                {getCompetitionIcon(comp.type)}
-                              </span>
+                              {competitionImage ? (
+                                <img
+                                  src={competitionImage}
+                                  alt={`${comp.name} logo`}
+                                  className="h-8 w-8 sm:h-10 sm:w-10 object-contain"
+                                  loading="lazy"
+                                  onError={(event) => {
+                                    (event.currentTarget as HTMLImageElement).src = '/images/team_logos/default.jpg';
+                                  }}
+                                />
+                              ) : (
+                                <span className={`text-xs sm:text-sm font-bold tracking-wide ${colors.iconColor}`}>
+                                  {competitionShort}
+                                </span>
+                              )}
                             </div>
 
                             {/* Competition Info */}

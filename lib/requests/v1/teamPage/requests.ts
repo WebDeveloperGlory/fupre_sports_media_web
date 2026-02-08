@@ -24,7 +24,16 @@ interface LineUp {
     subs: string[]
 }
 
-const API_URL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_PROD_API_URL : process.env.NEXT_PUBLIC_DEV_API_URL;
+const DEV_API_URL =
+  process.env.NEXT_PUBLIC_DEV_API_URL ||
+  process.env.NEXT_PUBLIC_DEV_PARTIAL_API_URL ||
+  process.env.NEXT_PUBLIC_NEW_DEV_API_URL;
+const PROD_API_URL =
+  process.env.NEXT_PUBLIC_PROD_API_URL ||
+  process.env.NEXT_PUBLIC_PROD_PARTIAL_API_URL ||
+  process.env.NEXT_PUBLIC_NEW_PROD_API_URL;
+
+const API_URL = process.env.NODE_ENV === 'production' ? PROD_API_URL : DEV_API_URL;
 
 export const getIndividualTeam = async ( teamId: string ) => {
     try {
