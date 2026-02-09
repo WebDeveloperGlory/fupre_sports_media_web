@@ -96,7 +96,12 @@ export type CompetitionTeamReg = {
 
 export type LeagueStanding = {
     id: string;
-    team: string;
+    team: {
+        id: string;
+        name: string;
+        logo: string | null;
+        shorthand: string;
+    } | string;
     played: number;
     wins: number;
     draws: number;

@@ -29,11 +29,18 @@ import {
   Edit,
   Trash2,
   Circle,
+  BarChart3,
+  Play,
+  Square,
+  X,
 } from "lucide-react";
 import { footballLiveApi } from "@/lib/api/v1/football-live.api";
 import { LiveFixtureResponse } from "@/lib/types/v1.response.types";
 import { LiveStatus } from "@/types/v1.football-live.types";
-import { FixtureTeamType } from "@/types/v1.football-fixture.types";
+import {
+  FixtureStatistics,
+  FixtureTeamType,
+} from "@/types/v1.football-fixture.types";
 import { FixturePlayerStatResponse } from "@/lib/types/v1.response.types";
 import {
   AddScorerDto,
@@ -42,9 +49,12 @@ import {
 } from "@/lib/types/v1.payload.types";
 import { footballPlayerStatApi } from "@/lib/api/v1/football-live-player-stat.api";
 import AddGoalModal from "@/components/admin/live/AddGoalModal";
-import GoalScorersModal, { GoalScorer } from "@/components/admin/live/GoalScorersModel";
+import GoalScorersModal, {
+  GoalScorer,
+} from "@/components/admin/live/GoalScorersModel";
 import AddEventModal from "@/components/admin/live/AddEventModal";
 import SubstitutionModal from "@/components/admin/live/SubstitutionModal";
+import UpdateStatsModal from "@/components/admin/live/UpdateStatsModal";
 
 type VariantClasses = {
   default: string;
@@ -117,10 +127,6 @@ export default function LiveFixtureManagementPage() {
   );
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState<
-    "overview" | "stats" | "events" | "lineup" | "settings"
-  >("overview");
-  const [editing, setEditing] = useState(false);
   const [expandedPlayers, setExpandedPlayers] = useState<Set<string>>(
     new Set(),
   );
@@ -132,7 +138,25 @@ export default function LiveFixtureManagementPage() {
   );
   const [showGoalScorersModal, setShowGoalScorersModal] = useState(false);
   const [editingGoalScorer, setEditingGoalScorer] = useState<any>(null);
-  const [saveLoading, setSaveLoading] = useState(false);
+  const [showUpdateStatsModal, setShowUpdateStatsModal] = useState(false);
+  const [possessionTracking, setPossessionTracking] = useState<{
+    isTracking: boolean;
+    trackingTeam: FixtureTeamType | null;
+    startTime: number | null;
+    accumulatedTime: {
+      [FixtureTeamType.HOME]: number;
+      [FixtureTeamType.AWAY]: number;
+    };
+  }>({
+    isTracking: false,
+    trackingTeam: null,
+    startTime: null,
+    accumulatedTime: {
+      [FixtureTeamType.HOME]: 0,
+      [FixtureTeamType.AWAY]: 0,
+    },
+  });
+  const [possessionLoading, setPossessionLoading] = useState(false);
 
   // Load fixture data
   const loadFixtureData = useCallback(async () => {
@@ -169,6 +193,31 @@ export default function LiveFixtureManagementPage() {
       loadFixtureData();
     }
   }, [fixtureId, loadFixtureData]);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+
+    if (possessionTracking.isTracking && possessionTracking.startTime) {
+      interval = setInterval(() => {
+        // Update UI in real-time (not saved to server yet)
+        setPossessionTracking((prev) => ({
+          ...prev,
+          accumulatedTime: {
+            ...prev.accumulatedTime,
+            [prev.trackingTeam!]: prev.accumulatedTime[prev.trackingTeam!] + 1,
+          },
+        }));
+      }, 1000); // Update every second
+    }
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [
+    possessionTracking.isTracking,
+    possessionTracking.startTime,
+    possessionTracking.trackingTeam,
+  ]);
 
   // Fixture control handlers
   const handleUpdateStatus = async (status: LiveStatus) => {
@@ -342,6 +391,128 @@ export default function LiveFixtureManagementPage() {
     } catch (error: any) {
       toast.error(error.message || "Failed to update player stats");
     }
+  };
+
+  const handleUpdateStatistics = async (stats: FixtureStatistics) => {
+    try {
+      setSaving(true);
+      const response = await footballLiveApi.updateStatistics(fixtureId, {
+        team: FixtureTeamType.HOME,
+        statistics: {
+          ...stats.home,
+          foul: stats.away.fouls,
+        },
+      });
+
+      // Update away team stats separately
+      await footballLiveApi.updateStatistics(fixtureId, {
+        team: FixtureTeamType.AWAY,
+        statistics: {
+          ...stats.away,
+          foul: stats.away.fouls,
+        },
+      });
+
+      if (response.success) {
+        setFixture(response.data);
+        toast.success("Statistics updated successfully!");
+        setShowUpdateStatsModal(false);
+      }
+    } catch (error: any) {
+      toast.error(error.message || "Failed to update statistics");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const startPossessionTracking = (team: FixtureTeamType) => {
+    // If already tracking, end current possession first
+    if (possessionTracking.isTracking && possessionTracking.trackingTeam) {
+      endPossessionTracking();
+    }
+
+    setPossessionTracking({
+      isTracking: true,
+      trackingTeam: team,
+      startTime: Date.now(),
+      accumulatedTime: possessionTracking.accumulatedTime,
+    });
+
+    toast.info(
+      `Started tracking ${team === FixtureTeamType.HOME ? homeName : awayName} possession`,
+    );
+  };
+
+  const endPossessionTracking = async () => {
+    if (!possessionTracking.isTracking || !possessionTracking.trackingTeam)
+      return;
+
+    setPossessionLoading(true);
+    try {
+      const duration = Math.floor(
+        (Date.now() - possessionTracking.startTime!) / 1000,
+      ); // Convert to seconds
+
+      // Get current possession times from fixture
+      const currentHomePossession =
+        fixture?.statistics.home.possessionTime || 0;
+      const currentAwayPossession =
+        fixture?.statistics.away.possessionTime || 0;
+
+      // Update statistics on server
+      await footballLiveApi.updateStatistics(fixtureId, {
+        team: FixtureTeamType.HOME,
+        statistics: {
+          ...fixture!.statistics.home,
+          foul: fixture!.statistics.home.fouls,
+          possessionTime: possessionTracking.trackingTeam === FixtureTeamType.HOME ? currentHomePossession + duration : currentHomePossession,
+        },
+      });
+
+      await footballLiveApi.updateStatistics(fixtureId, {
+        team: FixtureTeamType.AWAY,
+        statistics: {
+          ...fixture!.statistics.away,
+          foul: fixture!.statistics.away.fouls,
+          possessionTime: possessionTracking.trackingTeam === FixtureTeamType.AWAY ? currentAwayPossession + duration : currentAwayPossession,
+        },
+      });
+
+      // Reset tracking state
+      setPossessionTracking({
+        isTracking: false,
+        trackingTeam: null,
+        startTime: null,
+        accumulatedTime: {
+          [FixtureTeamType.HOME]: 0,
+          [FixtureTeamType.AWAY]: 0,
+        },
+      });
+
+      // Refresh fixture data
+      await loadFixtureData();
+
+      toast.success(
+        `Added ${duration}s of possession to ${possessionTracking.trackingTeam === FixtureTeamType.HOME ? homeName : awayName}`,
+      );
+    } catch (error: any) {
+      toast.error(error.message || "Failed to update possession");
+    } finally {
+      setPossessionLoading(false);
+    }
+  };
+
+  const resetPossessionTracking = () => {
+    setPossessionTracking({
+      isTracking: false,
+      trackingTeam: null,
+      startTime: null,
+      accumulatedTime: {
+        [FixtureTeamType.HOME]: 0,
+        [FixtureTeamType.AWAY]: 0,
+      },
+    });
+    toast.info("Possession tracking reset");
   };
 
   const handleIncrementMetric = (
@@ -668,7 +839,7 @@ export default function LiveFixtureManagementPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <button
-                onClick={() => router.push("/admin/live-fixtures")}
+                onClick={() => router.push("/admin/live/football/live-games")}
                 className="p-2 hover:bg-accent rounded-lg transition-colors"
               >
                 <ArrowLeft className="h-5 w-5" />
@@ -717,7 +888,7 @@ export default function LiveFixtureManagementPage() {
             {/* Match Header */}
             <div className="bg-card border border-border rounded-xl p-6">
               <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4 flex-wrap">
                   <div className="flex items-center gap-3">
                     <div className="h-16 w-16 rounded-lg bg-primary/10 flex items-center justify-center">
                       {fixture.homeTeam?.logo ? (
@@ -1101,18 +1272,42 @@ export default function LiveFixtureManagementPage() {
           <div className="space-y-6">
             {/* Match Statistics */}
             <div className="bg-card border border-border rounded-xl p-6">
-              <h3 className="text-lg font-semibold text-foreground mb-4">
-                Match Statistics
-              </h3>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-foreground">
+                  Match Statistics
+                </h3>
+                <button
+                  onClick={() => setShowUpdateStatsModal(true)}
+                  className="text-sm text-primary hover:text-primary/80 transition-colors flex items-center gap-1"
+                >
+                  <BarChart3 className="h-4 w-4" />
+                  Update
+                </button>
+              </div>
               <div className="space-y-4">
+                {/* Possession Tracker */}
+                {fixture && (
+                  <PossessionTracker
+                    fixture={fixture}
+                    possessionTracking={possessionTracking}
+                    possessionLoading={possessionLoading}
+                    homeName={homeName}
+                    awayName={awayName}
+                    onStartTracking={startPossessionTracking}
+                    onEndTracking={endPossessionTracking}
+                    onResetTracking={resetPossessionTracking}
+                  />
+                )}
+
+                {/* Other Stats */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-muted-foreground">
                       Possession
                     </span>
                     <span className="font-medium">
-                      {fixture.statistics.home.possessionTime}% -{" "}
-                      {fixture.statistics.away.possessionTime}%
+                      {((fixture.statistics.home.possessionTime)/(fixture.statistics.home.possessionTime + fixture.statistics.away.possessionTime) * 100).toFixed(1)}% -{" "}
+                      {((fixture.statistics.away.possessionTime)/(fixture.statistics.home.possessionTime + fixture.statistics.away.possessionTime) * 100).toFixed(1)}%
                     </span>
                   </div>
                   <div className="h-2 bg-muted rounded-full overflow-hidden">
@@ -1191,13 +1386,11 @@ export default function LiveFixtureManagementPage() {
                   onClick={() => setShowSubstitutionModal(true)}
                 />
                 <StatButton
-                  icon={MessageSquare}
-                  label="Commentary"
-                  value={fixture.commentary?.length || 0}
+                  icon={BarChart3}
+                  label="Update Stats"
+                  value=""
                   color="bg-green-500/10 text-green-600"
-                  onClick={() => {
-                    /* Navigate to commentary tab */
-                  }}
+                  onClick={() => setShowUpdateStatsModal(true)}
                 />
               </div>
             </div>
@@ -1419,6 +1612,17 @@ export default function LiveFixtureManagementPage() {
             setShowGoalScorersModal(false);
             setShowAddGoalModal(true);
           }}
+        />
+      )}
+
+      {showUpdateStatsModal && fixture && (
+        <UpdateStatsModal
+          isOpen={showUpdateStatsModal}
+          onClose={() => setShowUpdateStatsModal(false)}
+          onSubmit={handleUpdateStatistics}
+          currentStats={fixture.statistics}
+          homeTeamName={homeName}
+          awayTeamName={awayName}
         />
       )}
     </div>
@@ -1745,6 +1949,213 @@ const StatControl = ({
             <Plus className="h-3 w-3" />
           </button>
         </div>
+      </div>
+    </div>
+  );
+};
+
+interface PossessionTrackerProps {
+  fixture: LiveFixtureResponse;
+  possessionTracking: {
+    isTracking: boolean;
+    trackingTeam: FixtureTeamType | null;
+    startTime: number | null;
+    accumulatedTime: {
+      [FixtureTeamType.HOME]: number;
+      [FixtureTeamType.AWAY]: number;
+    };
+  };
+  possessionLoading: boolean;
+  homeName: string;
+  awayName: string;
+  onStartTracking: (team: FixtureTeamType) => void;
+  onEndTracking: () => Promise<void>;
+  onResetTracking: () => void;
+}
+
+const PossessionTracker = ({
+  fixture,
+  possessionTracking,
+  possessionLoading,
+  homeName,
+  awayName,
+  onStartTracking,
+  onEndTracking,
+  onResetTracking,
+}: PossessionTrackerProps) => {
+  // Calculate total tracked time
+  const totalTrackedTime =
+    possessionTracking.accumulatedTime[FixtureTeamType.HOME] +
+    possessionTracking.accumulatedTime[FixtureTeamType.AWAY];
+
+  // Calculate percentages for UI display
+  const homePercentage =
+    totalTrackedTime > 0
+      ? Math.round(
+          (possessionTracking.accumulatedTime[FixtureTeamType.HOME] /
+            totalTrackedTime) *
+            100,
+        )
+      : 0;
+
+  const awayPercentage =
+    totalTrackedTime > 0
+      ? Math.round(
+          (possessionTracking.accumulatedTime[FixtureTeamType.AWAY] /
+            totalTrackedTime) *
+            100,
+        )
+      : 0;
+
+  return (
+    <div className="p-4 bg-card border border-border rounded-xl">
+      <div className="flex items-center justify-between mb-4">
+        <h4 className="font-medium text-foreground">Live Possession Tracker</h4>
+        {possessionTracking.isTracking && (
+          <div className="flex items-center gap-2 px-3 py-1 bg-red-500/10 text-red-600 rounded-full text-sm">
+            <div className="animate-pulse h-2 w-2 rounded-full bg-red-500"></div>
+            LIVE
+          </div>
+        )}
+      </div>
+
+      {/* Current Status */}
+      <div className="mb-4">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-sm text-muted-foreground">Current Status:</span>
+          <span
+            className={`text-sm font-medium ${possessionTracking.isTracking ? "text-green-600" : "text-muted-foreground"}`}
+          >
+            {possessionTracking.isTracking
+              ? `Tracking ${possessionTracking.trackingTeam === FixtureTeamType.HOME ? homeName : awayName}`
+              : "Not Tracking"}
+          </span>
+        </div>
+
+        {possessionTracking.isTracking && possessionTracking.startTime && (
+          <div className="text-xs text-muted-foreground">
+            Started:{" "}
+            {Math.floor((Date.now() - possessionTracking.startTime) / 1000)}s
+            ago
+          </div>
+        )}
+      </div>
+
+      {/* Tracked Time Display */}
+      <div className="grid grid-cols-2 gap-4 mb-4">
+        <div className="p-3 bg-primary/10 rounded-lg">
+          <div className="text-center">
+            <div className="text-2xl font-bold text-primary">
+              {Math.floor(
+                possessionTracking.accumulatedTime[FixtureTeamType.HOME],
+              )}
+              s
+            </div>
+            <div className="text-xs text-muted-foreground">{homeName}</div>
+          </div>
+        </div>
+        <div className="p-3 bg-secondary/10 rounded-lg">
+          <div className="text-center">
+            <div className="text-2xl font-bold text-secondary">
+              {Math.floor(
+                possessionTracking.accumulatedTime[FixtureTeamType.AWAY],
+              )}
+              s
+            </div>
+            <div className="text-xs text-muted-foreground">{awayName}</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Progress Bar */}
+      {totalTrackedTime > 0 && (
+        <div className="mb-4">
+          <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
+            <span>Tracked Distribution</span>
+            <span>
+              {homePercentage}% - {awayPercentage}%
+            </span>
+          </div>
+          <div className="h-2 bg-muted rounded-full overflow-hidden">
+            <div
+              className="h-full bg-primary inline-block"
+              style={{ width: `${homePercentage}%` }}
+            />
+            <div
+              className="h-full bg-secondary inline-block"
+              style={{ width: `${awayPercentage}%` }}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Control Buttons */}
+      <div className="space-y-2">
+        {/* Start Buttons */}
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            onClick={() => onStartTracking(FixtureTeamType.HOME)}
+            disabled={possessionTracking.isTracking || possessionLoading}
+            className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg transition-colors ${possessionTracking.isTracking && possessionTracking.trackingTeam === FixtureTeamType.HOME ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary hover:bg-primary/20"} disabled:opacity-50`}
+          >
+            <Play className="h-4 w-4" />
+            Start {homeName}
+          </button>
+          <button
+            onClick={() => onStartTracking(FixtureTeamType.AWAY)}
+            disabled={possessionTracking.isTracking || possessionLoading}
+            className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg transition-colors ${possessionTracking.isTracking && possessionTracking.trackingTeam === FixtureTeamType.AWAY ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary hover:bg-primary/20"} disabled:opacity-50`}
+          >
+            <Play className="h-4 w-4" />
+            Start {awayName}
+          </button>
+        </div>
+
+        {/* End/Reset Buttons */}
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            onClick={onEndTracking}
+            disabled={!possessionTracking.isTracking || possessionLoading}
+            className="flex items-center justify-center gap-2 px-4 py-3 bg-amber-500/10 text-amber-600 rounded-lg hover:bg-amber-500/20 transition-colors disabled:opacity-50"
+          >
+            <Square className="h-4 w-4" />
+            End Possession
+          </button>
+          <button
+            onClick={onResetTracking}
+            disabled={possessionLoading}
+            className="flex items-center justify-center gap-2 px-4 py-3 bg-red-500/10 text-red-600 rounded-lg hover:bg-red-500/20 transition-colors disabled:opacity-50"
+          >
+            <X className="h-4 w-4" />
+            Reset
+          </button>
+        </div>
+      </div>
+
+      {/* Current Match Possession Display */}
+      <div className="mt-4 pt-4 border-t border-border">
+        <div className="flex items-center justify-between text-sm mb-2">
+          <span className="text-muted-foreground">Match Possession</span>
+          <span className="font-medium">
+            {fixture.statistics.home.possessionTime}% -{" "}
+            {fixture.statistics.away.possessionTime}%
+          </span>
+        </div>
+        <div className="h-2 bg-muted rounded-full overflow-hidden">
+          <div
+            className="h-full bg-primary"
+            style={{ width: `${fixture.statistics.home.possessionTime}%` }}
+          />
+        </div>
+      </div>
+
+      {/* Help Text */}
+      <div className="mt-4 text-xs text-muted-foreground">
+        <p>
+          Click "Start" when a team gains possession, "End" when possession
+          changes.
+        </p>
+        <p>Time is tracked in real-time and saved to match statistics.</p>
       </div>
     </div>
   );

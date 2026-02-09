@@ -38,6 +38,7 @@ import { ManageTeamsModal } from "@/components/admin/super/ManageTeamsModal";
 import { ManageSponsorsModal } from "@/components/admin/super/ManageSponsorsModal";
 import { ManageRulesModal } from "@/components/admin/super/ManageRulesModal";
 import { CompetitionActionsModal } from "@/components/admin/super/CompetitionActionsModal";
+import { useRouter } from "next/navigation";
 
 // Constants
 const TYPE_OPTIONS = [
@@ -74,6 +75,8 @@ const STATUS_OPTIONS = [
 ];
 
 export default function FootballCompetitionsPage() {
+  const router = useRouter();
+
   // State
   const [competitions, setCompetitions] = useState<CompetitionResponse[]>([]);
   const [stats, setStats] = useState<CompetitionStatsResponse[]>([]);
@@ -652,6 +655,13 @@ export default function FootballCompetitionsPage() {
                             title="Actions"
                           >
                             <BarChart3 className="h-4 w-4 text-purple-500" />
+                          </button>
+                          <button
+                            onClick={() => router.push(`/admin/super/football/standings/${competition.id}`)}
+                            className="p-2 hover:bg-accent rounded-lg transition-colors"
+                            title="Actions"
+                          >
+                            <Calendar className="h-4 w-4 text-purple-500" />
                           </button>
                           <button
                             onClick={() => handleDeleteCompetition(competition)}
