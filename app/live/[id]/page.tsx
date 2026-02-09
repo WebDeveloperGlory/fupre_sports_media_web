@@ -122,7 +122,7 @@ export default function LiveMatchPage({
                 <div className="flex flex-col items-center gap-3 flex-1 min-w-0">
                   <div className="relative w-16 h-16 md:w-20 md:h-20">
                     <Image
-                      src={teamLogos[homeTeamName] || '/images/team_logos/default.jpg'}
+                      src={liveFixture.homeTeam?.logo || '/images/team_logos/default.jpg'}
                       alt={homeTeamName}
                       fill
                       className="object-contain rounded-full"
@@ -155,7 +155,7 @@ export default function LiveMatchPage({
                 <div className="flex flex-col items-center gap-3 flex-1 min-w-0">
                   <div className="relative w-16 h-16 md:w-20 md:h-20">
                     <Image
-                      src={teamLogos[awayTeamName] || '/images/team_logos/default.jpg'}
+                      src={liveFixture.awayTeam?.logo || '/images/team_logos/default.jpg'}
                       alt={awayTeamName}
                       fill
                       className="object-contain rounded-full"
