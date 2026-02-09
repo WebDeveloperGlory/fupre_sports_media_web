@@ -105,8 +105,8 @@ const FootballHomePage: FC = () => {
 
   const liveHomeName = liveFixture?.homeTeam?.name ?? liveFixture?.temporaryHomeTeamName ?? 'Home';
   const liveAwayName = liveFixture?.awayTeam?.name ?? liveFixture?.temporaryAwayTeamName ?? 'Away';
-  const liveHomeLogo = teamLogos[liveHomeName] || '/images/team_logos/default.jpg';
-  const liveAwayLogo = teamLogos[liveAwayName] || '/images/team_logos/default.jpg';
+  const liveHomeLogo = liveFixture?.homeTeam?.logo || teamLogos[liveHomeName] || '/images/team_logos/default.jpg';
+  const liveAwayLogo = liveFixture?.awayTeam?.logo || teamLogos[liveAwayName] || '/images/team_logos/default.jpg';
 
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-0">
