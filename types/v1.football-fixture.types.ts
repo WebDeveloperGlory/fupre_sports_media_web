@@ -217,12 +217,12 @@ export type FixturePlayerOfTheMatch = {
 
 export type FixtureGoalScorers = {
     id: string;
-    player: string | null;
+    player: { name: string; photo: string; } | null;
     temporaryPlayerName: string | null;
     team: string | null;
     temporaryTeamName: string | null;
     time: number;
-    assist: string | null;
+    assist: { name: string; photo: string; } | null;
     temporaryAssistName: string | null;
 }
 
