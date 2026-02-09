@@ -56,9 +56,9 @@ const LeagueTable = ({ table }: { table: LeagueTableEntry[] }) => {
         </thead>
         <tbody>
           {table.map((entry, index) => {
-            const isTopPosition = index < 8;
-            const isPlayoffPosition = index > 7 && index < 16;
-            const isRelegationZone = index >= table.length - 2;
+            const isTopPosition = index < 1;
+            const isPlayoffPosition = index > 0 && index < 3;
+            const isRelegationZone = index >= table.length - 1;
 
             return (
               <tr
