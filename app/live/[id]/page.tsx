@@ -11,6 +11,7 @@ import { footballLiveApi } from '@/lib/api/v1/football-live.api';
 import { FixtureTeamType } from '@/types/v1.football-fixture.types';
 import { toast } from 'react-toastify';
 import { format } from 'date-fns';
+import { useLiveFixture } from '@/lib/hooks/useLiveFixture';
 
 const templateStats = {
   home: {
@@ -41,8 +42,8 @@ const templateCheerMeter = {
 };
 
 enum Tabs {
-  OVERVIEW = 'overview',
   STATS = 'stats',
+  OVERVIEW = 'overview',
 }
 
 export default function LiveMatchPage({
@@ -52,26 +53,15 @@ export default function LiveMatchPage({
 }) {
   const resolvedParams = use(params);
 
-  const [loading, setLoading] = useState<boolean>(true);
-  const [liveFixture, setLiveFixture] = useState<LiveFixtureResponse | null>(null);
-  const [activeTab, setActiveTab] = useState<Tabs>(Tabs.OVERVIEW);
+  const [activeTab, setActiveTab] = useState<Tabs>(Tabs.STATS);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const fixtureData = await footballLiveApi.getById(resolvedParams.id);
-        if (fixtureData?.success && fixtureData.data) {
-          setLiveFixture(fixtureData.data);
-        }
-      } catch (error) {
-        console.error('Error fetching live fixture:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (loading) fetchData();
-  }, [loading, resolvedParams.id]);
+  const { fixture: liveFixture, loading } = useLiveFixture(resolvedParams.id, {
+    autoFetch: true,
+    autoJoin: true,
+    onError: (error) => {
+      console.error('Error fetching live fixture:', error);
+    },
+  });
 
   if (loading) return <Loader />;
 

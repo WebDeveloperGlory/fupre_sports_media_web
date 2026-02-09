@@ -50,14 +50,22 @@ axiosInstance.interceptors.response.use(
 
         // Transform errors
         if (response?.data) {
-            const errorData = response.data;
+            const errorData = response.data as ApiErrorResponse & { message?: string };
+            const message = errorData.error || errorData.message || `Request failed (${response.status})`;
+            if (response.status === 429) {
+                throw new ApiError('Too many requests. Please wait and try again.', response.status, errorData.code, errorData.details, errorData.field);
+            }
             throw new ApiError(
-                errorData.error || 'An error occurred',
+                message,
                 response.status,
                 errorData.code,
                 errorData.details,
                 errorData.field
             );
+        }
+
+        if (response?.status === 429) {
+            throw new ApiError('Too many requests. Please wait and try again.', response.status);
         }
 
         throw new ApiError(error.message || 'Network error', response?.status || 500);
