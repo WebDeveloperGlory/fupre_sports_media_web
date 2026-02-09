@@ -1,7 +1,7 @@
 'use client';
 
 import Image from "next/image";
-import { FC, useEffect, useState } from "react";
+import { FC, useEffect, useState, useRef } from "react";
 import { Trophy, Calendar, AlertCircle, ArrowRight, Clock, Users, CalendarDays } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -9,19 +9,22 @@ import { teamLogos } from "@/constants";
 import { Loader } from "@/components/ui/loader";
 import RecentGames from "@/components/football/RecentGames";
 import { footballFixtureApi } from "@/lib/api/v1/football-fixture.api";
+import { footballLiveApi } from "@/lib/api/v1/football-live.api";
 import { FixtureResponse, LiveFixtureResponse } from "@/lib/types/v1.response.types";
+import getLiveFixtureSocketService, { LiveFixtureSocketEvent } from "@/lib/socket/live-fixture-socket.service";
 
 const FootballHomePage: FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [liveFixture, setLiveFixture] = useState<LiveFixtureResponse | null>(null);
   const [recentFixtures, setRecentFixtures] = useState<FixtureResponse[]>([]);
   const [recentLoading, setRecentLoading] = useState<boolean>(true);
+  const socketService = useRef(getLiveFixtureSocketService());
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const [liveRes, recentRes] = await Promise.all([
-          footballFixtureApi.getLive(),
+          footballLiveApi.getActive(),
           footballFixtureApi.getRecentResults(1, 5),
         ]);
         const liveData = Array.isArray(liveRes?.data) ? liveRes.data : [];
@@ -43,6 +46,59 @@ const FootballHomePage: FC = () => {
       fetchData();
     }
   }, [loading]);
+
+  // Subscribe to WebSocket updates for live fixture
+  useEffect(() => {
+    if (!liveFixture?.id) return;
+
+    const socket = socketService.current;
+    socket.joinFixture(liveFixture.id);
+
+    // Score updates
+    const unsubscribeScore = socket.on(LiveFixtureSocketEvent.SCORE_UPDATE, (payload) => {
+      if (payload.fixtureId === liveFixture.id) {
+        setLiveFixture(prev => prev ? {
+          ...prev,
+          result: payload.data.result,
+          goalScorers: payload.data.goalScorers || prev.goalScorers
+        } : null);
+      }
+    });
+
+    // Status updates
+    const unsubscribeStatus = socket.on(LiveFixtureSocketEvent.STATUS_UPDATE, (payload) => {
+      if (payload.fixtureId === liveFixture.id) {
+        setLiveFixture(prev => prev ? {
+          ...prev,
+          status: payload.data.status,
+          currentMinute: payload.data.currentMinute,
+          injuryTime: payload.data.injuryTime
+        } : null);
+      }
+    });
+
+    // Full update
+    const unsubscribeFull = socket.on(LiveFixtureSocketEvent.FULL_UPDATE, (payload) => {
+      if (payload.fixtureId === liveFixture.id) {
+        setLiveFixture(payload.data);
+      }
+    });
+
+    // Fixture ended
+    const unsubscribeEnded = socket.on(LiveFixtureSocketEvent.FIXTURE_ENDED, (payload) => {
+      if (payload.fixtureId === liveFixture.id) {
+        setLiveFixture(null);
+      }
+    });
+
+    return () => {
+      socket.leaveFixture(liveFixture.id);
+      unsubscribeScore();
+      unsubscribeStatus();
+      unsubscribeFull();
+      unsubscribeEnded();
+    };
+  }, [liveFixture?.id]);
 
   if (loading) {
     return <Loader />;
