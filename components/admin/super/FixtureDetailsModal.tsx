@@ -361,13 +361,13 @@ export function FixtureDetailsModal({
                           <div>
                             <div className="font-medium">
                               {scorer.player
-                                ? scorer.player
+                                ? typeof scorer.player === "string" ? scorer.player : scorer.player?.name
                                 : scorer.temporaryPlayerName || "Unknown"}
                             </div>
                             {scorer.assist || scorer.temporaryAssistName ? (
                               <div className="text-xs text-muted-foreground">
                                 Assist:{" "}
-                                {scorer.assist || scorer.temporaryAssistName}
+                                {typeof scorer.assist === "string" ? scorer.assist : scorer.assist?.name || scorer.temporaryAssistName}
                               </div>
                             ) : null}
                           </div>
