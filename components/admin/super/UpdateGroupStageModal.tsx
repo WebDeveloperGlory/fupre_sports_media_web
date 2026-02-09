@@ -126,46 +126,74 @@ export function UpdateGroupStageModal({
     setGroups(newGroups);
   };
 
+  const sortStandings = (a: LeagueStanding, b: LeagueStanding) => {
+    if (b.points !== a.points) {
+      return b.points - a.points;
+    }
+
+    const gdA = a.goalsFor - a.goalsAgainst;
+    const gdB = b.goalsFor - b.goalsAgainst;
+
+    if (gdB !== gdA) {
+      return gdB - gdA;
+    }
+
+    if (b.goalsFor !== a.goalsFor) {
+      return b.goalsFor - a.goalsFor;
+    }
+
+    if ((b.bonusPoints ?? 0) !== (a.bonusPoints ?? 0)) {
+      return (b.bonusPoints ?? 0) - (a.bonusPoints ?? 0);
+    }
+
+    return (a.disciplinaryPoints ?? 0) - (b.disciplinaryPoints ?? 0);
+  };
+
   const handleSave = async () => {
     try {
       setLoading(true);
 
       const payload: GroupStageUpdateDto = {
-        groups: groups.map((group) => ({
-          name: group.name,
-          groupNumber: group.groupNumber,
-          standings: group.standings.map((standing) => ({
-            team:
-              typeof standing.team === "string"
-                ? standing.team
-                : standing.team.id,
-            played: standing.played,
-            wins: standing.wins,
-            draws: standing.draws,
-            losses: standing.losses,
-            goalsFor: standing.goalsFor,
-            goalsAgainst: standing.goalsAgainst,
-            points: standing.points,
-            disciplinaryPoints: standing.disciplinaryPoints || 0,
-            bonusPoints: standing.bonusPoints || 0,
-            form: standing.form,
-            position: standing.position,
-            yellowCards: standing.yellowCards || 0,
-            redCards: standing.redCards || 0,
-          })),
-          fixtures: group.fixtures,
-          qualificationRules: group.qualificationRules,
-          qualifiedTeams: group.qualifiedTeams || [],
-          completed: group.completed,
-          matchesPlayed: group.matchesPlayed || 0,
-          totalMatches: group.totalMatches || 0,
-        })),
+        groups: groups.map((group) => {
+          const sortedStandings = [...group.standings].sort(sortStandings);
+
+          return {
+            name: group.name,
+            groupNumber: group.groupNumber,
+            standings: sortedStandings.map((standing, index) => ({
+              team:
+                typeof standing.team === "string"
+                  ? standing.team
+                  : standing.team.id,
+              played: standing.played,
+              wins: standing.wins,
+              draws: standing.draws,
+              losses: standing.losses,
+              goalsFor: standing.goalsFor,
+              goalsAgainst: standing.goalsAgainst,
+              points: standing.points,
+              disciplinaryPoints: standing.disciplinaryPoints ?? 0,
+              bonusPoints: standing.bonusPoints ?? 0,
+              form: standing.form,
+              position: index + 1, // ✅ recomputed
+              yellowCards: standing.yellowCards ?? 0,
+              redCards: standing.redCards ?? 0,
+            })),
+            fixtures: group.fixtures,
+            qualificationRules: group.qualificationRules,
+            qualifiedTeams: group.qualifiedTeams ?? [],
+            completed: group.completed,
+            matchesPlayed: group.matchesPlayed ?? 0,
+            totalMatches: group.totalMatches ?? 0,
+          };
+        }),
       };
 
       const response = await footballCompetitionApi.updateGroupStage(
         competition.id,
         payload,
       );
+
       if (response.success) {
         toast.success("Group stage updated successfully");
         onSuccess();
