@@ -28,6 +28,13 @@ export function useLiveFixture(fixtureId: string, options: UseLiveFixtureOptions
     const [error, setError] = useState<Error | null>(null);
     const [roomId, setRoomId] = useState(fixtureId);
     const socketService = useRef(getLiveFixtureSocketService());
+    const onLoadRef = useRef(onLoad);
+    const onErrorRef = useRef(onError);
+
+    useEffect(() => {
+        onLoadRef.current = onLoad;
+        onErrorRef.current = onError;
+    }, [onLoad, onError]);
 
     // Fetch initial fixture data
     const fetchFixture = useCallback(async () => {
@@ -45,7 +52,7 @@ export function useLiveFixture(fixtureId: string, options: UseLiveFixtureOptions
             if (fixtureRef === fixtureId && response.data?.id) {
                 setRoomId(response.data.id);
             }
-            onLoad?.(response.data);
+            onLoadRef.current?.(response.data);
         } catch (err) {
             if (err instanceof ApiError && err.isNotFoundError()) {
                 try {
@@ -54,7 +61,7 @@ export function useLiveFixture(fixtureId: string, options: UseLiveFixtureOptions
                     if (byFixture.data?.id) {
                         setRoomId(byFixture.data.id);
                     }
-                    onLoad?.(byFixture.data);
+                    onLoadRef.current?.(byFixture.data);
                     setLoading(false);
                     return;
                 } catch (fallbackError) {
@@ -66,11 +73,11 @@ export function useLiveFixture(fixtureId: string, options: UseLiveFixtureOptions
             }
             const error = err instanceof Error ? err : new Error('Failed to fetch fixture');
             setError(error);
-            onError?.(error);
+            onErrorRef.current?.(error);
         } finally {
             setLoading(false);
         }
-    }, [fixtureId, onLoad, onError]);
+    }, [fixtureId]);
 
     useEffect(() => {
         if (!fixtureId) return;

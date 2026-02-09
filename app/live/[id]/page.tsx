@@ -42,8 +42,8 @@ const templateCheerMeter = {
 };
 
 enum Tabs {
-  OVERVIEW = 'overview',
   STATS = 'stats',
+  OVERVIEW = 'overview',
 }
 
 export default function LiveMatchPage({
@@ -53,7 +53,7 @@ export default function LiveMatchPage({
 }) {
   const resolvedParams = use(params);
 
-  const [activeTab, setActiveTab] = useState<Tabs>(Tabs.OVERVIEW);
+  const [activeTab, setActiveTab] = useState<Tabs>(Tabs.STATS);
 
   const { fixture: liveFixture, loading } = useLiveFixture(resolvedParams.id, {
     autoFetch: true,
