@@ -9,6 +9,7 @@ import { teamLogos } from "@/constants";
 import { Loader } from "@/components/ui/loader";
 import RecentGames from "@/components/football/RecentGames";
 import { footballFixtureApi } from "@/lib/api/v1/football-fixture.api";
+import { footballLiveApi } from "@/lib/api/v1/football-live.api";
 import { FixtureResponse, LiveFixtureResponse } from "@/lib/types/v1.response.types";
 import getLiveFixtureSocketService, { LiveFixtureSocketEvent } from "@/lib/socket/live-fixture-socket.service";
 
@@ -23,7 +24,7 @@ const FootballHomePage: FC = () => {
     const fetchData = async () => {
       try {
         const [liveRes, recentRes] = await Promise.all([
-          footballFixtureApi.getLive(),
+          footballLiveApi.getActive(),
           footballFixtureApi.getRecentResults(1, 5),
         ]);
         const liveData = Array.isArray(liveRes?.data) ? liveRes.data : [];
