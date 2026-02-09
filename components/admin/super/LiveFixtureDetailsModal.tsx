@@ -13,7 +13,12 @@ import {
   DialogDescription,
 } from "@/components/ui/v1/dialogue";
 import { Badge } from "@/components/ui/v1/badge";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/v1/tabs";
+import {
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  TabsContent,
+} from "@/components/ui/v1/tabs";
 import {
   Calendar,
   MapPin,
@@ -37,7 +42,10 @@ import {
   Square,
   Volume2,
 } from "lucide-react";
-import { FixtureTeamType, FixtureTimelineType } from "@/types/v1.football-fixture.types";
+import {
+  FixtureTeamType,
+  FixtureTimelineType,
+} from "@/types/v1.football-fixture.types";
 import { Button } from "@/components/ui/v1/button";
 
 interface LiveFixtureDetailsModalProps {
@@ -77,13 +85,23 @@ export function LiveFixtureDetailsModal({
   onClose,
   onManage,
 }: LiveFixtureDetailsModalProps) {
-  const [activeTab, setActiveTab] = useState<"overview" | "live" | "events" | "stats" | "streams">("overview");
+  const [activeTab, setActiveTab] = useState<
+    "overview" | "live" | "events" | "stats" | "streams"
+  >("overview");
 
-  const homeName = fixture.homeTeam?.name || fixture.temporaryHomeTeamName || "TBD";
-  const awayName = fixture.awayTeam?.name || fixture.temporaryAwayTeamName || "TBD";
+  const homeName =
+    fixture.homeTeam?.name || fixture.temporaryHomeTeamName || "TBD";
+  const awayName =
+    fixture.awayTeam?.name || fixture.temporaryAwayTeamName || "TBD";
   const isActive = liveFixtureHelpers.isMatchActive(fixture.status);
-  const matchPhase = liveFixtureHelpers.getMatchPhase(fixture.status, fixture.currentMinute);
-  const matchProgress = liveFixtureHelpers.getMatchProgress(fixture.status, fixture.currentMinute);
+  const matchPhase = liveFixtureHelpers.getMatchPhase(
+    fixture.status,
+    fixture.currentMinute,
+  );
+  const matchProgress = liveFixtureHelpers.getMatchProgress(
+    fixture.status,
+    fixture.currentMinute,
+  );
 
   const getTimelineIcon = (type: FixtureTimelineType) => {
     switch (type) {
@@ -107,7 +125,9 @@ export function LiveFixtureDetailsModal({
       {/* Live Status Bar */}
       <div className="flex items-center justify-between p-4 rounded-lg bg-muted">
         <div className="flex items-center gap-3">
-          <div className={`p-2 rounded-lg ${isActive ? "bg-red-500/10" : "bg-slate-500/10"}`}>
+          <div
+            className={`p-2 rounded-lg ${isActive ? "bg-red-500/10" : "bg-slate-500/10"}`}
+          >
             {isActive ? (
               <Zap className="h-5 w-5 text-red-500" />
             ) : (
@@ -124,7 +144,8 @@ export function LiveFixtureDetailsModal({
         <Badge className={STATUS_COLORS[fixture.status]}>
           <span className="flex items-center gap-1">
             {STATUS_ICONS[fixture.status]}
-            {fixture.status.charAt(0).toUpperCase() + fixture.status.slice(1).replace("-", " ")}
+            {fixture.status.charAt(0).toUpperCase() +
+              fixture.status.slice(1).replace("-", " ")}
           </span>
         </Badge>
       </div>
@@ -189,11 +210,14 @@ export function LiveFixtureDetailsModal({
             <div className="text-lg font-bold text-red-600 flex items-center gap-2">
               <Clock className="h-5 w-5" />
               {fixture.currentMinute}'
-              {fixture.injuryTime > 0 && <span className="text-sm">+{fixture.injuryTime}</span>}
+              {fixture.injuryTime > 0 && (
+                <span className="text-sm">+{fixture.injuryTime}</span>
+              )}
             </div>
             {fixture.result.halftimeHomeScore !== null && (
               <div className="text-sm text-muted-foreground mt-1">
-                HT: {fixture.result.halftimeHomeScore}-{fixture.result.halftimeAwayScore}
+                HT: {fixture.result.halftimeHomeScore}-
+                {fixture.result.halftimeAwayScore}
               </div>
             )}
           </div>
@@ -268,19 +292,34 @@ export function LiveFixtureDetailsModal({
         {/* Tabs */}
         <Tabs defaultValue="overview" className="w-full">
           <TabsList className="grid grid-cols-5 mb-4">
-            <TabsTrigger value="overview" setActiveTab={() => setActiveTab("overview")}>
+            <TabsTrigger
+              value="overview"
+              setActiveTab={() => setActiveTab("overview")}
+            >
               Overview
             </TabsTrigger>
-            <TabsTrigger value="live" setActiveTab={() => setActiveTab('overview')}>
+            <TabsTrigger
+              value="live"
+              setActiveTab={() => setActiveTab("overview")}
+            >
               Live Match
             </TabsTrigger>
-            <TabsTrigger value="events" setActiveTab={() => setActiveTab("events")}>
+            <TabsTrigger
+              value="events"
+              setActiveTab={() => setActiveTab("events")}
+            >
               Events
             </TabsTrigger>
-            <TabsTrigger value="stats" setActiveTab={() => setActiveTab("stats")}>
+            <TabsTrigger
+              value="stats"
+              setActiveTab={() => setActiveTab("stats")}
+            >
               Statistics
             </TabsTrigger>
-            <TabsTrigger value="streams" setActiveTab={() => setActiveTab("streams")}>
+            <TabsTrigger
+              value="streams"
+              setActiveTab={() => setActiveTab("streams")}
+            >
               Streams
             </TabsTrigger>
           </TabsList>
@@ -293,10 +332,14 @@ export function LiveFixtureDetailsModal({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-4">
                 <div className="rounded-lg border border-border p-4">
-                  <h4 className="font-semibold text-foreground mb-3">Match Information</h4>
+                  <h4 className="font-semibold text-foreground mb-3">
+                    Match Information
+                  </h4>
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">Competition</span>
+                      <span className="text-sm text-muted-foreground">
+                        Competition
+                      </span>
                       <div className="flex items-center gap-2">
                         {fixture.competition?.logo && (
                           <img
@@ -311,23 +354,31 @@ export function LiveFixtureDetailsModal({
                       </div>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">Stadium</span>
+                      <span className="text-sm text-muted-foreground">
+                        Stadium
+                      </span>
                       <div className="flex items-center gap-2">
                         <MapPin className="h-4 w-4" />
                         <span className="font-medium">{fixture.stadium}</span>
                       </div>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">Referee</span>
+                      <span className="text-sm text-muted-foreground">
+                        Referee
+                      </span>
                       <div className="flex items-center gap-2">
                         <Volume2 className="h-4 w-4" />
                         <span className="font-medium">{fixture.referee}</span>
                       </div>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">Attendance</span>
+                      <span className="text-sm text-muted-foreground">
+                        Attendance
+                      </span>
                       <span className="font-medium">
-                        {fixture.attendance > 0 ? fixture.attendance.toLocaleString() : "TBD"}
+                        {fixture.attendance > 0
+                          ? fixture.attendance.toLocaleString()
+                          : "TBD"}
                       </span>
                     </div>
                   </div>
@@ -335,14 +386,18 @@ export function LiveFixtureDetailsModal({
 
                 {/* Weather */}
                 <div className="rounded-lg border border-border p-4">
-                  <h4 className="font-semibold text-foreground mb-3">Weather Conditions</h4>
+                  <h4 className="font-semibold text-foreground mb-3">
+                    Weather Conditions
+                  </h4>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="p-2 bg-blue-500/10 rounded-lg">
                         <Cloud className="h-6 w-6 text-blue-500" />
                       </div>
                       <div>
-                        <p className="font-medium">{fixture.weather.condition}</p>
+                        <p className="font-medium">
+                          {fixture.weather.condition}
+                        </p>
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                           <Thermometer className="h-3 w-3" />
                           {fixture.weather.temperature}°C
@@ -357,7 +412,9 @@ export function LiveFixtureDetailsModal({
               <div className="space-y-4">
                 {/* Goal Scorers */}
                 <div className="rounded-lg border border-border p-4">
-                  <h4 className="font-semibold text-foreground mb-3">Goal Scorers</h4>
+                  <h4 className="font-semibold text-foreground mb-3">
+                    Goal Scorers
+                  </h4>
                   {fixture.goalScorers.length > 0 ? (
                     <div className="space-y-2">
                       {fixture.goalScorers.map((scorer, index) => (
@@ -367,17 +424,27 @@ export function LiveFixtureDetailsModal({
                         >
                           <div>
                             <div className="font-medium">
-                              {scorer.player ? scorer.player : scorer.temporaryPlayerName || "Unknown"}
+                              {scorer.player
+                                ? typeof scorer.player === "string"
+                                  ? scorer.player
+                                  : scorer.player?.name
+                                : scorer.temporaryPlayerName || "Unknown"}
                             </div>
                             {scorer.assist || scorer.temporaryAssistName ? (
                               <div className="text-xs text-muted-foreground">
-                                Assist: {scorer.assist || scorer.temporaryAssistName}
+                                Assist:{" "}
+                                {typeof scorer.assist === "string"
+                                  ? scorer.assist
+                                  : scorer.assist?.name ||
+                                    scorer.temporaryAssistName}
                               </div>
                             ) : null}
                           </div>
                           <div className="flex items-center gap-2">
                             <Goal className="h-4 w-4 text-emerald-500" />
-                            <span className="font-semibold">{scorer.time}'</span>
+                            <span className="font-semibold">
+                              {scorer.time}'
+                            </span>
                           </div>
                         </div>
                       ))}
@@ -392,20 +459,34 @@ export function LiveFixtureDetailsModal({
                 {/* Recent Timeline Events */}
                 {fixture.timeline.length > 0 && (
                   <div className="rounded-lg border border-border p-4">
-                    <h4 className="font-semibold text-foreground mb-3">Recent Events</h4>
+                    <h4 className="font-semibold text-foreground mb-3">
+                      Recent Events
+                    </h4>
                     <div className="space-y-2">
-                      {fixture.timeline.slice(-3).reverse().map((event, index) => (
-                        <div key={index} className="flex items-center gap-3 p-2 rounded-lg hover:bg-accent/50">
-                          {getTimelineIcon(event.type)}
-                          <div className="flex-1">
-                            <div className="text-sm font-medium">{event.description}</div>
-                            <div className="text-xs text-muted-foreground">
-                              {event.team === FixtureTeamType.HOME ? homeName : awayName}
+                      {fixture.timeline
+                        .slice(-3)
+                        .reverse()
+                        .map((event, index) => (
+                          <div
+                            key={index}
+                            className="flex items-center gap-3 p-2 rounded-lg hover:bg-accent/50"
+                          >
+                            {getTimelineIcon(event.type)}
+                            <div className="flex-1">
+                              <div className="text-sm font-medium">
+                                {event.description}
+                              </div>
+                              <div className="text-xs text-muted-foreground">
+                                {event.team === FixtureTeamType.HOME
+                                  ? homeName
+                                  : awayName}
+                              </div>
                             </div>
+                            <span className="text-sm font-semibold">
+                              {event.minute}'
+                            </span>
                           </div>
-                          <span className="text-sm font-semibold">{event.minute}'</span>
-                        </div>
-                      ))}
+                        ))}
                     </div>
                   </div>
                 )}
@@ -425,26 +506,37 @@ export function LiveFixtureDetailsModal({
                   Live Commentary
                 </h4>
                 <div className="space-y-4 max-h-96 overflow-y-auto">
-                  {fixture.commentary.slice().reverse().map((comment, index) => (
-                    <div key={index} className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <span className="font-semibold text-sm">{comment.minute}'</span>
-                        {comment.injuryTime && (
-                          <span className="text-xs text-amber-600">+{comment.injuryTime}</span>
-                        )}
-                        <span className={`text-xs px-2 py-0.5 rounded ${
-                          comment.type === 'important' 
-                            ? 'bg-red-500/10 text-red-600' 
-                            : comment.type === 'highlight'
-                            ? 'bg-amber-500/10 text-amber-600'
-                            : 'bg-blue-500/10 text-blue-600'
-                        }`}>
-                          {comment.type}
-                        </span>
+                  {fixture.commentary
+                    .slice()
+                    .reverse()
+                    .map((comment, index) => (
+                      <div key={index} className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold text-sm">
+                            {comment.minute}'
+                          </span>
+                          {comment.injuryTime && (
+                            <span className="text-xs text-amber-600">
+                              +{comment.injuryTime}
+                            </span>
+                          )}
+                          <span
+                            className={`text-xs px-2 py-0.5 rounded ${
+                              comment.type === "important"
+                                ? "bg-red-500/10 text-red-600"
+                                : comment.type === "highlight"
+                                  ? "bg-amber-500/10 text-amber-600"
+                                  : "bg-blue-500/10 text-blue-600"
+                            }`}
+                          >
+                            {comment.type}
+                          </span>
+                        </div>
+                        <p className="text-sm text-foreground">
+                          {comment.text}
+                        </p>
                       </div>
-                      <p className="text-sm text-foreground">{comment.text}</p>
-                    </div>
-                  ))}
+                    ))}
                 </div>
               </div>
             )}
@@ -454,7 +546,9 @@ export function LiveFixtureDetailsModal({
           <TabsContent value="events" className="space-y-6">
             {fixture.timeline.length > 0 ? (
               <div className="space-y-4">
-                <h4 className="font-semibold text-foreground">Match Timeline</h4>
+                <h4 className="font-semibold text-foreground">
+                  Match Timeline
+                </h4>
                 <div className="relative">
                   <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-border" />
                   <div className="space-y-6">
@@ -472,16 +566,24 @@ export function LiveFixtureDetailsModal({
                                   {event.type.replace("-", " ")}
                                 </span>
                                 <Badge variant="outline" className="text-xs">
-                                  {event.team === FixtureTeamType.HOME ? homeName : awayName}
+                                  {event.team === FixtureTeamType.HOME
+                                    ? homeName
+                                    : awayName}
                                 </Badge>
                               </div>
                               <div className="flex items-center gap-1 text-sm font-medium">
                                 <Clock className="h-3 w-3" />
                                 {event.minute}'
-                                {event.injuryTime && <span className="text-xs text-muted-foreground">+</span>}
+                                {event.injuryTime && (
+                                  <span className="text-xs text-muted-foreground">
+                                    +
+                                  </span>
+                                )}
                               </div>
                             </div>
-                            <p className="text-sm text-foreground">{event.description}</p>
+                            <p className="text-sm text-foreground">
+                              {event.description}
+                            </p>
                             {event.player && (
                               <div className="mt-2 text-xs text-muted-foreground">
                                 Player: {event.player}
@@ -502,7 +604,9 @@ export function LiveFixtureDetailsModal({
             ) : (
               <div className="text-center py-8">
                 <Clock className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-                <h4 className="font-semibold text-foreground mb-1">No Events Recorded</h4>
+                <h4 className="font-semibold text-foreground mb-1">
+                  No Events Recorded
+                </h4>
                 <p className="text-sm text-muted-foreground">
                   Match events will appear here once the match begins
                 </p>
@@ -515,16 +619,47 @@ export function LiveFixtureDetailsModal({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Live Statistics */}
               <div className="rounded-lg border border-border p-4">
-                <h4 className="font-semibold text-foreground mb-4">Live Statistics</h4>
+                <h4 className="font-semibold text-foreground mb-4">
+                  Live Statistics
+                </h4>
                 <div className="space-y-4">
                   {[
-                    { label: "Shots on Target", home: fixture.statistics.home.shotsOnTarget, away: fixture.statistics.away.shotsOnTarget },
-                    { label: "Shots off Target", home: fixture.statistics.home.shotsOffTarget, away: fixture.statistics.away.shotsOffTarget },
-                    { label: "Fouls", home: fixture.statistics.home.fouls, away: fixture.statistics.away.fouls },
-                    { label: "Yellow Cards", home: fixture.statistics.home.yellowCards, away: fixture.statistics.away.yellowCards },
-                    { label: "Red Cards", home: fixture.statistics.home.redCards, away: fixture.statistics.away.redCards },
-                    { label: "Corners", home: fixture.statistics.home.corners, away: fixture.statistics.away.corners },
-                    { label: "Possession", home: fixture.statistics.home.possessionTime, away: fixture.statistics.away.possessionTime, isPercent: true },
+                    {
+                      label: "Shots on Target",
+                      home: fixture.statistics.home.shotsOnTarget,
+                      away: fixture.statistics.away.shotsOnTarget,
+                    },
+                    {
+                      label: "Shots off Target",
+                      home: fixture.statistics.home.shotsOffTarget,
+                      away: fixture.statistics.away.shotsOffTarget,
+                    },
+                    {
+                      label: "Fouls",
+                      home: fixture.statistics.home.fouls,
+                      away: fixture.statistics.away.fouls,
+                    },
+                    {
+                      label: "Yellow Cards",
+                      home: fixture.statistics.home.yellowCards,
+                      away: fixture.statistics.away.yellowCards,
+                    },
+                    {
+                      label: "Red Cards",
+                      home: fixture.statistics.home.redCards,
+                      away: fixture.statistics.away.redCards,
+                    },
+                    {
+                      label: "Corners",
+                      home: fixture.statistics.home.corners,
+                      away: fixture.statistics.away.corners,
+                    },
+                    {
+                      label: "Possession",
+                      home: fixture.statistics.home.possessionTime,
+                      away: fixture.statistics.away.possessionTime,
+                      isPercent: true,
+                    },
                   ].map((stat, index) => (
                     <div key={index} className="space-y-1">
                       <div className="flex items-center justify-between text-sm">
@@ -553,42 +688,54 @@ export function LiveFixtureDetailsModal({
                 {/* Player of the Match */}
                 {fixture.playerOfTheMatch && (
                   <div className="rounded-lg border border-border p-4">
-                    <h4 className="font-semibold text-foreground mb-3">Player of the Match</h4>
+                    <h4 className="font-semibold text-foreground mb-3">
+                      Player of the Match
+                    </h4>
                     <div className="flex items-center gap-3 p-2 rounded-lg bg-amber-500/5">
                       <div className="p-2 bg-amber-500/10 rounded-lg">
                         <Award className="h-5 w-5 text-amber-500" />
                       </div>
                       <div>
                         <p className="font-medium">
-                          {fixture.playerOfTheMatch.official || 
-                           fixture.playerOfTheMatch.temporaryOfficialName || 
-                           "Not selected"}
+                          {fixture.playerOfTheMatch.official ||
+                            fixture.playerOfTheMatch.temporaryOfficialName ||
+                            "Not selected"}
                         </p>
-                        <p className="text-xs text-muted-foreground">Official Selection</p>
+                        <p className="text-xs text-muted-foreground">
+                          Official Selection
+                        </p>
                       </div>
                     </div>
                   </div>
                 )}
 
                 {/* Fan Votes */}
-                {fixture.playerOfTheMatch?.fanVotes && fixture.playerOfTheMatch.fanVotes.length > 0 && (
-                  <div className="rounded-lg border border-border p-4">
-                    <h4 className="font-semibold text-foreground mb-3">Fan Votes</h4>
-                    <div className="space-y-2">
-                      {fixture.playerOfTheMatch.fanVotes
-                        .sort((a, b) => b.votes - a.votes)
-                        .slice(0, 3)
-                        .map((vote, index) => (
-                          <div key={index} className="flex items-center justify-between">
-                            <span className="text-sm">
-                              {vote.player || vote.temporaryPlayerName}
-                            </span>
-                            <Badge variant="outline">{vote.votes} votes</Badge>
-                          </div>
-                        ))}
+                {fixture.playerOfTheMatch?.fanVotes &&
+                  fixture.playerOfTheMatch.fanVotes.length > 0 && (
+                    <div className="rounded-lg border border-border p-4">
+                      <h4 className="font-semibold text-foreground mb-3">
+                        Fan Votes
+                      </h4>
+                      <div className="space-y-2">
+                        {fixture.playerOfTheMatch.fanVotes
+                          .sort((a, b) => b.votes - a.votes)
+                          .slice(0, 3)
+                          .map((vote, index) => (
+                            <div
+                              key={index}
+                              className="flex items-center justify-between"
+                            >
+                              <span className="text-sm">
+                                {vote.player || vote.temporaryPlayerName}
+                              </span>
+                              <Badge variant="outline">
+                                {vote.votes} votes
+                              </Badge>
+                            </div>
+                          ))}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
               </div>
             </div>
           </TabsContent>
@@ -611,33 +758,51 @@ export function LiveFixtureDetailsModal({
                       className="block p-4 rounded-lg border border-input hover:border-primary transition-colors"
                     >
                       <div className="flex items-center gap-3 mb-2">
-                        <div className={`p-2 rounded-lg ${
-                          stream.isOfficial ? 'bg-blue-500/10' : 'bg-gray-500/10'
-                        }`}>
-                          <Video className={`h-5 w-5 ${
-                            stream.isOfficial ? 'text-blue-500' : 'text-gray-500'
-                          }`} />
+                        <div
+                          className={`p-2 rounded-lg ${
+                            stream.isOfficial
+                              ? "bg-blue-500/10"
+                              : "bg-gray-500/10"
+                          }`}
+                        >
+                          <Video
+                            className={`h-5 w-5 ${
+                              stream.isOfficial
+                                ? "text-blue-500"
+                                : "text-gray-500"
+                            }`}
+                          />
                         </div>
                         <div>
-                          <h5 className="font-medium text-foreground">{stream.platform}</h5>
+                          <h5 className="font-medium text-foreground">
+                            {stream.platform}
+                          </h5>
                           <div className="flex items-center gap-2 mt-1">
                             {stream.isOfficial && (
-                              <Badge variant="default" className="text-xs">Official</Badge>
+                              <Badge variant="default" className="text-xs">
+                                Official
+                              </Badge>
                             )}
                             {stream.requiresSubscription && (
-                              <Badge variant="outline" className="text-xs">Premium</Badge>
+                              <Badge variant="outline" className="text-xs">
+                                Premium
+                              </Badge>
                             )}
                           </div>
                         </div>
                       </div>
-                      <p className="text-sm text-muted-foreground truncate">{stream.url}</p>
+                      <p className="text-sm text-muted-foreground truncate">
+                        {stream.url}
+                      </p>
                     </a>
                   ))}
                 </div>
               ) : (
                 <div className="text-center py-8">
                   <Video className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-                  <h4 className="font-semibold text-foreground mb-1">No Streams Available</h4>
+                  <h4 className="font-semibold text-foreground mb-1">
+                    No Streams Available
+                  </h4>
                   <p className="text-sm text-muted-foreground">
                     Stream links will appear here once they are added
                   </p>
