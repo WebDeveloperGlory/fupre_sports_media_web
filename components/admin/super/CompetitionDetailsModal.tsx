@@ -462,7 +462,11 @@ export function CompetitionDetailsModal({
                             <td className="py-3 px-4 font-semibold">
                               {standing.position}
                             </td>
-                            <td className="py-3 px-4">{standing.team}</td>
+                            <td className="py-3 px-4">
+                              {typeof standing.team === "string"
+                                ? standing.team
+                                : standing.team.name}
+                            </td>
                             <td className="py-3 px-4 text-center">
                               {standing.played}
                             </td>
