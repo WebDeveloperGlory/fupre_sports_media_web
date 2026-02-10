@@ -1,39 +1,61 @@
-'use client';
+"use client";
 
 import Image from "next/image";
-import { FC, useEffect, useState, useRef } from "react";
-import { Trophy, Calendar, AlertCircle, ArrowRight, Clock, Users, CalendarDays } from "lucide-react";
+import { FC, useEffect, useState, useCallback } from "react";
+import {
+  Trophy,
+  Calendar,
+  AlertCircle,
+  ArrowRight,
+  Clock,
+  Users,
+  CalendarDays,
+} from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { teamLogos } from "@/constants";
 import { Loader } from "@/components/ui/loader";
 import RecentGames from "@/components/football/RecentGames";
 import { footballFixtureApi } from "@/lib/api/v1/football-fixture.api";
-import { FixtureResponse, LiveFixtureResponse } from "@/lib/types/v1.response.types";
-import getLiveFixtureSocketService, { LiveFixtureSocketEvent } from "@/lib/socket/live-fixture-socket.service";
+import {
+  FixtureResponse,
+  LiveFixtureResponse,
+} from "@/lib/types/v1.response.types";
+import { footballLiveApi } from "@/lib/api/v1/football-live.api";
+import { LiveStatus } from "@/types/v1.football-live.types";
+import { toast } from "react-toastify";
 
 const FootballHomePage: FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
-  const [liveFixture, setLiveFixture] = useState<LiveFixtureResponse | null>(null);
   const [recentFixtures, setRecentFixtures] = useState<FixtureResponse[]>([]);
   const [recentLoading, setRecentLoading] = useState<boolean>(true);
-  const socketService = useRef(getLiveFixtureSocketService());
 
+  // Store all active fixtures and get the first one as "live"
+  const [activeFixtures, setActiveFixtures] = useState<LiveFixtureResponse[]>(
+    [],
+  );
+  const [socketConnected, setSocketConnected] = useState(false);
+
+  // Fetch initial data
   useEffect(() => {
     const fetchData = async () => {
       try {
         const [liveRes, recentRes] = await Promise.all([
-          footballFixtureApi.getLive(),
+          footballLiveApi.getAll(),
           footballFixtureApi.getRecentResults(1, 5),
         ]);
-        const liveData = Array.isArray(liveRes?.data) ? liveRes.data : [];
-        const recentData = Array.isArray(recentRes?.data) ? recentRes.data : [];
 
-        setLiveFixture(liveData.length > 0 ? liveData[0] : null);
+        if (liveRes.success && liveRes.total > 0) {
+          setActiveFixtures(liveRes.data);
+        } else {
+          setActiveFixtures([]);
+        }
+
+        const recentData = Array.isArray(recentRes?.data) ? recentRes.data : [];
         setRecentFixtures(recentData);
       } catch (error) {
-        console.error('Error fetching data:', error);
-        setLiveFixture(null);
+        console.error("Error fetching data:", error);
+        setActiveFixtures([]);
         setRecentFixtures([]);
       } finally {
         setLoading(false);
@@ -41,72 +63,228 @@ const FootballHomePage: FC = () => {
       }
     };
 
-    if (loading) {
-      fetchData();
-    }
-  }, [loading]);
+    fetchData();
+  }, []);
 
-  // Subscribe to WebSocket updates for live fixture
+  // Setup WebSocket connection for all active fixtures
   useEffect(() => {
-    if (!liveFixture?.id) return;
+    let socket: any = null;
+    let isConnected = false;
 
-    const socket = socketService.current;
-    socket.joinFixture(liveFixture.id);
+    const connectToSocket = async () => {
+      try {
+        // Dynamically import the socket service only on client side
+        const socketModule =
+          await import("@/lib/socket/live-fixture-socket.service");
+        const { getLiveFixtureSocketService, LiveFixtureSocketEvent } =
+          socketModule;
 
-    // Score updates
-    const unsubscribeScore = socket.on(LiveFixtureSocketEvent.SCORE_UPDATE, (payload) => {
-      if (payload.fixtureId === liveFixture.id) {
-        setLiveFixture(prev => prev ? {
-          ...prev,
-          result: payload.data.result,
-          goalScorers: payload.data.goalScorers || prev.goalScorers
-        } : null);
+        socket = getLiveFixtureSocketService();
+
+        // Join all active fixtures room
+        socket.joinAllActive();
+        setSocketConnected(true);
+
+        // Listen for fixture updates
+        const unsubscribeUpdates = socket.on(
+          LiveFixtureSocketEvent.FULL_UPDATE,
+          (payload: any) => {
+            setActiveFixtures((prev) => {
+              const existingIndex = prev.findIndex(
+                (f) => f.id === payload.fixtureId,
+              );
+              if (existingIndex >= 0) {
+                // Update existing fixture
+                const updated = [...prev];
+                updated[existingIndex] = payload.data;
+                return updated;
+              } else {
+                // Add new fixture if it's active
+                const status = payload.data.status;
+                const isActive = [
+                  LiveStatus.FIRSTHALF,
+                  LiveStatus.HALFTIME,
+                  LiveStatus.SECONDHALF,
+                  LiveStatus.EXTRATIME,
+                  LiveStatus.PENALTIES,
+                ].includes(status);
+
+                if (isActive) {
+                  return [payload.data, ...prev];
+                }
+                return prev;
+              }
+            });
+          },
+        );
+
+        // Listen for status updates
+        const unsubscribeStatus = socket.on(
+          LiveFixtureSocketEvent.STATUS_UPDATE,
+          (payload: any) => {
+            setActiveFixtures((prev) => {
+              const existingIndex = prev.findIndex(
+                (f) => f.id === payload.fixtureId,
+              );
+              if (existingIndex >= 0) {
+                const updated = [...prev];
+                updated[existingIndex] = {
+                  ...updated[existingIndex],
+                  status: payload.data.status,
+                  currentMinute: payload.data.currentMinute,
+                  injuryTime: payload.data.injuryTime,
+                };
+                return updated;
+              }
+              return prev;
+            });
+          },
+        );
+
+        // Listen for score updates
+        const unsubscribeScore = socket.on(
+          LiveFixtureSocketEvent.SCORE_UPDATE,
+          (payload: any) => {
+            setActiveFixtures((prev) => {
+              const existingIndex = prev.findIndex(
+                (f) => f.id === payload.fixtureId,
+              );
+              if (existingIndex >= 0) {
+                const updated = [...prev];
+                updated[existingIndex] = {
+                  ...updated[existingIndex],
+                  result: payload.data.result,
+                  goalScorers:
+                    payload.data.goalScorers ||
+                    updated[existingIndex].goalScorers,
+                };
+                return updated;
+              }
+              return prev;
+            });
+          },
+        );
+
+        // Listen for fixture ended
+        const unsubscribeEnded = socket.on(
+          LiveFixtureSocketEvent.FIXTURE_ENDED,
+          (payload: any) => {
+            setActiveFixtures((prev) => {
+              const existingIndex = prev.findIndex(
+                (f) => f.id === payload.fixtureId,
+              );
+              if (existingIndex >= 0) {
+                const updated = [...prev];
+                updated[existingIndex] = {
+                  ...updated[existingIndex],
+                  status: LiveStatus.FINISHED,
+                };
+                return updated;
+              }
+              return prev;
+            });
+          },
+        );
+
+        // Listen for fixture created (new live fixture)
+        const unsubscribeCreated = socket.on(
+          LiveFixtureSocketEvent.FIXTURE_CREATED,
+          (payload: any) => {
+            setActiveFixtures((prev) => [payload.data, ...prev]);
+          },
+        );
+
+        // Cleanup function
+        return () => {
+          unsubscribeUpdates();
+          unsubscribeStatus();
+          unsubscribeScore();
+          unsubscribeEnded();
+          unsubscribeCreated();
+          if (socket) {
+            socket.leaveAllActive();
+          }
+          setSocketConnected(false);
+        };
+      } catch (error) {
+        console.error("Error setting up WebSocket:", error);
       }
-    });
+    };
 
-    // Status updates
-    const unsubscribeStatus = socket.on(LiveFixtureSocketEvent.STATUS_UPDATE, (payload) => {
-      if (payload.fixtureId === liveFixture.id) {
-        setLiveFixture(prev => prev ? {
-          ...prev,
-          status: payload.data.status,
-          currentMinute: payload.data.currentMinute,
-          injuryTime: payload.data.injuryTime
-        } : null);
-      }
-    });
-
-    // Full update
-    const unsubscribeFull = socket.on(LiveFixtureSocketEvent.FULL_UPDATE, (payload) => {
-      if (payload.fixtureId === liveFixture.id) {
-        setLiveFixture(payload.data);
-      }
-    });
-
-    // Fixture ended
-    const unsubscribeEnded = socket.on(LiveFixtureSocketEvent.FIXTURE_ENDED, (payload) => {
-      if (payload.fixtureId === liveFixture.id) {
-        setLiveFixture(null);
-      }
-    });
+    const cleanupPromise = connectToSocket();
 
     return () => {
-      socket.leaveFixture(liveFixture.id);
-      unsubscribeScore();
-      unsubscribeStatus();
-      unsubscribeFull();
-      unsubscribeEnded();
+      cleanupPromise.then((cleanup) => {
+        if (cleanup) cleanup();
+      });
     };
-  }, [liveFixture?.id]);
+  }, []);
+
+  // Get the first live fixture (most recent)
+  const liveFixture = activeFixtures.length > 0 ? activeFixtures[0] : null;
 
   if (loading) {
     return <Loader />;
   }
 
-  const liveHomeName = liveFixture?.homeTeam?.name ?? liveFixture?.temporaryHomeTeamName ?? 'Home';
-  const liveAwayName = liveFixture?.awayTeam?.name ?? liveFixture?.temporaryAwayTeamName ?? 'Away';
-  const liveHomeLogo = liveFixture?.homeTeam?.logo || teamLogos[liveHomeName] || '/images/team_logos/default.jpg';
-  const liveAwayLogo = liveFixture?.awayTeam?.logo || teamLogos[liveAwayName] || '/images/team_logos/default.jpg';
+  const liveHomeName =
+    liveFixture?.homeTeam?.name ?? liveFixture?.temporaryHomeTeamName ?? "Home";
+  const liveAwayName =
+    liveFixture?.awayTeam?.name ?? liveFixture?.temporaryAwayTeamName ?? "Away";
+  const liveHomeLogo =
+    liveFixture?.homeTeam?.logo ||
+    teamLogos[liveHomeName] ||
+    "/images/team_logos/default.jpg";
+  const liveAwayLogo =
+    liveFixture?.awayTeam?.logo ||
+    teamLogos[liveAwayName] ||
+    "/images/team_logos/default.jpg";
+
+  // Determine if the fixture is actually live or has ended
+  const isFixtureActive =
+    liveFixture &&
+    [
+      LiveStatus.FIRSTHALF,
+      LiveStatus.HALFTIME,
+      LiveStatus.SECONDHALF,
+      LiveStatus.EXTRATIME,
+      LiveStatus.PENALTIES,
+    ].includes(liveFixture.status);
+
+  const isFixtureEnded =
+    liveFixture && liveFixture.status === LiveStatus.FINISHED;
+
+  // Function to get match status text
+  const getMatchStatusText = () => {
+    if (!liveFixture) return "";
+
+    switch (liveFixture.status) {
+      case LiveStatus.FINISHED:
+        return "FULL TIME";
+      case LiveStatus.POSTPONED:
+        return "POSTPONED";
+      case LiveStatus.ABANDONED:
+        return "ABANDONED";
+      default:
+        return "LIVE";
+    }
+  };
+
+  // Function to get status badge color
+  const getStatusBadgeColor = () => {
+    if (!liveFixture) return "bg-gray-500/10 text-gray-500";
+
+    switch (liveFixture.status) {
+      case LiveStatus.FINISHED:
+        return "bg-blue-500/10 text-blue-500";
+      case LiveStatus.POSTPONED:
+        return "bg-amber-500/10 text-amber-500";
+      case LiveStatus.ABANDONED:
+        return "bg-rose-500/10 text-rose-500";
+      default:
+        return "bg-red-500/10 text-red-500";
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-0">
@@ -122,15 +300,21 @@ const FootballHomePage: FC = () => {
             {/* Season Badge */}
             <div className="inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full border border-emerald-500/30 bg-emerald-500/10">
               <span className="w-2 h-2 rounded-full bg-emerald-500" />
-              <span className="text-sm font-medium text-emerald-700 dark:text-emerald-400">2025/2026</span>
+              <span className="text-sm font-medium text-emerald-700 dark:text-emerald-400">
+                2025/2026
+              </span>
             </div>
 
             <h1 className="text-4xl md:text-6xl font-bold tracking-tight">
-              Football at <span className="text-emerald-600 dark:text-emerald-400">FUPRE</span>
+              Football at{" "}
+              <span className="text-emerald-600 dark:text-emerald-400">
+                FUPRE
+              </span>
             </h1>
 
             <p className="text-lg text-muted-foreground max-w-xl mx-auto">
-              Stay updated with live matches, recent results, and all football action
+              Stay updated with live matches, recent results, and all football
+              action
             </p>
           </motion.div>
         </div>
@@ -146,14 +330,30 @@ const FootballHomePage: FC = () => {
           >
             <div className="border border-border rounded-xl md:rounded-2xl overflow-hidden">
               {/* Header */}
-              <div className="bg-secondary/50 px-3 py-1.5 sm:px-4 sm:py-3 text-center">
+              <div className="bg-secondary/50 px-3 py-1.5 sm:px-4 sm:py-3 text-center flex items-center justify-center gap-2">
                 {liveFixture ? (
-                  <span className="inline-flex items-center gap-2 px-3 py-1 bg-red-500/10 text-red-500 rounded-full text-sm font-medium">
-                    <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                    LIVE NOW
-                  </span>
+                  <>
+                    <span
+                      className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${getStatusBadgeColor()}`}
+                    >
+                      {isFixtureActive && (
+                        <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                      )}
+                      {getMatchStatusText()}
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <div
+                        className={`w-2 h-2 rounded-full ${socketConnected ? "bg-green-500 animate-pulse" : "bg-red-500"}`}
+                      />
+                      <span className="text-xs text-muted-foreground">
+                        {socketConnected ? "Live" : "Connecting..."}
+                      </span>
+                    </div>
+                  </>
                 ) : (
-                  <span className="text-sm font-medium text-muted-foreground">Live Match</span>
+                  <span className="text-sm font-medium text-muted-foreground">
+                    Live Match
+                  </span>
                 )}
               </div>
 
@@ -171,6 +371,7 @@ const FootballHomePage: FC = () => {
                             alt={liveHomeName}
                             fill
                             className="object-contain rounded-full"
+                            sizes="(max-width: 768px) 56px, 80px"
                           />
                         </div>
                         <span className="text-sm md:text-base font-semibold text-center">
@@ -182,17 +383,39 @@ const FootballHomePage: FC = () => {
                       <div className="flex flex-col items-center gap-2">
                         <div className="text-3xl md:text-5xl font-bold tracking-tight">
                           <span>{liveFixture.result?.homeScore ?? 0}</span>
-                          <span className="text-muted-foreground mx-2 md:mx-3">-</span>
+                          <span className="text-muted-foreground mx-2 md:mx-3">
+                            -
+                          </span>
                           <span>{liveFixture.result?.awayScore ?? 0}</span>
                         </div>
-                        {liveFixture.result && liveFixture.result.homePenalty !== null && liveFixture.result.awayPenalty !== null && (
-                          <div className="text-xs text-muted-foreground">
-                            ({liveFixture.result.homePenalty} - {liveFixture.result.awayPenalty})
-                          </div>
-                        )}
-                        <div className="flex items-center gap-1.5 text-sm text-emerald-600 dark:text-emerald-400 font-medium">
-                          <Clock className="w-4 h-4" />
-                          <span>{liveFixture.currentMinute ?? 0}'</span>
+                        {liveFixture.result &&
+                          liveFixture.result.homePenalty !== null &&
+                          liveFixture.result.awayPenalty !== null && (
+                            <div className="text-xs text-muted-foreground">
+                              ({liveFixture.result.homePenalty} -{" "}
+                              {liveFixture.result.awayPenalty})
+                            </div>
+                          )}
+                        <div className="flex items-center gap-1.5 text-sm font-medium">
+                          {isFixtureActive ? (
+                            <>
+                              <Clock className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                              <span className="text-emerald-600 dark:text-emerald-400">
+                                {liveFixture.currentMinute ?? 0}'
+                              </span>
+                              {liveFixture.injuryTime > 0 && (
+                                <span className="text-xs text-muted-foreground">
+                                  +{liveFixture.injuryTime}
+                                </span>
+                              )}
+                            </>
+                          ) : isFixtureEnded ? (
+                            <span className="text-blue-500">Full Time</span>
+                          ) : (
+                            <span className="text-muted-foreground">
+                              {liveFixture.status}
+                            </span>
+                          )}
                         </div>
                       </div>
 
@@ -204,6 +427,7 @@ const FootballHomePage: FC = () => {
                             alt={liveAwayName}
                             fill
                             className="object-contain rounded-full"
+                            sizes="(max-width: 768px) 56px, 80px"
                           />
                         </div>
                         <span className="text-sm md:text-base font-semibold text-center">
@@ -216,7 +440,9 @@ const FootballHomePage: FC = () => {
                     <div className="mt-6 flex flex-wrap items-center justify-center gap-4 text-xs md:text-sm text-muted-foreground">
                       <div className="flex items-center gap-2">
                         <Trophy className="w-4 h-4" />
-                        <span>{liveFixture.competition?.name || 'Friendly'}</span>
+                        <span>
+                          {liveFixture.competition?.name || "Friendly"}
+                        </span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Calendar className="w-4 h-4" />
@@ -224,13 +450,17 @@ const FootballHomePage: FC = () => {
                       </div>
                     </div>
 
-                    {/* Watch Live Button */}
+                    {/* Watch Live / View Details Button */}
                     <div className="mt-6 flex justify-center">
                       <Link
                         href={`/live/${liveFixture.id}`}
-                        className="inline-flex items-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full text-sm font-medium transition-colors"
+                        className={`inline-flex items-center gap-2 px-6 py-3 rounded-full text-sm font-medium transition-colors ${
+                          isFixtureActive
+                            ? "bg-emerald-600 hover:bg-emerald-700 text-white"
+                            : "bg-secondary hover:bg-secondary/80 text-foreground"
+                        }`}
                       >
-                        Watch Live
+                        {isFixtureActive ? "Watch Live" : "View Details"}
                         <ArrowRight className="w-4 h-4" />
                       </Link>
                     </div>
@@ -240,8 +470,12 @@ const FootballHomePage: FC = () => {
                     <div className="w-14 h-14 rounded-full bg-secondary flex items-center justify-center mb-4">
                       <AlertCircle className="w-7 h-7 text-muted-foreground/50" />
                     </div>
-                    <h3 className="text-lg font-semibold mb-1">No Live Match</h3>
-                    <p className="text-sm text-muted-foreground">Check back later for live coverage</p>
+                    <h3 className="text-lg font-semibold mb-1">
+                      No Live Match
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      Check back later for live coverage
+                    </p>
                   </div>
                 )}
               </div>
@@ -261,7 +495,10 @@ const FootballHomePage: FC = () => {
           >
             <div className="flex items-center justify-between">
               <h2 className="text-xl md:text-2xl font-bold">Recent Games</h2>
-              <Link href="/sports/football/fixtures" className="text-sm font-medium text-muted-foreground hover:text-foreground flex items-center">
+              <Link
+                href="/sports/football/fixtures"
+                className="text-sm font-medium text-muted-foreground hover:text-foreground flex items-center"
+              >
                 All Fixtures <ArrowRight className="w-4 h-4 ml-1" />
               </Link>
             </div>
@@ -289,7 +526,9 @@ const FootballHomePage: FC = () => {
                 <Trophy className="w-5 h-5 md:w-6 md:h-6 text-muted-foreground" />
               </div>
               <h3 className="font-bold text-sm md:text-base mb-1">TOTS</h3>
-              <p className="text-xs text-muted-foreground">Vote for your stars</p>
+              <p className="text-xs text-muted-foreground">
+                Vote for your stars
+              </p>
             </div>
 
             {/* Competitions */}
@@ -300,8 +539,12 @@ const FootballHomePage: FC = () => {
               <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-emerald-500/10 flex items-center justify-center mb-3">
                 <CalendarDays className="w-5 h-5 md:w-6 md:h-6 text-emerald-600 dark:text-emerald-400" />
               </div>
-              <h3 className="font-bold text-sm md:text-base mb-1">Competitions</h3>
-              <p className="text-xs text-muted-foreground">Leagues & tournaments</p>
+              <h3 className="font-bold text-sm md:text-base mb-1">
+                Competitions
+              </h3>
+              <p className="text-xs text-muted-foreground">
+                Leagues & tournaments
+              </p>
             </Link>
 
             {/* Fixtures */}
@@ -325,7 +568,9 @@ const FootballHomePage: FC = () => {
                 <Users className="w-5 h-5 md:w-6 md:h-6 text-emerald-600 dark:text-emerald-400" />
               </div>
               <h3 className="font-bold text-sm md:text-base mb-1">Teams</h3>
-              <p className="text-xs text-muted-foreground">All participating teams</p>
+              <p className="text-xs text-muted-foreground">
+                All participating teams
+              </p>
             </Link>
           </div>
         </div>
